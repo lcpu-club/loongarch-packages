@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 67f423d..a7604d3 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -12,7 +12,7 @@ license=('GPL')
+ depends=(
+   'glibc' 'ncurses' 'libassuan' 'libsecret' 'glib2'
+ )
+-makedepends=('qt6-base' 'qt5-x11extras' 'kwayland5' 'gtk2-compat' 'gcr' 'kguiaddons' 'kwindowsystem')
++makedepends=('qt6-base' 'qt5-x11extras' 'kwayland5' 'gtk2-compat' 'gcr' 'kguiaddons5' 'kwindowsystem5')
+ optdepends=(
+   'gcr: GNOME backend'
+   'gtk3: GTK backend'
