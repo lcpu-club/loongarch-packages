@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index b792569..62e118c 100644
+index b01d783..49cdcce 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -7,7 +7,7 @@
@@ -8,8 +8,8 @@ index b792569..62e118c 100644
  
 -pkgname=(gcc gcc-libs lib32-gcc-libs gcc-ada gcc-d gcc-fortran gcc-go gcc-m2 gcc-objc gcc-rust lto-dump libgccjit)
 +pkgname=(gcc gcc-libs gcc-fortran gcc-m2 gcc-objc lto-dump libgccjit)
- pkgver=14.2.1+r26+g14fa2b2ae7f
- _commit=14fa2b2ae7f49dee5e7e7469243e281e48d925b9
+ pkgver=14.2.1+r32+geccf707e5ce
+ _commit=eccf707e5ceb7e405ffe4edfbcae2f769b8386cf
  pkgrel=1
 @@ -18,15 +18,10 @@ url='https://gcc.gnu.org'
  makedepends=(
@@ -36,7 +36,7 @@ index b792569..62e118c 100644
  validpgpkeys=(F3691687D867B81B51CE07D9BBE43771487328A9  # bpiotrowski@archlinux.org
                86CFFCA918CF3AF47147588051E8B148A9999C34  # foutrelis@archlinux.org
 @@ -49,7 +45,8 @@ validpgpkeys=(F3691687D867B81B51CE07D9BBE43771487328A9  # bpiotrowski@archlinux.
- sha256sums=('e86f5dc20665c3e229c9795333084c429c3b8996b6584440d5061a13abc9fe9a'
+ sha256sums=('d3e9d9a008f3b63101eb5d771b3ee7db3a77ee87b8975485a79738245b377521'
              'de48736f6e4153f03d0a5d38ceb6c6fdb7f054e8f47ddd6af0a3dbf14f27b931'
              '2513c6d9984dd0a2058557bf00f06d8d5181734e41dcfe07be7ed86f2959622a'
 -            '1773f5137f08ac1f48f0f7297e324d5d868d55201c03068670ee4602babdef2f')
@@ -167,7 +167,7 @@ index b792569..62e118c 100644
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_fincludeHEADERS
    make -C gcc DESTDIR="$pkgdir" fortran.install-{common,man,info}
    install -Dm755 gcc/f951 "$pkgdir/${_libdir}/f951"
-@@ -471,21 +469,21 @@ package_gcc-m2() {
+@@ -471,22 +469,6 @@ package_gcc-m2() {
      "$pkgdir/usr/share/licenses/$pkgname/"
  }
  
@@ -186,21 +186,7 @@ index b792569..62e118c 100644
 - ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
 -   "$pkgdir/usr/share/licenses/$pkgname/"
 -}
-+#package_gcc-rust() {
-+# pkgdesc="Rust frontend for GCC"
-+# depends=("gcc=$pkgver-$pkgrel" libisl.so)
-+#
-+# cd gcc-build
-+# make -C gcc DESTDIR="$pkgdir" rust.install-{common,man,info}
-+#
-+# install -Dm755 gcc/gccrs "$pkgdir"/usr/bin/gccrs
-+# install -Dm755 gcc/crab1 "$pkgdir"/usr/bin/crab1
-+#
-+#  # Install Runtime Library Exception
-+# install -d "$pkgdir/usr/share/licenses/$pkgname/"
-+# ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
-+#   "$pkgdir/usr/share/licenses/$pkgname/"
-+#}
- 
+-
  package_lto-dump() {
    pkgdesc="Dump link time optimization object files"
+   depends=("gcc=$pkgver-$pkgrel" libisl.so)
