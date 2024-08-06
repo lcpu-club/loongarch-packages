@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 741ba63..85467a1 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -65,7 +65,7 @@ build() {
+     --enable-colored-disassembly \
+     --enable-default-execstack=no \
+     --enable-deterministic-archives \
+-    --enable-gold \
++    --disable-gold \
+     --enable-install-libiberty \
+     --enable-jansson \
+     --enable-ld=default \
+@@ -74,7 +74,6 @@ build() {
+     --enable-plugins \
+     --enable-relro \
+     --enable-shared \
+-    --enable-targets=x86_64-pep,bpf-unknown-none \
+     --enable-threads \
+     --disable-gdb \
+     --disable-gdbserver \
