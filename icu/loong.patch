@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 12c26f0..998b10e 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,6 +31,8 @@ validpgpkeys=('3DA35301A7C330257B8755754058F67406EAA6AB') # Craig Cornelius <cco
+ 
+ prepare() {
+   cd icu/source
++  cp /usr/share/automake-1.1?/config.sub .
++  cp /usr/share/automake-1.1?/config.guess .
+   # Required fix for thunderbird 115 to show Calendar and sidebar properly
+   # https://bugzilla.mozilla.org/show_bug.cgi?id=1843007
+   # https://unicode-org.atlassian.net/browse/ICU-22132
