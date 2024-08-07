@@ -1,0 +1,91 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c53ceba..998b23a 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,6 +32,7 @@ source=(
+   0002-skip-simpledrm-if-nvidia-drm.modeset=1-is.patch
+   0003-Default-to-maximum-amount-of-ASLR-bits.patch
+   config  # the main kernel config file
++  config.la64
+ )
+ validpgpkeys=(
+   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
+@@ -43,13 +44,15 @@ sha256sums=('93218296934915636fe6ba08e125948424cc270fd8948502c0ab91087a9fccd8'
+             '21195509fded29d0256abfce947b5a8ce336d0d3e192f3f8ea90bde9dd95a889'
+             '2f23be91455e529d16aa2bbf5f2c7fe3d10812749828fc752240c21b2b845849'
+             '6400a06e6eb3a24b650bc3b1bba9626622f132697987f718e7ed6a5b8c0317bc'
+-            'fc4a376c1ac185af11310633eaccc3247871720ce37ed8e9792002faf3741749')
++            'fc4a376c1ac185af11310633eaccc3247871720ce37ed8e9792002faf3741749'
++            '3b54937e8463e89f4a222d1693636b0ef4ad864bfc86cc9587a10e58414f3699')
+ b2sums=('52c7e474021f4288175477b613e04490471fc365809c48f25effe7a625db61e3599dc8c46036b250d0ff25c990eb9d9591f59f07a81ff73c83df81ccce751250'
+         'SKIP'
+         '02a10396c92ab93124139fc3e37b1d4d8654227556d0d11486390da35dfc401ff5784ad86d0d2aa7eacac12bc451aa2ff138749748c7e24deadd040d5404734c'
+         '5dc21a7a6f0b840e6a671dcf09a865e42f0e2c000d5e45d3f3202c02946a8ab2207858d0b2ef1004648b8c2963efb428298b263c8494be806dfc9b6af66d5413'
+         'ba6ebe349b3757411364a9ba2deaa30a8d71a247d518c159385977c2b4782771bda4edfc96bd954808617c9ba984d832471b63c11f5bd6003369bfe4051df31f'
+-        '00be778180aa1f5ed403d7b338897c7edb2730818d7e62743ed743a7e4cea8f77ed13bad15483d80501dd963e10ddee490dfe8e4e2c385fdae78211c7dba2eed')
++        '00be778180aa1f5ed403d7b338897c7edb2730818d7e62743ed743a7e4cea8f77ed13bad15483d80501dd963e10ddee490dfe8e4e2c385fdae78211c7dba2eed'
++        '3d42181927d6ccac6a41397bcc7c8cf9a3af678d50f69e9a6039319bcaeeda402e666f74df7b83f1d34d31d62ebf0f6d6290ca7d954463d19a7a7c8f75820fb8')
+ 
+ export KBUILD_BUILD_HOST=archlinux
+ export KBUILD_BUILD_USER=$pkgbase
+@@ -73,7 +76,11 @@ prepare() {
+   done
+ 
+   echo "Setting config..."
+-  cp ../config .config
++  if [ $CARCH == loong64 ]; then
++    cp ../config.la64 .config
++  else
++    cp ../config .config
++  fi
+   make olddefconfig
+   diff -u ../config .config || :
+ 
+@@ -241,20 +248,28 @@ _package-headers() {
+   install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
+     localversion.* version vmlinux
+   install -Dt "$builddir/kernel" -m644 kernel/Makefile
+-  install -Dt "$builddir/arch/x86" -m644 arch/x86/Makefile
++  if [ $CARCH == x86_64 ]; then
++    install -Dt "$builddir/arch/x86" -m644 arch/x86/Makefile
++  elif [ $CARCH == loong64 ]; then
++    install -Dt "$builddir/arch/loongarch" -m644 arch/loongarch/Makefile
++  fi
+   cp -t "$builddir" -a scripts
+ 
+   # required when STACK_VALIDATION is enabled
+-  install -Dt "$builddir/tools/objtool" tools/objtool/objtool
++  #install -Dt "$builddir/tools/objtool" tools/objtool/objtool
+ 
+   # required when DEBUG_INFO_BTF_MODULES is enabled
+-  install -Dt "$builddir/tools/bpf/resolve_btfids" tools/bpf/resolve_btfids/resolve_btfids
++  #install -Dt "$builddir/tools/bpf/resolve_btfids" tools/bpf/resolve_btfids/resolve_btfids
+ 
+   echo "Installing headers..."
+   cp -t "$builddir" -a include
+-  cp -t "$builddir/arch/x86" -a arch/x86/include
+-  install -Dt "$builddir/arch/x86/kernel" -m644 arch/x86/kernel/asm-offsets.s
+-
++  if [ $CARCH == x86_64 ]; then
++    cp -t "$builddir/arch/x86" -a arch/x86/include
++    install -Dt "$builddir/arch/x86/kernel" -m644 arch/x86/kernel/asm-offsets.s
++  elif [ $CARCH == loong64 ]; then
++    cp -t "$builddir/arch/loongarch" -a arch/loongarch/include
++    install -Dt "$builddir/arch/loongarch/kernel" -m644 arch/loongarch/kernel/asm-offsets.s
++  fi
+   install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
+   install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
+ 
+@@ -275,7 +290,11 @@ _package-headers() {
+   echo "Removing unneeded architectures..."
+   local arch
+   for arch in "$builddir"/arch/*/; do
+-    [[ $arch = */x86/ ]] && continue
++    if [ $CARCH == x86_64 ]; then
++      [[ $arch = */x86/ ]] && continue
++    elif [ $CARCH == loong64 ]; then
++      [[ $arch = */loongarch/ ]] && continue
++    fi
+     echo "Removing $(basename "$arch")"
+     rm -r "$arch"
+   done
