@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 76322a6..ff5bd89 100644
+index 76322a6..5520525 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -7,14 +7,14 @@
@@ -28,12 +28,13 @@ index 76322a6..ff5bd89 100644
  
    [[ -d glibc-$pkgver ]] && ln -s glibc-$pkgver glibc
    cd glibc
-@@ -61,11 +61,10 @@ build() {
+@@ -61,11 +61,11 @@ build() {
  
    # _FORTIFY_SOURCE=3 causes testsuite build failure and is unnecessary during
    # actual builds (support is built-in via --enable-fortify-source).
 -  CFLAGS=${CFLAGS/-Wp,-D_FORTIFY_SOURCE=3/}
 +  CFLAGS=${CFLAGS/-Wp,-D_FORTIFY_SOURCE=?/}
++  CFLAGS=${CFLAGS/-fno-plt/}
  
    (
      cd glibc-build
@@ -41,7 +42,7 @@ index 76322a6..ff5bd89 100644
      echo "slibdir=/usr/lib" >> configparms
      echo "rtlddir=/usr/lib" >> configparms
      echo "sbindir=/usr/bin" >> configparms
-@@ -83,28 +82,6 @@ build() {
+@@ -83,28 +83,6 @@ build() {
      make info
    )
  
@@ -70,14 +71,6 @@ index 76322a6..ff5bd89 100644
  
    # pregenerate locales here instead of in package
    # functions because localedef does not like fakeroot
-@@ -139,6 +116,7 @@ check() (
-   _skip_test tst-process_mrelease    sysdeps/unix/sysv/linux/Makefile
-   _skip_test tst-shstk-legacy-1g     sysdeps/x86_64/Makefile
-   _skip_test tst-adjtime             time/Makefile
-+  sed -i '/check-localplt.out /d' "${srcdir}/glibc/elf/Makefile"
- 
-   make -O check
- )
 @@ -189,31 +167,6 @@ package_glibc() {
    install -Dm644 "${srcdir}"/sdt-config.h "${pkgdir}"/usr/include/sys/sdt-config.h
  }
