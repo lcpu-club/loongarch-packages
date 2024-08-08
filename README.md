@@ -15,6 +15,7 @@ Packages are maintained as patches to x86_64 Arch Linux packages. The folder hie
 ├── patches # optional, Folder containing new patches for the package, they will be copied to patches folder of the package
 │   ├── 0001-<patch-name>.patch # all patches should be named in this format
 |   └── ... 
+├── files # optional, Folder containing files to be copied to the package directory directly
 ```
 
 The upstream packages can be found at `https://gitlab.archlinux.org/archlinux/packaging/packages/<package-name>`.
@@ -55,6 +56,7 @@ The upstream packages can be found at `https://gitlab.archlinux.org/archlinux/pa
 ├── patches # 可选，包含包的新补丁的文件夹，这些补丁将被复制到包的 patches 文件夹中
 │   ├── 0001-<补丁名>.patch # 所有补丁应以此格式命名
 |   └── ... 
+├── files # 可选，包含要直接复制到包目录的文件的文件夹
 ```
 
 对于上游包，都可以在`https://gitlab.archlinux.org/archlinux/packaging/packages/<package-name>`找到。
