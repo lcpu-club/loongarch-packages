@@ -31,7 +31,7 @@ index b01d783..49cdcce 100644
  source=(git+https://sourceware.org/git/gcc.git#commit=${_commit}
          c89 c99
          gcc-ada-repro.patch
-+	gcc-lib64-lib.patch
++	patches/gcc-lib64-lib.patch
  )
  validpgpkeys=(F3691687D867B81B51CE07D9BBE43771487328A9  # bpiotrowski@archlinux.org
                86CFFCA918CF3AF47147588051E8B148A9999C34  # foutrelis@archlinux.org
@@ -49,7 +49,7 @@ index b01d783..49cdcce 100644
  
    # Reproducible gcc-ada
    patch -Np0 < "$srcdir/gcc-ada-repro.patch"
-+  patch -p1 -i "$srcdir/gcc-lib64-lib.patch"
++  patch -p1 -i "$srcdir/patches/gcc-lib64-lib.patch"
  
    mkdir -p "$srcdir/gcc-build"
    mkdir -p "$srcdir/libgccjit-build"
