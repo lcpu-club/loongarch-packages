@@ -25,7 +25,7 @@ The upstream packages can be found at `https://gitlab.archlinux.org/archlinux/pa
 `spec` is a bash script that defines the package. It should contain the following variables:
 
 - `VER`: required, upstream git hash (at least 8 characters) or `SKIP` if the package is not upstreamed
-- `REL`: required, release number for loongarch64. Origin package's release number will be merged into package version like `1.2.3-4` -> `1.2.3+v4`
+- `REL`: Required, the release number for loongarch64. The release number of the original package will be appended to the `pkgrel` version of the Arch Linux official package. For example, if the official version is `1.2.3-4` and `REL` is `2`, the final version number will be `1.2.3-4.2`.
 - `ENVREQ`: optional, space separated list of builder machine requirements. See `https://github.com/lcpu-club/lcpu-buildit/blob/master/DESIGN.md` for available options
 
 
@@ -66,7 +66,7 @@ The upstream packages can be found at `https://gitlab.archlinux.org/archlinux/pa
 `spec` 是一个 bash 脚本，用于定义包。它应包含以下变量：
 
 - `VER`：必需，上游 git hash（至少 8 个字符）或 `SKIP`，如果包没有上游化
-- `REL`：必需，loongarch64 的发布号。原始包的发布号将合并到包版本中，如 `1.2.3-4` -> `1.2.3+v4`
+- `REL`：必需，loongarch64 的发布号。原始包的发布号将合并到Arch Linux官方包 `pkgrel` 的版本后，如官方版本为 `1.2.3-4`， `REL` 为`2`，则最终的版本号为 `1.2.3-4.2`
 - `ENVREQ`：可选，构建机器要求的空格分隔列表。有关可用选项，请参见 `https://github.com/lcpu-club/lcpu-buildit/blob/master/DESIGN.md`
 
 ## 提交和 PR 要求
