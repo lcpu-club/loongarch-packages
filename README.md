@@ -12,10 +12,10 @@ Packages are maintained as patches to x86_64 Arch Linux packages. The folder hie
 <package-name>
 ├── spec # spec file to define the package
 ├── loong.patch # The patch file to existing package
-├── patches # optional, Folder containing new patches for the package, they will be copied to patches folder of the package
-│   ├── 0001-<patch-name>.patch # all patches should be named in this format
-|   └── ... 
-├── files # optional, Folder containing files to be copied to the package directory directly
+├── patches # Optional, a folder containing patches for the package, which will be copied to the package's patches folder; it can also contain non-patch configuration files
+    ├── 0001-<patch-name>.patch # Patches listed directly should be named in this format
+    ├── example.conf # Configuration file
+    └── ... # Developers can decide whether to split subdirectories by type, but need to pay attention to the correspondence with PKGBUILD
 ```
 
 The upstream packages can be found at `https://gitlab.archlinux.org/archlinux/packaging/packages/<package-name>`.
@@ -53,10 +53,10 @@ The upstream packages can be found at `https://gitlab.archlinux.org/archlinux/pa
 <包名>
 ├── spec # 定义包的 spec 文件
 ├── loong.patch # 为现有包提供的补丁文件
-├── patches # 可选，包含包的新补丁的文件夹，这些补丁将被复制到包的 patches 文件夹中
-│   ├── 0001-<补丁名>.patch # 所有补丁应以此格式命名
-|   └── ... 
-├── files # 可选，包含要直接复制到包目录的文件的文件夹
+├── patches # 可选，包含包的新补丁的文件夹，这些补丁将被复制到包的 patches 文件夹中；也可以在其中包含非补丁的配置文件
+    ├── 0001-<补丁名>.patch # 直接列出的补丁应以此格式命名
+    ├── example.conf # 配置文件
+    └── ... # 可以由开发者决定是否按照类型拆分子目录，但需要注意与 PKGBUILD 的对应关系
 ```
 
 对于上游包，都可以在`https://gitlab.archlinux.org/archlinux/packaging/packages/<package-name>`找到。
