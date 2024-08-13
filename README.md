@@ -18,7 +18,7 @@ Packages are maintained as patches to x86_64 Arch Linux packages. The folder hie
     └── ... # Developers can decide whether to split subdirectories by type, but need to pay attention to the correspondence with PKGBUILD
 ```
 
-The upstream packages can be found at `https://gitlab.archlinux.org/archlinux/packaging/packages/<package-name>`.
+The upstream packages can be found at `https://gitlab.archlinux.org/archlinux/packaging/packages/<package-name>`, and can be downloaded on Arch Linux with `pkgctl repo clone <package-name>` or viewed with `pkgctl repo web <package-name>`.
 
 ## Spec structure
 
@@ -59,7 +59,7 @@ The upstream packages can be found at `https://gitlab.archlinux.org/archlinux/pa
     └── ... # 可以由开发者决定是否按照类型拆分子目录，但需要注意与 PKGBUILD 的对应关系
 ```
 
-对于上游包，都可以在`https://gitlab.archlinux.org/archlinux/packaging/packages/<package-name>`找到。
+对于上游包，都可以在`https://gitlab.archlinux.org/archlinux/packaging/packages/<package-name>`找到，在 Arch Linux 上，还可以通过`pkgctl repo clone <package-name>`下载或者`pkgctl repo web <package-name>`查看。
 
 ## spec 结构
 
