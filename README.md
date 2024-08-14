@@ -51,12 +51,6 @@ Follow the [guidelines](https://github.com/felixonmars/archriscv-packages/wiki/%
 >
 > **Please note that there should be a space around the colon in the title before writing the package name.** It is also strongly recommended not to use `git commit -m "title"` alone; it is recommended to clearly state the content and reason for the modification in the commit body.
 
-## Commit and PR requirements
-
-- The commit message should be in the format `package-name: version description`. Each commit should only contain changes to a single package.
-- Branch to be used for PR should be named as `theme-version-description`.
-- The PR cloud contain a set of commits, each commit should be a patch to a single package. Packages will be built in the order of commits in the PR by default, unless specified otherwise in the PR description.
-
 ## Version control requirements
 
 If version control is needed for the ported packages, the `pkgrel` field in the `PKGBUILD` file can be modified. The modified `pkgrel` field should follow the format of `major.minor`, where `major` must **remain consistent with the upstream**, and `minor` is used for version control of the ported package. The modification to the `pkgrel` field should be exported in `loong.patch` along with other changes to the `PKGBUILD`.
