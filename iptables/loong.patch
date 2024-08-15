@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 05b12e0..e9a2cec 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -48,6 +48,8 @@ prepare() {
+ 
+   # use Arch path
+   patch -p0 -i ../iptables-apply-default-path.patch
++  cp /usr/share/automake-1.1?/config.sub build-aux/
++  cp /usr/share/automake-1.1?/config.guess build-aux/
+ }
+ 
+ build() {
