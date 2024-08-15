@@ -1,0 +1,30 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7ef335d..3f74838 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -13,20 +13,23 @@ makedepends=('check' 'git')
+ #        https://www.kernel.org/pub/linux/utils/kbd/${pkgname}-${pkgver}.tar.sign
+ source=(git+https://git.kernel.org/pub/scm/linux/kernel/git/legion/kbd.git#tag=v$pkgver?signed
+         'fix-euro2.patch'
+-	'vlock.pam')
++	'vlock.pam'
++	kbd-max-font-size.patch)
+ backup=('etc/pam.d/vlock')
+ provides=('vlock')
+ conflicts=('vlock')
+ replaces=('vlock')
+ sha256sums=('SKIP'
+             'a5e0167b6a82a9eb4d581d56baab930c2d80f5541dc34630460b73e1115384b8'
+-            '5c2d377a87121e7c399534fb91e2ffc0cc1e75d44a8f07ee6f55c9c089bc81e4')
++            '5c2d377a87121e7c399534fb91e2ffc0cc1e75d44a8f07ee6f55c9c089bc81e4'
++            '44f554ae63f3e0a4c9dc9c88caa0f974c71147636eb409da6534af00a91fecb9')
+ validpgpkeys=(
+               '7F2A3D07298149A0793C9A4EA45ABA544CFFD434' #Alexey Gladkov 
+              )
+ 
+ prepare() {
+   cd ${pkgname}
++  patch -p1 -i $srcdir/kbd-max-font-size.patch
+   # rename keymap files with the same names
+   # this is needed because when only name of keymap is specified
+   # loadkeys loads the first keymap it can find, which is bad (see FS#13837)

@@ -1,0 +1,22 @@
+diff --git a/src/libkfont/kfont.h b/src/libkfont/kfont.h
+index 1f51b6d..4423cb9 100644
+--- a/src/libkfont/kfont.h
++++ b/src/libkfont/kfont.h
+@@ -92,7 +92,7 @@ struct psf2_header {
+ #define PSF2_HAS_UNICODE_TABLE 0x01
+ 
+ /* max version recognized so far */
+-#define PSF2_MAXVERSION 0
++#define PSF2_MAXVERSION 1
+ 
+ /* UTF8 separators */
+ #define PSF2_SEPARATOR 0xFF
+@@ -241,7 +241,7 @@ void kfont_disactivatemap(int fd);
+ #include <stdio.h>
+ 
+ /* Maximum font size that we try to handle */
+-#define MAXFONTSIZE (512*64*128)
++#define MAXFONTSIZE (16384*64*128)
+ 
+ /**
+  * readpsffont reads a PSF font.
