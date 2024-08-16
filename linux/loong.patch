@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0891b82..681874c 100644
+index 0891b82..dbcef14 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -35,6 +35,7 @@ source=(
@@ -27,21 +27,17 @@ index 0891b82..681874c 100644
  
  export KBUILD_BUILD_HOST=archlinux
  export KBUILD_BUILD_USER=$pkgbase
-@@ -75,7 +78,12 @@ prepare() {
-   done
+@@ -76,6 +79,9 @@ prepare() {
  
    echo "Setting config..."
--  cp ../config .config
+   cp ../config .config
 +  if [ $CARCH == loong64 ]; then
-+    patch ../config -i ../config.loong64.diff -o ../config.loong64
-+    cp ../config.loong64 .config
-+  else
-+    cp ../config .config
++    patch .config -i ../config.loong64.diff
 +  fi
    make olddefconfig
    diff -u ../config .config || :
  
-@@ -141,20 +149,28 @@ _package-headers() {
+@@ -141,20 +147,28 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -75,7 +71,7 @@ index 0891b82..681874c 100644
    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
  
-@@ -175,7 +191,11 @@ _package-headers() {
+@@ -175,7 +189,11 @@ _package-headers() {
    echo "Removing unneeded architectures..."
    local arch
    for arch in "$builddir"/arch/*/; do
