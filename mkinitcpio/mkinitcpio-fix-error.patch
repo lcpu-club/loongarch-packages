@@ -1,0 +1,19 @@
+commit 5ae346ebc96632fe6eef4b246d9ea1fa2555e94e
+Author: Xiaotian Wu <yetist@gmail.com>
+Date:   Tue Jan 9 12:40:14 2024 +0800
+
+    fix mkinitcpio error on loongarch
+
+diff --git a/install/kms b/install/kms
+index f1e10b0..1147bf9 100644
+--- a/install/kms
++++ b/install/kms
+@@ -6,7 +6,7 @@ build() {
+     map add_checked_modules '/drivers/char/agp/' '/drivers/gpu/drm/'
+ 
+     # modules that implement the privacy screen interface
+-    add_checked_modules_from_symbol 'drm_privacy_screen_register' '=drivers/platform'
++    map add_checked_modules 'chromeos_privacy_screen?' 'thinkpad_acpi?'
+ }
+ 
+ help() {
