@@ -1,33 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0891b82..dbcef14 100644
+index 0891b82..4416f8d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -35,6 +35,7 @@ source=(
-   https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/${_srcname}.tar.{xz,sign}
-   $url/releases/download/$_srctag/linux-$_srctag.patch.zst{,.sig}
-   config  # the main kernel config file
-+  config.loong64.diff
- )
- validpgpkeys=(
-   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
-@@ -46,12 +47,14 @@ sha256sums=('30909eb2e0434dce97a93cd97ed0dfab7688a124bc3ebc3ecf6c776de09ccc0b'
-             'SKIP'
-             '22ebc3047c4e5f327e49a078951802a2e6e3b6af523f4cc6b4e9dacf1ca18cda'
-             'SKIP'
--            '09bc22332affedcdf96cfa7b4ff3dcf1d087d1bde818b9929f5ad1102bc4f775')
-+            '09bc22332affedcdf96cfa7b4ff3dcf1d087d1bde818b9929f5ad1102bc4f775'
-+            '1a09fc853dd2a20a1dd59abd8604a9aea88f5440f3e9342ed4c918d19a9bb211')
- b2sums=('e4f8d468ff4e4ec45a697c69676a21e1716f3e4c8ed456def866125a93826de5e2f1366ba4fa970879744d431eac85377951cee391e39745d2e56eabd7985c83'
-         'SKIP'
-         '5efc5ad1166ab4f0526941dd40a9cbafe900543b70b292270cd7f5b67d0a1a4220917d62d9145725ceeabc2af09d663ecc74633133420024fc37510239675ce2'
-         'SKIP'
--        'c68807547b8dd52734252ae4002993b9dbeac2e171ab5db22256e9234331f96a830cee50ba9fcfc89f01b99df1d46caee42e2d282a75b40520b2e37a9b77c34c')
-+        'c68807547b8dd52734252ae4002993b9dbeac2e171ab5db22256e9234331f96a830cee50ba9fcfc89f01b99df1d46caee42e2d282a75b40520b2e37a9b77c34c'
-+        'e3731bde5a2ffb2888c506abe86376205c7dd11805c8ea7d69e4e321b15e8be8136c169fe8a7e9bd2d332372bb5fd64184859d64b8b9452ef2736ca0fdf02dc6')
- 
- export KBUILD_BUILD_HOST=archlinux
- export KBUILD_BUILD_USER=$pkgbase
-@@ -76,6 +79,9 @@ prepare() {
+@@ -76,6 +76,9 @@ prepare() {
  
    echo "Setting config..."
    cp ../config .config
@@ -37,7 +12,7 @@ index 0891b82..dbcef14 100644
    make olddefconfig
    diff -u ../config .config || :
  
-@@ -141,20 +147,28 @@ _package-headers() {
+@@ -141,20 +144,28 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -71,7 +46,7 @@ index 0891b82..dbcef14 100644
    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
  
-@@ -175,7 +189,11 @@ _package-headers() {
+@@ -175,7 +186,11 @@ _package-headers() {
    echo "Removing unneeded architectures..."
    local arch
    for arch in "$builddir"/arch/*/; do
@@ -84,3 +59,12 @@ index 0891b82..dbcef14 100644
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
+@@ -243,4 +258,8 @@ for _p in "${pkgname[@]}"; do
+   }"
+ done
+ 
++source+=('config.loong64.diff')
++sha256sums+=('73d7e0f48031a3b67d600e9ee7c4fde86896aad46bab4575185a15fd62f4893d')
++b2sums+=('1cb2014283325710154981e37a56c0f185d404f5293841d6cf9dcee7b9b3b400d016fc1cae0bda0986e37d16b87bca6ea9a407b8d06e43c3a3f6675c951b5110')
++
+ # vim:set ts=8 sts=2 sw=2 et:
