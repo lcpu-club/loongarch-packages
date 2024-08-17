@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -164,7 +164,7 @@ package() {
+     ["var/mail"]="spool/mail"
+     ["var/run"]="../run"
+   )
+-  [[ $CARCH = 'x86_64' ]] && {
++  [[ $CARCH = 'x86_64' || $CARCH = 'loong64' ]] && {
+     symlinks["lib64"]="usr/lib"
+     symlinks["usr/lib64"]="lib"
+   }
