@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,8 +21,12 @@ validpgpkeys=('C9E9416F76E610DBD09D040F47B70C55ACC9965B') # Denis Vlasenko <vda.
+ 
+ prepare() {
+   cd "busybox-$pkgver"
+-  
+-  local safeflags="-march=${CARCH/_/-} -mtune=generic -Os -pipe -fno-strict-aliasing"
++
++  if [ $CARCH == "loong64" ];then
++    local safeflags="-march=loongarch64 -mabi=lp64d -Os -pipe -fno-strict-aliasing"
++  else
++    local safeflags="-march=${CARCH/_/-} -mtune=generic -Os -pipe -fno-strict-aliasing"
++  fi
+ 
+   # use make oldconfig for updating the config file
+   sed 's|^\(CONFIG_EXTRA_CFLAGS\)=.*|\1="'"$safeflags"'"|' "$srcdir/config" > .config
