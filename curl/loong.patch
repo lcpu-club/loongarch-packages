@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,7 +23,6 @@ depends=('ca-certificates'
+          'zlib' 'libz.so'
+          'zstd' 'libzstd.so')
+ makedepends=('git' 'patchelf')
+-checkdepends=('valgrind')
+ validpgpkeys=('27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2') # Daniel Stenberg
+ source=("git+https://github.com/curl/curl.git#tag=curl-${pkgver//./_}?signed")
+ sha512sums=('402e12ad615c1db98df9cc8199d46f5c7a9bd174a457e469acbd9d3f567cc36b2db1fc3a010c3aa8e752da182f48d3b4590c98f15f6fad6ed063c4224d794442')
