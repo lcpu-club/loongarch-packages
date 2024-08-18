@@ -1,0 +1,54 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -4,16 +4,19 @@
+ # Contributor: Keshav Amburay <(the ddoott ridikulus ddoott rat) (aatt) (gemmaeiil) (ddoott) (ccoomm)>
+ 
+ ## "1" to enable IA32-EFI build in Arch x86_64, "0" to disable
+-_IA32_EFI_IN_ARCH_X64="1"
++_IA32_EFI_IN_ARCH_X64="0"
+ 
+ ## "1" to enable EMU build, "0" to disable
+ _GRUB_EMU_BUILD="0"
++SKIPCONFIG=1
+ 
+ [[ "${CARCH}" == 'x86_64' ]] && _EFI_ARCH='x86_64'
+ [[ "${CARCH}" == 'i686' ]] && _EFI_ARCH='i386'
++[[ "${CARCH}" == 'loong64' ]] && _EFI_ARCH='loongarch64'
+ 
+ [[ "${CARCH}" == 'x86_64' ]] && _EMU_ARCH='x86_64'
+ [[ "${CARCH}" == 'i686' ]] && _EMU_ARCH='i386'
++[[ "${CARCH}" == 'loong64' ]] && _EMU_ARCH=''
+ 
+ pkgname='grub'
+ pkgdesc='GNU GRand Unified Bootloader (2)'
+@@ -244,8 +247,10 @@ _build_grub-emu() {
+ build() {
+ 	cd "${srcdir}/grub/"
+ 
+-	echo "Build grub bios stuff..."
+-	_build_grub-common_and_bios
++	if [[ "${CARCH}" != "loong64" ]]; then
++	    echo "Build grub bios stuff..."
++	    _build_grub-common_and_bios
++	fi
+ 
+ 	echo "Build grub ${_EFI_ARCH} efi stuff..."
+ 	_build_grub-efi
+@@ -318,6 +323,15 @@ package() {
+ 		_package_grub-emu
+ 	fi
+ 
+-	echo "Package grub bios stuff..."
+-	_package_grub-common_and_bios
++	if [[ "${CARCH}" != "loong64" ]]; then
++	    echo "Package grub bios stuff..."
++	    _package_grub-common_and_bios
++	    cd "${srcdir}/grub-bios/"
++
++	    echo "Run make install for bios build..."
++	    make DESTDIR="${pkgdir}/" bashcompletiondir="/usr/share/bash-completion/completions" install
++	fi
++
++	echo "Install /etc/default/grub (used by grub-mkconfig)..."
++	install -D -m0644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
+ }
