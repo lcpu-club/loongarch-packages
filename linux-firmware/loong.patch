@@ -1,0 +1,23 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -51,6 +51,11 @@ build() {
+   echo kernel/x86/microcode/AuthenticAMD.bin |
+     bsdtar --uid 0 --gid 0 -cnf - -T - |
+     bsdtar --null -cf - --format=newc @- > amd-ucode.img
++
++  # Add gsgpu firmware
++  echo 'File: loongson/lg100_cp.bin' >> "${pkgbase}/WHENCE"
++  install -Dm644 "${srcdir}/lg100_cp.bin" -t "${pkgbase}/loongson"
++
+ }
+ 
+ _pick() {
+@@ -166,4 +171,8 @@ package_linux-firmware-bnx2x() {
+   mv -v linux-firmware-bnx2x/* "${pkgdir}"
+ }
+ 
++source+=("lg100_cp.bin::https://github.com/cl91/linux-gsgpu-archpkg/raw/master/gsgpu-firmware/lg100_cp.bin")
++sha256sums+=('5f0cea0c155ed87e655e4b69d92a11ad31582799bf21909f23f809c9b3109a44')
++noextract=('lg100_cp.bin')
++
+ # vim:set sw=2 et:
