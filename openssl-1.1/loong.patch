@@ -1,0 +1,25 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -28,13 +28,14 @@ prepare() {
+ 
+ 	# set ca dir to /etc/ssl by default
+ 	patch -p0 -i "$srcdir/ca-dir.patch"
++	patch -p1 -i "$srcdir/openssl-loong64.patch"
+ }
+ 
+ build() {
+ 	cd "$srcdir/$_pkgname-$_ver"
+ 
+ 	./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib/openssl-1.1 \
+-		shared no-ssl3-method enable-ec_nistp_64_gcc_128 linux-x86_64
++		shared no-ssl3-method enable-ec_nistp_64_gcc_128 linux-`uname -m`
+ 
+ 	make depend
+ 	make
+@@ -75,3 +76,6 @@ package() {
+ 
+ 	install -D -m644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++source+=('openssl-loong64.patch')
++sha256sums+=('2b146d69cfe81801012da66a0880fe170c7bd31f03c4b045e31e9f22807b97e8')

@@ -1,0 +1,17 @@
+Index: openssl-1.1.1h/Configurations/10-main.conf
+===================================================================
+--- openssl-1.1.1h.orig/Configurations/10-main.conf
++++ openssl-1.1.1h/Configurations/10-main.conf
+@@ -726,7 +726,11 @@ my %targets = (
+         bn_ops           => "SIXTY_FOUR_BIT RC4_CHAR",
+         perlasm_scheme   => "linux64",
+     },
+-
++    "linux-loongarch64" => {
++        inherit_from     => [ "linux-generic64" ],
++        perlasm_scheme   => "64",
++        multilib         => "64",
++    },
+     "linux-mips32" => {
+         # Configure script adds minimally required -march for assembly
+         # support, if no -march was specified at command line.
