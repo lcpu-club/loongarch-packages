@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,7 +34,7 @@ build() {
+ 	cd "$srcdir/$pkgname-$pkgver"
+ 
+ 	./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib \
+-		shared enable-ktls enable-ec_nistp_64_gcc_128 linux-${CARCH}
++		shared enable-ktls enable-ec_nistp_64_gcc_128 linux64-`uname -m`
+ 
+ 	make depend
+ 	make
