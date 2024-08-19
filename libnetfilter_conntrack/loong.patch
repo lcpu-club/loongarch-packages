@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,6 +18,8 @@ sha256sums=('67bd9df49fe34e8b82144f6dfb93b320f384a8ea59727e92ff8d18b5f4b579a8'
+ 
+ build() {
+   cd $pkgname-$pkgver
++  cp /usr/share/automake-1.1?/config.sub build-aux
++  cp /usr/share/automake-1.1?/config.guess build-aux
+   ./configure --prefix=/usr
+   make
+ }
