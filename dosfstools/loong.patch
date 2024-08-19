@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,6 +18,8 @@ sha256sums=('64926eebf90092dca21b14259a5301b7b98e7b1943e8a201c7d726084809b527'
+ 
+ build() {
+   cd $pkgname-$pkgver
++  cp /usr/share/automake-1.1?/config.sub .
++  cp /usr/share/automake-1.1?/config.guess .
+   ./configure --prefix=/usr --libexecdir=/usr/lib \
+               --sbindir=/usr/bin --mandir=/usr/share/man \
+               --docdir=/usr/share/doc/dosfstools --enable-compat-symlinks
