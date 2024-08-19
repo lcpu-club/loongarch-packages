@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,8 @@ sha256sums=('f210501445ce21bf607ba51ef8c125e10e22dffdffec377646462df5f01915ec')
+ 
+ build() {
+     cd unixODBC-${pkgver}
++    cp /usr/share/automake-1.1?/config.sub .
++    cp /usr/share/automake-1.1?/config.guess .
+     ./configure --prefix=/usr --sysconfdir=/etc
+     sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+     make
