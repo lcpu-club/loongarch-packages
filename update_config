@@ -1,0 +1,14 @@
+ding-libs
+dmraid
+dosfstools
+icu
+iptables
+libnetfilter_conntrack
+libnftnl
+lzo
+popt
+reiserfsprogs
+sdparm
+sqlite
+tpm2-tss
+unixodbc
