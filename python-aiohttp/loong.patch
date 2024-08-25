@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -84,7 +84,7 @@ check() {
+   local python_version=$(python -c 'import sys; print("".join(map(str, sys.version_info[:2])))')
+   mv tests/autobahn/test_autobahn.py{,.bak} # Docker tests
+   # https://github.com/aio-libs/aiohttp/issues/8234
+-  PYTHONPATH="$PWD/build/lib.linux-$CARCH-cpython-$python_version" pytest \
++  PYTHONPATH="$PWD/build/lib.linux-`uname -m`-cpython-$python_version" pytest \
+     --deselect 'tests/test_pytest_plugin.py::test_aiohttp_plugin'
+   mv tests/autobahn/test_autobahn.py{.bak,}
+ }
