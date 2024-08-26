@@ -1,0 +1,16 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,9 +23,12 @@ sha512sums=('e95b2d30cb0273e5b723cf532f63b7b18f44c7f909a9d03331e0b7b7200bee8b635
+ #  python scripts/regenerate-fixtures.py
+ #}
+ 
++source+=("lexicon_update.diff")
++sha512sums+=("e0d0f27bd7c1bd9f4332326dd7dae4a0fe87361365c5c17774a07eeb0da0fe346d7540dda4354d3b61afe34afed67ae98b7dc4b97cd672312576081c97de4f09")
++
+ build() {
+   cd $_pkgname-$pkgver
+-
++  patch -Np1 < ../lexicon_update.diff
+   SETUPTOOLS_SCM_PRETEND_VERSION=$pkgver python -m build --wheel --no-isolation
+ }
+ 
