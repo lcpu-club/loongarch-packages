@@ -1,0 +1,19 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,8 @@ sha512sums=('ee9ab8effb3c71de004c3d61ec583b9980c6b75fe9bb04cf2c76025ea70afc206bc
+ build() {
+   cd $_pkgname-$pkgver
+ 
++  sed -i '\|sip/siplib/bool\.cpp|d' wscript
++
+ #  rm -r sip/{cpp,gen}/* # Recreate sip files with current wxWidgets - broken with doxygen 1.9.7 https://github.com/wxWidgets/Phoenix/issues/2414
+   SIP=/usr/bin/sip DOXYGEN=/usr/bin/doxygen WAF=/usr/bin/waf \
+   python build.py --nodoc sip build --use_syswx --release
+@@ -30,7 +32,6 @@ build() {
+ 
+ check() {
+   cd $_pkgname-$pkgver
+-
+   # there are segfaulting tests so --forked ensures we get sensible results
+   PYTHONPATH=$PWD xvfb-run pytest --forked unittests || echo "==> WARNING: tests usually fail randomly"
+ }
