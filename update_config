@@ -1,3 +1,6 @@
+# The PKGBUILD for these packages need to be updated by building scripts:
+# Update the config.{guess,sub} file in the source code.
+
 ding-libs
 dmraid
 dosfstools
@@ -12,3 +15,9 @@ sdparm
 sqlite
 tpm2-tss
 unixodbc
+dovecot
+libcdr
+libzmf
+source-highlight
+libvisio
+libqxp
