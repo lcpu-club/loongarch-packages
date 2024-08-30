@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c07a8e7..658dd89 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,4 +38,10 @@ depends=(
+   which
+ )
+ 
++depends+=(
++  # Linux Club of Peking University's signature keyring
++  # needed for loongarchlinux port
++  'archlinux-lcpu-keyring'
++)
++
+ # vim: ts=2 sw=2 et:
