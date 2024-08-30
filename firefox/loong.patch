@@ -1,0 +1,97 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 63813f5..7a7b924 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -129,6 +129,14 @@ prepare() {
+   # Fix build with cinbdgen 0.27.0
+   # https://bugzilla.mozilla.org/show_bug.cgi?id=1912663
+   patch -Np1 -i ../0004-Bug-1912663-Fix-some-build-issues-with-cbindgen-0.27.patch
++  
++  # Fix `ld.lld: error: undefined hidden symbol` in libyuv
++  patch -Np1 -i ../0010-Fix-libyuv-build-with-LSX-LASX.patch
++  # Fix `ld.lld: error: undefined hidden symbol: png_init_filter_functions_lsx`
++  patch -Np1 -i ../0011-Add-missing-loongarch-lsx-code-for-libpng.patch
++  # WebRTC support for loong64
++  patch -Np1 -i ../0012-Add-support-for-LoongArch64.patch
++  patch -Np1 -i ../0013-Enable-WebRTC-for-LoongArch.patch
+ 
+   echo -n "$_google_api_key" >google-api-key
+ 
+@@ -143,7 +151,6 @@ ac_add_options --enable-optimize
+ ac_add_options --enable-rust-simd
+ ac_add_options --enable-linker=lld
+ ac_add_options --disable-install-strip
+-ac_add_options --disable-elf-hack
+ ac_add_options --disable-bootstrap
+ ac_add_options --with-wasi-sysroot=/usr/share/wasi-sysroot
+ 
+@@ -167,7 +174,7 @@ ac_add_options --with-system-nss
+ # Features
+ ac_add_options --enable-alsa
+ ac_add_options --enable-jack
+-ac_add_options --enable-crashreporter
++ac_add_options --disable-crashreporter
+ ac_add_options --disable-updater
+ ac_add_options --disable-tests
+ END
+@@ -194,41 +201,7 @@ build() {
+ 
+   # Do 3-tier PGO
+   echo "Building instrumented browser..."
+-  cat >.mozconfig ../mozconfig - <<END
+-ac_add_options --enable-profile-generate=cross
+-END
+-  ./mach build --priority normal
+-
+-  echo "Profiling instrumented browser..."
+-  ./mach package
+-  LLVM_PROFDATA=llvm-profdata JARLOG_FILE="$PWD/jarlog" \
+-    MOZ_DISABLE_CONTENT_SANDBOX=1 \
+-    MOZ_DISABLE_GMP_SANDBOX=1 \
+-    MOZ_DISABLE_GPU_SANDBOX=1 \
+-    MOZ_DISABLE_RDD_SANDBOX=1 \
+-    MOZ_DISABLE_SOCKET_PROCESS_SANDBOX=1 \
+-    MOZ_DISABLE_UTILITY_SANDBOX=1 \
+-    MOZ_DISABLE_VR_SANDBOX=1 \
+-    GTK_A11Y=none NO_AT_BRIDGE=1 dbus-run-session \
+-    xvfb-run -s "-screen 0 1920x1080x24 -nolisten local" \
+-    ./mach python build/pgo/profileserver.py
+-
+-  stat -c "Profile data found (%s bytes)" merged.profdata
+-  test -s merged.profdata
+-
+-  stat -c "Jar log found (%s bytes)" jarlog
+-  test -s jarlog
+-
+-  echo "Removing instrumented browser..."
+-  ./mach clobber objdir
+-
+-  echo "Building optimized browser..."
+-  cat >.mozconfig ../mozconfig - <<END
+-ac_add_options --enable-lto=cross,full
+-ac_add_options --enable-profile-use=cross
+-ac_add_options --with-pgo-profile-path=${PWD@Q}/merged.profdata
+-ac_add_options --with-pgo-jarlog=${PWD@Q}/jarlog
+-END
++  cat >.mozconfig ../mozconfig
+   ./mach build --priority normal
+ }
+ 
+@@ -313,4 +286,17 @@ Version=2
+ END
+ }
+ 
++source+=('0010-Fix-libyuv-build-with-LSX-LASX.patch'
++         '0011-Add-missing-loongarch-lsx-code-for-libpng.patch'
++         '0012-Add-support-for-LoongArch64.patch'
++         '0013-Enable-WebRTC-for-LoongArch.patch')
++sha256sums+=('b2d1b209b1d1e484bfa5861728fefc6918d903994d2d42a710f70b213447745b'
++             'da6733b8ca23d9de4f4c2ee1ff2bdc111128da4ec403e385bb576f2e229d1f6e'
++             '20263ae1fb3f0a424af71fb867ea7a46646a95b2f86dae229fd78a277595113e'
++             'c37b4c91e80ffb64b261e968dde3513a36ba77cd414689c7106e4d2cdbeb76a2')
++b2sums+=('b23dd10c654e8a3c0f1fbf8101d5bcffb58fcda9dbc8df5188ac8bbbb6a00539f5639e3f2c2d33399b0708c848f0da48a3cae80bef060758ec0c3ea9f5ee72df'
++         '4b0f39835f67b6b1ab120f4cb038e1afd169b84b4f8bf18b669468b6ac3543de3e131947aca616ca5db6f9cb0f97c58dd6115af9c0138a41f5f990a5b6e304c7'
++         '7f09ea931476ba0f8e4b8e3088e9fc9b8bd4cdf266b7dd90634acb73037f529904936736fc2746f2bae5c2aa9f1c19036f1fb247c9642240e4ff1cdf7a427d9b'
++         '884139f25013c18fd6dd82153bc713ac98dd50bd647ae570ca52dfda1dfec7d8c5b2a4b22ffd4afc00202249b847e4816a5c3e21852e2ef7cf33ed463e2facac')
++
+ # vim:set sw=2 sts=-1 et:
