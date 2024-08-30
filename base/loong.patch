@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 844efc8..9e40937 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -29,4 +29,10 @@ optdepends=(
+   'linux: bare metal support'
+ )
+ 
++depends+=(
++  # Linux Club of Peking University's signature keyring
++  # needed for loongarchlinux port
++  'archlinux-lcpu-keyring'
++)
++
+ # vim:set sw=2 sts=-1 et:
