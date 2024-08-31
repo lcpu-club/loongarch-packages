@@ -1,0 +1,16 @@
+Index: cdrtools-3.02/RULES/MKLINKS
+===================================================================
+--- cdrtools-3.02.orig/RULES/MKLINKS
++++ cdrtools-3.02/RULES/MKLINKS
+@@ -262,6 +262,11 @@ $symlink	i586-linux-clang64.rul	aarch64-
+ $symlink	i586-linux-gcc.rul	aarch64-linux-gcc.rul
+ $symlink	i586-linux-gcc32.rul	aarch64-linux-gcc32.rul
+ $symlink	i586-linux-gcc64.rul	aarch64-linux-gcc64.rul
++$symlink	i586-linux-cc.rul	loongarch64-linux-cc.rul
++$symlink	i586-linux-clang.rul	loongarch64-linux-clang.rul
++$symlink	i586-linux-clang64.rul	loongarch64-linux-clang64.rul
++$symlink	i586-linux-gcc.rul	loongarch64-linux-gcc.rul
++$symlink	i586-linux-gcc64.rul	loongarch64-linux-gcc64.rul
+ $symlink	i586-linux-cc.rul	sh3-linux-cc.rul
+ $symlink	i586-linux-gcc.rul	sh3-linux-gcc.rul
+ $symlink	i586-linux-cc.rul	sh4-linux-cc.rul
