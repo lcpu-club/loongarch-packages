@@ -1,0 +1,18 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e3867dd..f99c31b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,11 +25,11 @@ pkgver() {
+ }
+ 
+ build() {
+-  make PREFIX=/usr DISPATCH=1 -C xxHash
++  make PREFIX=/usr -C xxHash
+ }
+ 
+ package() {
+-  make PREFIX=/usr DISPATCH=1 DESTDIR="${pkgdir}" -C xxHash install
++  make PREFIX=/usr DESTDIR="${pkgdir}" -C xxHash install
+   install -Dm 644 xxHash/LICENSE -t "${pkgdir}"/usr/share/licenses/xxhash
+ }
+ 
