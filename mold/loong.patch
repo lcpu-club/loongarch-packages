@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,7 +25,7 @@ build() {
+   -D MOLD_USE_SYSTEM_MIMALLOC=ON \
+   -D MOLD_USE_SYSTEM_TBB=ON \
+   -D MOLD_LTO=ON \
+-  -D MOLD_USE_MOLD=ON
++  -D MOLD_USE_MOLD=OFF
+ 
+   cmake --build build
+ }
