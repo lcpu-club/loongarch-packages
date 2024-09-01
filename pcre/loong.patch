@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 510211c..0567a95 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -42,7 +42,7 @@ build() {
+     --enable-unicode-properties \
+     --enable-pcre16 \
+     --enable-pcre32 \
+-    --enable-jit \
++    --disable-jit \
+     --enable-pcregrep-libz \
+     --enable-pcregrep-libbz2 \
+     --enable-pcretest-libreadline
