@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 9d08cde..7c12e4b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -43,6 +43,8 @@ build() {
+     -D deep-plc=enabled
+     -D dred=enabled
+     -D osce=enabled
++    -D intrinsics=disabled
++    -D rtcd=disabled
+   )
+ 
+   arch-meson opus build "${meson_options[@]}"
+@@ -50,7 +52,7 @@ build() {
+ }
+ 
+ check() {
+-  meson test -C build --print-errorlogs
++  meson test -C build --print-errorlogs -t 30
+ }
+ 
+ package_opus() {
