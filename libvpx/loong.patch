@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 50af858..ed86326 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,6 +34,8 @@ build() {
+     --prefix=/usr \
+     --disable-install-docs \
+     --disable-install-srcs \
++    --disable-lsx \
++    --disable-lasx \
+     --disable-unit-tests \
+     --enable-pic \
+     --enable-postproc \
