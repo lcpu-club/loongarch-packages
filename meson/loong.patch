@@ -1,0 +1,33 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,7 +21,7 @@ makedepends=(
+   python-setuptools
+   python-wheel
+ )
+-checkdepends=(
++makedepends+=(
+   boost
+   clang
+   cmake
+@@ -39,18 +39,18 @@ checkdepends=(
+   graphviz
+   gtest
+   gtk-doc
+-  gtk-sharp-2
++#  gtk-sharp-2
+   gtk3
+   gtkmm3
+   hotdoc
+   itstool
+   java-environment=8
+-  ldc
++#  ldc
+   libelf
+   libwmf
+   llvm
+   mercurial
+-  mono
++#  mono
+   nasm
+   netcdf-fortran
+   openmpi
