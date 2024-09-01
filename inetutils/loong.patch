@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -75,6 +75,9 @@ build() {
+     --disable-uucpd \
+     --disable-ifconfig \
+     --disable-traceroute
++  # dirty hack to add the proper include file
++  sed -i '/^#include "general.h"/a #include <term.h>' telnet/telnet.c
++  sed -i '/^#include <time.h>/a #include <term.h>' telnetd/utility.c
+   make
+ }
+ 
