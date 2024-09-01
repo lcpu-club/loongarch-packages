@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 75e6e0c..22a2d0c 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -340,4 +340,11 @@ sha512sums=('b12e1302d6be94dd88bee6dd069d3fec944bfce95e1afc1d72c14cc188d952fd5a8
+             'eb4e1894f408b7d90982a447183c3dbd702c654950c772c3adf6ac90be23655e6d6426210542de70682ba70797c247e6271bc7867fe2a8dc04ba8a63ab0e94c0'
+             '661acf4f1eeb803eabb4c5b8f9cfbbb6bd71eb456860fe23debf0de889d204aba490d545334098c8fd302de29b6adb5f1a75c4bd96e3fbd13f3dceec358a15ad')
+ 
++source+=('0100-Add-support-for-LoongArch.patch'
++         '0101-Bug-1837935-loong64-Fix-scratch-register-usage-when-.patch'
++         '0102-Fix-libyuv-build-with-LSX-LASX.patch')
++sha512sums+=('9f95351652d273eb667e785023870398a3b7f8475413d1b820752dfbc1711c3f1e2837128b3db5accc25e99d96297cd5cf9fd3c79775f7878d3565d59dfcf342'
++             '74de782970435f6402efd8bcaa58149b1f6348f8f0e53beb2f8c0fdf64d9f5afb108c5ae4e35b59a609c7a3adc7540b6a9a34630af20436947b491219fc55992'
++             '1a1917fcbe2af02b48e2a839f6fdb8e9fe27eea2301fde6e6dd9506f79078d5e78b6c17eafbd8cac147e4b894680c6838306a14f92904a09d34866aa88307b2d')
++
+ # vim:set sw=2 et:
