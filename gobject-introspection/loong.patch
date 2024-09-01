@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 50958c8..1440db0 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,7 +17,7 @@ license=(
+   GPL-2.0-or-later
+   LGPL-2.0-or-later
+ )
+-_glibver=2.80.0
++_glibver=2.80.4
+ makedepends=(
+   "glib2=$_glibver"
+   cairo
