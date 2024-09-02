@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,6 +36,7 @@ b2sums=('5cbf0e2e504964e75c45ad41fcdab5a2ef0be91d9f4a8898305d15a5dc124abc3dc0986
+ 
+ build() {
+   cd $_name-$pkgver
++  sed -i '/^\[dependencies\]/a\ target-lexicon="0.12.16"' rust/Cargo.toml
+   python -m build --wheel --no-isolation
+ }
+ 
