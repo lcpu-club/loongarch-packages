@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,7 @@ sha256sums=('d100efbc6084f494400892ef53fa476fd6f201dba3b2fddee11ef90dd9d6111d')
+ 
+ build() {
+   cd "${srcdir}/${pkgname}-${pkgver}"
++  sed -i 's/-Werror //g' makeflags
+   make BEES_VERSION="${pkgver}"
+ }
+ 
