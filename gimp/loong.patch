@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8ded008..f4f67a5 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,6 +38,9 @@ prepare() {
+   cd ${pkgname}-${pkgver}
+ 
+   patch -Np1 < ../0001-no-check-update.patch
++  cp /usr/share/automake-1.1?/config.sub .
++  cp /usr/share/automake-1.1?/config.guess .
++  CFLAGS+=" -Wno-incompatible-pointer-types"
+ 
+   autoreconf -vi
+ }
