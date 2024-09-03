@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -39,6 +39,7 @@ validpgpkeys=(A85FF376759C994A8A1168D8D8219C8C43F6C5E1)  # Kushal Das <kushal@fr
+ 
+ build() {
+   cd $_name
++  sed -i '/^\[dependencies\]/a\ target-lexicon="0.12.16"' Cargo.toml
+   python -m build --wheel --no-isolation
+ }
+ 
