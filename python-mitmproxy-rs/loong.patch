@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,14 @@ source=("https://github.com/mitmproxy/mitmproxy_rs/archive/${pkgver}/${pkgname}-
+ sha256sums=('ee6c65c85c29859ad9aa528074ae85edbde8980afc8cff2e2eb424ab1e0c6017')
+ b2sums=('e276ab9f2bd1bc13a6401d5ba09addd75417b9c1b29a782195fbcdcade56ad266a34494a0b9275bfb1ea22381acfccca0f1526bc4d77032f5643c1911354ac9b')
+ 
++prepare() {
++  cd ${_pyname}-${pkgver}
++  sed -i Cargo.toml \
++    -e 's/x25519-dalek = "=2.0.0-rc.3"/x25519-dalek = "2.0.0"/' \
++    -e '/\[patch.crates-io\]/a boringtun = { git = "https://github.com/cloudflare/boringtun", rev = "e3252d9c4f4c8fc628995330f45369effd4660a1" }'
++  cargo update -p boringtun
++}
++
+ build() {
+   cd ${_pyname}-${pkgver}/mitmproxy-rs
+   maturin build --release --strip
