@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,6 +26,8 @@ prepare() {
+       -e $'s/1:46:00 PM/1:46:00\u202fPM/' \
+       -e $'s/3:46:00 PM/3:46:00\u202fPM/' \
+       -i tests/tests.py
++  sed -i "s|'http://docs.python.org/': None|'python': ('https://docs.python.org/3', None)|" docs/conf.py
++  sed -i "s|'http://flask.pocoo.org/docs/': None|'flask': ('http://flask.pocoo.org/docs/', None)|" docs/conf.py
+ }
+ 
+ build() {
