@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,7 +15,7 @@ sha512sums=('224e2d18915f08d9f02e32845968e0e2eac531ad7f4efe5401de692cdb0980049f3
+ 
+ build() {
+   cd $pkgname-$pkgver
+-
++  sed -i "s|'http://docs.python.org/': None|'python': ('https://docs.python.org/3', None)|" doc/source/conf.py
+   python setup.py build
+ 
+   make doc
