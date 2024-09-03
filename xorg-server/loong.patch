@@ -1,0 +1,34 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -45,8 +45,15 @@ sha512sums=('8893b7e236ffb2001d75df98af6480548bc2f5c129d2df1e377730d26c0f0d6a6fa
+ 
+ prepare() {
+   cd ${pkgbase}
++  # fix modesetting driver for loongson and gsgpu
++  patch -Np1 -i ../0001-modesetting-match-against-Multimedia-Video-Controlle.patch
+ }
+ 
++source+=('10-modeset.conf'
++         '0001-modesetting-match-against-Multimedia-Video-Controlle.patch')
++sha512sums+=('1aa711f4948cd1557d77bd47a64ea92be55cf737b8204214c6c3ae2ecd00dc6928fd7a789d1aa5faaff5d6162f895a41efd332e8f1710d0a7c9b33326b057ec5'
++             '0e55cc994dd8f1309c6ea40cb1f5b2d763d850a466c9d30bd8619fd68ce369b19f098d28ab684db1bd2758a6402654cf93188651e863f0e1be4eed8cf9b40e14')
++
+ build() {
+   # Since pacman 5.0.2-2, hardened flags are now enabled in makepkg.conf
+   # With them, modules fail to load with undefined symbol.
+@@ -64,6 +71,7 @@ build() {
+     -D xephyr=true \
+     -D glamor=true \
+     -D udev=true \
++    -D udev_kms=true \
+     -D dtrace=false \
+     -D systemd_logind=true \
+     -D suid_wrapper=true \
+@@ -126,6 +134,7 @@ package_xorg-server() {
+ 
+   # distro specific files must be installed in /usr/share/X11/xorg.conf.d
+   install -m755 -d "${pkgdir}/etc/X11/xorg.conf.d"
++  install -m644 -Dt "${pkgdir}/usr/share/X11/xorg.conf.d" 10-modeset.conf
+ 
+   # license
+   install -m644 -Dt "${pkgdir}/usr/share/licenses/${pkgname}" "${pkgbase}"/COPYING
