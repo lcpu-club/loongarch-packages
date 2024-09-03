@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,7 +15,7 @@ sha512sums=('81a100d3c8c3a7c6bd37a23f1290ff10685f8e62fbecd83b0086aae4edc721483e2
+ 
+ build() {
+   cd SDL2_gfx-$pkgver
+-  ./configure --prefix=/usr
++  ./configure --prefix=/usr --disable-mmx
+   make
+ }
+ 
