@@ -1,0 +1,16 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,9 +32,12 @@ sha256sums=('0ac416bb55997ca8632174fd10737fd61cdb8dba2752160a335775bc21dc73c7'
+ 
+ prepare() {
+   cd "${srcdir}/${pkgbase}-${_realver}"
+-
++  patch -Np1 < ../autoreconf-bind.patch
+   patch -Np1 < ../0001-99-replace-hostname-with-uname-n.patch
++  autoreconf -fiv
+ }
++source+=('autoreconf-bind.patch')
++sha256sums+=('6d133c27979a8358b391ec243b050f15ba1dd85f2a645357953373083c874bda')
+ 
+ build() {
+   cd "${srcdir}/${pkgbase}-${_realver}"
