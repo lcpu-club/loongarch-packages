@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,6 +25,7 @@ prepare() {
+ 
+ build() {
+   cd "$srcdir"/$_pkgname-$pkgver
++  CFLAGS+=" -Wno-incompatible-pointer-types"
+   ./update_c.sh
+   python -m build --wheel --no-isolation
+ }
