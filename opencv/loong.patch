@@ -1,0 +1,50 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 2f759c9..79b6f57 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -5,8 +5,7 @@
+ pkgbase=opencv
+ pkgname=(opencv
+          opencv-samples
+-         python-opencv
+-         opencv-cuda)
++         python-opencv)
+ pkgver=4.10.0
+ pkgrel=4
+ pkgdesc='Open Source Computer Vision Library'
+@@ -40,10 +39,8 @@ depends=(abseil-cpp
+ makedepends=(ant
+              cmake
+              cuda
+-             cudnn
+              eigen
+              fmt
+-             gcc13
+              git
+              glew
+              hdf5
+@@ -107,7 +104,6 @@ build() {
+          -DINSTALL_PYTHON_EXAMPLES=ON \
+          -DCMAKE_INSTALL_PREFIX=/usr \
+          -DCPU_BASELINE_DISABLE=SSE3 \
+-         -DCPU_BASELINE_REQUIRE=SSE2 \
+          -DOPENCV_EXTRA_MODULES_PATH=$srcdir/opencv_contrib/modules \
+          -DOPENCV_SKIP_PYTHON_LOADER=ON \
+          -DLAPACK_LIBRARIES=/usr/lib/liblapack.so;/usr/lib/libblas.so;/usr/lib/libcblas.so \
+@@ -125,6 +121,8 @@ build() {
+     -DBUILD_WITH_DEBUG_INFO=ON
+   cmake --build build
+ 
++  # Use a "multi-line comment" to keep patch from rotting
++  : <<'COMMENT_SEPARATOR'
+   CFLAGS="${CFLAGS} -fno-lto" CXXFLAGS="${CXXFLAGS} -fno-lto" LDFLAGS="${LDFLAGS} -fno-lto" \
+   cmake -B build-cuda -S $pkgname $_opts \
+     -DBUILD_WITH_DEBUG_INFO=OFF \
+@@ -135,6 +133,7 @@ build() {
+     -DCUDA_ARCH_BIN='52-real;53-real;60-real;61-real;62-real;70-real;72-real;75-real;80-real;86-real;87-real;89-real;90-real;90-virtual' \
+     -DCUDA_ARCH_PTX='90-virtual'
+   cmake --build build-cuda
++COMMENT_SEPARATOR
+ }
+ 
+ package_opencv() {
