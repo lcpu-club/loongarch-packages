@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,6 +25,7 @@ sha256sums=('92645255bcfeaab9ad32c7de8b3d8804808484f18ff9f3e6c432e1132147b579')
+ 
+ build() {
+   cd SuiteSparse
++  CFLAGS+=" -mcmodel=medium"
+   CMAKE_OPTIONS="-DBLA_VENDOR=Generic \
+                  -DCMAKE_INSTALL_PREFIX=/usr \
+                  -DCMAKE_BUILD_TYPE=None \
