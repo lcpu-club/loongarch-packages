@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b990327..0f80e40 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,7 +25,7 @@ b2sums=('627b309b38b238902b1cad2cb0963d0182f8f4cc4bc72efcd2b9ecc9810f019968c141e
+ prepare() {
+   cd $pkgname-$pkgver
+   # remove march=native
+-  sed -e '/native/d' -i {source,apps}/Makefile
++  sed -e '/native/d' -e '/ENABLE_SSE2/d' -i {source,apps}/Makefile
+ }
+ 
+ build() {
