@@ -1,0 +1,15 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,8 +18,12 @@ _tag=bb429dac1a686807c69b916f03dd843fa10b0927
+ source=(git+https://github.com/wiseman/py-webrtcvad.git#tag=${_tag})
+ b2sums=(SKIP)
+ 
++source+=('add-loong64-build.patch')
++b2sums+=('6ef76a3848eaec8c645d2aca92a99cb086445364d407bc52f2f1af7dffe9a1d7bbdb912559909bfc90f5012d9ea57a488ba112c67c268c01ad64156967cebb74')
++
+ build() {
+   cd py-webrtcvad
++  patch -Np1 -i ../add-loong64-build.patch
+   python setup.py build
+ }
+ 
