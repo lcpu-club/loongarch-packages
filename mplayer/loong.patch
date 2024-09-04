@@ -1,0 +1,29 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b5eb6e5..a993637 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,6 +36,7 @@ sha512sums=('SKIP'
+ 
+ prepare() {
+   cd ${pkgbase}-${pkgver}
++  patch -p0 < "../add_loong64_support.patch"
+   patch -p1 < "../include-samba-4.0.patch"
+   ./version.sh
+ 
+@@ -50,7 +51,7 @@ build() {
+   export LDFLAGS="${LDFLAGS/-Wl,-O1/}"
+   export LDFLAGS="${LDFLAGS/-Wl,--sort-common/}"
+   ./configure --prefix=/usr \
+-    --enable-runtime-cpudetection \
++    --disable-runtime-cpudetection \
+     --disable-gui \
+     --disable-arts \
+     --disable-liblzo \
+@@ -109,4 +110,7 @@ package_mencoder() {
+   find "${pkgdir}/usr/share/man" -name mplayer.1 -exec rename mplayer.1 mencoder.1 {} +
+ }
+ 
++source+=("add_loong64_support.patch")
++sha512sums+=('bebf3c8fe5b1e87a35d80c4f2d81678a336a81fcfe7a6fe9a62d61b040ab9e4b575a2b835f44bfcdb9ebc8ac1f5f292ccb1843066b8a5389c968391fa1035f96')
++
+ # vim: ts=2 sw=2 et:
