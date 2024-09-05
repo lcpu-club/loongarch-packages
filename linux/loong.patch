@@ -1,17 +1,17 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0891b82..4416f8d 100644
+index fba9569..0057ae3 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -76,6 +76,9 @@ prepare() {
- 
+@@ -77,6 +77,9 @@ prepare() {
    echo "Setting config..."
    cp ../config .config
+   make olddefconfig
 +  if [ $CARCH == loong64 ]; then
 +    patch .config -i ../config.loong64.diff
 +  fi
-   make olddefconfig
    diff -u ../config .config || :
  
+   make -s kernelrelease > version
 @@ -141,20 +144,28 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
@@ -64,7 +64,7 @@ index 0891b82..4416f8d 100644
  done
  
 +source+=('config.loong64.diff')
-+sha256sums+=('73d7e0f48031a3b67d600e9ee7c4fde86896aad46bab4575185a15fd62f4893d')
-+b2sums+=('1cb2014283325710154981e37a56c0f185d404f5293841d6cf9dcee7b9b3b400d016fc1cae0bda0986e37d16b87bca6ea9a407b8d06e43c3a3f6675c951b5110')
++sha256sums+=('3a9608c93058f25bcda6a5d27f6be89416bb18d86c68b0f1705995d73dcf5d2b')
++b2sums+=('2e86b04c62d4d38efcaf460dc5e4b7e91db2758d42c4dfcd05c2ffed3544b0ef98b3bd2b0d35b5cbee7031fbc2268cd098f9e5c279ab163d50e08664008d3971')
 +
  # vim:set ts=8 sts=2 sw=2 et:
