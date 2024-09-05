@@ -1,0 +1,28 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c2e4ca4..d450773 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -1,7 +1,7 @@
+ # Maintainer: Bruno Pagani <archange@archlinux.org>
+ 
+ pkgname=libyuv
+-pkgver=r2426+464c51a0
++pkgver=r2426+464c51a03
+ pkgrel=1
+ pkgdesc="Library for YUV scaling"
+ arch=(x86_64)
+@@ -20,6 +20,7 @@ pkgver() {
+ }
+ 
+ prepare() {
++  patch -p3 -i "${srcdir}/0102-Fix-libyuv-build-with-LSX-LASX.patch"
+   sed -i 's|yuvconvert ${JPEG_LIBRARY}|${ly_lib_shared} ${JPEG_LIBRARY}|' ${pkgname}/CMakeLists.txt
+ }
+ 
+@@ -33,3 +34,6 @@ package() {
+   make -C build DESTDIR="${pkgdir}" install
+   install -Dm644 ${pkgname}/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
+ }
++
++source+=("0102-Fix-libyuv-build-with-LSX-LASX.patch")
++sha512sums+=('1a1917fcbe2af02b48e2a839f6fdb8e9fe27eea2301fde6e6dd9506f79078d5e78b6c17eafbd8cac147e4b894680c6838306a14f92904a09d34866aa88307b2d')
