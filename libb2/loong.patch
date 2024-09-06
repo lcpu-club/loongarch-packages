@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -30,8 +30,7 @@ build() {
+     --prefix=/usr \
+     --disable-static \
+     --enable-shared \
+-    --disable-native \
+-    --enable-fat
++    --disable-native
+   make
+ }
+ 
