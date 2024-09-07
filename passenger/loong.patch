@@ -1,0 +1,15 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,12 @@ sha256sums=('897555224fb11340677780d929b5099da62303b1ae15f2e7c65cd3f6d3e7920c'
+             'SKIP')
+ 
+ prepare() {
++  pushd "$srcdir"/$pkgbase-$pkgver/src/cxx_supportlib/vendor-copy/libuv/
++  autoreconf -fiv
++  popd
++  pushd "$srcdir"/$pkgbase-$pkgver/src/cxx_supportlib/vendor-modified/libev/
++  autoreconf -fiv
++  popd
+   mkdir -p build
+   cd build
+   ln -sf /usr/src/nginx/auto
