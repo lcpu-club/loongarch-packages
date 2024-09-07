@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,6 +17,7 @@ sha512sums=('42ab237ab571bc758e678fc66d1c4eb9694807e5886ee23056ccd738805a31c1de2
+ 
+ build() {
+   cd ${pkgname}-${pkgver}
++  sed 's/\$(shell \$(COWSAY) -l/\$(shell script -q -c "$(COWSAY) -l" \/dev\/null/g' -i Makefile
+   make
+ }
+ 
