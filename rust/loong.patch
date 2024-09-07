@@ -1,18 +1,16 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0b08895..deb1612 100644
+index 0b08895..94e4f58 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -7,9 +7,6 @@
+@@ -7,7 +7,6 @@
  pkgbase=rust
  pkgname=(
    rust
 -  lib32-rust-libs
--  rust-musl
--  rust-wasm
+   rust-musl
+   rust-wasm
    rust-src
- )
- epoch=1
-@@ -37,18 +34,13 @@ depends=(
+@@ -37,8 +36,6 @@ depends=(
  makedepends=(
    clang
    cmake
@@ -21,44 +19,19 @@ index 0b08895..deb1612 100644
    libffi
    lld
    llvm
--  musl
-   ninja
-   perl
-   python
-   rust
--  wasi-libc
--  wasm-component-ld
- )
- checkdepends=(
-   gdb
-@@ -87,6 +79,10 @@ prepare() {
-   # Use our wasm-ld
-   patch -Np1 -i ../0004-compiler-Use-wasm-ld-for-wasm-targets.patch
- 
-+  # Patches for loong64
-+  # Avoid `relocation R_LARCH_B26 out of range` when binary is huge
-+  patch -Np1 -i ../0010-medium-code-model-on-LoongArch.patch
-+
-   cat >config.toml <<END
- # see src/bootstrap/defaults/
- profile = "dist"
-@@ -99,14 +95,7 @@ link-shared = true
+@@ -99,9 +96,8 @@ link-shared = true
  
  [build]
  target = [
 -  "x86_64-unknown-linux-gnu",
 -  "i686-unknown-linux-gnu",
 -  "x86_64-unknown-linux-musl",
--  "wasm32-unknown-unknown",
--  "wasm32-wasi",
--  "wasm32-wasip1",
--  "wasm32-wasip1-threads",
--  "wasm32-wasip2",
 +  "`uname -m`-unknown-linux-gnu",
- ]
- cargo = "/usr/bin/cargo"
- rustc = "/usr/bin/rustc"
-@@ -149,46 +138,13 @@ jemalloc = true
++  "`uname -m`-unknown-linux-musl",
+   "wasm32-unknown-unknown",
+   "wasm32-wasi",
+   "wasm32-wasip1",
+@@ -149,20 +145,14 @@ jemalloc = true
  [dist]
  compression-formats = ["gz"]
  
@@ -77,36 +50,11 @@ index 0b08895..deb1612 100644
 -ranlib = "/usr/bin/gcc-ranlib"
 -
 -[target.x86_64-unknown-linux-musl]
--sanitizers = false
--musl-root = "/usr/lib/musl"
--
--[target.wasm32-unknown-unknown]
--sanitizers = false
--profiler = false
--
--[target.wasm32-wasi]
--sanitizers = false
--profiler = false
--wasi-root = "/usr/share/wasi-sysroot"
--
--[target.wasm32-wasip1]
--sanitizers = false
--profiler = false
--wasi-root = "/usr/share/wasi-sysroot"
--
--[target.wasm32-wasip1-threads]
--sanitizers = false
--profiler = false
--wasi-root = "/usr/share/wasi-sysroot"
--
--[target.wasm32-wasip2]
--sanitizers = false
--profiler = false
--wasi-root = "/usr/share/wasi-sysroot"
- END
- }
++[target.`uname -m`-unknown-linux-musl]
+ sanitizers = false
+ musl-root = "/usr/lib/musl"
  
-@@ -230,13 +186,8 @@ build() {
+@@ -230,12 +220,9 @@ build() {
  
    # rustbuild always installs copies of the shared libraries to /usr/lib,
    # overwrite them with symlinks to the per-architecture versions
@@ -117,14 +65,7 @@ index 0b08895..deb1612 100644
  
 -  _pick dest-i686 usr/lib/rustlib/i686-unknown-linux-gnu usr/lib32
 -  _pick dest-musl usr/lib/rustlib/x86_64-unknown-linux-musl
--  _pick dest-wasm usr/lib/rustlib/wasm32-*
++  _pick dest-musl usr/lib/rustlib/`uname -m`-unknown-linux-musl
+   _pick dest-wasm usr/lib/rustlib/wasm32-*
    _pick dest-src  usr/lib/rustlib/src
  }
- 
-@@ -316,3 +267,6 @@ package_rust-src() {
- }
- 
- # vim:set ts=2 sw=2 et:
-+
-+source+=("0010-medium-code-model-on-LoongArch.patch")
-+b2sums+=('f72780cea412a3d1c1710ab55839e519324534a4f92e39b153bdfc27e2beb82297b17423d46756e15875c2864946efbbe0c2ea152c1497568a26b7df8fa3e9a2')
