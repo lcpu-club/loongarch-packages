@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,7 @@ sha512sums=('42dcba5fd593c9a8ec7af11251006b083ad2c49ec198734d1d66f67c2ded4557d77
+ 
+ build() {
+     cd "${pkgname}-${pkgver}"
++    rm -f m4/libgcrypt.m4
+     ./bootstrap
+     ./configure --prefix=/usr
+     make
