@@ -1,0 +1,24 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 15b7a67..4f9f40f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,7 +36,7 @@ depends=(
+ )
+ makedepends=(
+   asciidoctor
+-  shellcheck
++  # shellcheck # FIXME: shellcheck depends on ghc, which is missing
+ )
+ checkdepends=(
+   bats
+@@ -70,6 +70,10 @@ check() {
+ package() {
+   cd ${pkgname}-${pkgver}
+   make PREFIX=/usr DESTDIR="${pkgdir}" install
++  # Arch aliases for loong64 and loongarch64
++  echo "loongarch64" > ${pkgdir}/usr/share/devtools/setarch-aliases.d/loong64
+ }
+ 
++optdepends_loong64=("devtools-loong64: Support to build loong64 pkgs")
++
+ # vim: ts=2 sw=2 et:
