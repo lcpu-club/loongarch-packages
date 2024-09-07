@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# Forked from [archlinuxcn-keyring](https://github.com/archlinuxcn/archlinuxcn-keyring/blob/master/update-keys)
+
+export LANG=C
+
+TMPDIR=$(mktemp -d)
+trap "rm -rf '${TMPDIR}'" EXIT
+
+#KEYSERVER='hkp://pgp.ustc.edu.cn'
+#KEYSERVER='hkps://pool.sks-keyservers.net'
+#KEYSERVER='hkp://pgp.mit.edu'
+#KEYSERVER='hkp://keys.gnupg.net'
+#KEYSERVER='hkps://keys.openpgp.org'
+#KEYSERVER='hkp://pgp.nic.ad.jp'
+#KEYSERVER='hkps://keys.mailvelope.com'
+#KEYSERVER='hkp://hkps.pool.sks-keyservers.net'
+#KEYSERVER='hkp://keyserver.ubuntu.com'
+
+GPG="gpg --quiet --batch --no-tty --no-permission-warning --homedir ${TMPDIR}"
+
+pushd "$(dirname "$0")" >/dev/null
+
+$GPG --gen-key <<EOF
+%echo Generating Arch Linux LCPU Keyring keychain master key...
+Key-Type: RSA
+Key-Length: 1024
+Key-Usage: sign
+Name-Real: Arch Linux LCPU Keyring Keychain Master Key
+Name-Email: archlinux-lcpu-keyring@localhost
+Expire-Date: 0
+%no-protection
+%commit
+%echo Done
+EOF
+
+rm -rf master packager packager-revoked archlinux-lcpu-trusted archlinux-lcpu-revoked
+mkdir master packager packager-revoked
+
+while read -ra data; do
+  keyid="${data[0]}"
+  username="${data[1]}"
+  keyserver="${data[2]}"
+  echo "Recv '${keyid}' of '${username}' from '${keyserver}'"
+  ${GPG} --keyserver ${keyserver} --recv-keys ${keyid} &>/dev/null
+  printf 'minimize\nquit\ny\n' |
+    ${GPG} --command-fd 0 --edit-key ${keyid}
+  ${GPG} --yes --lsign-key ${keyid} &>/dev/null
+  ${GPG} --armor --no-emit-version --export ${keyid} >>master/${username}.asc
+  echo "${keyid}:4:" >>archlinux-lcpu-trusted
+done <master-keyids
+${GPG} --import-ownertrust <archlinux-lcpu-trusted 2>/dev/null
+
+while read -ra data; do
+  keyid="${data[0]}"
+  keyserver="${data[2]}"
+  ${GPG} --keyserver ${keyserver} --recv-keys ${keyid} &>/dev/null
+done <packager-keyids
+while read -ra data; do
+  keyid="${data[0]}"
+  username="${data[1]}"
+  printf 'clean\nquit\ny\n' |
+    ${GPG} --command-fd 0 --edit-key ${keyid}
+  if ! ${GPG} --list-keys --with-colons ${keyid} 2>/dev/null | grep -q '^pub:f:'; then
+    echo "key is not fully trusted: ${keyid} ${username}"
+  else
+    ${GPG} --armor --no-emit-version --export ${keyid} >>packager/${username}.asc
+  fi
+done <packager-keyids
+
+while read -ra data; do
+  keyid="${data[0]}"
+  username="${data[1]}"
+  keyserver="${data[2]}"
+  echo "Recv '${keyid}' of '${username}' from '${keyserver}'"
+  ${GPG} --keyserver ${keyserver} --recv-keys ${keyid} &>/dev/null
+  printf 'clean\nquit\ny\n' |
+    ${GPG} --command-fd 0 --edit-key ${keyid}
+  if ! ${GPG} --list-keys --with-colons ${keyid} 2>/dev/null | grep -q '^pub:f:'; then
+    ${GPG} --armor --no-emit-version --export ${keyid} >>packager-revoked/${username}.asc
+    echo "${keyid}" >>archlinux-lcpu-revoked
+  else
+    echo "key is still fully trusted: ${keyid} ${username}"
+  fi
+done <packager-revoked-keyids
+
+cat master/*.asc packager/*.asc packager-revoked/*.asc >archlinux-lcpu.gpg
+
+if [[ ! -f archlinux-lcpu-revoked ]]; then
+  touch archlinux-lcpu-revoked
+fi
+
+popd >/dev/null
