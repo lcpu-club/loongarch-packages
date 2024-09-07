@@ -1,0 +1,35 @@
+@@ -19,7 +19,7 @@
+ #XferCommand = /usr/bin/curl -L -C - -f -o %o %u
+ #XferCommand = /usr/bin/wget --passive-ftp -c -O %o %u
+ #CleanMethod = KeepInstalled
+-Architecture = auto
++Architecture = loong64
+ 
+ # Pacman won't upgrade packages listed in IgnorePkg and members of IgnoreGroup
+ #IgnorePkg   =
+@@ -70,17 +70,21 @@
+ # repo name header and Include lines. You can add preferred servers immediately
+ # after the header, and they will be used before the default mirrors.
+ 
+-#[core-testing]
++[core-testing]
+ #Include = /etc/pacman.d/mirrorlist
++Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
+ 
+ [core]
+-Include = /etc/pacman.d/mirrorlist
++#Include = /etc/pacman.d/mirrorlist
++Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
+ 
+-#[extra-testing]
++[extra-testing]
+ #Include = /etc/pacman.d/mirrorlist
++Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
+ 
+ [extra]
+-Include = /etc/pacman.d/mirrorlist
++#Include = /etc/pacman.d/mirrorlist
++Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
+ 
+ # An example of a custom package repository.  See the pacman manpage for
+ # tips on creating your own repositories.
