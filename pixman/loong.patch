@@ -1,0 +1,35 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,11 @@ source=(https://xorg.freedesktop.org/releases/individual/lib/${pkgname}-${pkgver
+ sha512sums=('b40fb05bd58dc78f4e4e9b19c86991ab0611b708657c9a7fb42bfe82d57820a0fde01a34b00a0848a41da6c3fb90c2213942a70f435a0e9467631695d3bc7e36')
+ #validpgpkeys=('') # Maarten Lankhorst <maarten.lankhorst@linux.intel.com>
+ 
++prepare() {
++  cd "$pkgname-$pkgver"
++  patch -Np1 -i ../83.patch
++}
++
+ build() {
+   arch-meson $pkgname-$pkgver build \
+     -D loongson-mmi=disabled \
+@@ -25,7 +30,12 @@ build() {
+     -D a64-neon=disabled \
+     -D iwmmxt=disabled \
+     -D mips-dspr2=disabled \
+-    -D gtk=disabled
++    -D gtk=disabled \
++    -D lsx=enabled \
++    -D b_lto=false \
++    -D mmx=disabled \
++    -D ssse3=disabled \
++    -D sse2=disabled
+   ninja -C build
+ }
+ 
+@@ -37,3 +47,6 @@ package() {
+   DESTDIR="$pkgdir" meson install -C build
+   install -Dt "$pkgdir/usr/share/licenses/$pkgname" -m644 $pkgname-$pkgver/COPYING
+ }
++
++source+=('83.patch')
++sha512sums+=('f0ddc083f1cafaebdaf3a3b2d3b9c85b55f3354c7c115b4eff31eb46ddbf71cd6bedea207e10a4692ba73e9857e2e8b49e197de1a037589bb842ee666e829a83')
