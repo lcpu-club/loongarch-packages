@@ -4,12 +4,12 @@ _pkgver=1.2.1
 _patchver=7
 pkgname=devtools-loong64
 pkgver=${_pkgver}.patch${_patchver}
-pkgrel=2
+pkgrel=4
 pkgdesc='Tools for Arch Linux LoongArch package maintainers'
 arch=('loong64' 'x86_64' 'riscv64' 'aarch64')
 license=('GPL-3.0-or-later')
 url='https://gitlab.archlinux.org/archlinux/devtools'
-depends=("devtools>=${_pkgver}")
+depends=("devtools>=1:${_pkgver}")
 source=(makepkg-loong64.patch
         pacman-extra-loong64.patch
         pacman-extra-testing-loong64.patch
@@ -47,11 +47,12 @@ package() {
   patch /usr/share/devtools/pacman.conf.d/extra.conf -i pacman-extra-staging-loong64.patch -o extra-staging-loong64.conf
   install -Dm644 extra-staging-loong64.conf -t "$pkgdir"/usr/share/devtools/pacman.conf.d
 
+  install -dm755 "$pkgdir"/usr/share/devtools/setarch-aliases.d
   if [[ ! "$CARCH" =~ loong ]]; then
-    install -dm755 "$pkgdir"/usr/share/devtools/setarch-aliases.d
     echo "$CARCH" > "$pkgdir"/usr/share/devtools/setarch-aliases.d/loong64
-
     # qemu-user-static-binfmt with C flag
     install -Dm644 z-qemu-loong64-static-for-archpkg.conf -t "$pkgdir"/usr/lib/binfmt.d/
+  else # loongarch64 <--> loong64
+    echo "$(uname -m)" > "$pkgdir"/usr/share/devtools/setarch-aliases.d/loong64
   fi
 }
