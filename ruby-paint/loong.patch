@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -11,6 +11,7 @@ arch=('any')
+ license=('MIT')
+ depends=('ruby')
+ makedepends=('ruby-rake' 'ruby-rspec' 'ruby-rainbow' 'ruby-term-ansicolor')
++makedepends+=('ruby-rspec-support')
+ options=('!emptydirs')
+ source=(${url}/archive/v${pkgver}/${pkgname}-${pkgver}.tar.gz)
+ sha512sums=('296c73ae3066f2114fdadfbaab81bb0f4b4893c8ab5b41d5dc8ef511104541df2a1bfd9f35582742769cb32e11ad22527fef7938952147eec6d4d36526fb5f60')
