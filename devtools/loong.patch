@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 15b7a67..4f9f40f 100644
+index 15b7a67..fdcfa34 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -36,7 +36,7 @@ depends=(
@@ -11,12 +11,8 @@ index 15b7a67..4f9f40f 100644
  )
  checkdepends=(
    bats
-@@ -70,6 +70,10 @@ check() {
- package() {
-   cd ${pkgname}-${pkgver}
+@@ -72,4 +72,6 @@ package() {
    make PREFIX=/usr DESTDIR="${pkgdir}" install
-+  # Arch aliases for loong64 and loongarch64
-+  echo "loongarch64" > ${pkgdir}/usr/share/devtools/setarch-aliases.d/loong64
  }
  
 +optdepends_loong64=("devtools-loong64: Support to build loong64 pkgs")
