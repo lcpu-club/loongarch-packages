@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -10,6 +10,7 @@ url='https://github.com/postmodern/rubygems-tasks'
+ license=(MIT)
+ depends=(ruby-irb ruby-rake)
+ makedepends=(git ruby-yard)
++makedepends+=(ruby-rspec-core)
+ checkdepends=(ruby-rspec)
+ options=(!emptydirs)
+ source=(git+https://github.com/postmodern/rubygems-tasks.git#commit=$_commit)
