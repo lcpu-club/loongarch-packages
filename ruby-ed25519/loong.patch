@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -11,6 +11,7 @@ license=('MIT')
+ depends=('ruby')
+ makedepends=('ruby-rake' 'ruby-bundler' 'ruby-rdoc' 'ruby-rake-compiler')
+ checkdepends=('ruby-rspec')
++makedepends+=('ruby-rspec-core')
+ options=('!emptydirs')
+ source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
+ sha512sums=('dbd108769e131d15e4f31eaf7f4a46530769f279ccbbe4a10b5fe9e1d394bafb0ea6af95b6b1da2d66db00072576ff9d6d5c9156d949d79daf929a9dbd22eea8')
