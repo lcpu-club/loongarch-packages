@@ -1,0 +1,27 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 0bbcc4e..8e2c47a 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -122,6 +122,13 @@ prepare() {
+     ln -s "${srcdir}"/$source .
+     done
+     popd
++    
++    # Enable loong64 support in external/firebird
++    # Copy `0001-firebird-la64-support.patch` to its patch dir
++    cp "${srcdir}/0001-firebird-la64-support.patch" external/firebird
++    # And then patch `UnpackedTarball_firebird.mk` to enable to
++    # use `0001-firebird-la64-support.patch`
++    patch external/firebird/UnpackedTarball_firebird.mk < "${srcdir}/0002-UnpackedTarball_firebird.mk-apply-la64-support.diff"
+ 
+     #use the CFLAGS but remove the LibO overridden ones
+     for i in $CFLAGS; do
+@@ -403,3 +410,8 @@ package_libreoffice-fresh() {
+     'sid','sk','sl','sq','sv','ta','tg','tr','ug','uk','vi','zh-CN','zh-TW'])" \
+         > "${pkgdir}"/usr/lib/libreoffice/help/languages.js
+ }
++
++source+=("0001-firebird-la64-support.patch"
++         "0002-UnpackedTarball_firebird.mk-apply-la64-support.diff")
++sha256sums+=('7e160a4e30f66aefbb60c0ed877d196d04840221724e6473c8571fda70ab7922'
++             '468959231bbac297e3a3903e40df9ec42ee882ccb98c1fbc3e060506ddfafce5')

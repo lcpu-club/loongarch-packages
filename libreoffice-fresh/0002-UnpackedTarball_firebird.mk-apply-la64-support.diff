@@ -1,0 +1,8 @@
+@@ -53,6 +53,7 @@
+     external/firebird/Wincompatible-function-pointer-types.patch \
+     external/firebird/c++26.patch \
+     external/firebird/c++20.patch \
++    external/firebird/0001-firebird-la64-support.patch \
+ ))
+ 
+ ifeq ($(OS),WNT)
