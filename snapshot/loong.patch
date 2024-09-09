@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index fa44cf9..4169012 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -45,7 +45,7 @@ build() {
+ }
+ 
+ check() {
+-  meson test -C build --print-errorlogs --no-rebuild
++  meson test -C build --print-errorlogs --no-rebuild -t 10
+ }
+ 
+ package() {
