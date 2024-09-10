@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,8 @@ depends=(
+ makedepends=(
+   libgit2
+   ruby-rdoc
++  ruby-rake
++  ruby-rake-compiler
+ )
+ checkdepends=(
+   git
