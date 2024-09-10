@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -28,6 +28,7 @@ checkdepends=(
+   ruby-snowglobe
+   ruby-test-unit
+   ruby-warnings_logger
++  ruby-method_source
+ )
+ options=(!emptydirs)
+ source=(
