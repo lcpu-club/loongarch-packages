@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index bbe5b78..f092485 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -41,6 +41,7 @@ build() {
+     -DENABLE_AJA=OFF \
+     -DENABLE_JACK=ON \
+     -DENABLE_LIBFDK=ON \
++    -DENABLE_QSV11=OFF \
+     -DENABLE_WEBRTC=ON \
+     -DOBS_VERSION_OVERRIDE="$pkgver-$pkgrel" \
+     -DCALM_DEPRECATION=ON \
