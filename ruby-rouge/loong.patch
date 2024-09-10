@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,6 +25,7 @@ checkdepends=(
+   ruby-redcarpet
+   ruby-sinatra
+   ruby-yard
++  ruby-method_source
+ )
+ options=('!emptydirs')
+ source=("https://github.com/jneen/rouge/archive/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
