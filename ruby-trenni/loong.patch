@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,7 @@ makedepends=(
+   ruby-covered
+   ruby-nokogiri
+   ruby-rack
++  ruby-mapping
+ )
+ checkdepends=(
+   ruby-bundler
