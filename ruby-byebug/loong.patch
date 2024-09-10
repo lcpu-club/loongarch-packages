@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,6 +21,7 @@ checkdepends=(
+   ruby-rexml
+   ruby-simplecov
+   ruby-yard
++  ruby-method_source
+ )
+ options=(!emptydirs)
+ source=(https://github.com/deivid-rodriguez/byebug/archive/v$pkgver/$pkgname-$pkgver.tar.gz
