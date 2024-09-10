@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,6 +22,7 @@ checkdepends=(
+   ruby-rake
+   ruby-rspec
+   ruby-yard
++  ruby-method_source
+ )
+ options=(!emptydirs)
+ source=(git+https://github.com/pry/pry.git#commit=$_commit)
