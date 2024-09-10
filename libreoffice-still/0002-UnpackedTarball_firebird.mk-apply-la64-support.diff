@@ -1,0 +1,8 @@
+@@ -51,6 +51,7 @@
+     external/firebird/0001-extern-cloop-Missing-dependencies-of-compilations-on.patch.1 \
+     external/firebird/configure-c99.patch \
+     external/firebird/Wincompatible-function-pointer-types.patch \
++    external/firebird/0001-firebird-la64-support.patch \
+ ))
+ 
+ ifeq ($(OS),WNT)
