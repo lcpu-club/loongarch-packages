@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,7 @@ checkdepends=(
+   ruby-mocha
+   ruby-pry
+   ruby-rake
++  ruby-method_source
+ )
+ options=(!emptydirs)
+ source=(https://github.com/travisjeffery/timecop/archive/v$pkgver/$pkgname-$pkgver.tar.gz)
