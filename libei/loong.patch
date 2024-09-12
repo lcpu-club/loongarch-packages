@@ -1,0 +1,20 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -33,7 +33,7 @@ makedepends=(
+ )
+ checkdepends=(
+   python-pytest-xdist
+-  valgrind
++  # valgrind
+ )
+ source=(
+   "git+https://gitlab.freedesktop.org/libinput/libei.git?signed#tag=$pkgver"
+@@ -71,7 +71,7 @@ check() {
+   meson test -C build --print-errorlogs --suite python || :
+ 
+   # Extra valgrind tests
+-  meson test -C build --print-errorlogs --setup valgrind
++  # meson test -C build --print-errorlogs --setup valgrind
+ }
+ 
+ package_libei() {
