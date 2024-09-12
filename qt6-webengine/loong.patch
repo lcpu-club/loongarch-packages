@@ -1,0 +1,35 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a0a6b90..a7d78c1 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -83,6 +83,19 @@ prepare() {
+   git submodule init
+   git submodule set-url src/3rdparty "$srcdir"/qtwebengine-chromium
+   git -c protocol.file.allow=always submodule update
++  
++  # Fix libyuv's lsx and lsax
++  patch -d src/3rdparty -p1 -i "$srcdir/0001-fix-libyuv-unified-source-and-LoongArch-SIMD-build.patch"
++  # Fix build for loong, AOSC patch
++  patch -p2 -i ../0006-LOONGARCH64-qtwebengine-chromium-skip-unreliable-ter.patch
++  patch -p2 -i ../0007-LOONGARCH64-qtwebengine-chromium-add-LoongArch-suppo.patch
++  
++  # Add `-mcmodel=medium` to CFLAGS etc.
++  # to avoid `relocation R_LARCH_B26 overflow`
++  export CFLAGS="${CFLAGS} -mcmodel=medium"
++  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
++  export RUSTFLAGS="${RUSTFLAGS} -C code-model=extreme"
++  export LDFLAGS="${LDFLAGS} -Wl,--no-relax"
+ 
+ # Fix build with ninja 1.12 - Gentoo patch
+   patch -p1 -i ../qtwebengine-6.7.0-ninja1.12.patch
+@@ -108,3 +121,10 @@ package() {
+ 
+   install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
+ }
++
++source+=("0001-fix-libyuv-unified-source-and-LoongArch-SIMD-build.patch"
++         "0006-LOONGARCH64-qtwebengine-chromium-skip-unreliable-ter.patch"
++         "0007-LOONGARCH64-qtwebengine-chromium-add-LoongArch-suppo.patch")
++sha256sums+=("d971477d4920a51de1ef9ffb96d1c755bf48d7ba6f3fbf869da2131f083d9f40"
++             "aac1e4354673cba1a7905a53b5b53064a10cc3191ceff922a2a4dc1fe597989e"
++             "d1cb3d7cc635da18a3023d7b71130dcf65c4ec48dc34c8b191a06d50fe071c87")
