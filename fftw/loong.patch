@@ -1,0 +1,56 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -41,6 +41,8 @@ prepare() {
+   # fix wrong soname in FFTW3LibraryDepends.cmake
+   sed -e "s/3.6.9/$_soname/" -i $pkgname-$pkgver/CMakeLists.txt
+ 
++  cp -f /usr/share/automake-1.1?/config.sub $pkgname-$pkgver
++  cp -f /usr/share/automake-1.1?/config.guess $pkgname-$pkgver
+   mv -v $pkgname-$pkgver $pkgname-$pkgver-single
+   for _i in {1..3}; do
+     cp -av $pkgname-$pkgver-single $pkgname-$pkgver-"${_build_types[$_i]}"
+@@ -59,20 +61,15 @@ build() {
+     MPILIBS="$(mpicc --showme:link)"
+   )
+   local _configure_single=(
+-    --enable-sse
+-    --enable-avx
+     --enable-single
+   )
+   local _configure_double=(
+-    --enable-sse2
+-    --enable-avx
+   )
+   local _configure_long_double=(
+     --enable-long-double
+   )
+   local _configure_quad=(
+     --disable-mpi
+-    --enable-quad-precision
+   )
+   local _cmake_options=(
+     -B build
+@@ -84,10 +81,10 @@ build() {
+     -D ENABLE_FLOAT=ON
+     -D ENABLE_LONG_DOUBLE=ON
+     -D ENABLE_QUAD_PRECISION=ON
+-    -D ENABLE_SSE=ON
+-    -D ENABLE_SSE2=ON
+-    -D ENABLE_AVX=ON
+-    -D ENABLE_AVX2=ON
++    -D ENABLE_SSE=OFF
++    -D ENABLE_SSE2=OFF
++    -D ENABLE_AVX=OFF
++    -D ENABLE_AVX2=OFF
+   )
+ 
+   # create missing FFTW3LibraryDepends.cmake
+@@ -98,7 +95,7 @@ build() {
+ 
+   export F77='gfortran'
+   # use upstream default CFLAGS while keeping our -march/-mtune
+-  CFLAGS+=" -O3 -fomit-frame-pointer -malign-double -fstrict-aliasing -ffast-math"
++  CFLAGS+=" -O3 -fomit-frame-pointer -fstrict-aliasing -ffast-math"
+ 
+   for _name in "${_build_types[@]}"; do
+     (
