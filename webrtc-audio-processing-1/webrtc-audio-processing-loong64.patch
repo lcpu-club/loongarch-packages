@@ -1,0 +1,12 @@
+--- webrtc-audio-processing/webrtc/rtc_base/system/arch.h	2023-11-10 21:50:34.000000000 +0800
++++ webrtc-audio-processing/webrtc/rtc_base/system/arch.h	2023-11-10 21:54:23.409972954 +0800
+@@ -57,6 +57,9 @@
+ #elif defined(__EMSCRIPTEN__)
+ #define WEBRTC_ARCH_32_BITS
+ #define WEBRTC_ARCH_LITTLE_ENDIAN
++#elif defined(__loongarch_lp64)
++#define WEBRTC_ARCH_64_BITS
++#define WEBRTC_ARCH_LITTLE_ENDIAN
+ #else
+ #error Please add support for your architecture in rtc_base/system/arch.h
+ #endif
