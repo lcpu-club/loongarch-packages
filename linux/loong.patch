@@ -1,18 +1,19 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index fba9569..0057ae3 100644
+index 1088ade..df90b8c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -77,6 +77,9 @@ prepare() {
+@@ -76,6 +76,10 @@ prepare() {
+ 
    echo "Setting config..."
    cp ../config .config
-   make olddefconfig
 +  if [ $CARCH == loong64 ]; then
-+    patch .config -i ../config.loong64.diff
++    make savedefconfig
++    cat defconfig ../loong-addition.config > .config
 +  fi
+   make olddefconfig
    diff -u ../config .config || :
  
-   make -s kernelrelease > version
-@@ -141,20 +144,28 @@ _package-headers() {
+@@ -141,20 +145,28 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -46,7 +47,7 @@ index fba9569..0057ae3 100644
    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
  
-@@ -175,7 +186,11 @@ _package-headers() {
+@@ -175,7 +187,11 @@ _package-headers() {
    echo "Removing unneeded architectures..."
    local arch
    for arch in "$builddir"/arch/*/; do
@@ -59,12 +60,12 @@ index fba9569..0057ae3 100644
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -243,4 +258,8 @@ for _p in "${pkgname[@]}"; do
+@@ -243,4 +259,8 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
-+source+=('config.loong64.diff')
-+sha256sums+=('3a9608c93058f25bcda6a5d27f6be89416bb18d86c68b0f1705995d73dcf5d2b')
-+b2sums+=('2e86b04c62d4d38efcaf460dc5e4b7e91db2758d42c4dfcd05c2ffed3544b0ef98b3bd2b0d35b5cbee7031fbc2268cd098f9e5c279ab163d50e08664008d3971')
++source+=('loong-addition.config')
++sha256sums+=('04f094af6e53088cbc5cf184a237b9cdb2e97ed1022b884b678ac72a801e1df4')
++b2sums+=('23338f593bbb01491f4b0dd7c34840c322d1c9b8a6f2fc0009b4d3b97668899fa967b0431d2d4f4c148a613b88fa27fb3532563d0e3918b54c2583b146348f8d')
 +
  # vim:set ts=8 sts=2 sw=2 et:
