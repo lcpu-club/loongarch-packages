@@ -1,0 +1,14 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,9 +38,9 @@ _commit=31e19f92f00c7003fa115047ce50978bc98c3a0d
+ source=(git+https://code.videolan.org/videolan/x264.git#commit=${_commit})
+ sha256sums=(SKIP)
+ 
+-pkgver() {
++prepare() {
+   cd x264
+-  ./version.sh | grep X264_POINTVER | sed -r 's/^#define X264_POINTVER "([0-9]+\.[0-9]+)\.([0-9]+) (.*)"$/\1.r\2.\3/'
++  cp -v "/usr/share/autoconf/build-aux/config.guess" "/usr/share/autoconf/build-aux/config.sub" .
+ }
+ 
+ build() {
