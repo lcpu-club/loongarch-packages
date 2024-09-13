@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,7 +31,7 @@ prepare() {
+ 
+   git submodule init
+   git submodule set-url subprojects/mutest "$srcdir/mutest"
+-  git submodule update
++  git -c protocol.file.allow=always submodule update
+ }
+ 
+ build() {
