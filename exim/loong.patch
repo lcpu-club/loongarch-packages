@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 83e507c..9e1342d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -100,7 +100,7 @@ package() {
+ 		exiqsumm
+ 		exiwhat
+ 	)
+-	pushd "build-Linux-$CARCH"
++	pushd "build-Linux-$(uname -m)"
+ 	install -Dm0755 -t "$pkgdir/usr/bin/" ${bins[@]}
+ 	chmod u+s "$pkgdir/usr/bin/exim"
+ 	popd
