@@ -1,0 +1,43 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -4,7 +4,7 @@
+ pkgbase=gssdp
+ pkgname=(
+   gssdp
+-  gssdp-docs
++#  gssdp-docs
+ )
+ pkgver=1.6.3
+ pkgrel=1
+@@ -22,7 +22,7 @@ makedepends=(
+   gobject-introspection
+   gtk4
+   meson
+-  pandoc
++#  pandoc
+   vala
+ )
+ _commit=28c388aa45698dcc09ba24e8de849653e9eedf8c  # tags/gssdp-1.6.3^0
+@@ -36,11 +36,12 @@ pkgver() {
+ 
+ prepare() {
+   cd gssdp
++  sed -i "/subdir('doc')/s/^/#/" meson.build
+ }
+ 
+ build() {
+   local meson_options=(
+-    -D gtk_doc=true
++    -D gtk_doc=false
+   )
+ 
+   arch-meson gssdp build "${meson_options[@]}"
+@@ -72,7 +73,7 @@ package_gssdp() {
+   meson install -C build --destdir "$pkgdir"
+ 
+   cd "$pkgdir"
+-  _pick docs usr/share/doc
++#  _pick docs usr/share/doc
+ }
+ 
+ package_gssdp-docs() {
