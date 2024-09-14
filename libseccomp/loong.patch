@@ -1,6 +1,13 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -12,7 +12,6 @@ arch=('x86_64')
+@@ -6,13 +6,12 @@
+ pkgbase=libseccomp
+ pkgname=(libseccomp python-libseccomp)
+ pkgver=2.5.5
+-pkgrel=3
++pkgrel=3.1
+ pkgdesc='Enhanced seccomp library'
+ arch=('x86_64')
  license=('LGPL2.1')
  url="https://github.com/seccomp/libseccomp"
  depends=('glibc')
@@ -8,44 +15,18 @@
  makedepends=('gperf' 'cython' 'python-setuptools')
  source=(https://github.com/seccomp/${pkgname}/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.gz{,.asc})
  sha256sums=('248a2c8a4d9b9858aa6baf52712c34afefcf9c9e94b76dce02c1c9aa25fb3375'
-@@ -26,6 +25,13 @@ validpgpkeys=(
+@@ -26,6 +25,7 @@ validpgpkeys=(
  
  prepare() {
    cd ${pkgbase}-${pkgver}
-+  patch -Np1 -i ../1000-tests-add-fstatfs-syscall-in-the-06-sim-actions.patch
-+  patch -Np1 -i ../1001-arch-Add-64-bit-LoongArch-support.patch
-+  patch -Np1 -i ../1002-Add-__PNR_fstat.patch
-+  patch -Np1 -i ../1003-tests-Add-64-bit-LoongArch-support.patch
-+  patch -Np1 -i ../1004-doc-update-README-and-manpage-for-64-bit-LoongArch.patch
-+  patch -Np1 -i ../1005-arch-tools-change-macros-used-to-detect-LoongArch64-.patch
-+  patch -Np1 -i ../1006-Regenerate-syscalls.csv-from-linux-6.7-rc3-for-loong.patch
++  patch -Np1 -i ../libseccomp-loong64-support.patch
    autoreconf -fiv
  }
  
-@@ -56,3 +62,26 @@ package_python-libseccomp() {
+@@ -56,3 +56,6 @@ package_python-libseccomp() {
  }
  
  # vim: ts=2 sw=2 et:
-+source+=('1000-tests-add-fstatfs-syscall-in-the-06-sim-actions.patch'
-+         '1001-arch-Add-64-bit-LoongArch-support.patch'
-+         '1002-Add-__PNR_fstat.patch'
-+         '1003-tests-Add-64-bit-LoongArch-support.patch'
-+         '1004-doc-update-README-and-manpage-for-64-bit-LoongArch.patch'
-+         '1005-arch-tools-change-macros-used-to-detect-LoongArch64-.patch'
-+         '1006-Regenerate-syscalls.csv-from-linux-6.7-rc3-for-loong.patch')
-+
-+sha256sums+=('7f6ffceac2e8ea056b84cb96476b38237593cb6a3a9048611e41cf28ba3d7224'
-+             '85839a2c873c68de82d8e0877034f64ce13f2eca621f965f8e856e3752f4d85c'
-+             '24e8fef2414f46fe6926510df938451aef86606b7e02c9bd502696cd47711688'
-+             '7d0fc64011e87b654ec699899d5061070bc3b0371d3e8012e900957d45454891'
-+             '6499690bdeec44c915df2bbc660609dc046f1f865d62ec4b654e5f8600b88ca4'
-+             '750bac021aa9c27a3e96ea82d5eba3da49c956b4d9708519bc4133b28eb399b2'
-+             '69dca1201bd6153346978d96bb565c2d05c728aea131fcdc36dda55c3ae690d6')
-+
-+b2sums+=('9787c584ebd3cd3d171313db04b9428705d4a4bfe8616fc8e1b1b0a5aec6500ac69825366d6b1d22cad42e0d5b1fa088acc357480d10cf67161329cc97897e86'
-+         '8fab5c72df66a9bb43350a0085aaec0d210aa23b9c97988be21bfee8ea26760359624ccebfda2c75264e54cd66bacaa0aaae35a24c563ce60a94b743d94e12f9'
-+         '6adeaf9f313afadcdd9f274e4bc027c5e53b34fb8bbb9476bff1e5c37d48963d45ea7f6ea141762c4e41871b4c7c5d1415fb1ea6789ba16e11a0385615efeb11'
-+         '602cbd3557f72f7ecf092e64caaa1bbf63ae321af95b39a387011f8c1bc39cbfd8ee8ae902fff299c80fb2b0c5a2eaf289bfa60e081b3a3587692ed09081d2d8'
-+         'f7f809bcb8b188fad1de195b54b70370d026d0fa5dbada0edda9c85b7fea8794bfec66d72c502124bc6f2a9c9e3f445cd83fd672b4288a19d3519255ed86a931'
-+         '04616f02897d1cb6e05b9841fab3ac15e5f955072015a5fb344e88cf45244236c1700df3b8541efe8500e38466ee9991162595eaf077227aa33def157a17107e'
-+         '1b4c3ff9417cdf575dd09ab31713ab0ae83cbe1957d1b0fb8bf7dbafc8db54f2968ce8373ecae48fd6c151bd10238793f3bb6477c7daecda6b45a8ef62b4e2df')
++source+=('libseccomp-loong64-support.patch')
++sha256sums+=('ca7fadad1c3fc167904ca44ae4cc417dc186e7703f7fd8d6221355cb604c4386')
++b2sums+=('c6654141850444e43c3c19961a7192fa04a0264568359fddff65ab4839d6c8f0ecd83c08b113eb6aab0892d7b0b764112e35dcaca94db35af15f8fecabe1125b')
