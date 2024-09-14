@@ -1,0 +1,35 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 74b3cb9..1764e5d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -28,12 +28,16 @@ validpgpkeys=(ED31791B2C5C1613AF388B8AD113FCAC3C4E599F) # Nikolaus Rath <Nikolau
+ prepare() {
+   cd fuse-$pkgver
+   patch -Np1 -i ${srcdir}/conditionally-define-closefrom.patch
++  patch -Np1 -i ${srcdir}/loongarch-type-size.patch
+   autoreconf -i
+ }
+ 
+ build() {
+   cd fuse-$pkgver
+ 
++  cp ${srcdir}/config.guess config.guess
++  cp ${srcdir}//config.sub config.sub
++
+   UDEV_RULES_PATH=/usr/lib/udev/rules.d MOUNT_FUSE_PATH=/usr/bin ./configure --prefix=/usr --libdir=/usr/lib --enable-lib --enable-util --disable-example
+   make
+ }
+@@ -50,3 +54,13 @@ package() {
+   # static device nodes are handled by udev
+   rm -r "${pkgdir}"/dev
+ }
++
++source+=(loongarch-type-size.patch
++        config.sub
++        config.guess)
++sha1sums+=('b7791ec80f9d8b21f327cd506adb512868174893'
++          '2120cad11c6107ad0f4c427345ca4c37937fd318'
++          '6c001c66a9663b9751c11a8b25f675aca3f77ef3')
++sha512sums+=('3aba672a094d07c62597d3e77c19b7716340341a020fff71491218ceca6eb35d828d9d7a0adf2767bab0c5a92afe163268a78fd501d9d1adac7edacfce6f99de'
++            'b3e92e53a3d1b58668cc14603b4e0ccf31c12156bda31aba0a74af2e1254b091a82a574cb1fb5c4d77ca024e5957ba280032489a33cdd9bbff8724ec16ee3853'
++            '665f24c57d8e390e2a68ca5bd781389f83b646b2aaa8032b409c1257b7501f4c104d5c4721497e0053b00222a5f723e6b2ddd2b796474fcbb33a777a3943e506')

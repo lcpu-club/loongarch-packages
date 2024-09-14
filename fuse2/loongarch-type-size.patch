@@ -1,0 +1,28 @@
+Index: fuse-2.9.9/lib/fuse_loop_mt.c
+===================================================================
+--- fuse-2.9.9.orig/lib/fuse_loop_mt.c
++++ fuse-2.9.9/lib/fuse_loop_mt.c
+@@ -6,11 +6,6 @@
+   See the file COPYING.LIB.
+ */
+ 
+-#include "fuse_lowlevel.h"
+-#include "fuse_misc.h"
+-#include "fuse_kernel.h"
+-#include "fuse_i.h"
+-
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -20,6 +15,11 @@
+ #include <errno.h>
+ #include <sys/time.h>
+ 
++#include "fuse_lowlevel.h"
++#include "fuse_misc.h"
++#include "fuse_kernel.h"
++#include "fuse_i.h"
++
+ /* Environment var controlling the thread stack size */
+ #define ENVNAME_THREAD_STACK "FUSE_THREAD_STACK"
+ 
