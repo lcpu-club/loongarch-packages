@@ -1,13 +1,13 @@
-From 81362a0e26b957e000af7cbd0e0df1f6fac9a9d9 Mon Sep 17 00:00:00 2001
+From 9e991746b5dc9310be05996dd73455c5debc9fce Mon Sep 17 00:00:00 2001
 From: WANG Xuerui <xen0n@gentoo.org>
 Date: Sun, 31 Dec 2023 13:16:33 +0800
-Subject: [PATCH 3/3] Fix libyuv build with LSX & LASX
+Subject: [PATCH 04/12] Fix libyuv build with LSX & LASX
 
 This is not of upstream quality, and will not be upstreamed as-is.
 This is only meant as a quick-and-dirty build fix for LoongArch early
 adopters.
 
-(cherry picked from commit 7a3c2cbce2b6cf951c94850596dac20b5c3a98dc)
+Signed-off-by: WANG Xuerui <xen0n@gentoo.org>
 ---
  media/libyuv/libyuv/BUILD.gn           | 37 +++++++++++++++++++++
  media/libyuv/libyuv/libyuv.gni         |  2 ++
@@ -17,7 +17,7 @@ adopters.
  5 files changed, 92 insertions(+), 28 deletions(-)
 
 diff --git a/media/libyuv/libyuv/BUILD.gn b/media/libyuv/libyuv/BUILD.gn
-index a72ff06558000..7d70848be9f1a 100644
+index a72ff06558..7d70848be9 100644
 --- a/media/libyuv/libyuv/BUILD.gn
 +++ b/media/libyuv/libyuv/BUILD.gn
 @@ -69,6 +69,14 @@ group("libyuv") {
@@ -79,18 +79,18 @@ index a72ff06558000..7d70848be9f1a 100644
    config("libyuv_unittest_warnings_config") {
      if (!is_win) {
 diff --git a/media/libyuv/libyuv/libyuv.gni b/media/libyuv/libyuv/libyuv.gni
-index 852f08ca9d61f..ecad693508811 100644
+index 852f08ca9d..8e5bd40e4e 100644
 --- a/media/libyuv/libyuv/libyuv.gni
 +++ b/media/libyuv/libyuv/libyuv.gni
 @@ -20,4 +20,6 @@ declare_args() {
        (current_cpu == "mips64el" || current_cpu == "mipsel") && mips_use_msa
    libyuv_use_mmi =
        (current_cpu == "mips64el" || current_cpu == "mipsel") && mips_use_mmi
-+  libyuv_use_lsx = current_cpu == "loong64" || current_cpu == "loongarch64"
-+  libyuv_use_lasx = current_cpu == "loong64" || current_cpu == "loongarch64"
++  libyuv_use_lsx = current_cpu == "loong64"
++  libyuv_use_lasx = current_cpu == "loong64"
  }
 diff --git a/media/libyuv/libyuv/libyuv.gypi b/media/libyuv/libyuv/libyuv.gypi
-index 48936aa7b0239..9c19abf9c34c9 100644
+index 48936aa7b0..9c19abf9c3 100644
 --- a/media/libyuv/libyuv/libyuv.gypi
 +++ b/media/libyuv/libyuv/libyuv.gypi
 @@ -18,6 +18,7 @@
@@ -127,7 +127,7 @@ index 48936aa7b0239..9c19abf9c34c9 100644
        'source/scale_neon.cc',
        'source/scale_neon64.cc',
 diff --git a/media/libyuv/libyuv/source/row_lasx.cc b/media/libyuv/libyuv/source/row_lasx.cc
-index f824906d3f5c6..8ecf887de3c7f 100644
+index 29ac9254d9..8c325483b1 100644
 --- a/media/libyuv/libyuv/source/row_lasx.cc
 +++ b/media/libyuv/libyuv/source/row_lasx.cc
 @@ -543,8 +543,8 @@ void I422ToARGB4444Row_LASX(const uint8_t* src_y,
@@ -240,7 +240,7 @@ index f824906d3f5c6..8ecf887de3c7f 100644
  
  // ARGB expects first 3 values to contain RGB and 4th value is ignored.
  static void ARGBToYMatrixRow_LASX(const uint8_t* src_argb,
-@@ -2240,8 +2243,8 @@ void ARGBToUVJRow_LASX(const uint8_t* src_argb,
+@@ -2242,8 +2245,8 @@ void ARGBToUVJRow_LASX(const uint8_t* src_argb,
    __m256i const_21 = __lasx_xvldi(0x415);
    __m256i const_53 = __lasx_xvldi(0x435);
    __m256i const_10 = __lasx_xvldi(0x40A);
@@ -251,7 +251,7 @@ index f824906d3f5c6..8ecf887de3c7f 100644
    __m256i shuff = {0x1614060412100200, 0x1E1C0E0C1A180A08, 0x1715070513110301,
                     0x1F1D0F0D1B190B09};
  
-@@ -2294,6 +2297,13 @@ void ARGBToUVJRow_LASX(const uint8_t* src_argb,
+@@ -2296,6 +2299,13 @@ void ARGBToUVJRow_LASX(const uint8_t* src_argb,
    }
  }
  
@@ -266,7 +266,7 @@ index f824906d3f5c6..8ecf887de3c7f 100644
  }  // extern "C"
  }  // namespace libyuv
 diff --git a/media/libyuv/libyuv/source/row_lsx.cc b/media/libyuv/libyuv/source/row_lsx.cc
-index 0825b63359cfe..546427601d4e3 100644
+index 9c1e16f22e..91221ff03c 100644
 --- a/media/libyuv/libyuv/source/row_lsx.cc
 +++ b/media/libyuv/libyuv/source/row_lsx.cc
 @@ -407,7 +407,7 @@ void ARGB1555ToUVRow_LSX(const uint8_t* src_argb1555,
@@ -381,7 +381,7 @@ index 0825b63359cfe..546427601d4e3 100644
  
  // ARGB expects first 3 values to contain RGB and 4th value is ignored.
  static void ARGBToYMatrixRow_LSX(const uint8_t* src_argb,
-@@ -1849,6 +1852,13 @@ void RAWToYRow_LSX(const uint8_t* src_raw, uint8_t* dst_y, int width) {
+@@ -1853,6 +1856,13 @@ void RAWToYRow_LSX(const uint8_t* src_raw, uint8_t* dst_y, int width) {
    RGBToYMatrixRow_LSX(src_raw, dst_y, width, &kRawI601Constants);
  }
  
@@ -396,5 +396,5 @@ index 0825b63359cfe..546427601d4e3 100644
  }  // extern "C"
  }  // namespace libyuv
 -- 
-2.43.0
+2.46.0
 

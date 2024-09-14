@@ -1,16 +1,18 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 75e6e0c..22a2d0c 100644
+index 6dda290..a846a0c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -340,4 +340,11 @@ sha512sums=('b12e1302d6be94dd88bee6dd069d3fec944bfce95e1afc1d72c14cc188d952fd5a8
-             'eb4e1894f408b7d90982a447183c3dbd702c654950c772c3adf6ac90be23655e6d6426210542de70682ba70797c247e6271bc7867fe2a8dc04ba8a63ab0e94c0'
-             '661acf4f1eeb803eabb4c5b8f9cfbbb6bd71eb456860fe23debf0de889d204aba490d545334098c8fd302de29b6adb5f1a75c4bd96e3fbd13f3dceec358a15ad')
+@@ -334,4 +334,13 @@ sha512sums=('24af7d705c13a0b49b0f9fa66a4d17ce4e95b65cc60f84f56364dc8fb480fb61b80
+             '647dfe19d2866e1455d9c21ff0576f7a6ee5a780f5d07ca11cc02bade2a50cf42f21270d573f74258feba2a9adbede415fa4ae4a71e87f77a133e8931c259b47'
+             '162d5a7ef2e84e55424a6fcb14d18999d0b4c781045180a30394d7f767507dc6b1b084b2d4f3bed63b11d605560bf1fd59fbed7ed0d1e0dce6e47511ed7e6a8e')
  
-+source+=('0100-Add-support-for-LoongArch.patch'
-+         '0101-Bug-1837935-loong64-Fix-scratch-register-usage-when-.patch'
-+         '0102-Fix-libyuv-build-with-LSX-LASX.patch')
-+sha512sums+=('9f95351652d273eb667e785023870398a3b7f8475413d1b820752dfbc1711c3f1e2837128b3db5accc25e99d96297cd5cf9fd3c79775f7878d3565d59dfcf342'
-+             '74de782970435f6402efd8bcaa58149b1f6348f8f0e53beb2f8c0fdf64d9f5afb108c5ae4e35b59a609c7a3adc7540b6a9a34630af20436947b491219fc55992'
-+             '1a1917fcbe2af02b48e2a839f6fdb8e9fe27eea2301fde6e6dd9506f79078d5e78b6c17eafbd8cac147e4b894680c6838306a14f92904a09d34866aa88307b2d')
++source+=('0010-Fix-libyuv-build-with-LSX-LASX.patch'
++         '0011-Add-missing-loongarch-lsx-code-for-libpng.patch'
++         '0012-Add-support-for-LoongArch64.patch'
++         '0013-Enable-WebRTC-for-LoongArch.patch')
++sha512sums+=('f74ccb758ff6058e4897f2045b08f0e35eb37b7faef33fb9bda70e16a8363070c983179a34283471dcb26df72a15b4f296f2c4f3bce5c8df7c6f03a1e5b5f4d4'
++             '3715431cf206df5cd7a639a949fe7daeacf2781d84bc9ff2b228b88e735d866bf2248e163e0d700f43511fcc79ef47fb606fdbd0c1d01405cf2276cd9534c13c'
++             '47c9429dbfdfde97366eba5dc65f696691b681b166c6e82765f9ee4135c0f32a3acde2056d21e9ab5cd7ac3b2c0e904c8779a9d4b151b3278d4c0175315990fe'
++             '787b6c919a803ecaa4fee9e0004ed1e29b2c2d26cb9377ce1ac08579650df04179079652cdec923fe2f3e1b30aee3a1569812e2a01987fb58f0933cd6fed5a90')
 +
  # vim:set sw=2 et:
