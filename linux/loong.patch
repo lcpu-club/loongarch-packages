@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 1088ade..df90b8c 100644
+index b951e29..1f5be44 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -76,6 +76,10 @@ prepare() {
@@ -13,7 +13,7 @@ index 1088ade..df90b8c 100644
    make olddefconfig
    diff -u ../config .config || :
  
-@@ -141,20 +145,28 @@ _package-headers() {
+@@ -141,20 +145,29 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -24,6 +24,7 @@ index 1088ade..df90b8c 100644
 +    install -Dt "$builddir/arch/loongarch" -m644 arch/loongarch/Makefile
 +  fi
    cp -t "$builddir" -a scripts
+   ln -srt "$builddir" "$builddir/scripts/gdb/vmlinux-gdb.py"
  
    # required when STACK_VALIDATION is enabled
 -  install -Dt "$builddir/tools/objtool" tools/objtool/objtool
@@ -36,7 +37,6 @@ index 1088ade..df90b8c 100644
    cp -t "$builddir" -a include
 -  cp -t "$builddir/arch/x86" -a arch/x86/include
 -  install -Dt "$builddir/arch/x86/kernel" -m644 arch/x86/kernel/asm-offsets.s
--
 +  if [ $CARCH == x86_64 ]; then
 +    cp -t "$builddir/arch/x86" -a arch/x86/include
 +    install -Dt "$builddir/arch/x86/kernel" -m644 arch/x86/kernel/asm-offsets.s
@@ -44,10 +44,10 @@ index 1088ade..df90b8c 100644
 +    cp -t "$builddir/arch/loongarch" -a arch/loongarch/include
 +    install -Dt "$builddir/arch/loongarch/kernel" -m644 arch/loongarch/kernel/asm-offsets.s
 +  fi
+ 
    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
- 
-@@ -175,7 +187,11 @@ _package-headers() {
+@@ -176,7 +189,11 @@ _package-headers() {
    echo "Removing unneeded architectures..."
    local arch
    for arch in "$builddir"/arch/*/; do
@@ -60,12 +60,33 @@ index 1088ade..df90b8c 100644
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -243,4 +259,8 @@ for _p in "${pkgname[@]}"; do
+@@ -244,4 +261,29 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
-+source+=('loong-addition.config')
-+sha256sums+=('04f094af6e53088cbc5cf184a237b9cdb2e97ed1022b884b678ac72a801e1df4')
-+b2sums+=('23338f593bbb01491f4b0dd7c34840c322d1c9b8a6f2fc0009b4d3b97668899fa967b0431d2d4f4c148a613b88fa27fb3532563d0e3918b54c2583b146348f8d')
++source+=('loong-addition.config'
++         '0083-LOONGARCH64-arch-loongarch-add-la_ow_syscall-as-in-t.patch'
++         '0084-LOONGARCH64-la_ow_syscall-add-kconfig-for-module.patch'
++         '0085-LOONGARCH64-drivers-firmware-Move-sysfb_init-from-de.patch'
++         '0086-LOONGARCH64-drm-Makefile-Move-tiny-drivers-before-na.patch'
++         '0087-LOONGARCH64-drm-xe-fix-build-on-non-4K-kernels.patch'
++         '0088-LOONGARCH64-drm-radeon-Workaround-radeon-driver-bug-.patch'
++         '0089-LOONGARCH64-drm-radeon-Call-mmiowb-at-the-end-of-rad.patch')
++sha256sums+=('416713d91e18bf0b8a86d47929a9281c0968bb0d84144ed2327580927aae9e6a'
++             'd6201884957d8038f3c6037b40176429524d5461a751b3e5350506c38e32640b'
++             'ea061749d8fd9687119eda0912f66b2d51ca4908f2828d23f32453f7c5bfcc2b'
++             '8d3e1c96a8ca99617fb3f3da585830d18c939dc2230460139a7eb7ceb85cd905'
++             'fce55a900c2f728c3a4384de674768a77b4a41d2b1457387139798081274d735'
++             'dae1f322246d4b0010306c477823e85c00577cfa856657c80acaca4707a553a6'
++             '470da96b36ca6e0dd9661ac6fd50ebcd4cf78f42a9d5dd9aa7f40695705081bd'
++             '772ef74a631246b377ac75006d3222c01f0be50e03d4a5a9a396d56724bebfbf')
++b2sums+=('a86a6c3e7b0dddabf85bf24aad8d5f0b4e01069e9de8ce2269b32c49a4f1ed2c829d61852ea8be8c09e0742aa33a448311bbdc90b840699c7a6ae45a1c552c07'
++         'c45a1b2ff189e3596dd8bedd706c0245c0b08f399bc1f9d888df2b6e872f8da86eafc3d9aa09f6e90acf857e120bb682dfc84855294d9b0c1f0b2017ce459fd7'
++         'e62f7ccd7ac418c331687f302c52ba7828dea380bcadaf37127f12483b0c7d83a133b5a253d8ac84d74c73f396857689483417d2f69bb6a66e5fb75ab9ad6646'
++         '99826642be9c11ef8b714ee821238e4bb12896a5093b226dada368b1bf66250d10418ea37c03cb108c5d52d2b65ed40651c590fd4c73bd4854ab3682a2798d91'
++         '679207f656c9017b7d4ec1f74ed8b3706f3c8d9a9d2580ccf8819ce6ab83b1720a921fc84aa3c90768b668a1725f91e9e5fa05b771b3eb11cf281a5a69816b36'
++         'd7f6b0317b85bb68faf6d5e31299c0ee85d58bd10b862ad45b211d22bf573745ae940032e82456dde8f48e58ac9cde1f86348e1d494e5d3cdb3d6bdd1d69704c'
++         '35016d71fadd278005511a1b75b95494d2891fc8ea8468d50f1fec6bc52666910cadb4cbbfb66084dd3c7126113a89a107f4401ebaeb8bc7b8b2b406b8048385'
++         '894f09ac06cb5ec6269aec7c4c9d466cd61c408083df0de64122895c7e7b45a999257dfe6fbefc5c2c60144b5e37e4af23dec9b45798f49f984aa5a96bb7daa2')
 +
  # vim:set ts=8 sts=2 sw=2 et:
