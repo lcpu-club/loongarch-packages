@@ -1,25 +1,24 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c2e4ca4..d450773 100644
+index c2e4ca4..ccdbad2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -1,7 +1,7 @@
- # Maintainer: Bruno Pagani <archange@archlinux.org>
+@@ -14,12 +14,15 @@ _commit=464c51a0353c71f08fe45f683d6a97a638d47833
+ source=(git+${url}#commit=${_commit})
+ sha512sums=(SKIP)
  
- pkgname=libyuv
--pkgver=r2426+464c51a0
-+pkgver=r2426+464c51a03
- pkgrel=1
- pkgdesc="Library for YUV scaling"
- arch=(x86_64)
-@@ -20,6 +20,7 @@ pkgver() {
++: <<'COMMENT_SEPARATOR'
+ pkgver() {
+   cd ${pkgname}
+   printf "r%s+%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
  }
++COMMENT_SEPARATOR
  
  prepare() {
 +  patch -p3 -i "${srcdir}/0102-Fix-libyuv-build-with-LSX-LASX.patch"
    sed -i 's|yuvconvert ${JPEG_LIBRARY}|${ly_lib_shared} ${JPEG_LIBRARY}|' ${pkgname}/CMakeLists.txt
  }
  
-@@ -33,3 +34,6 @@ package() {
+@@ -33,3 +36,6 @@ package() {
    make -C build DESTDIR="${pkgdir}" install
    install -Dm644 ${pkgname}/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
  }
