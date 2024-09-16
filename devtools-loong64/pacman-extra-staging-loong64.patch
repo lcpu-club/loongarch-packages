@@ -1,5 +1,3 @@
---- /usr/share/devtools/pacman.conf.d/extra.conf	2024-06-18 20:18:52.000000000 +0800
-+++ extra-staging-loong64.conf	2024-09-04 17:17:06.305273251 +0800
 @@ -19,7 +19,7 @@
  #XferCommand = /usr/bin/curl -L -C - -f -o %o %u
  #XferCommand = /usr/bin/wget --passive-ftp -c -O %o %u
@@ -9,37 +7,32 @@
  
  # Pacman won't upgrade packages listed in IgnorePkg and members of IgnoreGroup
  #IgnorePkg   =
-@@ -70,17 +70,29 @@
- # repo name header and Include lines. You can add preferred servers immediately
+@@ -71,22 +71,22 @@
  # after the header, and they will be used before the default mirrors.
  
--#[core-testing]
-+[core-staging]
- #Include = /etc/pacman.d/mirrorlist
-+Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
-+
-+[core-testing]
-+#Include = /etc/pacman.d/mirrorlist
-+Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
+ [core-staging]
+-Include = /etc/pacman.d/mirrorlist
++Include = /etc/pacman.d/mirrorlist-loong64
+ 
+ [core-testing]
+-Include = /etc/pacman.d/mirrorlist
++Include = /etc/pacman.d/mirrorlist-loong64
  
  [core]
 -Include = /etc/pacman.d/mirrorlist
-+#Include = /etc/pacman.d/mirrorlist
-+Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
++Include = /etc/pacman.d/mirrorlist-loong64
  
--#[extra-testing]
-+[extra-staging]
- #Include = /etc/pacman.d/mirrorlist
-+Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
-+
-+[extra-testing]
-+#Include = /etc/pacman.d/mirrorlist
-+Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
+ [extra-staging]
+-Include = /etc/pacman.d/mirrorlist
++Include = /etc/pacman.d/mirrorlist-loong64
+ 
+ [extra-testing]
+-Include = /etc/pacman.d/mirrorlist
++Include = /etc/pacman.d/mirrorlist-loong64
  
  [extra]
 -Include = /etc/pacman.d/mirrorlist
-+#Include = /etc/pacman.d/mirrorlist
-+Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
++Include = /etc/pacman.d/mirrorlist-loong64
  
  # An example of a custom package repository.  See the pacman manpage for
  # tips on creating your own repositories.
