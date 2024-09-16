@@ -7,29 +7,24 @@
  
  # Pacman won't upgrade packages listed in IgnorePkg and members of IgnoreGroup
  #IgnorePkg   =
-@@ -70,17 +70,21 @@
- # repo name header and Include lines. You can add preferred servers immediately
+@@ -71,16 +71,16 @@
  # after the header, and they will be used before the default mirrors.
  
--#[core-testing]
-+[core-testing]
- #Include = /etc/pacman.d/mirrorlist
-+Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
+ [core-testing]
+-Include = /etc/pacman.d/mirrorlist
++Include = /etc/pacman.d/mirrorlist-loong64
  
  [core]
 -Include = /etc/pacman.d/mirrorlist
-+#Include = /etc/pacman.d/mirrorlist
-+Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
++Include = /etc/pacman.d/mirrorlist-loong64
  
--#[extra-testing]
-+[extra-testing]
- #Include = /etc/pacman.d/mirrorlist
-+Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
+ [extra-testing]
+-Include = /etc/pacman.d/mirrorlist
++Include = /etc/pacman.d/mirrorlist-loong64
  
  [extra]
 -Include = /etc/pacman.d/mirrorlist
-+#Include = /etc/pacman.d/mirrorlist
-+Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
++Include = /etc/pacman.d/mirrorlist-loong64
  
  # An example of a custom package repository.  See the pacman manpage for
  # tips on creating your own repositories.

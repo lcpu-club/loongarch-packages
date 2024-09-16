@@ -1,5 +1,3 @@
---- /usr/bin/sogrep	2024-06-18 20:18:52.000000000 +0800
-+++ sogrep-loong64	2024-08-07 11:35:34.643989661 +0800
 @@ -10,14 +10,14 @@
  # shellcheck source=src/lib/common.sh
  source "${_DEVTOOLS_LIBRARY_DIR}"/lib/common.sh
@@ -10,7 +8,7 @@
  
  # globals
 -fallback_mirror='https://geo.mirror.pkgbuild.com'
-+fallback_mirror='https://loongarchlinux.lcpu.dev/loongarch/archlinux'
++fallback_mirror='https://mirrors.pku.edu.cn/loongarch-lcpu/archlinux'
  : ${SOCACHE_DIR:="${XDG_CACHE_HOME:-${HOME}/.cache}/sogrep"}
  
 -arches=('x86_64')
