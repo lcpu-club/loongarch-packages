@@ -1,32 +1,32 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index f929ea1..6f7bf13 100644
+index db1fa23..e49700e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -27,6 +27,8 @@ source=(https://gitlab.archlinux.org/pacman/pacman/-/releases/v$pkgver/downloads
-         "$pkgname-repo-add-parseopts.patch::https://gitlab.archlinux.org/pacman/pacman/-/commit/0571ee82bff0edbd5ffac2228d4e6ac510b9008e.patch"
-         "$pkgname-drop-result-warn.patch::https://gitlab.archlinux.org/pacman/pacman/-/commit/111eed0251238a9d3f90e76d62f2ac01aeccce48.patch"
-         "$pkgname-fix-debugedit.patch::https://gitlab.archlinux.org/pacman/pacman/-/commit/bae9594ac1806ce30f2af1de27c49bb101a00d44.patch"
-+        pacman-use-loong64.patch
-+        makepkg.loong64.diff
-         pacman.conf
-         makepkg.conf)
- sha256sums=('5a60ac6e6bf995ba6140c7d038c34448df1f3daa4ae7141d2cad88eeb5f1f9d9'
-@@ -38,6 +40,8 @@ sha256sums=('5a60ac6e6bf995ba6140c7d038c34448df1f3daa4ae7141d2cad88eeb5f1f9d9'
-             '2bbfe40539513ff5775aaf900644c8985ef618f5df9af856b9d571e2501365b0'
-             '160515b741aadc876a67f213029f5f62a51ff072ea4aaeb687bbe614035bf72f'
-             '1f4e4cc54332e60c9da2bdabf9a80dc11db466535f1a0be298cbf654f0723721'
-+            '5ab2a0ae2747184e7a3b0d4f6f45f0a66b6ad85e853b78fb77102e4b32667cdc'
-+            '10cf137d2b5d4ff2cdc01d3ef71d660d6b3ac51f46d8adae9fc27d5aa8d46d9f'
-             '656c4d4cb8cb12adbf178fc8cb2fd25f8c285d6572bbdbb24d865d00e0d5a85a'
-             '2465d495cb275dce434eb3bfe4d293a223e301b968c14861aea42bc7c60404ef')
- 
-@@ -92,6 +96,9 @@ package() {
-   install -dm755 "$pkgdir/etc"
-   install -m644 "$srcdir/pacman.conf" "$pkgdir/etc"
-   install -m644 "$srcdir/makepkg.conf" "$pkgdir/etc"
+@@ -22,7 +22,7 @@ depends=(
+   gpgme
+   grep
+   libarchive
+-  pacman-mirrorlist
++  pacman-mirrorlist-loong64
+   systemd
+ )
+ makedepends=(
+@@ -133,6 +133,18 @@ package() {
+   for unit in dirmngr gpg-agent gpg-agent-{browser,extra,ssh} keyboxd; do
+     ln -s "../${unit}@.socket" "$wantsdir/${unit}@etc-pacman.d-gnupg.socket"
+   done
++  
 +  if [[ $CARCH != "x86_64" ]]; then
 +    patch "$pkgdir/etc/makepkg.conf" -i "$srcdir/makepkg.$CARCH.diff"
++    patch "$pkgdir/etc/pacman.conf" -i "$srcdir/pacman.conf.$CARCH.diff"
 +  fi
+ }
  
-   local wantsdir="$pkgdir/usr/lib/systemd/system/sockets.target.wants"
-   install -dm755 "$wantsdir"
++source+=(makepkg.loong64.diff
++         pacman-use-loong64.patch
++         pacman.conf.loong64.diff)
++sha256sums+=('10cf137d2b5d4ff2cdc01d3ef71d660d6b3ac51f46d8adae9fc27d5aa8d46d9f'
++             '5ab2a0ae2747184e7a3b0d4f6f45f0a66b6ad85e853b78fb77102e4b32667cdc'
++             'fadd0c5453aadfcb89cebb0bfc64674f68c7d988e512d8a4fca14718afa2cc62')
++
+ # vim: set ts=2 sw=2 et:
