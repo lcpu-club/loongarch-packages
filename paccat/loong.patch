@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 25db2da..bc08fca 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,7 +16,7 @@ sha256sums=('239a362eed3f971d673a714711a4d3f7df0b7fb7d71e6f4cea23ef4e29f003c0')
+ prepare() {
+   cd "$pkgname-$pkgver"
+   export RUSTUP_TOOLCHAIN=stable
+-  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
++  cargo fetch --locked
+ }
+ 
+ build () {
