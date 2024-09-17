@@ -9,7 +9,7 @@ url="https://github.com/lcpu-club/loongarch-packages"
 license=('GPL')
 backup=(etc/pacman.d/mirrorlist-loong64)
 source=(mirrorlist-loong64)
-sha256sums=('c0bd6d5a17ef903df4328cc94c393e22593389b00bce925932d6f60ba0b51fb8')
+sha256sums=('3221a3a59928fcd53fa78e269be87eac19b1836613da8dc0f7e59081ff0a2894')
 
 pkgver() {
   date +'%Y%m%d'
