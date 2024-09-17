@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3e6e94d..35ad0b0 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,8 +20,8 @@ build() {
+   cd "${srcdir}/${pkgname}-${pkgver}"
+   CFLAGS+=' -ffat-lto-objects'
+   CXXFLAGS+=' -ffat-lto-objects'
+-  ./configure --prefix /usr --mandir /usr/share/man -enable-frame-pointers
+-  make --debug=v world.opt
++  ./configure --prefix /usr --mandir /usr/share/man
++  make --debug=v world
+ }
+ 
+ package_ocaml() {
