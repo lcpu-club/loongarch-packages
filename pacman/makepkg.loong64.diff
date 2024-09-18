@@ -1,5 +1,3 @@
---- makepkg.conf	
-+++ makepkg-loong64.conf
 @@ -35,18 +35,16 @@
  # ARCHITECTURE, COMPILE FLAGS
  #########################################################################
@@ -21,7 +19,7 @@
  CXXFLAGS="$CFLAGS -Wp,-D_GLIBCXX_ASSERTIONS"
 -LDFLAGS="-Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now \
 -         -Wl,-z,pack-relative-relocs"
-+LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
++LDFLAGS="-Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now"
  LTOFLAGS="-flto=auto"
- RUSTFLAGS="-Cforce-frame-pointers=yes"
  #-- Make Flags: change this for DistCC/SMP systems
+ #MAKEFLAGS="-j2"

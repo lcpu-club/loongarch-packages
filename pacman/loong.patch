@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index db1fa23..f7427b5 100644
+index db1fa23..82406ea 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -22,7 +22,7 @@ depends=(
@@ -16,12 +16,12 @@ index db1fa23..f7427b5 100644
  
  prepare() {
 +  if [[ $CARCH != "x86_64" ]]; then
-+    cp --dereference "$srcdir/pacman.conf" "$srcdir/pacman.conf.$CARCH"
-+    cp --dereference "$srcdir/makepkg.conf" "$srcdir/makepkg.conf.$CARCH"
-+    patch "$srcdir/pacman.conf.$CARCH" -i "$srcdir/pacman.$CARCH.diff"
-+    patch "$srcdir/makepkg.conf.$CARCH" -i "$srcdir/makepkg.$CARCH.diff"
-+    mv -f "$srcdir/pacman.conf.$CARCH" "$srcdir/pacman.conf"
-+    mv -f "$srcdir/makepkg.conf.$CARCH" "$srcdir/makepkg.conf"
++    cp --dereference "$srcdir/pacman.conf" "$srcdir/pacman.$CARCH.conf"
++    cp --dereference "$srcdir/makepkg.conf" "$srcdir/makepkg.$CARCH.conf"
++    patch "$srcdir/pacman.$CARCH.conf" -i "$srcdir/pacman.$CARCH.diff"
++    patch "$srcdir/makepkg.$CARCH.conf" -i "$srcdir/makepkg.$CARCH.diff"
++    mv -f "$srcdir/pacman.$CARCH.conf" "$srcdir/pacman.conf"
++    mv -f "$srcdir/makepkg.$CARCH.conf" "$srcdir/makepkg.conf"
 +  fi
 +
    cd "$pkgname"
@@ -34,7 +34,7 @@ index db1fa23..f7427b5 100644
 +source+=(makepkg.loong64.diff
 +         pacman-use-loong64.patch
 +         pacman.loong64.diff)
-+sha256sums+=('10cf137d2b5d4ff2cdc01d3ef71d660d6b3ac51f46d8adae9fc27d5aa8d46d9f'
++sha256sums+=('944c57e9abbbd9a550a6d1b5a234fd11a6cba29dc136f72c9d3ce33c5ef581cc'
 +             '5ab2a0ae2747184e7a3b0d4f6f45f0a66b6ad85e853b78fb77102e4b32667cdc'
 +             'fadd0c5453aadfcb89cebb0bfc64674f68c7d988e512d8a4fca14718afa2cc62')
 +
