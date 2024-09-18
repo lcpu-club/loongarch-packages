@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 84948f2..1e94eb2 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,8 +19,12 @@ sha256sums=('860d56653b719402736b00ac9bc09e5e418dea2577cead30644252e85ab5d1a1')
+ 
+ _features='remote-packages,native-tls,fontconfig'
+ 
++source+=("00-update-lock.patch")
++sha256sums+=('2c72cb48a28aafbc70577a18690225ba0288ed1bd00f2a090d7cf6718e6a7ff4')
++
+ prepare() {
+ 	cd "$_archive"
++	patch -Np1 < ../00-update-lock.patch
+ 	cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+ }
+ 
