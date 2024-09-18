@@ -1,0 +1,23 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a26cdab..0a0c69c 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,12 +17,15 @@ replaces=(typst-bin)
+ makedepends=(cargo
+              git)
+ _archive="$pkgname-$pkgver"
+-source=("$_url/archive/v$pkgver/$_archive.tar.gz")
+-sha256sums=('b1ba054e821073daafd90675c4822bcd8166f33fe2e3acba87ba1451a0d1fc56')
++source=("$_url/archive/v$pkgver/$_archive.tar.gz"
++	"00-update-lock.patch")
++sha256sums=('b1ba054e821073daafd90675c4822bcd8166f33fe2e3acba87ba1451a0d1fc56'
++	'7f190d940242096d34a12da0c8bd381353e01aa7688a01a2f8a872b2522e8926')
+ 
+ prepare() {
+ 	cd "$_archive"
+-	cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
++	patch Cargo.lock < ../00-update-lock.patch
++	cargo fetch --locked
+ }
+ 
+ build() {
