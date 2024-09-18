@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index db1fa23..e49700e 100644
+index db1fa23..f7427b5 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -22,7 +22,7 @@ depends=(
@@ -11,20 +11,29 @@ index db1fa23..e49700e 100644
    systemd
  )
  makedepends=(
-@@ -133,6 +133,18 @@ package() {
-   for unit in dirmngr gpg-agent gpg-agent-{browser,extra,ssh} keyboxd; do
-     ln -s "../${unit}@.socket" "$wantsdir/${unit}@etc-pacman.d-gnupg.socket"
-   done
-+  
+@@ -64,6 +64,15 @@ pkgver() {
+ }
+ 
+ prepare() {
 +  if [[ $CARCH != "x86_64" ]]; then
-+    patch "$pkgdir/etc/makepkg.conf" -i "$srcdir/makepkg.$CARCH.diff"
-+    patch "$pkgdir/etc/pacman.conf" -i "$srcdir/pacman.conf.$CARCH.diff"
++    cp --dereference "$srcdir/pacman.conf" "$srcdir/pacman.conf.$CARCH"
++    cp --dereference "$srcdir/makepkg.conf" "$srcdir/makepkg.conf.$CARCH"
++    patch "$srcdir/pacman.conf.$CARCH" -i "$srcdir/pacman.$CARCH.diff"
++    patch "$srcdir/makepkg.conf.$CARCH" -i "$srcdir/makepkg.$CARCH.diff"
++    mv -f "$srcdir/pacman.conf.$CARCH" "$srcdir/pacman.conf"
++    mv -f "$srcdir/makepkg.conf.$CARCH" "$srcdir/makepkg.conf"
 +  fi
++
+   cd "$pkgname"
+ 
+   # apply patch level commits on top of annotated tag
+@@ -135,4 +144,11 @@ package() {
+   done
  }
  
 +source+=(makepkg.loong64.diff
 +         pacman-use-loong64.patch
-+         pacman.conf.loong64.diff)
++         pacman.loong64.diff)
 +sha256sums+=('10cf137d2b5d4ff2cdc01d3ef71d660d6b3ac51f46d8adae9fc27d5aa8d46d9f'
 +             '5ab2a0ae2747184e7a3b0d4f6f45f0a66b6ad85e853b78fb77102e4b32667cdc'
 +             'fadd0c5453aadfcb89cebb0bfc64674f68c7d988e512d8a4fca14718afa2cc62')
