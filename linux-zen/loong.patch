@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 56239e3..b8c8c45 100644
+index 56239e3..06bb06f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -76,6 +76,10 @@ prepare() {
@@ -13,7 +13,7 @@ index 56239e3..b8c8c45 100644
    make olddefconfig
    diff -u ../config .config || :
  
-@@ -141,20 +145,28 @@ _package-headers() {
+@@ -141,7 +145,11 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -26,11 +26,7 @@ index 56239e3..b8c8c45 100644
    cp -t "$builddir" -a scripts
  
    # required when STACK_VALIDATION is enabled
--  install -Dt "$builddir/tools/objtool" tools/objtool/objtool
-+  #install -Dt "$builddir/tools/objtool" tools/objtool/objtool
- 
-   # required when DEBUG_INFO_BTF_MODULES is enabled
-   install -Dt "$builddir/tools/bpf/resolve_btfids" tools/bpf/resolve_btfids/resolve_btfids
+@@ -152,9 +160,13 @@ _package-headers() {
  
    echo "Installing headers..."
    cp -t "$builddir" -a include
