@@ -1,51 +1,34 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index b01d783..49cdcce 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -7,7 +7,7 @@
- # toolchain build order: linux-api-headers->glibc->binutils->gcc->glibc->binutils->gcc
- # NOTE: libtool requires rebuilt with each new gcc version
- 
--pkgname=(gcc gcc-libs lib32-gcc-libs gcc-ada gcc-d gcc-fortran gcc-go gcc-m2 gcc-objc gcc-rust lto-dump libgccjit)
-+pkgname=(gcc gcc-libs gcc-fortran gcc-m2 gcc-objc lto-dump libgccjit)
- pkgver=14.2.1+r32+geccf707e5ce
- _commit=eccf707e5ceb7e405ffe4edfbcae2f769b8386cf
- pkgrel=1
-@@ -18,15 +18,10 @@ url='https://gcc.gnu.org'
+@@ -18,11 +18,8 @@ url='https://gcc.gnu.org'
  makedepends=(
    binutils
    doxygen
 -  gcc-ada
--  gcc-d
+   gcc-d
    git
 -  lib32-glibc
 -  lib32-gcc-libs
    libisl
    libmpc
    python
--  rust
-   zstd
- )
- checkdepends=(
-@@ -41,6 +36,7 @@ _libdir=usr/lib/gcc/$CHOST/${pkgver%%+*}
- source=(git+https://sourceware.org/git/gcc.git#commit=${_commit}
-         c89 c99
-         gcc-ada-repro.patch
-+        gcc-lib64-lib.patch
- )
- validpgpkeys=(F3691687D867B81B51CE07D9BBE43771487328A9  # bpiotrowski@archlinux.org
-               86CFFCA918CF3AF47147588051E8B148A9999C34  # foutrelis@archlinux.org
-@@ -49,7 +45,8 @@ validpgpkeys=(F3691687D867B81B51CE07D9BBE43771487328A9  # bpiotrowski@archlinux.
- sha256sums=('d3e9d9a008f3b63101eb5d771b3ee7db3a77ee87b8975485a79738245b377521'
-             'de48736f6e4153f03d0a5d38ceb6c6fdb7f054e8f47ddd6af0a3dbf14f27b931'
-             '2513c6d9984dd0a2058557bf00f06d8d5181734e41dcfe07be7ed86f2959622a'
--            '1773f5137f08ac1f48f0f7297e324d5d868d55201c03068670ee4602babdef2f')
-+            '1773f5137f08ac1f48f0f7297e324d5d868d55201c03068670ee4602babdef2f'
-+            'd09cbb949364442a78e886b8f55593f07ad17f1e5369ecc83d6c6826015ba22e')
- pkgver() {
-   cd gcc
+@@ -55,6 +52,15 @@ pkgver() {
    echo "$(cat gcc/BASE-VER)+$(git describe --tags | sed 's/[^-]*-[^-]*-//;s/[^-]*-/r&/;s/-/+/g;s/_/./')"
-@@ -67,6 +64,7 @@ prepare() {
+ }
+ 
++source+=(gcc-lib64-lib.patch)
++sha256sums+=('d09cbb949364442a78e886b8f55593f07ad17f1e5369ecc83d6c6826015ba22e')
++
++for i in "${!pkgname[@]}"; do
++  if [[ ${pkgname[$i]} = "gcc-ada" ]] || [[ ${pkgname[$i]} = "lib32-gcc-libs" ]] || [[ ${pkgname[$i]} = "gcc-go" ]]; then
++    unset 'pkgname[$i]'
++  fi
++done
++
+ prepare() {
+   [[ ! -d gcc ]] && ln -s gcc-${pkgver/+/-} gcc
+   cd gcc
+@@ -67,6 +73,7 @@ prepare() {
  
    # Reproducible gcc-ada
    patch -Np0 < "$srcdir/gcc-ada-repro.patch"
@@ -53,7 +36,7 @@ index b01d783..49cdcce 100644
  
    mkdir -p "$srcdir/gcc-build"
    mkdir -p "$srcdir/libgccjit-build"
-@@ -95,7 +93,8 @@ build() {
+@@ -95,7 +102,8 @@ build() {
        --enable-link-serialization=1
        --enable-linker-build-id
        --enable-lto
@@ -63,16 +46,16 @@ index b01d783..49cdcce 100644
        --enable-plugin
        --enable-shared
        --enable-threads=posix
-@@ -113,7 +112,7 @@ build() {
+@@ -113,7 +121,7 @@ build() {
    CXXFLAGS=${CXXFLAGS/-Werror=format-security/}
  
    "$srcdir/gcc/configure" \
 -    --enable-languages=ada,c,c++,d,fortran,go,lto,m2,objc,obj-c++,rust \
-+    --enable-languages=c,c++,fortran,lto,m2,objc,obj-c++\
++    --enable-languages=c,c++,d,fortran,lto,m2,objc,obj-c++,rust \
      --enable-bootstrap \
      "${_confflags[@]:?_confflags unset}"
  
-@@ -162,7 +161,7 @@ package_gcc-libs() {
+@@ -162,7 +170,7 @@ package_gcc-libs() {
    pkgdesc='Runtime libraries shipped by GCC'
    depends=('glibc>=2.27')
    options=(!emptydirs !strip)
@@ -81,7 +64,7 @@ index b01d783..49cdcce 100644
              libubsan.so libasan.so libtsan.so liblsan.so)
    replaces=($pkgname-multilib libgphobos)
  
-@@ -172,7 +171,6 @@ package_gcc-libs() {
+@@ -172,7 +180,6 @@ package_gcc-libs() {
  
    for lib in libatomic \
               libgfortran \
@@ -89,16 +72,7 @@ index b01d783..49cdcce 100644
               libgomp \
               libitm \
               libquadmath \
-@@ -185,7 +183,7 @@ package_gcc-libs() {
-   make -C $CHOST/libobjc DESTDIR="$pkgdir" install-libs
-   make -C $CHOST/libstdc++-v3/po DESTDIR="$pkgdir" install
- 
--  make -C $CHOST/libphobos DESTDIR="$pkgdir" install
-+  #make -C $CHOST/libphobos DESTDIR="$pkgdir" install
-   rm -rf "$pkgdir"/$_libdir/include/d/
-   rm -f "$pkgdir"/usr/lib/libgphobos.spec
- 
-@@ -220,22 +218,22 @@ package_gcc() {
+@@ -220,22 +227,22 @@ package_gcc() {
    install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
@@ -126,7 +100,7 @@ index b01d783..49cdcce 100644
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -252,14 +250,14 @@ package_gcc() {
+@@ -252,14 +259,14 @@ package_gcc() {
    make -C $CHOST/libsanitizer/asan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
    make -C $CHOST/libsanitizer/tsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
    make -C $CHOST/libsanitizer/lsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
@@ -147,7 +121,7 @@ index b01d783..49cdcce 100644
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -270,7 +268,7 @@ package_gcc() {
+@@ -270,7 +277,7 @@ package_gcc() {
    # create cc-rs compatible symlinks
    # https://github.com/rust-lang/cc-rs/blob/1.0.73/src/lib.rs#L2578-L2581
    for binary in {c++,g++,gcc,gcc-ar,gcc-nm,gcc-ranlib}; do
@@ -156,7 +130,7 @@ index b01d783..49cdcce 100644
    done
  
    # POSIX conformance launcher scripts for c89 and c99
-@@ -302,8 +300,8 @@ package_gcc-fortran() {
+@@ -302,8 +309,8 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS,gfor_cHEADERS}
@@ -167,26 +141,3 @@ index b01d783..49cdcce 100644
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_fincludeHEADERS
    make -C gcc DESTDIR="$pkgdir" fortran.install-{common,man,info}
    install -Dm755 gcc/f951 "$pkgdir/${_libdir}/f951"
-@@ -471,22 +469,6 @@ package_gcc-m2() {
-     "$pkgdir/usr/share/licenses/$pkgname/"
- }
- 
--package_gcc-rust() {
-- pkgdesc="Rust frontend for GCC"
-- depends=("gcc=$pkgver-$pkgrel" libisl.so)
--
-- cd gcc-build
-- make -C gcc DESTDIR="$pkgdir" rust.install-{common,man,info}
--
-- install -Dm755 gcc/gccrs "$pkgdir"/usr/bin/gccrs
-- install -Dm755 gcc/crab1 "$pkgdir"/usr/bin/crab1
--
--  # Install Runtime Library Exception
-- install -d "$pkgdir/usr/share/licenses/$pkgname/"
-- ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
--   "$pkgdir/usr/share/licenses/$pkgname/"
--}
--
- package_lto-dump() {
-   pkgdesc="Dump link time optimization object files"
-   depends=("gcc=$pkgver-$pkgrel" libisl.so)
