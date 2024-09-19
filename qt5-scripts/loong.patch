@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c10795d..4f73a3b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,6 +18,7 @@ sha256sums=('72f43b11cae7759b97d66993404a1da00b4733a2f4771368465920883fdb9029')
+ options=(!lto)
+ 
+ prepare() {
++  patch -d kde-qtscript -p2 -i "$srcdir/0004-LoongArchLinux-QtScript-Add-LoongArch-support.patch"
+   mkdir -p build
+ }
+ 
+@@ -43,3 +44,6 @@ package() {
+   # Fix cmake dependency versions
+   sed -e "s|$pkgver\ |$_basever |" -i "$pkgdir"/usr/lib/cmake/*/*Config.cmake
+ }
++
++source+=("0004-LoongArchLinux-QtScript-Add-LoongArch-support.patch")
++sha256sums+=('90b1fc535bf36229f46d80b0e0e6547715d4d359ec8aaf0b30442cacd3f62273')
