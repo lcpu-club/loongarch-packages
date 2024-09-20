@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -51,6 +51,11 @@ build() {
+@@ -62,6 +62,11 @@ build() {
    echo kernel/x86/microcode/AuthenticAMD.bin |
      bsdtar --uid 0 --gid 0 -cnf - -T - |
      bsdtar --null -cf - --format=newc @- > amd-ucode.img
@@ -12,12 +12,12 @@
  }
  
  _pick() {
-@@ -166,4 +171,8 @@ package_linux-firmware-bnx2x() {
+@@ -177,4 +182,8 @@ package_linux-firmware-bnx2x() {
    mv -v linux-firmware-bnx2x/* "${pkgdir}"
  }
  
 +source+=("lg100_cp.bin::https://github.com/cl91/linux-gsgpu-archpkg/raw/master/gsgpu-firmware/lg100_cp.bin")
-+sha256sums+=('5f0cea0c155ed87e655e4b69d92a11ad31582799bf21909f23f809c9b3109a44')
++b2sums+=('68301cdbdbb7b03c8a8c3c051ad415f2e6313306ea725664628a6606c049b1f69200464ef16fc74e0462c9b9ac926342646e7518f90a6424ad82f240925d903a')
 +noextract=('lg100_cp.bin')
 +
  # vim:set sw=2 et:
