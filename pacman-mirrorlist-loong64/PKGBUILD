@@ -1,15 +1,15 @@
 # Maintainer: wszqkzqk <wszqkzqk@qq.com>
 
 pkgname=pacman-mirrorlist-loong64
-pkgver=20240916
+pkgver=20240920
 pkgrel=1
 pkgdesc="Arch Linux mirror list for use by pacman"
 arch=('any')
 url="https://github.com/lcpu-club/loongarch-packages"
-license=('GPL')
+license=('GPL-2.0-or-later')
 backup=(etc/pacman.d/mirrorlist-loong64)
 source=(mirrorlist-loong64)
-sha256sums=('3221a3a59928fcd53fa78e269be87eac19b1836613da8dc0f7e59081ff0a2894')
+sha256sums=('b0d95a78ea22f28dc9d0c450e7c7f376a8772e15b7140be034d4c0538a95f63c')
 
 pkgver() {
   date +'%Y%m%d'
