@@ -225,7 +225,6 @@ libirman
 libjpeg6-turbo
 libkeybinder3
 libmatio
-libnftnl
 libofa
 libotf
 libquvi-scripts
@@ -269,7 +268,6 @@ synapse
 telepathy-idle
 thrift
 tpm2-abrmd
-vcdimager
 viking
 vorbis-tools
 xboard
