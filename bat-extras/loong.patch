@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,7 +15,7 @@ depends=(
+   'man'
+ )
+ makedepends=('shfmt')
+-checkdepends=('fish')
++checkdepends=('fish' 'libgit2')
+ optdepends=(
+   'ncurses: optional for batdiff script'
+   'git-delta: optional for batdiff script'
