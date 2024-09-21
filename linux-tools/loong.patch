@@ -1,0 +1,79 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -9,11 +9,11 @@ pkgname=(
+   'linux-tools-meta'
+   'perf'
+   'tmon'
+-  'turbostat'
++#  'turbostat'
+   'usbip'
+-  'x86_energy_perf_policy'
++# 'x86_energy_perf_policy'
+ )
+-pkgver=6.10
++pkgver=6.8
+ pkgrel=2
+ license=('GPL-2.0-only')
+ arch=('x86_64')
+@@ -80,6 +80,9 @@ echo '#define PERF_VERSION "$pkgver-$pkgrel"' > "\${1:-.}"/PERF-VERSION-FILE
+ EOF
+ }
+ 
++source+=('hv_fcopy_daemon.service')
++sha256sums+=('16855c197d2334f820cb190312a5a7fffe9165189db01344a957e582e39e17d8')
++
+ build() {
+   echo ':: perf'
+   pushd linux/tools/perf
+@@ -100,11 +103,6 @@ build() {
+   make VERSION=$pkgver-$pkgrel
+   popd
+ 
+-  echo ':: x86_energy_perf_policy'
+-  pushd linux/tools/power/x86/x86_energy_perf_policy
+-  make
+-  popd
+-
+   echo ':: usbip'
+   pushd linux/tools/usb/usbip
+   # Fix gcc compilation
+@@ -119,14 +117,9 @@ build() {
+   make
+   popd
+ 
+-  echo ':: turbostat'
+-  pushd linux/tools/power/x86/turbostat
+-  make
+-  popd
+-
+   echo ':: hv'
+   pushd linux/tools/hv
+-  CFLAGS+=' -DKVP_SCRIPTS_PATH=\"/usr/lib/hypervkvpd/\"' make
++  CFLAGS+=' -DKVP_SCRIPTS_PATH=\"/usr/lib/hyperv/kvp_scripts/\"' make
+   popd
+ 
+   echo ':: bpf'
+@@ -154,9 +147,9 @@ package_linux-tools-meta() {
+     'hyperv'
+     'perf'
+     'tmon'
+-    'turbostat'
++#    'turbostat'
+     'usbip'
+-    'x86_energy_perf_policy'
++#    'x86_energy_perf_policy'
+   )
+   conflicts=(
+     'acpidump'
+@@ -260,9 +253,10 @@ package_hyperv() {
+ 
+   cd linux/tools/hv
+   make install DESTDIR="$pkgdir" sbindir=/usr/bin libexecdir=/usr/lib
+-  for _p in hv_kvp_daemon hv_vss_daemon; do
++  for _p in hv_fcopy_daemon hv_kvp_daemon hv_vss_daemon; do
+     install -Dm644 "$srcdir/$_p.service" "$pkgdir/usr/lib/systemd/system/$_p.service"
+   done
++  install -dm755 "$pkgdir/usr/lib/hyperv/kvp_scripts"
+ }
+ 
+ package_bpf() {
