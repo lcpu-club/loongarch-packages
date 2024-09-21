@@ -21,34 +21,31 @@
  
  pkgname='grub'
  pkgdesc='GNU GRand Unified Bootloader (2)'
-@@ -244,8 +247,10 @@ _build_grub-emu() {
+@@ -285,9 +288,10 @@ _build_grub-emu() {
+ 
  build() {
- 	cd "${srcdir}/grub/"
+   cd "${srcdir}/grub/"
+-
+-  echo "Build grub bios stuff..."
+-  _build_grub-common_and_bios
++  if [[ "${CARCH}" != "loong64" ]]; then
++      echo "Build grub bios stuff..."
++      _build_grub-common_and_bios
++  fi
  
--	echo "Build grub bios stuff..."
--	_build_grub-common_and_bios
-+	if [[ "${CARCH}" != "loong64" ]]; then
-+	    echo "Build grub bios stuff..."
-+	    _build_grub-common_and_bios
-+	fi
+   echo "Build grub ${_EFI_ARCH} efi stuff..."
+   _build_grub-efi
+@@ -360,6 +364,11 @@ package() {
+     _package_grub-emu
+   fi
  
- 	echo "Build grub ${_EFI_ARCH} efi stuff..."
- 	_build_grub-efi
-@@ -318,6 +323,15 @@ package() {
- 		_package_grub-emu
- 	fi
- 
--	echo "Package grub bios stuff..."
--	_package_grub-common_and_bios
-+	if [[ "${CARCH}" != "loong64" ]]; then
-+	    echo "Package grub bios stuff..."
-+	    _package_grub-common_and_bios
-+	    cd "${srcdir}/grub-bios/"
+-  echo "Package grub bios stuff..."
+-  _package_grub-common_and_bios
++  if [[ "${CARCH}" != "loong64" ]]; then
++      echo "Package grub bios stuff..."
++      _package_grub-common_and_bios
++  fi
 +
-+	    echo "Run make install for bios build..."
-+	    make DESTDIR="${pkgdir}/" bashcompletiondir="/usr/share/bash-completion/completions" install
-+	fi
-+
-+	echo "Install /etc/default/grub (used by grub-mkconfig)..."
-+	install -D -m0644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
++  echo "Install /etc/default/grub (used by grub-mkconfig)..."
++  install -D -m0644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
  }
