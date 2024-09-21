@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 90f99d0..aff143e 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,9 +31,8 @@ makedepends=('evince'
+              'vim'
+              # for the docs
+              'doxygen' 'yelp-tools' 'graphviz'
+-             'pandoc-cli'
+ )
+-checkdepends=('xorg-server-xvfb' 'shellcheck')
++checkdepends=('xorg-server-xvfb')
+ optdepends=('librsvg: SVG rendering'
+             'fbida: for jpeg rotation'
+             'gawk: to use the geo-decode function'
