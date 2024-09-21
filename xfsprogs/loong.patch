@@ -1,11 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -23,7 +23,7 @@ validpgpkeys=(
- build() {
+@@ -50,5 +50,5 @@ build() {
+ package() {
    cd ${pkgname}-dev
-   make configure
--  export OPTIMIZER="-march=${CARCH/_/-} -O1"
-+  export OPTIMIZER="-march=`uname -m` -O1"
-   export DEBUG=-DNDEBUG
-   ./configure --prefix=/usr --sbindir=/usr/bin --libexecdir=/usr/lib --with-systemd-unit-dir=/usr/lib/systemd/system
-   make
+   make PKG_USER=root PKG_GROUP=root DIST_ROOT="${pkgdir}" \
+-       PKG_ROOT_SBIN_DIR="/usr/bin" install install-dev
++       PKG_ROOT_SBIN_DIR="/usr/bin" install install-dev -j1
+ }
