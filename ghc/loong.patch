@@ -1,0 +1,35 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,17 +17,19 @@ pkgdesc='The Glasgow Haskell Compiler'
+ arch=('x86_64')
+ url='https://www.haskell.org/ghc/'
+ license=('custom')
+-makedepends=('ghc-static' 'perl' 'libxslt' 'docbook-xsl' 'python-sphinx' 'haskell-hadrian'
+-             'haskell-hscolour' 'texlive-fontsrecommended' 'texlive-latexextra' 'texlive-xetex'
+-             'ttf-dejavu' 'alex' 'happy' 'time' 'numactl' 'python-sphinx_rtd_theme')
++makedepends=('perl' 'libxslt' 'docbook-xsl' 'python-sphinx'
++             'texlive-fontsrecommended' 'texlive-latexextra' 'texlive-xetex'
++             'ttf-dejavu' 'time' 'numactl' 'python-sphinx_rtd_theme')
+ source=("https://downloads.haskell.org/~ghc/$pkgver/$pkgbase-${pkgver}-src.tar.xz"
+         ghc-sphinx-6.patch::https://gitlab.haskell.org/ghc/ghc/-/commit/00dc51060881df81258ba3b3bdf447294618a4de.patch
+-        ghc-rebuild-doc-index.hook ghc-register.hook ghc-unregister.hook)
++        ghc-rebuild-doc-index.hook ghc-register.hook ghc-unregister.hook
++        Add-loong64-support.patch)
+ sha512sums=('c1159741725deaa00be7c230b38d43aed0fd456621fb4bc434434f13b03b74da1f91c09ce5dad553cf535f14038d8568fce7f21ea068680211b8bd35eafacf49'
+             '7a79a5e9591b1ddd78fa349526a85cf9fee64db80639dcf1f3d6edef422fd4454222aedf5581e21489a20d748656265a40e7645004e4d5220280f6214c568e64'
+             '940e58508a34bd5ec6a58dba2e60dd28be78138b2e820fc45b115879335d4a160dafcac5c68bf5d19300d6d403f80a0a8c783a6dd187fb690c6608888c21effe'
+             '5f659651d8e562a4dcaae0f821d272d6e9c648b645b1d6ab1af61e4dd690dc5a4b9c6846753b7f935963f001bb1ae1f40cd77731b71ef5a8dbc079a360aa3f8f'
+-            '3bdbd05c4a2c4fce4adf6802ff99b1088bdfad63da9ebfc470af9e271c3dd796f86fba1cf319d8f4078054d85c6d9e6a01f79994559f24cc77ee1a25724af2e6')
++            '3bdbd05c4a2c4fce4adf6802ff99b1088bdfad63da9ebfc470af9e271c3dd796f86fba1cf319d8f4078054d85c6d9e6a01f79994559f24cc77ee1a25724af2e6'
++            '2b95b2dea8fb00d072f002ed332972200f9167f5d13aaffef0e36ac9a1e25047b097040ad8f88b5de0cc8516d07cd23cff9de05088bfc465df2bf77e97cc1c71')
+ 
+ prepare() {
+   cd ghc-$pkgver
+@@ -44,6 +46,7 @@ prepare() {
+   sed -i '1iBuildFlavour = perf' mk/build.mk
+ 
+   ./boot
++  patch -Np1 -i ../Add-loong64-support.patch
+ }
+ 
+ build() {
