@@ -1,0 +1,25 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 498b5ad..5fffbda 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,16 +16,18 @@ _commit='d434bd289d043997058d9a08d5e02642060fcde9'
+ source=("$pkgname::git+$url.git#commit=$_commit")
+ sha256sums=('SKIP')
+ 
++: <<COMMENT_SEPARATOR
+ pkgver() {
+   cd "$pkgname"
+ 
+   git describe --tags | sed 's/^v//'
+ }
++COMMENT_SEPARATOR
+ 
+ prepare() {
+   cd "$pkgname"
+-
+-  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
++  git cherry-pick -n cc9482cdbdf63b65e02107a0ad3c16a209412e00
++  cargo fetch --locked --target "`uname -m`-unknown-linux-gnu"
+ }
+ 
+ build() {
