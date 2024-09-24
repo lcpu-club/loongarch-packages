@@ -1,0 +1,24 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5128b75..eef2a0c 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -10,7 +10,7 @@ license=("GPL-2.0-or-later")
+ groups=("budgie")
+ depends=(accountsservice gcr gnome-bluetooth gnome-settings-daemon ibus libgtop libpwquality smbclient
+          libcheese libnma udisks2 libhandy gsound colord-gtk)
+-makedepends=(docbook-xsl modemmanager meson)
++makedepends=(docbook-xsl modemmanager meson glib2-devel colord)
+ optdepends=("system-config-printer: Printer settings"
+             "gnome-user-share: WebDAV file sharing"
+             "rygel: Media sharing"
+@@ -30,3 +30,10 @@ build() {
+ package() {
+     meson install -C build --destdir "$pkgdir"
+ }
++
++prepare() {
++    patch -d "$pkgname-$pkgver" -p1 -i "$srcdir/fix-FTBFS-with-incompatible-pointer-types.patch"
++}
++
++source+=("fix-FTBFS-with-incompatible-pointer-types.patch::https://patch-diff.githubusercontent.com/raw/BuddiesOfBudgie/budgie-control-center/pull/80.patch")
++b2sums+=('23d908433c135479fe6e3ed1af3fb8012990da7cb66b64a27dd63ab6cf42e39e30dc1786998019ef3938fd5becf42d8932888d2425f13e740cb463cfc1467e1f')
