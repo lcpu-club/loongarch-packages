@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0b08895..94e4f58 100644
+index 0b08895..233e3c9 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -7,7 +7,6 @@
@@ -19,7 +19,18 @@ index 0b08895..94e4f58 100644
    libffi
    lld
    llvm
-@@ -99,9 +96,8 @@ link-shared = true
+@@ -74,6 +71,10 @@ validpgpkeys=(
+ prepare() {
+   cd rustc-$pkgver-src
+ 
++  export CFLAGS="${CFLAGS} -mcmodel=medium"
++  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
++  export RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
++
+   # Patch bootstrap so that rust-analyzer-proc-macro-srv
+   # is in /usr/lib instead of /usr/libexec
+   patch -Np1 -i ../0001-bootstrap-Change-libexec-dir.patch
+@@ -99,9 +100,8 @@ link-shared = true
  
  [build]
  target = [
@@ -31,7 +42,7 @@ index 0b08895..94e4f58 100644
    "wasm32-unknown-unknown",
    "wasm32-wasi",
    "wasm32-wasip1",
-@@ -149,20 +145,14 @@ jemalloc = true
+@@ -149,20 +149,14 @@ jemalloc = true
  [dist]
  compression-formats = ["gz"]
  
@@ -54,7 +65,7 @@ index 0b08895..94e4f58 100644
  sanitizers = false
  musl-root = "/usr/lib/musl"
  
-@@ -230,12 +220,9 @@ build() {
+@@ -230,12 +224,9 @@ build() {
  
    # rustbuild always installs copies of the shared libraries to /usr/lib,
    # overwrite them with symlinks to the per-architecture versions
