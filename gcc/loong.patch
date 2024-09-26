@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8147682..66f170e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -21,8 +21,6 @@ makedepends=(
@@ -9,27 +11,18 @@
    libisl
    libmpc
    python
-@@ -52,9 +50,18 @@ sha256sums=('82b674a17bbac14acbf16b10e9d61e928e5630cd56635eb97acfeda849d4ebbf'
-             '1773f5137f08ac1f48f0f7297e324d5d868d55201c03068670ee4602babdef2f')
- pkgver() {
-   cd gcc
--  echo "$(cat gcc/BASE-VER)+$(git describe --tags | sed 's/[^-]*-[^-]*-//;s/[^-]*-/r&/;s/-/+/g;s/_/./')"
-+  echo "$(cat gcc/BASE-VER)+$(git describe --tags --abbrev=12 | sed 's/[^-]*-[^-]*-//;s/[^-]*-/r&/;s/-/+/g;s/_/./')"
- }
- 
-+source+=(gcc-lib64-lib.patch)
-+sha256sums+=('d09cbb949364442a78e886b8f55593f07ad17f1e5369ecc83d6c6826015ba22e')
-+
-+for i in "${!pkgname[@]}"; do
-+  if [[ ${pkgname[$i]} = "lib32-gcc-libs" ]] || [[ ${pkgname[$i]} = "gcc-go" ]]; then
-+    unset 'pkgname[$i]'
-+  fi
-+done
-+
- prepare() {
+@@ -59,6 +57,10 @@ prepare() {
    [[ ! -d gcc ]] && ln -s gcc-${pkgver/+/-} gcc
    cd gcc
-@@ -67,6 +74,7 @@ prepare() {
+ 
++  export CFLAGS="${CFLAGS} -mcmodel=medium"
++  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
++  export RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
++
+   # Do not run fixincludes
+   sed -i 's@\./fixinc\.sh@-c true@' gcc/Makefile.in
+ 
+@@ -67,6 +69,7 @@ prepare() {
  
    # Reproducible gcc-ada
    patch -Np0 < "$srcdir/gcc-ada-repro.patch"
@@ -37,7 +30,7 @@
  
    mkdir -p "$srcdir/gcc-build"
    mkdir -p "$srcdir/libgccjit-build"
-@@ -95,7 +103,8 @@ build() {
+@@ -95,7 +98,8 @@ build() {
        --enable-link-serialization=1
        --enable-linker-build-id
        --enable-lto
@@ -47,7 +40,7 @@
        --enable-plugin
        --enable-shared
        --enable-threads=posix
-@@ -113,7 +122,7 @@ build() {
+@@ -113,7 +117,7 @@ build() {
    CXXFLAGS=${CXXFLAGS/-Werror=format-security/}
  
    "$srcdir/gcc/configure" \
@@ -56,7 +49,7 @@
      --enable-bootstrap \
      "${_confflags[@]:?_confflags unset}"
  
-@@ -162,7 +171,7 @@ package_gcc-libs() {
+@@ -162,7 +166,7 @@ package_gcc-libs() {
    pkgdesc='Runtime libraries shipped by GCC'
    depends=('glibc>=2.27')
    options=(!emptydirs !strip)
@@ -65,7 +58,7 @@
              libubsan.so libasan.so libtsan.so liblsan.so)
    replaces=($pkgname-multilib libgphobos)
  
-@@ -172,7 +181,6 @@ package_gcc-libs() {
+@@ -172,7 +176,6 @@ package_gcc-libs() {
  
    for lib in libatomic \
               libgfortran \
@@ -73,7 +66,7 @@
               libgomp \
               libitm \
               libquadmath \
-@@ -220,22 +228,18 @@ package_gcc() {
+@@ -220,22 +223,18 @@ package_gcc() {
    install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
@@ -97,7 +90,7 @@
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -252,14 +256,10 @@ package_gcc() {
+@@ -252,14 +251,10 @@ package_gcc() {
    make -C $CHOST/libsanitizer/asan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
    make -C $CHOST/libsanitizer/tsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
    make -C $CHOST/libsanitizer/lsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
@@ -114,7 +107,7 @@
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -270,7 +270,7 @@ package_gcc() {
+@@ -270,7 +265,7 @@ package_gcc() {
    # create cc-rs compatible symlinks
    # https://github.com/rust-lang/cc-rs/blob/1.0.73/src/lib.rs#L2578-L2581
    for binary in {c++,g++,gcc,gcc-ar,gcc-nm,gcc-ranlib}; do
@@ -123,7 +116,7 @@
    done
  
    # POSIX conformance launcher scripts for c89 and c99
-@@ -302,8 +302,6 @@ package_gcc-fortran() {
+@@ -302,8 +297,6 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS,gfor_cHEADERS}
@@ -132,7 +125,7 @@
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_fincludeHEADERS
    make -C gcc DESTDIR="$pkgdir" fortran.install-{common,man,info}
    install -Dm755 gcc/f951 "$pkgdir/${_libdir}/f951"
-@@ -348,10 +346,6 @@ package_gcc-ada() {
+@@ -348,10 +341,6 @@ package_gcc-ada() {
    make DESTDIR="${pkgdir}" INSTALL="install" \
      INSTALL_DATA="install -m644" install-libada
  
@@ -143,7 +136,7 @@
    ln -s gcc "$pkgdir/usr/bin/gnatgcc"
  
    # insist on dynamic linking, but keep static libraries because gnatmake complains
-@@ -360,12 +354,6 @@ package_gcc-ada() {
+@@ -360,12 +349,6 @@ package_gcc-ada() {
    ln -s libgnat-${pkgver%%.*}.so "$pkgdir/usr/lib/libgnat.so"
    rm -f "$pkgdir"/${_libdir}/adalib/libgna{rl,t}.so
  
@@ -156,3 +149,16 @@
    # Install Runtime Library Exception
    install -d "$pkgdir/usr/share/licenses/$pkgname/"
    ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
+@@ -512,3 +495,12 @@ package_libgccjit() {
+   ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
+     "$pkgdir/usr/share/licenses/$pkgname/"
+ }
++
++source+=(gcc-lib64-lib.patch)
++sha256sums+=('d09cbb949364442a78e886b8f55593f07ad17f1e5369ecc83d6c6826015ba22e')
++
++for i in "${!pkgname[@]}"; do
++  if [[ ${pkgname[$i]} = "lib32-gcc-libs" ]] || [[ ${pkgname[$i]} = "gcc-go" ]]; then
++    unset 'pkgname[$i]'
++  fi
++done
