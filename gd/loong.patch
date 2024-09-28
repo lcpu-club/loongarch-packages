@@ -1,0 +1,24 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,6 +26,14 @@ prepare() {
+   for f in tests/tiff/{tiff_read_bw,tiff_im2im,tiff_dpi}.c; do
+     echo 'int main() { return 0; }' > $f
+   done
++
++  # 2 tests fail on aarch64 (and riscv64, looongarch): https://github.com/libgd/libgd/issues/745
++  # upstream disabled them only for aarch64: https://github.com/libgd/libgd/commit/4ff557bc31fc12fba0a57554bf5f596e7fb3f15b
++  patch -Np1 -i "$srcdir/skip-failing-tests.patch"
++
++  # Test fail for new version of libheif: https://github.com/libgd/libgd/issues/889
++  # disable it for now
++  sed -i '/FILE/a return 77;' tests/heif/heif_read.c
+ }
+ 
+ build() {
+@@ -50,3 +58,6 @@ package() {
+   make DESTDIR="${pkgdir}" install
+   install -D -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+ }
++
++source+=(skip-failing-tests.patch)
++sha256sums+=('ac6041e58b51e4b0c4aaf225de637c1c0d467e306480d7925d6d124904ea7e45')
