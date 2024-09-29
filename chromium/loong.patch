@@ -1,15 +1,14 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index d9c69a6..d0947a4 100644
+index d9c69a6..3244d20 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -118,6 +118,20 @@ prepare() {
+@@ -118,6 +118,19 @@ prepare() {
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
  
 +  # Patches for loong64
 +  patch -Np1 -i "${srcdir}/loong64-fix-clang-builtins-path.diff"
 +  patch -Np1 -i "${srcdir}/chromium-loongarch64-${_PATCHSET_LOONG}/chromium/"chromium-*-rollup.diff
-+  patch -Np1 -i "${srcdir}/chromium-loongarch64-${_PATCHSET_LOONG}/chromium/"chromium-*-fix-invalid-substition-type.diff
 +  for _patch in "${srcdir}/chromium-loongarch64-${_PATCHSET_LOONG}/chromium/"chromium-*-loongarch64*.diff; do
 +    patch -Np1 -i $_patch
 +  done
@@ -23,11 +22,10 @@ index d9c69a6..d0947a4 100644
    # Fixes for building with libstdc++ instead of libc++
  
    # Link to system tools required by the build
-@@ -325,4 +339,11 @@ package() {
+@@ -325,4 +338,10 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
-+makedepends+=(libyuv) # Temporarily fix missing headers
 +_PATCHSET_LOONG="chromium-129.0.6668.68-1"
 +source+=("chromium-loong64-patchset.tar.gz::https://github.com/AOSC-Dev/chromium-loongarch64/archive/refs/tags/${_PATCHSET_LOONG}.tar.gz"
 +         "loong64-fix-clang-builtins-path.diff")
