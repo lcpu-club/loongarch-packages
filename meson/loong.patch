@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -21,7 +21,7 @@ makedepends=(
+@@ -21,11 +21,10 @@ makedepends=(
    python-setuptools
    python-wheel
  )
@@ -9,7 +9,11 @@
    boost
    clang
    cmake
-@@ -39,18 +39,18 @@ checkdepends=(
+-  cuda
+   cython
+   doxygen
+   gcc-fortran
+@@ -39,18 +38,18 @@ checkdepends=(
    graphviz
    gtest
    gtk-doc
@@ -31,3 +35,12 @@
    nasm
    netcdf-fortran
    openmpi
+@@ -64,7 +63,7 @@ checkdepends=(
+   rust-bindgen
+   sdl2
+   vala
+-  valgrind
++#  valgrind
+   vulkan-validation-layers
+   wxgtk3
+ )
