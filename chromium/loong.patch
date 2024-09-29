@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index d9c69a6..0883b76 100644
+index d9c69a6..d0947a4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -118,6 +118,20 @@ prepare() {
@@ -27,9 +27,9 @@ index d9c69a6..0883b76 100644
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
-+depends+=(libyuv)
++makedepends+=(libyuv) # Temporarily fix missing headers
 +_PATCHSET_LOONG="chromium-129.0.6668.68-1"
-+source+=("https://github.com/AOSC-Dev/chromium-loongarch64/archive/refs/tags/${_PATCHSET_LOONG}.tar.gz"
++source+=("chromium-loong64-patchset.tar.gz::https://github.com/AOSC-Dev/chromium-loongarch64/archive/refs/tags/${_PATCHSET_LOONG}.tar.gz"
 +         "loong64-fix-clang-builtins-path.diff")
 +sha256sums+=('bd2797ae4428975bd80bacb1c5671ced89756df8efb9c18aefb2374c892cae4d'
 +             'f3da3e04b19163a329510a64e169035dc4915cad3a254919c55ec26751ee3c23')
