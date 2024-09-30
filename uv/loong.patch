@@ -1,0 +1,18 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -27,11 +27,15 @@ sha256sums=('c8f9a057f47623712c183d468e266e5385e42474cad97a38d7fce05162bfff46')
+ 
+ prepare() {
+   cd "$pkgbase"
++  patch -Np1 -i ../update_cargo_lock.patch
+   local tripple="$(rustc -vV | sed -n 's/host: //p')"
+   cargo fetch --locked --target "$tripple"
+   mkdir completions
+ }
+ 
++source+=(update_cargo_lock.patch)
++sha256sums+=('967748bc5526acab497129e5b4b974480a1fe591b3eb1dea088de28f90d0538d')
++
+ # Note --frozen doesn't work here because cargo fetch didn't get everything
+ # maturin ends up trying to use so we make do with --locked ...
+ build() {
