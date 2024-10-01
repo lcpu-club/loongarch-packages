@@ -1,5 +1,3 @@
-diff --git a/src/include/mozilla_chardet/nsprpub/pr/include/prcpucfg_linux.h b/src/include/mozilla_chardet/nsprpub/pr/include/prcpucfg_linux.h
-index 2fdbf63..c3e9879 100644
 --- a/src/include/mozilla_chardet/nsprpub/pr/include/prcpucfg_linux.h
 +++ b/src/include/mozilla_chardet/nsprpub/pr/include/prcpucfg_linux.h
 @@ -914,6 +914,52 @@
@@ -55,20 +53,27 @@ index 2fdbf63..c3e9879 100644
  #else
  
  #error "Unknown CPU architecture"
-diff --git a/src/plugins/contrib/dragscroll/dragscrollcfg.h b/src/plugins/contrib/dragscroll/dragscrollcfg.h
-index 7fc28be..06d7197 100644
 --- a/src/plugins/contrib/dragscroll/dragscrollcfg.h
 +++ b/src/plugins/contrib/dragscroll/dragscrollcfg.h
-@@ -35,7 +35,13 @@ class cbDragScrollCfg: public cbConfigurationPanel
+@@ -1,6 +1,8 @@
+ #ifndef DragScrollCfg_H
+ #define DragScrollCfg_H
+ 
++#include <csignal>
++
+ #ifdef __BORLANDC__
+     #pragma hdrstop
+ #endif
+@@ -35,7 +37,13 @@
          wxString GetBitmapBaseName() const;
          void OnApply();
          void OnCancel(){}
 -        virtual void InitDialog(){ asm("int3");} /*trap*/
 +        virtual void InitDialog(){ /*trap*/
-+#if defined(__loongarch_lp64)
-+            asm(".4byte 0x00100073");
-+#else
++#if defined(__i386__) || defined(__x86_64__)
 +            asm("int3");
++#else
++            std::raise(SIGTRAP);
 +#endif
 +        }
  
