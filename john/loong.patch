@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6ca3519..2ba3ec9 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -93,6 +93,9 @@ build() {
+     mv ../run/john{,-non-xop}
+     ./configure "${options[@]}" CFLAGS="${CFLAGS} -mxop"
+     make clean; make
++  elif [[ "${CARCH}" == "loong64" ]]; then
++    ./configure "${options[@]}" CFLAGS="${CFLAGS/-DCPU_FALLBACK}"
++    make clean; make
+   else
+     ./configure "${options[@]}" CFLAGS="${CFLAGS}"
+     make clean; make
