@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6cbcfa8..a000cbd 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,7 +34,7 @@ build() {
+ 
+ check() {
+   cd pyfuse3
+-  PYTHONPATH="$PWD/build/lib.linux-$CARCH-cpython-$(python -c 'import sys; print("".join(map(str, sys.version_info[:2])))')" \
++  PYTHONPATH="$PWD/build/lib.linux-$(uname -m)-cpython-$(python -c 'import sys; print("".join(map(str, sys.version_info[:2])))')" \
+     pytest
+ }
+ 
