@@ -1,0 +1,30 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a2f20d8..5c509f9 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,11 +18,13 @@ _commit=4c96b96f7fbe07223627c469ff33376b2a634748
+ source=(libretro-yabause::git+https://github.com/libretro/yabause.git#commit=${_commit})
+ sha256sums=(SKIP)
+ 
++: <<COMMENT_SEPARATOR
+ pkgver() {
+   cd libretro-yabause
+ 
+   git rev-list --count HEAD
+ }
++COMMENT_SEPARATOR
+ 
+ build() {
+   make -C libretro-yabause/yabause/src/libretro
+@@ -32,4 +34,11 @@ package() {
+   install -Dm 644 libretro-yabause/yabause/src/libretro/yabause_libretro.so -t "${pkgdir}"/usr/lib/libretro/
+ }
+ 
++prepare() {
++  patch -d libretro-yabause -p1 -i "${srcdir}/fix-unrecognized-command-line-option-msse.patch"
++}
++
++source+=("fix-unrecognized-command-line-option-msse.patch::https://github.com/wszqkzqk/yabause/commit/59bfd39175650a07b646cd96c63ddc78137dd978.patch")
++sha256sums+=('0aef2453c10b2be8cf117bc6dde989db3ae544b2c39883484a05f500b9e47f40')
++
+ # vim: ts=2 sw=2 et:
