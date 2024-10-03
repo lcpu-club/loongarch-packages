@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,7 +25,8 @@ prepare() {
+ 
+ build() {
+   cd OpenCOLLADA
+-
++  sed -i '/warning_sstream/a #include <cstdint>' DAEValidator/library/src/DaeValidator.cpp
++  sed -i '/zlib.h/a #include <cstdint>' DAEValidator/library/src/XmlDoc.cpp
+   [[ -d build ]] && rm -r build
+   mkdir build && cd build
+ 
