@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -12,6 +12,7 @@ makedepends=('gobject-introspection' 'python' 'gtk-doc')
+ optdepends=('gst-plugins-good' 'gst-plugins-bad')
+ conflicts=('farsight2')
+ replaces=('farsight2')
++options=(!lto)
+ source=(https://freedesktop.org/software/$pkgname/releases/$pkgname/$pkgname-$pkgver.tar.gz{,.asc}
+         farstream-make-4.3.patch)
+ sha256sums=('cb7d112433cf7c2e37a8ec918fb24f0ea5cb293cfa1002488e431de26482f47b'
