@@ -1,0 +1,37 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 15e027a..698f947 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,7 +22,6 @@ pkgname=(
+   qemu-ui-{curses,dbus,egl-headless,gtk,opengl,sdl,spice-{app,core}}
+   qemu-user{,-static}{,-binfmt}
+   qemu-vhost-user-gpu
+-  qemu-vmsr-helper
+   qemu-{base,desktop,emulators-full,full}
+ )
+ pkgver=9.1.0
+@@ -217,7 +216,6 @@ _qemu_desktop_optdepends=(
+   'qemu-tests: for QEMU tests'
+   'qemu-tools: for QEMU tools'
+   'qemu-user: for user mode emulation of QEMU targets'
+-  'qemu-vmsr-helper: for accessing the Running Average Power Limit (RAPL) MSR'
+ )
+ 
+ _qemu_base_optdepends=(
+@@ -606,8 +604,6 @@ package_qemu-common() {
+ 
+     _pick qemu-vhost-user-gpu usr/lib/qemu/vhost-user-gpu
+     _pick qemu-vhost-user-gpu usr/share/qemu/vhost-user/50-qemu-gpu.json
+-
+-    _pick qemu-vmsr-helper usr/bin/qemu-vmsr-helper
+   )
+ }
+ 
+@@ -1231,7 +1227,6 @@ package_qemu-full() {
+     qemu-tests=$pkgver-$pkgrel
+     qemu-tools=$pkgver-$pkgrel
+     qemu-user=$pkgver-$pkgrel
+-    qemu-vmsr-helper=$pkgver-$pkgrel
+   )
+   optdepends=("${_qemu_full_optdepends[@]}")
+   provides=(qemu=$pkgver)
