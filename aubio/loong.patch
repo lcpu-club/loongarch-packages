@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index ca2aec7..b12cb65 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -117,6 +117,14 @@ package_aubio() {
+   # move doc, as waf configure doesn't honor the htmldir and docdir settings
+   mv -v "$pkgdir/usr/share/doc/lib$pkgname-doc" "$pkgdir/usr/share/doc/$pkgname"
+   install -vDm 644 {AUTHORS,ChangeLog,README.md} -t "$pkgdir/usr/share/doc/$pkgname/"
++  
++  # For some reasons config `--libdir=/usr/lib` in waf doesn't work
++  # So we need to manually move
++  if [ -d "$pkgdir/usr/lib64" ]; then
++    mkdir -p "$pkgdir/usr/lib"
++    mv -v "$pkgdir/usr/lib64"/* "$pkgdir/usr/lib"
++    rmdir "$pkgdir/usr/lib64"
++  fi
+ }
+ 
+ package_python-aubio() {
