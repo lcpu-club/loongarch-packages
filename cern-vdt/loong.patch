@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 06d4a2c..b66c423 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -14,10 +14,15 @@ makedepends=('cmake' 'python')
+ source=("${pkgname}-${pkgver}.tar.gz::https://github.com/dpiparo/${_pkgname}/archive/v${pkgver}.tar.gz")
+ sha256sums=('8b1664b45ec82042152f89d171dd962aea9bb35ac53c8eebb35df1cb9c34e498')
+ 
++source+=("00-lsx.patch")
++sha256sums+=('b4e9938a051722ff065130f57c3da332252ceccd7607e0f191e6b9e44bc5abf5')
++
+ prepare() {
+   # remove scripts incompatible with Python 3.12: https://github.com/dpiparo/vdt/issues/18
+   rm -v $_pkgname-$pkgver/src/vdt.py
+   rm -v $_pkgname-$pkgver/progs/{{vdtNumpytest,vdtNumpyTime,testExp}.py,{vdtTiming,vdtTest}.ipynb}
++  # patch lsx extension
++  patch -N -d $_pkgname-$pkgver/ -i ../00-lsx.patch
+ }
+ 
+ build() {
