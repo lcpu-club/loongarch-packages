@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f2d7c00..f40ce5a 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -16,6 +16,11 @@ source=(https://xorg.freedesktop.org/releases/individual/lib/${pkgname}-${pkgver
@@ -12,21 +14,20 @@
  build() {
    arch-meson $pkgname-$pkgver build \
      -D loongson-mmi=disabled \
-@@ -25,7 +30,12 @@ build() {
+@@ -25,7 +30,11 @@ build() {
      -D a64-neon=disabled \
      -D iwmmxt=disabled \
      -D mips-dspr2=disabled \
 -    -D gtk=disabled
 +    -D gtk=disabled \
 +    -D lsx=enabled \
-+    -D b_lto=false \
 +    -D mmx=disabled \
 +    -D ssse3=disabled \
 +    -D sse2=disabled
    ninja -C build
  }
  
-@@ -37,3 +47,6 @@ package() {
+@@ -37,3 +46,6 @@ package() {
    DESTDIR="$pkgdir" meson install -C build
    install -Dt "$pkgdir/usr/share/licenses/$pkgname" -m644 $pkgname-$pkgver/COPYING
  }
