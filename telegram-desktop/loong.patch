@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7dfaa75..697ddf9 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,3 +38,9 @@ build() {
+ package() {
+     DESTDIR="$pkgdir" cmake --install build
+ }
++
++prepare() {
++    export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
++}
++
++makedepends+=(mold)
