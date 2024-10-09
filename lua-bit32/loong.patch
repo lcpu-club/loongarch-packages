@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,7 +21,7 @@ makedepends=(lua
+              luarocks)
+ _archive="$_project-$pkgver"
+ _rockspec="$_rockname-$_pseudover-$_rockrel.rockspec"
+-_rock="$_rockname-$_pseudover-$_rockrel.linux-$CARCH.rock"
++_rock="$_rockname-$_pseudover-$_rockrel.linux-`uname -m`.rock"
+ source=("$url/archive/v$pkgver/$_archive.tar.gz")
+ sha256sums=('6a6f2d444aa894b972bc1fac2cb73f5257005f61a513a571d08302b122045047')
+ 
