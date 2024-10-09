@@ -1,0 +1,24 @@
+Index: luarocks-3.9.1/src/luarocks/core/sysdetect.lua
+===================================================================
+--- luarocks-3.9.1.orig/src/luarocks/core/sysdetect.lua
++++ luarocks-3.9.1/src/luarocks/core/sysdetect.lua
+@@ -91,6 +91,7 @@ local e_machines = {
+    [0xB6] = "alpha",
+    [0xB7] = "aarch64",
+    [0xF3] = "riscv64",
++   [0x102] = "loongarch",
+    [0x9026] = "alpha",
+ }
+ 
+@@ -219,6 +220,11 @@ local function read_elf_header(fd)
+    if endian == 1 and processor == "ppc64" then
+       processor = "ppc64le"
+    end
++   if processor == "loongarch" and hdr.bits == 1 then
++      processor = "loongarch32"
++   elseif processor == "loongarch" and hdr.bits == 2 then
++      processor = "loongarch64"
++   end
+ 
+    local elfversion = read(fd, 4, endian)
+    if elfversion ~= 1 then
