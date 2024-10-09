@@ -1,0 +1,24 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 1bf04f5..8108450 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -28,3 +28,19 @@ package() {
+   install -vDm 644 $pkgname-$pkgver/README.md -t "$pkgdir/usr/share/doc/$pkgname/"
+   install -vDm 644 $pkgname-$pkgver/COPYING -t "$pkgdir/usr/share/licenses/$pkgname/"
+ }
++
++prepare() {
++  patch -d $pkgname-$pkgver -p1 -i "${srcdir}/Fix-type-convert-error-for-LSX.patch"
++  patch -d $pkgname-$pkgver -p1 -i "${srcdir}/loongarch-float16-use-a-portable-version-to-avoid-compilation-errors.patch"
++  # GCC will fail with `internal compiler error`
++  export CC=clang
++  export CXX=clang++
++}
++
++makedepends+=(clang)
++source+=( "Fix-type-convert-error-for-LSX.patch::https://github.com/simd-everywhere/simde/commit/bda3cdf310925b1e88388f0dc800732dcb690e03.patch"
++          "loongarch-float16-use-a-portable-version-to-avoid-compilation-errors.patch")
++sha512sums+=( 'd97e4e3c36bed2a710fbc9055337cbd27c4eb6b4bb70545a9abd539b5f8ef29195eadd64a6fb481d40924ae36133b1111e6861c65d4bcab69e73465578761c55'
++              '468d632a0633df0f276cb5134eeda08cf989b627b6912a3be48548885b34920a5f57aff65ed16a6174fe0a2553a3b27b8eb568ece25cb5a5a6fcd5158d914aa3')
++b2sums+=( 'b22758c45bdb7ebdc27071238e66ec7b9a7c97ee7df349008e5f6510ff63a8e810964926f81ffa94e1b26a631d354d818d24d1776de4e642acef46d19a5aedf7'
++          '83908820aeafd1fb06b81b6126bb771a2ce342a3ffd2b06756b4d25c714a3f550e017442884b0461a13250b0fea4b1cc1af8fd2cbeee1644e20131e29242bfda')
