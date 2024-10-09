@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8de3e41..e4c880b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -8,7 +8,7 @@ pkgdesc="Thin wrapper for pandoc"
+ arch=('any')
+ license=('MIT')
+ url="https://github.com/JessicaTegner/pypandoc"
+-depends=('pandoc')
++#depends=('pandoc')
+ makedepends=('python-build' 'python-installer' 'python-poetry-core' 'python-wheel')
+ checkdepends=('texlive-basic' 'texlive-latexextra' 'texlive-fontsrecommended' 'python-pandocfilters')
+ source=("https://github.com/JessicaTegner/pypandoc/archive/v$pkgver/$pkgname-$pkgver.tar.gz")
