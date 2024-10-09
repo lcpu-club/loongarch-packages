@@ -1,0 +1,53 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,15 +17,15 @@ pkgrel=1
+ arch=('x86_64')
+ url='https://openjdk.java.net/'
+ license=('LicenseRef-Java')
+-makedepends=('java-environment=21' 'cpio' 'unzip' 'zip' 'libelf' 'libcups' 'libx11'
+-             'libxrender' 'libxtst' 'libxt' 'libxext' 'libxrandr' 'alsa-lib' 'pandoc'
++makedepends=('jdk-openjdk' 'cpio' 'unzip' 'zip' 'libelf' 'libcups' 'libx11'
++             'libxrender' 'libxtst' 'libxt' 'libxext' 'libxrandr' 'alsa-lib'
+              'graphviz' 'freetype2' 'libjpeg-turbo' 'giflib' 'libpng' 'lcms2'
+              'libnet' 'bash' 'harfbuzz' 'gcc-libs' 'glibc')
+-source=(https://github.com/openjdk/jdk${_majorver}u/archive/${_git_tag}.tar.gz
++source=(https://github.com/loongson/jdk${_majorver}u/archive/refs/tags/${_git_tag}-ls-ga.tar.gz
+         freedesktop-java.desktop
+         freedesktop-jconsole.desktop
+         freedesktop-jshell.desktop)
+-sha256sums=('b8b37fa6fcc284d91e7458c703ca4c893a1dd5a6e0f6b9e198e7d13cd8efd24d'
++sha256sums=('c0562c564f9872bf76ba1835b8be860418895dd413f7e0bbdd6aa69d1473884e'
+             '72111743ab6ab36854b0c85a504172983715d0798fce10bc4e35689b7d15fd93'
+             '8ecdf5c1605bafa58b3f7da615e6d8d3d943e3a2d3831930d6efa7815aacce07'
+             '50fc0d677489b73d549df2f08d759d5f057f200adbbab83ea5e87456152ee03e')
+@@ -33,10 +33,11 @@ sha256sums=('b8b37fa6fcc284d91e7458c703ca4c893a1dd5a6e0f6b9e198e7d13cd8efd24d'
+ case "${CARCH}" in
+   x86_64) _JARCH='x86_64';;
+   i686)   _JARCH='x86';;
++  loong64) _JARCH='loongarch64';;
+ esac
+ 
+ _jvmdir=/usr/lib/jvm/java-${_majorver}-openjdk
+-_jdkdir=jdk${_majorver}u-${_git_tag//+/-}
++_jdkdir=jdk${_majorver}u-${_git_tag//+/-}-ls-ga
+ _imgdir=${_jdkdir}/build/linux-${_JARCH}-server-release/images
+ 
+ _nonheadless=(lib/libawt_xawt.so
+@@ -117,7 +118,7 @@ build() {
+     ${NUM_PROC_OPT}
+     #--disable-javac-server
+ 
+-  make images legacy-jre-image docs
++  make images legacy-jre-image # docs
+ 
+   # https://bugs.openjdk.java.net/browse/JDK-8173610
+   find "${srcdir}/${_imgdir}" -iname '*.so' -exec chmod +x {} \;
+@@ -348,7 +349,7 @@ package_openjdk21-doc() {
+   provides=("openjdk${_majorver}-doc=${pkgver}-${pkgrel}")
+ 
+   install -dm 755 "${pkgdir}/usr/share/doc"
+-  cp -r ${_imgdir}/docs "${pkgdir}/usr/share/doc/${pkgbase}"
++  #cp -r ${_imgdir}/docs "${pkgdir}/usr/share/doc/${pkgbase}"
+ 
+   install -dm 755 "${pkgdir}/usr/share/licenses"
+   ln -s ${pkgbase} "${pkgdir}/usr/share/licenses/${pkgname}"
