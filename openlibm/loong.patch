@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 1b43b80..415ca84 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,6 +17,7 @@ sha256sums=('f7c5ce8166b53ec31f6169ae9ae11d033ff0b05b9a05e53591b430a34bca9845')
+ prepare() {
+   cd $pkgname
+   sed -e 's|/usr/local|/usr|' -i Make.inc
++  patch -Np1 -d . -i ../308.patch
+ }
+ 
+ build() {
+@@ -24,6 +25,9 @@ build() {
+   make prefix=/usr
+ }
+ 
++source+=(https://github.com/JuliaMath/openlibm/pull/308.patch)
++sha256sums+=('83bc92143076abf05e7894c0a4895f2cb7d4897744dc16cd7d671e44932701b5')
++
+ package() {
+   cd $pkgname
+   make DESTDIR="$pkgdir" install
