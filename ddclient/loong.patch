@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,6 +25,7 @@ validpgpkeys=('53B26AEDC08246715E15504B236B6291555E8401' # Sandro Jäckel
+ 
+ prepare() {
+   patch -Np1 -d ${pkgname} -i "${srcdir}/permission.patch"
++  sed -i 's/-Werror //' ${pkgname}/configure.ac
+ }
+ 
+ build() {
