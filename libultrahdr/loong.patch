@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0bb253b..95e03e7 100644
+index 0bb253b..1889da4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -32,3 +32,10 @@ check() {
@@ -11,5 +11,5 @@ index 0bb253b..95e03e7 100644
 +  patch -d "${srcdir}/${pkgname}" -p1 -i "${srcdir}/add-loong64-support.patch"
 +}
 +
-+source+=("add-loong64-support.patch::https://github.com/wszqkzqk/libultrahdr/commit/96e7bc1eeda936035c082269611cce5112b25040.patch")
-+sha256sums+=('857424bd386e80fa24ad0bdd8da9cf51e9e3cb1795c00d45fb0228066b7d39ae')
++source+=("add-loong64-support.patch::https://github.com/google/libultrahdr/commit/0fbd5117560cfd415e969d4f6f7a8011e9e7818d.patch")
++sha256sums+=('7513241bf31cd03d71c8b373105936e34499dc1d1d1d7725ce07b16dac263b82')
