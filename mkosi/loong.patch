@@ -1,0 +1,22 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,7 +18,8 @@ depends=(
+   systemd
+ )
+ makedepends=(
+-  pandoc-cli
++  #pandoc-cli
++  ruby-ronn-ng
+   python-build
+   python-installer
+   python-setuptools
+@@ -64,7 +65,8 @@ b2sums=('98685e19b7891f409ccffe4223e588c3777649b817228e0590d6603f96fb779cd1c0d09
+ build() {
+   cd $pkgname-$pkgver
+   python -m build --wheel --no-isolation
+-  pandoc -t man -s -o $pkgname/resources/$pkgname.1 $pkgname/resources/$pkgname.md
++  #pandoc -t man -s -o $pkgname/resources/$pkgname.1 $pkgname/resources/$pkgname.md
++  ronn -r --section=1 $pkgname/resources/$pkgname.md
+ }
+ 
+ check() {
