@@ -1,0 +1,377 @@
+diff -urN py-cpuinfo-9.0.0.orig/cpuinfo/cpuinfo.py py-cpuinfo-9.0.0/cpuinfo/cpuinfo.py
+--- py-cpuinfo-9.0.0.orig/cpuinfo/cpuinfo.py	2024-10-13 19:19:55.093112460 +0800
++++ py-cpuinfo-9.0.0/cpuinfo/cpuinfo.py	2024-10-13 19:20:13.376632059 +0800
+@@ -362,9 +362,9 @@
+ 	arch, bits = _parse_arch(DataSource.arch_string_raw)
+ 	if not arch in ['X86_32', 'X86_64', 'ARM_7', 'ARM_8',
+ 	               'PPC_64', 'S390X', 'MIPS_32', 'MIPS_64',
+-				   "RISCV_32", "RISCV_64"]:
++				   "RISCV_32", "RISCV_64", 'Loong_32', 'Loong_64']:
+ 		raise Exception("py-cpuinfo currently only works on X86 "
+-		                "and some ARM/PPC/S390X/MIPS/RISCV CPUs.")
++		                "and some ARM/PPC/S390X/MIPS/RISCV/LoongArch CPUs.")
+ 
+ def _obj_to_b64(thing):
+ 	import pickle
+@@ -816,10 +816,11 @@
+ 	elif re.match(r'^s390x$', arch_string_raw):
+ 		arch = 'S390X'
+ 		bits = 64
+-	elif arch_string_raw == 'mips':
++	# MIPS
++	elif re.match('^mips$', arch_string_raw):
+ 		arch = 'MIPS_32'
+ 		bits = 32
+-	elif arch_string_raw == 'mips64':
++	elif re.match('^mips64$', arch_string_raw):
+ 		arch = 'MIPS_64'
+ 		bits = 64
+ 	# RISCV
+@@ -828,6 +829,12 @@
+ 		bits = 32
+ 	elif re.match(r'^riscv64$|^riscv64be$', arch_string_raw):
+ 		arch = 'RISCV_64'
++	# LoongArch
++	elif re.match('^loongarch32$', arch_string_raw):
++		arch = 'Loong_32'
++		bits = 32
++	elif re.match('^loongarch64$', arch_string_raw):
++		arch = 'Loong_64'
+ 		bits = 64
+ 
+ 	return (arch, bits)
+diff -urN py-cpuinfo-9.0.0.orig/tests/test_invalid_cpu.py py-cpuinfo-9.0.0/tests/test_invalid_cpu.py
+--- py-cpuinfo-9.0.0.orig/tests/test_invalid_cpu.py	2024-10-13 19:19:55.093112460 +0800
++++ py-cpuinfo-9.0.0/tests/test_invalid_cpu.py	2024-10-13 19:20:13.376632059 +0800
+@@ -33,4 +33,4 @@
+ 			cpuinfo._check_arch()
+ 			self.fail('Failed to raise Exception')
+ 		except Exception as err:
+-			self.assertEqual('py-cpuinfo currently only works on X86 and some ARM/PPC/S390X/MIPS/RISCV CPUs.', err.args[0])
++			self.assertEqual('py-cpuinfo currently only works on X86 and some ARM/PPC/S390X/MIPS/RISCV/LoongArch CPUs.', err.args[0])
+diff -urN py-cpuinfo-9.0.0.orig/tests/test_linux_new_world_loongarch64.py py-cpuinfo-9.0.0/tests/test_linux_new_world_loongarch64.py
+--- py-cpuinfo-9.0.0.orig/tests/test_linux_new_world_loongarch64.py	1970-01-01 08:00:00.000000000 +0800
++++ py-cpuinfo-9.0.0/tests/test_linux_new_world_loongarch64.py	2024-10-13 19:20:13.376632059 +0800
+@@ -0,0 +1,171 @@
++
++
++import unittest
++from cpuinfo import *
++import helpers
++
++
++class MockDataSource(object):
++	bits = '64bit'
++	cpu_count = 4
++	is_windows = False
++	arch_string_raw = 'loongarch64'
++	uname_string_raw = 'loongarch64'
++	can_cpuid = False
++
++	@staticmethod
++	def has_proc_cpuinfo():
++		return True
++
++	@staticmethod
++	def has_lscpu():
++		return True
++
++	@staticmethod
++	def cat_proc_cpuinfo():
++		returncode = 0
++		output = r'''
++system type		: generic-loongson-machine
++
++processor		: 0
++package			: 0
++core			: 0
++CPU Family		: Loongson-64bit
++Model Name		: Loongson-3A5000
++CPU Revision		: 0x10
++FPU Revision		: 0x00
++CPU MHz			: 2500.00
++BogoMIPS		: 5000.00
++TLB Entries		: 2112
++Address Sizes		: 48 bits physical, 48 bits virtual
++ISA			: loongarch32 loongarch64
++Features		: cpucfg lam ual fpu complex crypto lvz
++Hardware Watchpoint	: yes, iwatch count: 0, dwatch count: 0
++
++processor		: 1
++package			: 0
++core			: 1
++CPU Family		: Loongson-64bit
++Model Name		: Loongson-3A5000
++CPU Revision		: 0x10
++FPU Revision		: 0x00
++CPU MHz			: 2500.00
++BogoMIPS		: 5000.00
++TLB Entries		: 2112
++Address Sizes		: 48 bits physical, 48 bits virtual
++ISA			: loongarch32 loongarch64
++Features		: cpucfg lam ual fpu complex crypto lvz
++Hardware Watchpoint	: yes, iwatch count: 0, dwatch count: 0
++
++processor		: 2
++package			: 0
++core			: 2
++CPU Family		: Loongson-64bit
++Model Name		: Loongson-3A5000
++CPU Revision		: 0x10
++FPU Revision		: 0x00
++CPU MHz			: 2500.00
++BogoMIPS		: 5000.00
++TLB Entries		: 2112
++Address Sizes		: 48 bits physical, 48 bits virtual
++ISA			: loongarch32 loongarch64
++Features		: cpucfg lam ual fpu complex crypto lvz
++Hardware Watchpoint	: yes, iwatch count: 0, dwatch count: 0
++
++processor		: 3
++package			: 0
++core			: 3
++CPU Family		: Loongson-64bit
++Model Name		: Loongson-3A5000
++CPU Revision		: 0x10
++FPU Revision		: 0x00
++CPU MHz			: 2500.00
++BogoMIPS		: 5000.00
++TLB Entries		: 2112
++Address Sizes		: 48 bits physical, 48 bits virtual
++ISA			: loongarch32 loongarch64
++Features		: cpucfg lam ual fpu complex crypto lvz
++Hardware Watchpoint	: yes, iwatch count: 0, dwatch count: 0
++
++'''
++		return returncode, output
++
++	@staticmethod
++	def lscpu():
++		returncode = 0
++		output = r'''
++Architecture:        loongarch64
++Byte Order:          Little Endian
++CPU(s):              4
++On-line CPU(s) list: 0-3
++Model name:          -
++Thread(s) per core:  1
++Core(s) per socket:  4
++Socket(s):           1
++BogoMIPS:            5000.00
++Flags:               cpucfg lam ual fpu complex crypto lvz
++L1d cache:           256 KiB (4 instances)
++L1i cache:           256 KiB (4 instances)
++L2 cache:            1 MiB (4 instances)
++L3 cache:            16 MiB (1 instance)
++NUMA node(s):        1
++NUMA node0 CPU(s):   0-3
++'''
++		return returncode, output
++
++
++class TestLinux_NewWorld_loongarch64(unittest.TestCase):
++
++	def setUp(self):
++		helpers.backup_data_source(cpuinfo)
++		helpers.monkey_patch_data_source(cpuinfo, MockDataSource)
++
++	def tearDown(self):
++		helpers.restore_data_source(cpuinfo)
++
++	'''
++	Make sure calls return the expected number of fields.
++	'''
++	def test_returns(self):
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_registry()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_cpufreq_info()))
++		self.assertEqual(6, len(cpuinfo._get_cpu_info_from_lscpu()))
++		self.assertEqual(6, len(cpuinfo._get_cpu_info_from_proc_cpuinfo()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_sysctl()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_kstat()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_dmesg()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_cat_var_run_dmesg_boot()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_ibm_pa_features()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_sysinfo()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_cpuid()))
++		self.assertEqual(17, len(cpuinfo._get_cpu_info_internal()))
++
++	def test_get_cpu_info_from_lscpu(self):
++		info = cpuinfo._get_cpu_info_from_lscpu()
++
++		self.assertEqual('-', info['brand_raw'])
++		self.assertEqual(262144, info['l1_data_cache_size'])
++		self.assertEqual(262144, info['l1_instruction_cache_size'])
++		self.assertEqual(1048576, info['l2_cache_size'])
++		self.assertEqual(16777216, info['l3_cache_size'])
++		self.assertEqual(['complex', 'cpucfg', 'crypto', 'fpu', 'lam', 'lvz', 'ual'], info['flags'])
++
++	def test_get_cpu_info_from_proc_cpuinfo(self):
++		info = cpuinfo._get_cpu_info_from_proc_cpuinfo()
++
++		self.assertEqual('Loongson-3A5000', info['brand_raw'])
++		self.assertEqual('2.5000 GHz', info['hz_advertised_friendly'])
++		self.assertEqual('2.5000 GHz', info['hz_actual_friendly'])
++		self.assertEqual((2500000000, 0), info['hz_advertised'])
++		self.assertEqual((2500000000, 0), info['hz_actual'])
++		self.assertEqual(['complex', 'cpucfg', 'crypto', 'fpu', 'lam', 'lvz', 'ual'], info['flags'])
++
++	def test_all(self):
++		info = cpuinfo._get_cpu_info_internal()
++
++		self.assertEqual('Loongson-3A5000', info['brand_raw'])
++		self.assertEqual('Loong_64', info['arch'])
++		self.assertEqual(64, info['bits'])
++		self.assertEqual(4, info['count'])
++		self.assertEqual('loongarch64', info['arch_string_raw'])
++		self.assertEqual(['complex', 'cpucfg', 'crypto', 'fpu', 'lam', 'lvz', 'ual'], info['flags'])
+diff -urN py-cpuinfo-9.0.0.orig/tests/test_linux_old_world_loongarch64.py py-cpuinfo-9.0.0/tests/test_linux_old_world_loongarch64.py
+--- py-cpuinfo-9.0.0.orig/tests/test_linux_old_world_loongarch64.py	1970-01-01 08:00:00.000000000 +0800
++++ py-cpuinfo-9.0.0/tests/test_linux_old_world_loongarch64.py	2024-10-13 19:20:13.376632059 +0800
+@@ -0,0 +1,126 @@
++
++
++import unittest
++from cpuinfo import *
++import helpers
++
++
++class MockDataSource(object):
++	bits = '64bit'
++	cpu_count = 4
++	is_windows = False
++	arch_string_raw = 'loongarch64'
++	uname_string_raw = 'loongarch64'
++	can_cpuid = False
++
++	@staticmethod
++	def has_proc_cpuinfo():
++		return True
++
++	@staticmethod
++	def has_lscpu():
++		return True
++
++	@staticmethod
++	def cat_proc_cpuinfo():
++		returncode = 0
++		output = r'''
++system type		: generic-loongson-machine
++processor		: 0
++package			: 0
++core			: 0
++cpu family		: Loongson-64bit
++model name		: Loongson-3A5000LL
++CPU Revision		: 0x10
++FPU Revision		: 0x00
++CPU MHz			: 2300.00
++BogoMIPS		: 4600.00
++TLB entries		: 2112
++Address sizes		: 48 bits physical, 48 bits virtual
++isa			: loongarch32 loongarch64
++features		: cpucfg lam ual fpu lsx lasx complex crypto lvz
++hardware watchpoint	: yes, iwatch count: 8, dwatch count: 8
++'''
++		return returncode, output
++
++	@staticmethod
++	def lscpu():
++		returncode = 0
++		output = r'''
++Architecture:        loongarch64
++Byte Order:          Little Endian
++CPU(s):              4
++On-line CPU(s) list: 0-3
++Thread(s) per core:  1
++Core(s) per socket:  4
++Socket(s):           1
++NUMA node(s):        1
++CPU family:          Loongson-64bit
++Model name:          Loongson-3A5000LL
++CPU max MHz:         2300.0000
++CPU min MHz:         225.0000
++BogoMIPS:            4600.00
++L1d cache:           64K
++L1i cache:           64K
++L2 cache:            256K
++L3 cache:            16384K
++NUMA node0 CPU(s):   0-3
++Flags:               cpucfg lam ual fpu lsx lasx complex crypto lvz
++'''
++		return returncode, output
++
++
++class TestLinux_OldWorld_loongarch64(unittest.TestCase):
++
++	def setUp(self):
++		helpers.backup_data_source(cpuinfo)
++		helpers.monkey_patch_data_source(cpuinfo, MockDataSource)
++
++	def tearDown(self):
++		helpers.restore_data_source(cpuinfo)
++
++	'''
++	Make sure calls return the expected number of fields.
++	'''
++	def test_returns(self):
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_registry()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_cpufreq_info()))
++		self.assertEqual(10, len(cpuinfo._get_cpu_info_from_lscpu()))
++		self.assertEqual(6, len(cpuinfo._get_cpu_info_from_proc_cpuinfo()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_sysctl()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_kstat()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_dmesg()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_cat_var_run_dmesg_boot()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_ibm_pa_features()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_sysinfo()))
++		self.assertEqual(0, len(cpuinfo._get_cpu_info_from_cpuid()))
++		self.assertEqual(17, len(cpuinfo._get_cpu_info_internal()))
++
++	def test_get_cpu_info_from_lscpu(self):
++		info = cpuinfo._get_cpu_info_from_lscpu()
++
++		self.assertEqual('Loongson-3A5000LL', info['brand_raw'])
++		self.assertEqual(65536, info['l1_data_cache_size'])
++		self.assertEqual(65536, info['l1_instruction_cache_size'])
++		self.assertEqual(262144, info['l2_cache_size'])
++		self.assertEqual(16777216, info['l3_cache_size'])
++
++	def test_get_cpu_info_from_proc_cpuinfo(self):
++		info = cpuinfo._get_cpu_info_from_proc_cpuinfo()
++
++		self.assertEqual('Loongson-3A5000LL', info['brand_raw'])
++		self.assertEqual('2.3000 GHz', info['hz_advertised_friendly'])
++		self.assertEqual('2.3000 GHz', info['hz_actual_friendly'])
++		self.assertEqual((2300000000, 0), info['hz_advertised'])
++		self.assertEqual((2300000000, 0), info['hz_actual'])
++		self.assertEqual(['complex', 'cpucfg', 'crypto', 'fpu', 'lam', 'lasx', 'lsx', 'lvz', 'ual'], info['flags'])
++
++	def test_all(self):
++		info = cpuinfo._get_cpu_info_internal()
++
++		self.assertEqual('Loongson-3A5000LL', info['brand_raw'])
++		self.assertEqual('Loong_64', info['arch'])
++		self.assertEqual(64, info['bits'])
++		self.assertEqual(4, info['count'])
++		self.assertEqual('loongarch64', info['arch_string_raw'])
++		self.assertEqual(['complex', 'cpucfg', 'crypto', 'fpu', 'lam', 'lasx', 'lsx', 'lvz', 'ual'], info['flags'])
+diff -urN py-cpuinfo-9.0.0.orig/test_suite.py py-cpuinfo-9.0.0/test_suite.py
+--- py-cpuinfo-9.0.0.orig/test_suite.py	2024-10-13 19:19:55.096445827 +0800
++++ py-cpuinfo-9.0.0/test_suite.py	2024-10-13 19:20:13.376632059 +0800
+@@ -60,6 +60,8 @@
+ from test_linux_alt_p9_mipsel_bfk3 import TestLinuxAlt_p9_mipsel_bfk3
+ from test_linux_mips64el_loongson3A3000 import TestLinux_mips64el_Loongson3A3000
+ from test_linux_ubuntu_21_04_riscv64 import TestLinuxUbuntu_21_04_riscv64
++from test_linux_new_world_loongarch64 import TestLinux_NewWorld_loongarch64
++from test_linux_old_world_loongarch64 import TestLinux_OldWorld_loongarch64
+ from test_pcbsd_10_x86_64 import TestPCBSD
+ from test_free_bsd_11_x86_64 import TestFreeBSD_11_X86_64
+ from test_osx_10_9_x86_64 import TestOSX_10_9
+@@ -112,6 +114,8 @@
+ 		TestLinux_Odroid_C2_Aarch_64,
+ 		TestLinux_Odroid_XU3_arm_32,
+ 		TestLinuxUbuntu_21_04_riscv64,
++		TestLinux_NewWorld_loongarch64,
++		TestLinux_OldWorld_loongarch64,
+ 		TestFreeBSD_11_X86_64,
+ 		TestPCBSD,
+ 		TestOSX_10_9,

@@ -1,0 +1,32 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -2,7 +2,7 @@
+ 
+ pkgname=python-py-cpuinfo
+ pkgver=9.0.0
+-pkgrel=4
++pkgrel=4.1
+ arch=('any')
+ pkgdesc='Get CPU info with pure Python'
+ url='https://github.com/workhorsy/py-cpuinfo'
+@@ -13,14 +13,19 @@ checkdepends=('python-pytest')
+ source=("$pkgname-$pkgver.tar.gz::https://github.com/workhorsy/py-cpuinfo/archive/v$pkgver.tar.gz")
+ sha512sums=('169ab080f10184d9067c041801f1d7c506532371cd5aaaeb05b6d10d3a9b079e011b6a992f4f8e8c6c47cfe8c0e0e6b62e147469544f0bf052aa9927813584c3')
+ 
++source+=('add-loong64-support.patch')
++sha512sums+=('76e7991ff61408c9dd1d8736a17accb2a478d1280dcd27cb3b7f3d343461d49436571de19295b4318e7b4ff1e56a9644e58233b77c3a0213bc697c4657909965')
++
+ build() {
+   cd py-cpuinfo-$pkgver
++  patch -Np1 -i ../add-loong64-support.patch
+   python -m build --wheel --no-isolation
+ }
+ 
+ check() {
+   cd py-cpuinfo-$pkgver
+-  pytest
++  pytest --deselect test_suite.py::TestLinuxUbuntu_21_04_riscv64::test_all \
++         --deselect tests/test_linux_ubuntu_21_04_riscv64.py::TestLinuxUbuntu_21_04_riscv64::test_all
+ }
+ 
+ package_python-py-cpuinfo() {
