@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,6 +17,7 @@ sha512sums=('e6be1f0117f069cb9d67bb0dbc1cd8fa37b40865094ee33a60f794f6721cef14a72
+ 
+ build() {
+   cd ${_pyname}-${pkgver}
++  sed -i "/intersphinx_mapping/s|{'https://docs.python.org/': None}|{'python': ('https://docs.python.org/3', None)}|" docs/source/conf.py
+   python setup.py build
+   make -C docs text man
+ }
