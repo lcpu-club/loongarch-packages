@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6e81c0a..a6559f7 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -30,7 +30,7 @@ build() {
+ check() {
+ 	cd "pygit2-$pkgver"
+ 	local _pyver=cpython-$(python -c 'import sys; print("".join(map(str, sys.version_info[:2])))')
+-	PYTHONPATH="$PWD/build/lib.linux-$CARCH-$_pyver" pytest
++	PYTHONPATH="$PWD/build/lib.linux-$(uname -m)-$_pyver" pytest
+ }
+ 
+ package() {
