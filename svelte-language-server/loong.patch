@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d7501e9..5c22151 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,7 +34,7 @@ build() {
+ 
+ check() {
+   cd $_name/packages/language-server
+-  pnpm test
++  pnpm test -- --timeout 1000000
+ }
+ 
+ package() {
