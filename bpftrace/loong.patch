@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,7 @@ source=("https://github.com/iovisor/bpftrace/archive/v$pkgver/bpftrace-$pkgver.t
+ sha512sums=('8c64de94da29030dcde0680be90e3c16a5cd965a0066b1abe3c0740f11a78d70f383bf2e0bbe2fce639eddc7d45cb44508cc8a78743c205d7efa45734151e743')
+ 
+ build() {
++  sed -i 's/-mno-omit-leaf-frame-pointer//g' bpftrace-$pkgver/tests/testprogs/CMakeLists.txt
+   cmake -S bpftrace-$pkgver -B build -G Ninja \
+     -DCMAKE_BUILD_TYPE=Release \
+     -DCMAKE_INSTALL_PREFIX=/usr \
