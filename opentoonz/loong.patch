@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,8 @@ prepare() {
+ }
+ 
+ build() {
++  for c_s in $(find -type f -name config.sub -o -name configure.sub); do cp -f /usr/share/automake-1.1?/config.sub "$c_s"; done
++  for c_s in $(find -type f -name config.guess -o -name configure.guess); do cp -f /usr/share/automake-1.1?/config.guess "$c_s"; done
+   pushd $pkgname-$pkgver/thirdparty/tiff-4.0.3
+   ./configure --with-pic --disable-jbig
+   make
