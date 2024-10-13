@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 54bb8f5..e20c610 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -39,3 +39,11 @@ package() {
+   DESTDIR="$pkgdir" cmake --install build
+   install -Dm644 $pkgname-$pkgver/LICENSE.md -t "$pkgdir/usr/share/licenses/$pkgname/"
+ }
++
++prepare() {
++  patch -d "$pkgname-$pkgver" -p1 -i "${srcdir}/post-release-patch-for-v1.8.0.patch"
++}
++
++source+=("post-release-patch-for-v1.8.0.patch::https://github.com/stlink-org/stlink/commit/6a6718b3342b6c5e282a4e33325b9f97908a0692.patch")
++sha512sums+=('1c2f15c355c374866112fe0356afea4b9350ef6686b66caf36649d73bbd99061ef60380970f2db91c8fb0541aa9a8f59e6326618405cef98a3a26c61f66082cd')
++b2sums+=('ce90a0dbd6899a788bb6521b2d5176f23705aae2b8243ab1084813cb82968073fcbaf5680853748cb662a50508d46b38cf0ebd88e386ccb843d5aed65dd0404c')
