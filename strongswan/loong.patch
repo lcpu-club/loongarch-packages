@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 873e1bb..c1b32d4 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -84,7 +84,6 @@ build() {
+     --enable-cmd \
+     --enable-forecast \
+     --enable-connmark \
+-    --enable-aesni \
+     --enable-eap-ttls \
+     --enable-radattr \
+     --enable-xauth-pam \
