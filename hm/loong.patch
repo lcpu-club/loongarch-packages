@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,7 @@ sha256sums=('799d5f937cb1df3a3294fe8c04e0628fc7208a636d1afea3b6bb05a9af46a83a'
+ 
+ prepare() {
+     patch -d "HM-HM-${pkgver}" -Np1 -i "${srcdir}/010-hm-disable-werror.patch"
++    sed -i 's/-msse4.1//g' "HM-HM-${pkgver}"/CMakeLists.txt
+     cp -a "HM-HM-${pkgver}"{,-highbit}
+ }
+ 
