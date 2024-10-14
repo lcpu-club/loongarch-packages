@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a0a618c..a70525a 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -57,4 +57,12 @@ package() {
+   DESTDIR="${pkgdir}" ninja install -C build
+ }
+ 
++prepare() {
++  export CFLAGS="${CFLAGS} -Wno-int-conversion -Wno-implicit-function-declaration"
++  patch -d desmume -Np1 -i ${srcdir}/fix-compiling-on-non-arm-arch.patch
++}
++
++source+=("fix-compiling-on-non-arm-arch.patch::https://github.com/TASEmulators/desmume/commit/d4afd4977ce8b7ba6293946c74914afe79536059.patch")
++b2sums+=('2c9ada4f8f6a9c61dceddf1c29c92e942c27e86edd73e1dc930cf9a50fe6fb6f3c4770634bd141464ce159a106a6cb13f56388eab9bc6353fcc808c70c1dfb67')
++
+ # vim: ts=2 sw=2 et:
