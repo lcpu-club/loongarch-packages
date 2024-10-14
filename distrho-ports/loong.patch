@@ -1,0 +1,18 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4e9a995..5f61d68 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -222,3 +222,13 @@ package_distrho-ports-vst3() {
+ 
+   mv -v $pkgname/* "$pkgdir"
+ }
++
++prepare() {
++  cd $pkgname
++  patch -Np1 -i ../use-simde.patch
++  export CXXFLAGS="${CXXFLAGS} -fpermissive"
++}
++
++makedepends+=(simde)
++source+=("use-simde.patch")
++b2sums+=('dfb57a90d6e2df7b386f52e66404399f996079595ad155e1d84e466e6a5241ab42e1661c3da53bdcd02585aa28670701a4998474f9e66d189ebf9a1bb4a77ea6')
