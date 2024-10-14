@@ -1,0 +1,23 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3e64113..917f441 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -130,12 +130,12 @@ build() {
+     --enable-vaapi \
+     --enable-amf \
+     --enable-libvpl \
+-    --enable-ffnvcodec \
+-    --enable-cuda \
+-    --enable-cuda-llvm \
+-    --enable-cuvid \
+-    --enable-nvdec \
+-    --enable-nvenc
++    --disable-ffnvcodec \
++    --disable-cuda \
++    --disable-cuda-llvm \
++    --disable-cuvid \
++    --disable-nvdec \
++    --disable-nvenc
+ 
+   make
+ }
