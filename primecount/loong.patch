@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 49be565..f644bcb 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,7 +21,7 @@ build() {
+     -DBUILD_LIBPRIMESIEVE=OFF \
+     -DBUILD_STATIC_LIBS=OFF \
+     -DBUILD_SHARED_LIBS=ON \
+-    -DWITH_FLOAT128=ON
++    -DWITH_FLOAT128=OFF
+   cmake --build build
+ }
+ 
