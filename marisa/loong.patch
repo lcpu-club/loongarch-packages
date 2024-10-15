@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,7 +25,7 @@ prepare() {
+ build() {
+   cd marisa-trie-$pkgver
+   # sse2 is part of amd64
+-  ./configure --prefix=/usr --disable-static --enable-sse2
++  ./configure --prefix=/usr --disable-static # --enable-sse2
+     # --enable-popcnt
+     # --enable-sse3
+     # --enable-ssse3
