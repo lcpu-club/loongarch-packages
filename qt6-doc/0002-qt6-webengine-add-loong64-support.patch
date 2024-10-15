@@ -1,122 +1,7 @@
-From 81cac92319ca3798f61e16e1c4f05dcfba97c637 Mon Sep 17 00:00:00 2001
-From: Mingcong Bai <jeffbai@aosc.xyz>
-Date: Mon, 1 Jul 2024 11:25:38 +0800
-Subject: [PATCH 7/7] [LOONGARCH64] qtwebengine: chromium: add LoongArch
- support
-
-Co-authored-by: Jiajie Chen <c@jia.je>
----
- qtwebengine/cmake/Functions.cmake             |    2 +
- .../3rdparty/chromium/sandbox/features.gni    |    2 +-
- .../linux/bpf_dsl/linux_syscall_ranges.h      |    7 +
- .../sandbox/linux/bpf_dsl/seccomp_macros.h    |   41 +
- .../seccomp-bpf-helpers/baseline_policy.cc    |   10 +-
- .../seccomp-bpf-helpers/sigsys_handlers.cc    |    2 +
- .../syscall_parameters_restrictions.cc        |    9 +-
- .../linux/seccomp-bpf-helpers/syscall_sets.cc |   58 +-
- .../linux/seccomp-bpf-helpers/syscall_sets.h  |    6 +-
- .../sandbox/linux/seccomp-bpf/syscall.cc      |   35 +-
- .../sandbox/linux/services/credentials.cc     |    2 +-
- .../linux/services/syscall_wrappers.cc        |   56 +-
- .../sandbox/linux/services/syscall_wrappers.h |    2 +
- .../linux/syscall_broker/broker_client.cc     |   15 +
- .../linux/syscall_broker/broker_client.h      |    3 +
- .../linux/syscall_broker/broker_command.h     |    1 +
- .../linux/syscall_broker/broker_host.cc       |   18 +-
- .../linux/syscall_broker/broker_process.cc    |   21 +-
- .../syscall_broker/syscall_dispatcher.cc      |   13 +
- .../linux/syscall_broker/syscall_dispatcher.h |    3 +
- .../linux/system_headers/linux_seccomp.h      |    8 +
- .../linux/system_headers/linux_signal.h       |    2 +-
- .../sandbox/linux/system_headers/linux_stat.h |   46 +-
- .../linux/system_headers/linux_syscalls.h     |    4 +
- .../system_headers/loong64_linux_syscalls.h   | 1194 +++++++++
- .../policy/linux/bpf_audio_policy_linux.cc    |    1 +
- .../policy/linux/bpf_broker_policy_linux.cc   |    6 +
- .../linux/bpf_cros_amd_gpu_policy_linux.cc    |    2 +-
- .../policy/linux/bpf_gpu_policy_linux.cc      |    2 +-
- .../policy/linux/bpf_network_policy_linux.cc  |    2 +-
- .../linux/bpf_screen_ai_policy_linux.cc       |    2 +-
- .../sandbox/policy/linux/sandbox_linux.cc     |   10 +
- .../src/3rdparty/chromium/skia/BUILD.gn       |    2 +
- .../loongarch64/webgl_image_conversion_lsx.h  |   88 +-
- .../boringssl/src/include/openssl/target.h    |    2 +
- .../crashpad/minidump/minidump_context.h      |   50 +
- .../minidump/minidump_context_writer.cc       |   46 +
- .../minidump/minidump_context_writer.h        |   38 +
- .../crashpad/minidump/minidump_extensions.h   |    3 +
- .../minidump/minidump_misc_info_writer.cc     |    2 +
- .../minidump/minidump_system_info_writer.cc   |    3 +
- .../crashpad/snapshot/capture_memory.cc       |    5 +
- .../crashpad/snapshot/cpu_architecture.h      |    3 +
- .../crashpad/crashpad/snapshot/cpu_context.cc |    5 +
- .../crashpad/crashpad/snapshot/cpu_context.h  |   17 +
- .../snapshot/linux/cpu_context_linux.cc       |   34 +
- .../snapshot/linux/cpu_context_linux.h        |   39 +
- .../linux/exception_snapshot_linux.cc         |   74 +-
- .../snapshot/linux/exception_snapshot_linux.h |    2 +
- .../snapshot/linux/process_reader_linux.cc    |    2 +
- .../crashpad/snapshot/linux/signal_context.h  |   40 +
- .../snapshot/linux/system_snapshot_linux.cc   |   11 +
- .../snapshot/linux/thread_snapshot_linux.cc   |    7 +
- .../snapshot/linux/thread_snapshot_linux.h    |    2 +
- .../minidump/minidump_context_converter.cc    |   24 +
- .../minidump/system_snapshot_minidump.cc      |    2 +
- .../crashpad/crashpad/util/linux/ptracer.cc   |   33 +-
- .../crashpad/util/linux/thread_info.h         |   20 +-
- .../util/misc/capture_context_linux.S         |   45 +
- .../util/net/http_transport_libcurl.cc        |    2 +
- .../config/Chrome/linux/loong64/config.h      |  764 ++++++
- .../Chrome/linux/loong64/config_components.h  | 2187 +++++++++++++++++
- .../linux/loong64/libavcodec/bsf_list.c       |    2 +
- .../linux/loong64/libavcodec/codec_list.c     |   20 +
- .../linux/loong64/libavcodec/parser_list.c    |   11 +
- .../linux/loong64/libavformat/demuxer_list.c  |    9 +
- .../linux/loong64/libavformat/muxer_list.c    |    2 +
- .../linux/loong64/libavformat/protocol_list.c |    2 +
- .../Chrome/linux/loong64/libavutil/avconfig.h |    6 +
- .../config/Chromium/linux/loong64/config.h    |  764 ++++++
- .../linux/loong64/config_components.h         | 2187 +++++++++++++++++
- .../linux/loong64/libavcodec/bsf_list.c       |    2 +
- .../linux/loong64/libavcodec/codec_list.c     |   18 +
- .../linux/loong64/libavcodec/parser_list.c    |    9 +
- .../linux/loong64/libavformat/demuxer_list.c  |    8 +
- .../linux/loong64/libavformat/muxer_list.c    |    2 +
- .../linux/loong64/libavformat/protocol_list.c |    2 +
- .../linux/loong64/libavutil/avconfig.h        |    6 +
- .../third_party/ffmpeg/ffmpeg_generated.gni   |   15 +-
- .../chromium/third_party/libgav1/options.gni  |    2 +-
- .../libvpx/vpx_dsp/loongarch/quantize_lsx.c   |   45 +-
- .../third_party/llvm-10.0/BUILD.gn            |    2 +
- .../loong64/regexp-macro-assembler-loong64.cc |   40 +-
- .../loong64/regexp-macro-assembler-loong64.h  |    5 +-
- .../src/3rdparty/gn/src/util/sys_info.cc      |    2 +
- 85 files changed, 8138 insertions(+), 160 deletions(-)
- create mode 100644 qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/loong64_linux_syscalls.h
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config_components.h
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/bsf_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/codec_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/parser_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/demuxer_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/muxer_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/protocol_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavutil/avconfig.h
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config.h
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config_components.h
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/bsf_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/muxer_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/protocol_list.c
- create mode 100644 qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavutil/avconfig.h
-
-diff --git a/qtwebengine/cmake/Functions.cmake b/qtwebengine/cmake/Functions.cmake
-index 6cc8a401ea..bff3c4ff58 100644
---- a/qtwebengine/cmake/Functions.cmake
-+++ b/qtwebengine/cmake/Functions.cmake
-@@ -635,6 +635,8 @@ function(get_gn_arch result arch)
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/cmake/Functions.cmake b/qtwebengine/cmake/Functions.cmake
+--- a/qtwebengine/cmake/Functions.cmake	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/cmake/Functions.cmake	2000-01-01 00:00:00.000000000 +0800
+@@ -636,6 +636,8 @@ function(get_gn_arch result arch)
          set(${result} "mips64el" PARENT_SCOPE)
      elseif(arch STREQUAL "riscv64")
          set(${result} "riscv64" PARENT_SCOPE)
@@ -125,10 +10,31 @@ index 6cc8a401ea..bff3c4ff58 100644
      else()
          message(FATAL_ERROR "Unknown architecture: ${arch}")
      endif()
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/features.gni b/qtwebengine/src/3rdparty/chromium/sandbox/features.gni
-index 8434144118..189bb35f8e 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/features.gni
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/features.gni
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/content/browser/BUILD.gn b/qtwebengine/src/3rdparty/chromium/content/browser/BUILD.gn
+--- a/qtwebengine/src/3rdparty/chromium/content/browser/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/content/browser/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
+@@ -194,6 +194,7 @@ jumbo_source_set("browser") {
+     "//components/services/storage/dom_storage:local_storage_proto",
+     "//components/services/storage/public/cpp",
+     "//components/services/storage/public/mojom",
++    "//components/spellcheck:buildflags",
+     "//components/sqlite_proto",
+     "//components/system_media_controls",
+     "//components/tracing:startup_tracing",
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/extensions/browser/api/declarative_net_request/BUILD.gn b/qtwebengine/src/3rdparty/chromium/extensions/browser/api/declarative_net_request/BUILD.gn
+--- a/qtwebengine/src/3rdparty/chromium/extensions/browser/api/declarative_net_request/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/extensions/browser/api/declarative_net_request/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
+@@ -20,6 +20,7 @@ source_set("declarative_net_request") {
+   deps = [
+     "//base",
+     "//content/public/browser",
++    "//components/web_cache/public/mojom",
+     "//extensions/common",
+     "//extensions/common/api",
+     "//services/preferences/public/cpp",
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/features.gni b/qtwebengine/src/3rdparty/chromium/sandbox/features.gni
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/features.gni	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/features.gni	2000-01-01 00:00:00.000000000 +0800
 @@ -9,7 +9,7 @@
  use_seccomp_bpf = (is_linux || is_chromeos || is_android) &&
                    (current_cpu == "x86" || current_cpu == "x64" ||
@@ -138,10 +44,9 @@ index 8434144118..189bb35f8e 100644
  
  # SSBD (Speculative Store Bypass Disable) is a mitigation of Spectre Variant 4.
  # As Spectre Variant 4 can be mitigated by site isolation, opt-out SSBD on site
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/linux_syscall_ranges.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
-index 1d0590b7dd..92f0a6245f 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/linux_syscall_ranges.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/linux_syscall_ranges.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/linux_syscall_ranges.h	2000-01-01 00:00:00.000000000 +0800
 @@ -56,6 +56,13 @@
  #define MAX_PUBLIC_SYSCALL __NR_syscalls
  #define MAX_SYSCALL MAX_PUBLIC_SYSCALL
@@ -156,10 +61,9 @@ index 1d0590b7dd..92f0a6245f 100644
  #else
  #error "Unsupported architecture"
  #endif
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h
-index 87d5825aa3..2f1ba99e7a 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h	2000-01-01 00:00:00.000000000 +0800
 @@ -343,6 +343,47 @@ struct regs_struct {
  #define SECCOMP_PT_PARM4(_regs) (_regs).regs[3]
  #define SECCOMP_PT_PARM5(_regs) (_regs).regs[4]
@@ -208,11 +112,10 @@ index 87d5825aa3..2f1ba99e7a 100644
  #else
  #error Unsupported target platform
  
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
-index 7bde501115..5745a8da7e 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
-@@ -193,7 +193,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -193,7 +193,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
      return RestrictFcntlCommands();
  #endif
  
@@ -221,7 +124,7 @@ index 7bde501115..5745a8da7e 100644
    // fork() is never used as a system call (clone() is used instead), but we
    // have seen it in fallback code on Android.
    if (sysno == __NR_fork) {
-@@ -255,7 +255,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
+@@ -255,7 +255,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
    }
  
  #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -230,7 +133,7 @@ index 7bde501115..5745a8da7e 100644
    if (sysno == __NR_mmap)
      return RestrictMmapFlags();
  #endif
-@@ -276,7 +276,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
+@@ -276,7 +276,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
      return RestrictPrctl();
  
  #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -239,7 +142,7 @@ index 7bde501115..5745a8da7e 100644
    if (sysno == __NR_socketpair) {
      // Only allow AF_UNIX, PF_UNIX. Crash if anything else is seen.
      static_assert(AF_UNIX == PF_UNIX,
-@@ -302,6 +302,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
+@@ -302,6 +302,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
      return Allow();
    }
  
@@ -247,7 +150,7 @@ index 7bde501115..5745a8da7e 100644
    // The fstatat syscalls are file system syscalls, which will be denied below
    // with fs_denied_errno. However some allowed fstat syscalls are rewritten by
    // libc implementations to fstatat syscalls, and we need to rewrite them back.
-@@ -319,6 +320,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
+@@ -319,6 +320,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
      return If(mask == STATX_BASIC_STATS, Error(ENOSYS))
          .Else(Error(fs_denied_errno));
    }
@@ -255,7 +158,7 @@ index 7bde501115..5745a8da7e 100644
  
    if (SyscallSets::IsFileSystem(sysno) ||
        SyscallSets::IsCurrentDirectory(sysno)) {
-@@ -366,7 +368,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
+@@ -366,7 +368,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
    // Allow creating pipes, but don't allow weird flags to pipe2().
    // O_NOTIFICATION_PIPE (== O_EXCL) can be used to create
    // "notification pipes", which are rarely used.
@@ -264,11 +167,10 @@ index 7bde501115..5745a8da7e 100644
    if (sysno == __NR_pipe) {
      return Allow();
    }
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
-index 4bf133a4e2..d275bd5b0e 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
-@@ -354,6 +354,7 @@ intptr_t SIGSYSSchedHandler(const struct arch_seccomp_data& args,
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -354,6 +354,7 @@ intptr_t SIGSYSSchedHandler(const struct
  
  intptr_t SIGSYSFstatatHandler(const struct arch_seccomp_data& args,
                                void* fs_denied_errno) {
@@ -276,7 +178,7 @@ index 4bf133a4e2..d275bd5b0e 100644
    if (args.nr == __NR_fstatat_default) {
      if (*reinterpret_cast<const char*>(args.args[1]) == '\0' &&
          args.args[3] == static_cast<uint64_t>(AT_EMPTY_PATH)) {
-@@ -362,6 +363,7 @@ intptr_t SIGSYSFstatatHandler(const struct arch_seccomp_data& args,
+@@ -362,6 +363,7 @@ intptr_t SIGSYSFstatatHandler(const stru
      }
      return -reinterpret_cast<intptr_t>(fs_denied_errno);
    }
@@ -284,10 +186,9 @@ index 4bf133a4e2..d275bd5b0e 100644
  
    CrashSIGSYS_Handler(args, fs_denied_errno);
  
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
-index ba995ace6d..6bbe799453 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc	2000-01-01 00:00:00.000000000 +0800
 @@ -37,7 +37,7 @@
  
  #if (BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS_LACROS)) && \
@@ -306,7 +207,7 @@ index ba995ace6d..6bbe799453 100644
                FUTEX_WAIT_REQUEUE_PI, FUTEX_CMP_REQUEUE_PI,
  #endif  // BUILDFLAG(ENABLE_MUTEX_PRIORITY_INHERITANCE)
                FUTEX_WAKE_OP, FUTEX_WAIT_BITSET, FUTEX_WAKE_BITSET},
-@@ -460,8 +460,11 @@ ResultExpr RestrictPtrace() {
+@@ -464,8 +464,11 @@ ResultExpr RestrictPtrace() {
    return Switch(request)
        .Cases({
  #if !defined(__aarch64__)
@@ -319,10 +220,9 @@ index ba995ace6d..6bbe799453 100644
  #endif
  #if defined(__arm__)
                   PTRACE_GETVFPREGS,
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
-index 27ea264070..9de221334e 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc	2000-01-01 00:00:00.000000000 +0800
 @@ -103,7 +103,7 @@ bool SyscallSets::IsUmask(int sysno) {
  // Both EPERM and ENOENT are valid errno unless otherwise noted in comment.
  bool SyscallSets::IsFileSystem(int sysno) {
@@ -332,7 +232,7 @@ index 27ea264070..9de221334e 100644
      case __NR_access:  // EPERM not a valid errno.
      case __NR_chmod:
      case __NR_chown:
-@@ -161,7 +161,9 @@ bool SyscallSets::IsFileSystem(int sysno) {
+@@ -161,7 +161,9 @@ bool SyscallSets::IsFileSystem(int sysno
  #endif
      case __NR_openat:
      case __NR_readlinkat:
@@ -342,7 +242,7 @@ index 27ea264070..9de221334e 100644
      case __NR_renameat2:
  #if defined(__i386__) || defined(__arm__) || \
      (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
-@@ -211,7 +213,11 @@ bool SyscallSets::IsTruncate(int sysno) {
+@@ -211,7 +213,11 @@ bool SyscallSets::IsTruncate(int sysno)
  
  bool SyscallSets::IsAllowedFileSystemAccessViaFd(int sysno) {
    switch (sysno) {
@@ -354,7 +254,7 @@ index 27ea264070..9de221334e 100644
      case __NR_ftruncate:
  #if defined(__i386__) || defined(__arm__) || \
      (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
-@@ -241,7 +247,7 @@ bool SyscallSets::IsAllowedFileSystemAccessViaFd(int sysno) {
+@@ -241,7 +247,7 @@ bool SyscallSets::IsAllowedFileSystemAcc
      case __NR_oldfstat:
  #endif
  #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -363,7 +263,7 @@ index 27ea264070..9de221334e 100644
      case __NR_sync_file_range:  // EPERM not a valid errno.
  #elif defined(__arm__)
      case __NR_arm_sync_file_range:  // EPERM not a valid errno.
-@@ -260,7 +266,7 @@ bool SyscallSets::IsDeniedFileSystemAccessViaFd(int sysno) {
+@@ -260,7 +266,7 @@ bool SyscallSets::IsDeniedFileSystemAcce
  #if defined(__i386__) || defined(__arm__)
      case __NR_fchown32:
  #endif
@@ -372,7 +272,7 @@ index 27ea264070..9de221334e 100644
      case __NR_getdents:    // EPERM not a valid errno.
  #endif
      case __NR_getdents64:  // EPERM not a valid errno.
-@@ -339,7 +345,7 @@ bool SyscallSets::IsProcessPrivilegeChange(int sysno) {
+@@ -339,7 +345,7 @@ bool SyscallSets::IsProcessPrivilegeChan
  bool SyscallSets::IsProcessGroupOrSession(int sysno) {
    switch (sysno) {
      case __NR_setpgid:
@@ -381,7 +281,7 @@ index 27ea264070..9de221334e 100644
      case __NR_getpgrp:
  #endif
      case __NR_setsid:
-@@ -373,7 +379,7 @@ bool SyscallSets::IsAllowedSignalHandling(int sysno) {
+@@ -373,7 +379,7 @@ bool SyscallSets::IsAllowedSignalHandlin
      case __NR_rt_sigqueueinfo:
      case __NR_rt_sigsuspend:
      case __NR_rt_tgsigqueueinfo:
@@ -390,7 +290,7 @@ index 27ea264070..9de221334e 100644
      case __NR_signalfd:
  #endif
      case __NR_signalfd4:
-@@ -397,12 +403,12 @@ bool SyscallSets::IsAllowedOperationOnFd(int sysno) {
+@@ -397,12 +403,12 @@ bool SyscallSets::IsAllowedOperationOnFd
    switch (sysno) {
      case __NR_close:
      case __NR_dup:
@@ -405,7 +305,7 @@ index 27ea264070..9de221334e 100644
      case __NR_shutdown:
  #endif
        return true;
-@@ -441,7 +447,7 @@ bool SyscallSets::IsAllowedProcessStartOrDeath(int sysno) {
+@@ -441,7 +447,7 @@ bool SyscallSets::IsAllowedProcessStartO
        return true;
      case __NR_clone:  // Should be parameter-restricted.
      case __NR_setns:  // Privileged.
@@ -414,7 +314,7 @@ index 27ea264070..9de221334e 100644
      case __NR_fork:
  #endif
  #if defined(__i386__) || defined(__x86_64__)
-@@ -452,7 +458,7 @@ bool SyscallSets::IsAllowedProcessStartOrDeath(int sysno) {
+@@ -452,7 +458,7 @@ bool SyscallSets::IsAllowedProcessStartO
  #endif
      case __NR_set_tid_address:
      case __NR_unshare:
@@ -423,7 +323,7 @@ index 27ea264070..9de221334e 100644
      case __NR_vfork:
  #endif
      default:
-@@ -477,7 +483,7 @@ bool SyscallSets::IsAllowedFutex(int sysno) {
+@@ -477,7 +483,7 @@ bool SyscallSets::IsAllowedFutex(int sys
  
  bool SyscallSets::IsAllowedEpoll(int sysno) {
    switch (sysno) {
@@ -432,7 +332,7 @@ index 27ea264070..9de221334e 100644
      case __NR_epoll_create:
      case __NR_epoll_wait:
  #endif
-@@ -499,7 +505,7 @@ bool SyscallSets::IsAllowedEpoll(int sysno) {
+@@ -499,7 +505,7 @@ bool SyscallSets::IsAllowedEpoll(int sys
  bool SyscallSets::IsDeniedGetOrModifySocket(int sysno) {
    switch (sysno) {
  #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -441,7 +341,7 @@ index 27ea264070..9de221334e 100644
      case __NR_accept:
      case __NR_accept4:
      case __NR_bind:
-@@ -553,7 +559,7 @@ bool SyscallSets::IsAllowedAddressSpaceAccess(int sysno) {
+@@ -553,7 +559,7 @@ bool SyscallSets::IsAllowedAddressSpaceA
      case __NR_mincore:
      case __NR_mlockall:
  #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -450,7 +350,7 @@ index 27ea264070..9de221334e 100644
      case __NR_mmap:
  #endif
  #if defined(__i386__) || defined(__arm__) || \
-@@ -586,7 +592,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
+@@ -586,7 +592,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
      (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
      case __NR__llseek:
  #endif
@@ -459,7 +359,7 @@ index 27ea264070..9de221334e 100644
      case __NR_poll:
  #endif
      case __NR_ppoll:
-@@ -607,7 +613,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
+@@ -607,7 +613,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
      case __NR_recv:
  #endif
  #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -468,7 +368,7 @@ index 27ea264070..9de221334e 100644
      case __NR_recvfrom:  // Could specify source.
      case __NR_recvmsg:   // Could specify source.
  #endif
-@@ -622,7 +628,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
+@@ -622,7 +628,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
      case __NR_send:
  #endif
  #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -495,7 +395,7 @@ index 27ea264070..9de221334e 100644
      case __NR_migrate_pages:
  #endif
      case __NR_move_pages:
-@@ -803,7 +809,9 @@ bool SyscallSets::IsGlobalProcessEnvironment(int sysno) {
+@@ -803,7 +809,9 @@ bool SyscallSets::IsGlobalProcessEnviron
      case __NR_getrusage:
      case __NR_personality:  // Can change its personality as well.
      case __NR_prlimit64:    // Like setrlimit / getrlimit.
@@ -514,7 +414,7 @@ index 27ea264070..9de221334e 100644
      case __NR__sysctl:
      case __NR_sysfs:
  #endif
-@@ -843,7 +851,7 @@ bool SyscallSets::IsGlobalSystemStatus(int sysno) {
+@@ -843,7 +851,7 @@ bool SyscallSets::IsGlobalSystemStatus(i
  
  bool SyscallSets::IsEventFd(int sysno) {
    switch (sysno) {
@@ -523,7 +423,7 @@ index 27ea264070..9de221334e 100644
      case __NR_eventfd:
  #endif
      case __NR_eventfd2:
-@@ -895,7 +903,7 @@ bool SyscallSets::IsKeyManagement(int sysno) {
+@@ -895,7 +903,7 @@ bool SyscallSets::IsKeyManagement(int sy
  }
  
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -532,7 +432,7 @@ index 27ea264070..9de221334e 100644
  bool SyscallSets::IsSystemVSemaphores(int sysno) {
    switch (sysno) {
      case __NR_semctl:
-@@ -915,7 +923,7 @@ bool SyscallSets::IsSystemVSemaphores(int sysno) {
+@@ -915,7 +923,7 @@ bool SyscallSets::IsSystemVSemaphores(in
  
  #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
      defined(__aarch64__) ||                                         \
@@ -541,7 +441,7 @@ index 27ea264070..9de221334e 100644
  // These give a lot of ambient authority and bypass the setuid sandbox.
  bool SyscallSets::IsSystemVSharedMemory(int sysno) {
    switch (sysno) {
-@@ -931,7 +939,7 @@ bool SyscallSets::IsSystemVSharedMemory(int sysno) {
+@@ -931,7 +939,7 @@ bool SyscallSets::IsSystemVSharedMemory(
  #endif
  
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -550,7 +450,7 @@ index 27ea264070..9de221334e 100644
  bool SyscallSets::IsSystemVMessageQueue(int sysno) {
    switch (sysno) {
      case __NR_msgctl:
-@@ -962,7 +970,7 @@ bool SyscallSets::IsSystemVIpc(int sysno) {
+@@ -962,7 +970,7 @@ bool SyscallSets::IsSystemVIpc(int sysno
  
  bool SyscallSets::IsAnySystemV(int sysno) {
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -559,7 +459,7 @@ index 27ea264070..9de221334e 100644
    return IsSystemVMessageQueue(sysno) || IsSystemVSemaphores(sysno) ||
           IsSystemVSharedMemory(sysno);
  #elif defined(__i386__) || \
-@@ -999,7 +1007,7 @@ bool SyscallSets::IsAdvancedScheduler(int sysno) {
+@@ -999,7 +1007,7 @@ bool SyscallSets::IsAdvancedScheduler(in
  bool SyscallSets::IsInotify(int sysno) {
    switch (sysno) {
      case __NR_inotify_add_watch:
@@ -568,7 +468,7 @@ index 27ea264070..9de221334e 100644
      case __NR_inotify_init:
  #endif
      case __NR_inotify_init1:
-@@ -1137,7 +1145,7 @@ bool SyscallSets::IsMisc(int sysno) {
+@@ -1134,7 +1142,7 @@ bool SyscallSets::IsMisc(int sysno) {
  #if defined(__x86_64__)
      case __NR_tuxcall:
  #endif
@@ -577,10 +477,9 @@ index 27ea264070..9de221334e 100644
      case __NR_vserver:
  #endif
        return true;
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
-index 9be7b03ec4..3952270046 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h	2000-01-01 00:00:00.000000000 +0800
 @@ -79,18 +79,18 @@ class SANDBOX_EXPORT SyscallSets {
    static bool IsAsyncIo(int sysno);
    static bool IsKeyManagement(int sysno);
@@ -603,10 +502,9 @@ index 9be7b03ec4..3952270046 100644
    static bool IsSystemVMessageQueue(int sysno);
  #endif
  
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc
-index 02cbb047c1..4c66fe4465 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc	2000-01-01 00:00:00.000000000 +0800
 @@ -18,7 +18,7 @@ namespace sandbox {
  namespace {
  
@@ -616,7 +514,7 @@ index 02cbb047c1..4c66fe4465 100644
  // Number that's not currently used by any Linux kernel ABIs.
  const int kInvalidSyscallNumber = 0x351d3;
  #else
-@@ -308,6 +308,27 @@ asm(// We need to be able to tell the kernel exactly where we made a
+@@ -308,6 +308,27 @@ asm(// We need to be able to tell the ke
      "2:ret\n"
      ".cfi_endproc\n"
      ".size SyscallAsm, .-SyscallAsm\n"
@@ -663,10 +561,9 @@ index 02cbb047c1..4c66fe4465 100644
  #else
  #error "Unimplemented architecture"
  #endif
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc
-index e284c59d23..ea30f36276 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc	2000-01-01 00:00:00.000000000 +0800
 @@ -80,7 +80,7 @@ bool ChrootToSafeEmptyDir() {
    pid_t pid = -1;
    alignas(16) char stack_buf[PTHREAD_STACK_MIN];
@@ -676,10 +573,9 @@ index e284c59d23..ea30f36276 100644
    // The stack grows downward.
    void* stack = stack_buf + sizeof(stack_buf);
  #else
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.cc
-index 7650e983b3..451d3664eb 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.cc
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.cc	2000-01-01 00:00:00.000000000 +0800
 @@ -5,6 +5,7 @@
  #include "sandbox/linux/services/syscall_wrappers.h"
  
@@ -752,7 +648,7 @@ index 7650e983b3..451d3664eb 100644
    res = syscall(__NR_newfstatat, AT_FDCWD, path, stat_buf, 0);
  #else
    res = syscall(__NR_stat, path, stat_buf);
-@@ -177,7 +222,12 @@ int sys_stat(const char* path, struct kernel_stat* stat_buf) {
+@@ -177,7 +222,12 @@ int sys_stat(const char* path, struct ke
  
  int sys_lstat(const char* path, struct kernel_stat* stat_buf) {
    int res;
@@ -766,10 +662,9 @@ index 7650e983b3..451d3664eb 100644
    res = syscall(__NR_newfstatat, AT_FDCWD, path, stat_buf, AT_SYMLINK_NOFOLLOW);
  #else
    res = syscall(__NR_lstat, path, stat_buf);
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.h
-index a05d447022..ecd4b03edd 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/syscall_wrappers.h	2000-01-01 00:00:00.000000000 +0800
 @@ -19,6 +19,7 @@ struct cap_hdr;
  struct cap_data;
  struct kernel_stat;
@@ -778,7 +673,7 @@ index a05d447022..ecd4b03edd 100644
  
  namespace sandbox {
  
-@@ -91,6 +92,7 @@ SANDBOX_EXPORT int sys_sigaction(int signum,
+@@ -91,6 +92,7 @@ SANDBOX_EXPORT int sys_sigaction(int sig
  // architectures, with the same capabilities as stat() and lstat().
  SANDBOX_EXPORT int sys_stat(const char* path, struct kernel_stat* stat_buf);
  SANDBOX_EXPORT int sys_lstat(const char* path, struct kernel_stat* stat_buf);
@@ -786,11 +681,10 @@ index a05d447022..ecd4b03edd 100644
  
  // Takes care of unpoisoning |stat_buf| for MSAN. Check-fails if fstatat64() is
  // not a supported syscall on the current platform.
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc
-index 679ff420d0..71470a37a5 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc
-@@ -193,6 +193,21 @@ int BrokerClient::Stat64(const char* pathname,
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -193,6 +193,21 @@ int BrokerClient::Stat64(const char* pat
                             sizeof(*sb));
  }
  
@@ -812,11 +706,10 @@ index 679ff420d0..71470a37a5 100644
  int BrokerClient::Unlink(const char* path) const {
    if (!path)
      return -EFAULT;
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.h
-index 9d0fdee5f3..1c7f951436 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.h
-@@ -67,6 +67,9 @@ class SANDBOX_EXPORT BrokerClient : public SyscallDispatcher {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.h	2000-01-01 00:00:00.000000000 +0800
+@@ -67,6 +67,9 @@ class SANDBOX_EXPORT BrokerClient : publ
    int Stat64(const char* pathname,
               bool follow_links,
               struct kernel_stat64* sb) const override;
@@ -826,10 +719,9 @@ index 9d0fdee5f3..1c7f951436 100644
    int Unlink(const char* unlink) const override;
    int InotifyAddWatch(int fd,
                        const char* pathname,
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_command.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_command.h
-index d44c42fe2b..5fd22d8186 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_command.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_command.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_command.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_command.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_command.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_command.h	2000-01-01 00:00:00.000000000 +0800
 @@ -42,6 +42,7 @@ enum BrokerCommand {
    COMMAND_RMDIR,
    COMMAND_STAT,
@@ -838,11 +730,10 @@ index d44c42fe2b..5fd22d8186 100644
    COMMAND_UNLINK,
    COMMAND_INOTIFY_ADD_WATCH,
  
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc
-index 8447121007..08945c5002 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc
-@@ -299,6 +299,21 @@ void BrokerHost::StatFileForIPC(BrokerCommand command_type,
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -297,6 +297,21 @@ void BrokerHost::StatFileForIPC(BrokerCo
      RAW_CHECK(reply->AddIntToMessage(0));
      RAW_CHECK(
          reply->AddDataToMessage(reinterpret_cast<char*>(&sb), sizeof(sb)));
@@ -864,7 +755,7 @@ index 8447121007..08945c5002 100644
  #else  // defined(__NR_fstatat64)
      // We should not reach here on 64-bit systems, as the *stat*64() are only
      // necessary on 32-bit.
-@@ -438,7 +453,8 @@ bool BrokerHost::HandleRemoteCommand(BrokerSimpleMessage* message,
+@@ -436,7 +451,8 @@ bool BrokerHost::HandleRemoteCommand(Bro
        break;
      }
      case COMMAND_STAT:
@@ -874,11 +765,10 @@ index 8447121007..08945c5002 100644
        const char* requested_filename;
        if (!message->ReadString(&requested_filename)) {
          return false;
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_process.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_process.cc
-index a55b548a8e..e78ad6c22a 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_process.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_process.cc
-@@ -122,44 +122,46 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_process.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_process.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_process.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_process.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -122,44 +122,46 @@ bool BrokerProcess::IsSyscallBrokerable(
    // and are default disabled in Android. So, we should refuse to broker them
    // to be consistent with the platform's restrictions.
    switch (sysno) {
@@ -932,7 +822,7 @@ index a55b548a8e..e78ad6c22a 100644
      case __NR_stat:
      case __NR_lstat:
  #endif
-@@ -169,6 +171,9 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
+@@ -169,6 +171,9 @@ bool BrokerProcess::IsSyscallBrokerable(
  #if defined(__NR_fstatat64)
      case __NR_fstatat64:
  #endif
@@ -942,7 +832,7 @@ index a55b548a8e..e78ad6c22a 100644
  #if defined(__x86_64__) || defined(__aarch64__)
      case __NR_newfstatat:
  #endif
-@@ -184,7 +189,7 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
+@@ -184,7 +189,7 @@ bool BrokerProcess::IsSyscallBrokerable(
        return !fast_check || policy_->allowed_command_set.test(COMMAND_STAT);
  #endif
  
@@ -951,11 +841,10 @@ index a55b548a8e..e78ad6c22a 100644
      case __NR_unlink:
        return !fast_check || policy_->allowed_command_set.test(COMMAND_UNLINK);
  #endif
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc
-index 6abc80b432..2975dce339 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc
-@@ -169,6 +169,19 @@ int SyscallDispatcher::DispatchSyscall(const arch_seccomp_data& args) {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -169,6 +169,19 @@ int SyscallDispatcher::DispatchSyscall(c
        return Stat64(reinterpret_cast<const char*>(args.args[0]), true,
                      reinterpret_cast<struct kernel_stat64*>(args.args[1]));
  #endif
@@ -975,10 +864,9 @@ index 6abc80b432..2975dce339 100644
  #if defined(__NR_lstat)
      case __NR_lstat:
        // See https://crbug.com/847096
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.h
-index 906c37d922..1804f48837 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.h	2000-01-01 00:00:00.000000000 +0800
 @@ -49,6 +49,9 @@ class SANDBOX_EXPORT SyscallDispatcher {
    virtual int Stat64(const char* pathname,
                       bool follow_links,
@@ -989,10 +877,9 @@ index 906c37d922..1804f48837 100644
  
    // Emulates unlink()/unlinkat().
    virtual int Unlink(const char* unlink) const = 0;
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_seccomp.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_seccomp.h
-index 8690a96eb0..45d7a17819 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_seccomp.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_seccomp.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_seccomp.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_seccomp.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_seccomp.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_seccomp.h	2000-01-01 00:00:00.000000000 +0800
 @@ -39,6 +39,10 @@
  #define EM_AARCH64 183
  #endif
@@ -1015,10 +902,9 @@ index 8690a96eb0..45d7a17819 100644
  // For prctl.h
  #ifndef PR_SET_SECCOMP
  #define PR_SET_SECCOMP               22
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_signal.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_signal.h
-index 69ccaf1081..0d29396a6c 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_signal.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_signal.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_signal.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_signal.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_signal.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_signal.h	2000-01-01 00:00:00.000000000 +0800
 @@ -13,7 +13,7 @@
  // (not undefined, but defined different values and in different memory
  // layouts). So, fill the gap here.
@@ -1028,10 +914,9 @@ index 69ccaf1081..0d29396a6c 100644
  
  #define LINUX_SIGHUP 1
  #define LINUX_SIGINT 2
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_stat.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_stat.h
-index 3aae8cbced..c5293cfeb8 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_stat.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_stat.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_stat.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_stat.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_stat.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_stat.h	2000-01-01 00:00:00.000000000 +0800
 @@ -150,7 +150,7 @@ struct kernel_stat {
    int st_blocks;
    int st_pad4[14];
@@ -1084,7 +969,7 @@ index 3aae8cbced..c5293cfeb8 100644
  #if !defined(AT_EMPTY_PATH)
  #define AT_EMPTY_PATH 0x1000
  #endif
-@@ -207,8 +243,14 @@ using default_stat_struct = struct kernel_stat;
+@@ -207,8 +243,14 @@ using default_stat_struct = struct kerne
  #define __NR_fstatat_default __NR_newfstatat
  #define __NR_fstat_default __NR_fstat
  
@@ -1100,10 +985,9 @@ index 3aae8cbced..c5293cfeb8 100644
  #endif
  
  #endif  // SANDBOX_LINUX_SYSTEM_HEADERS_LINUX_STAT_H_
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_syscalls.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_syscalls.h
-index 438147b401..46a6f91b77 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_syscalls.h
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_syscalls.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_syscalls.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_syscalls.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_syscalls.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/linux_syscalls.h	2000-01-01 00:00:00.000000000 +0800
 @@ -35,5 +35,9 @@
  #include "sandbox/linux/system_headers/arm64_linux_syscalls.h"
  #endif
@@ -1114,11 +998,9 @@ index 438147b401..46a6f91b77 100644
 +
  #endif  // SANDBOX_LINUX_SYSTEM_HEADERS_LINUX_SYSCALLS_H_
  
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/loong64_linux_syscalls.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/loong64_linux_syscalls.h
-new file mode 100644
-index 0000000000..808d6de740
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/loong64_linux_syscalls.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/loong64_linux_syscalls.h b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/loong64_linux_syscalls.h
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/loong64_linux_syscalls.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/system_headers/loong64_linux_syscalls.h	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,1194 @@
 +// Copyright 2023 The Chromium Authors
 +// Use of this source code is governed by a BSD-style license that can be
@@ -2314,11 +2196,10 @@ index 0000000000..808d6de740
 +#endif
 +
 +#endif  // SANDBOX_LINUX_SYSTEM_HEADERS_LOONG64_LINUX_SYSCALLS_H_
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_audio_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_audio_policy_linux.cc
-index e1716b97e8..3ed6fc9b4d 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_audio_policy_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_audio_policy_linux.cc
-@@ -85,6 +85,7 @@ ResultExpr AudioProcessPolicy::EvaluateSyscall(int system_call_number) const {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_audio_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_audio_policy_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_audio_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_audio_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -85,6 +85,7 @@ ResultExpr AudioProcessPolicy::EvaluateS
        return Switch(op & ~(FUTEX_PRIVATE_FLAG | FUTEX_CLOCK_REALTIME))
            .Cases({FUTEX_CMP_REQUEUE,
                    FUTEX_LOCK_PI,
@@ -2326,11 +2207,10 @@ index e1716b97e8..3ed6fc9b4d 100644
                    FUTEX_UNLOCK_PI,
                    FUTEX_WAIT,
                    FUTEX_WAIT_BITSET,
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_broker_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_broker_policy_linux.cc
-index 87a0cc1faf..3702bf91ba 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_broker_policy_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_broker_policy_linux.cc
-@@ -87,6 +87,12 @@ ResultExpr BrokerProcessPolicy::EvaluateSyscall(int sysno) const {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_broker_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_broker_policy_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_broker_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_broker_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -87,6 +87,12 @@ ResultExpr BrokerProcessPolicy::Evaluate
          return Allow();
        break;
  #endif
@@ -2343,11 +2223,10 @@ index 87a0cc1faf..3702bf91ba 100644
  #if defined(__NR_lstat)
      case __NR_lstat:
        if (allowed_command_set_.test(syscall_broker::COMMAND_STAT))
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc
-index df2567f749..8cabc0d20e 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc
-@@ -38,7 +38,7 @@ ResultExpr CrosAmdGpuProcessPolicy::EvaluateSyscall(int sysno) const {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -38,7 +38,7 @@ ResultExpr CrosAmdGpuProcessPolicy::Eval
      case __NR_sched_setscheduler:
      case __NR_sysinfo:
      case __NR_uname:
@@ -2356,11 +2235,10 @@ index df2567f749..8cabc0d20e 100644
      case __NR_readlink:
      case __NR_stat:
  #endif
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_gpu_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_gpu_policy_linux.cc
-index ef49a63ee3..305c15977d 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_gpu_policy_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_gpu_policy_linux.cc
-@@ -80,7 +80,7 @@ ResultExpr GpuProcessPolicy::EvaluateSyscall(int sysno) const {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_gpu_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_gpu_policy_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_gpu_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_gpu_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -80,7 +80,7 @@ ResultExpr GpuProcessPolicy::EvaluateSys
      (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
      case __NR_ftruncate64:
  #endif
@@ -2369,11 +2247,10 @@ index ef49a63ee3..305c15977d 100644
      case __NR_getdents:
  #endif
      case __NR_getdents64:
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc
-index ed1582d790..a20626dacc 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc
-@@ -255,7 +255,7 @@ ResultExpr NetworkProcessPolicy::EvaluateSyscall(int sysno) const {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -255,7 +255,7 @@ ResultExpr NetworkProcessPolicy::Evaluat
      case __NR_fdatasync:
      case __NR_fsync:
      case __NR_mremap:
@@ -2382,11 +2259,10 @@ index ed1582d790..a20626dacc 100644
      case __NR_getdents:
  #endif
      case __NR_getdents64:
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
-index 2d00b76853..1fce6c800e 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
-@@ -37,7 +37,7 @@ ResultExpr ScreenAIProcessPolicy::EvaluateSyscall(
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -37,7 +37,7 @@ ResultExpr ScreenAIProcessPolicy::Evalua
        const Arg<int> op(1);
        return Switch(op & FUTEX_CMD_MASK)
            .Cases(
@@ -2395,11 +2271,10 @@ index 2d00b76853..1fce6c800e 100644
                 FUTEX_WAIT_BITSET, FUTEX_WAKE},
                Allow())
            // Sending ENOSYS tells the Futex backend to use another approach if
-diff --git a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc
-index e77b8d40e3..dcec5782e6 100644
---- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc
-@@ -552,6 +552,7 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -586,6 +586,7 @@ bpf_dsl::ResultExpr SandboxLinux::Handle
    const bpf_dsl::ResultExpr handle_via_broker =
        bpf_dsl::Trap(syscall_broker::BrokerClient::SIGSYS_Handler,
                      broker_process_->GetBrokerClientSignalBased());
@@ -2407,7 +2282,7 @@ index e77b8d40e3..dcec5782e6 100644
    if (sysno == __NR_fstatat_default) {
      // This may be an fstatat(fd, "", stat_buf, AT_EMPTY_PATH), which should be
      // rewritten as fstat(fd, stat_buf). This should be consistent with how the
-@@ -562,6 +563,15 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
+@@ -596,6 +597,15 @@ bpf_dsl::ResultExpr SandboxLinux::Handle
      return bpf_dsl::If((flags & AT_EMPTY_PATH) == AT_EMPTY_PATH,
                         RewriteFstatatSIGSYS(BPFBasePolicy::GetFSDeniedErrno()))
          .Else(handle_via_broker);
@@ -2423,11 +2298,10 @@ index e77b8d40e3..dcec5782e6 100644
    } else {
      return handle_via_broker;
    }
-diff --git a/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn b/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn
-index bedc83f29f..6bea390c1f 100644
---- a/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn
-+++ b/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn
-@@ -783,6 +783,8 @@ skia_source_set("skia_opts") {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn b/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn
+--- a/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
+@@ -754,6 +754,8 @@ skia_source_set("skia_opts") {
      # Conditional and empty body needed to avoid assert() below.
    } else if (current_cpu == "riscv64") {
      # Conditional and empty body needed to avoid assert() below.
@@ -2436,11 +2310,10 @@ index bedc83f29f..6bea390c1f 100644
    } else {
      assert(false, "Unknown cpu target")
    }
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
-index 1ce9a9ca11..ef440f9753 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
-@@ -91,19 +91,19 @@ ALWAYS_INLINE void PackOneRowOfRGBA8LittleToRA8(const uint8_t*& source,
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
+@@ -91,19 +91,19 @@ ALWAYS_INLINE void PackOneRowOfRGBA8Litt
    v4f32 mask_falpha = __lsx_vffint_s_w(mask_lalpha);
    v16u8 ra_index = {0,19, 4,23, 8,27, 12,31};
    for (unsigned i = 0; i < pixels_per_row_trunc; i += 4) {
@@ -2468,7 +2341,7 @@ index 1ce9a9ca11..ef440f9753 100644
  
      v2u64 ra = __lsx_vshuf_b(bgra, component_r, ra_index);
      __lsx_vstelm_d(ra, destination, 0, 0);
-@@ -138,19 +138,19 @@ ALWAYS_INLINE void PackOneRowOfRGBA8LittleToR8(const uint8_t*& source,
+@@ -138,19 +138,19 @@ ALWAYS_INLINE void PackOneRowOfRGBA8Litt
    v4u32 mask_lalpha = __lsx_vreplgr2vr_w(0x0ff);
    v4f32 mask_falpha = __lsx_vffint_s_w(mask_lalpha);
    for (unsigned i = 0; i < pixels_per_row_trunc; i += 4) {
@@ -2496,7 +2369,7 @@ index 1ce9a9ca11..ef440f9753 100644
  
      component_r = __lsx_vpickev_b(component_r, component_r);
      component_r = __lsx_vpickev_b(component_r, component_r);
-@@ -173,41 +173,41 @@ ALWAYS_INLINE void PackOneRowOfRGBA8LittleToRGBA8(const uint8_t*& source,
+@@ -173,41 +173,41 @@ ALWAYS_INLINE void PackOneRowOfRGBA8Litt
    v4f32 mask_falpha = __lsx_vffint_s_w(mask_lalpha);
    v16u8 rgba_index = {0,1,2,19, 4,5,6,23, 8,9,10,27, 12,13,14,31};
    for (unsigned i = 0; i < pixels_per_row_trunc; i += 4) {
@@ -2566,10 +2439,9 @@ index 1ce9a9ca11..ef440f9753 100644
  
      bgra_01 = __lsx_vpickev_b(bgra_1, bgra_0);
      bgra_23 = __lsx_vpickev_b(bgra_3, bgra_2);
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/boringssl/src/include/openssl/target.h b/qtwebengine/src/3rdparty/chromium/third_party/boringssl/src/include/openssl/target.h
-index 12736416f3..62e7ad7b8b 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/boringssl/src/include/openssl/target.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/boringssl/src/include/openssl/target.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/boringssl/src/include/openssl/target.h b/qtwebengine/src/3rdparty/chromium/third_party/boringssl/src/include/openssl/target.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/boringssl/src/include/openssl/target.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/boringssl/src/include/openssl/target.h	2000-01-01 00:00:00.000000000 +0800
 @@ -45,6 +45,8 @@
  #define OPENSSL_RISCV64
  #elif defined(__riscv) && __SIZEOF_POINTER__ == 4
@@ -2579,10 +2451,9 @@ index 12736416f3..62e7ad7b8b 100644
  #elif defined(__pnacl__)
  #define OPENSSL_32_BIT
  #define OPENSSL_PNACL
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context.h
-index 12413de02b..54bf262708 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context.h	2000-01-01 00:00:00.000000000 +0800
 @@ -687,6 +687,56 @@ struct MinidumpContextRISCV64 {
    uint32_t fcsr;
  };
@@ -2640,11 +2511,10 @@ index 12413de02b..54bf262708 100644
  }  // namespace crashpad
  
  #endif  // CRASHPAD_MINIDUMP_MINIDUMP_CONTEXT_H_
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc
-index 84c0148203..9fce84735b 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc
-@@ -109,6 +109,13 @@ MinidumpContextWriter::CreateFromSnapshot(const CPUContext* context_snapshot) {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -110,6 +110,13 @@ MinidumpContextWriter::CreateFromSnapsho
        break;
      }
  
@@ -2658,10 +2528,11 @@ index 84c0148203..9fce84735b 100644
      default: {
        LOG(ERROR) << "unknown context architecture "
                   << context_snapshot->architecture;
-@@ -601,4 +608,43 @@ size_t MinidumpContextRISCV64Writer::ContextSize() const {
+@@ -601,5 +608,44 @@ size_t MinidumpContextRISCV64Writer::Con
+   DCHECK_GE(state(), kStateFrozen);
    return sizeof(context_);
  }
- 
++
 +MinidumpContextLOONG64Writer::MinidumpContextLOONG64Writer()
 +    : MinidumpContextWriter(), context_() {
 +  context_.context_flags = kMinidumpContextLOONG64;
@@ -2700,13 +2571,12 @@ index 84c0148203..9fce84735b 100644
 +  DCHECK_GE(state(), kStateFrozen);
 +  return sizeof(context_);
 +}
-+
+ 
  }  // namespace crashpad
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.h
-index 8e39c6692f..b9931cda68 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.h
-@@ -413,6 +413,44 @@ class MinidumpContextRISCV64Writer final : public MinidumpContextWriter {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_context_writer.h	2000-01-01 00:00:00.000000000 +0800
+@@ -413,6 +413,44 @@ class MinidumpContextRISCV64Writer final
    MinidumpContextRISCV64 context_;
  };
  
@@ -2751,11 +2621,10 @@ index 8e39c6692f..b9931cda68 100644
  }  // namespace crashpad
  
  #endif  // CRASHPAD_MINIDUMP_MINIDUMP_CONTEXT_WRITER_H_
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_extensions.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_extensions.h
-index a5f442bf5e..d981b961e7 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_extensions.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_extensions.h
-@@ -213,6 +213,9 @@ enum MinidumpCPUArchitecture : uint16_t {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_extensions.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_extensions.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_extensions.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_extensions.h	2000-01-01 00:00:00.000000000 +0800
+@@ -213,6 +213,9 @@ enum MinidumpCPUArchitecture : uint16_t
    //! \brief Used by Breakpad for 64-bit RISC-V.
    kMinidumpCPUArchitectureRISCV64Breakpad = 0x8006,
  
@@ -2765,11 +2634,10 @@ index a5f442bf5e..d981b961e7 100644
    //! \brief Unknown CPU architecture.
    kMinidumpCPUArchitectureUnknown = PROCESSOR_ARCHITECTURE_UNKNOWN,
  };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc
-index 1abb46c318..d69fcd7e07 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc
-@@ -177,6 +177,8 @@ std::string MinidumpMiscInfoDebugBuildString() {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -177,6 +177,8 @@ std::string MinidumpMiscInfoDebugBuildSt
    static constexpr char kCPU[] = "mips64";
  #elif defined(ARCH_CPU_RISCV64)
    static constexpr char kCPU[] = "riscv64";
@@ -2778,11 +2646,10 @@ index 1abb46c318..d69fcd7e07 100644
  #else
  #error define kCPU for this CPU
  #endif
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc
-index e2ab775ae7..791e408957 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc
-@@ -135,6 +135,9 @@ void MinidumpSystemInfoWriter::InitializeFromSnapshot(
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -135,6 +135,9 @@ void MinidumpSystemInfoWriter::Initializ
      case kCPUArchitectureRISCV64:
        cpu_architecture = kMinidumpCPUArchitectureRISCV64Breakpad;
        break;
@@ -2792,11 +2659,10 @@ index e2ab775ae7..791e408957 100644
      default:
        NOTREACHED();
        cpu_architecture = kMinidumpCPUArchitectureUnknown;
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc
-index c1c6fba58f..568d746988 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc
-@@ -122,6 +122,11 @@ void CaptureMemory::PointedToByContext(const CPUContext& context,
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -122,6 +122,11 @@ void CaptureMemory::PointedToByContext(c
    for (size_t i = 0; i < std::size(context.riscv64->regs); ++i) {
      MaybeCaptureMemoryAround(delegate, context.riscv64->regs[i]);
    }
@@ -2808,10 +2674,9 @@ index c1c6fba58f..568d746988 100644
  #else
  #error Port.
  #endif
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_architecture.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_architecture.h
-index 26d45f8412..29f1398b8b 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_architecture.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_architecture.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_architecture.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_architecture.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_architecture.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_architecture.h	2000-01-01 00:00:00.000000000 +0800
 @@ -47,6 +47,9 @@ enum CPUArchitecture {
  
    //! \brief 64-bit RISC-V.
@@ -2822,11 +2687,10 @@ index 26d45f8412..29f1398b8b 100644
  };
  
  }  // namespace crashpad
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.cc
-index 492a0f7f91..fd9f04e162 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.cc
-@@ -173,6 +173,8 @@ uint64_t CPUContext::InstructionPointer() const {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -173,6 +173,8 @@ uint64_t CPUContext::InstructionPointer(
        return arm64->pc;
      case kCPUArchitectureRISCV64:
        return riscv64->pc;
@@ -2835,7 +2699,7 @@ index 492a0f7f91..fd9f04e162 100644
      default:
        NOTREACHED();
        return ~0ull;
-@@ -191,6 +193,8 @@ uint64_t CPUContext::StackPointer() const {
+@@ -191,6 +193,8 @@ uint64_t CPUContext::StackPointer() cons
        return arm64->sp;
      case kCPUArchitectureRISCV64:
        return riscv64->regs[1];
@@ -2852,10 +2716,9 @@ index 492a0f7f91..fd9f04e162 100644
        return true;
      case kCPUArchitectureX86:
      case kCPUArchitectureARM:
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.h
-index c3640c328c..54ac3716b7 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/cpu_context.h	2000-01-01 00:00:00.000000000 +0800
 @@ -371,6 +371,22 @@ struct CPUContextRISCV64 {
    uint32_t fcsr;
  };
@@ -2887,11 +2750,10 @@ index c3640c328c..54ac3716b7 100644
    };
  };
  
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc
-index 6c4cb3ebce..b780e65f0f 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc
-@@ -281,6 +281,40 @@ void InitializeCPUContextRISCV64(const ThreadContext::t64_t& thread_context,
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -281,6 +281,40 @@ void InitializeCPUContextRISCV64(const T
    context->fcsr = float_context.fcsr;
  }
  
@@ -2932,11 +2794,10 @@ index 6c4cb3ebce..b780e65f0f 100644
  #endif  // ARCH_CPU_X86_FAMILY
  
  }  // namespace internal
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h
-index 507d1b44dd..a2b72b522c 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h
-@@ -188,6 +188,45 @@ void InitializeCPUContextRISCV64(const ThreadContext::t64_t& thread_context,
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h	2000-01-01 00:00:00.000000000 +0800
+@@ -188,6 +188,45 @@ void InitializeCPUContextRISCV64(const T
  
  #endif  // ARCH_CPU_RISCV64 || DOXYGEN
  
@@ -2982,10 +2843,9 @@ index 507d1b44dd..a2b72b522c 100644
  }  // namespace internal
  }  // namespace crashpad
  
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc
-index 677afdaa77..5ce0e4dfc6 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc	2000-01-01 00:00:00.000000000 +0800
 @@ -15,6 +15,7 @@
  #include "snapshot/linux/exception_snapshot_linux.h"
  
@@ -2994,7 +2854,7 @@ index 677afdaa77..5ce0e4dfc6 100644
  
  #include "base/logging.h"
  #include "snapshot/linux/capture_memory_delegate_linux.h"
-@@ -367,6 +368,77 @@ bool ExceptionSnapshotLinux::ReadContext<ContextTraits64>(
+@@ -367,6 +368,77 @@ bool ExceptionSnapshotLinux::ReadContext
    return internal::ReadContext(reader, context_address, context_.riscv64);
  }
  
@@ -3081,11 +2941,10 @@ index 677afdaa77..5ce0e4dfc6 100644
      if (!ReadContext<ContextTraits32>(process_reader, context_address) ||
          !ReadSiginfo<Traits32>(process_reader, siginfo_address)) {
        return false;
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
-index f931d33002..c5acf661f8 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
-@@ -91,6 +91,8 @@ class ExceptionSnapshotLinux final : public ExceptionSnapshot {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h	2000-01-01 00:00:00.000000000 +0800
+@@ -91,6 +91,8 @@ class ExceptionSnapshotLinux final : pub
      CPUContextMIPS64 mips64;
  #elif defined(ARCH_CPU_RISCV64)
      CPUContextRISCV64 riscv64;
@@ -3094,11 +2953,10 @@ index f931d33002..c5acf661f8 100644
  #endif
    } context_union_;
    CPUContext context_;
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc
-index 45713386d9..3afcd51478 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc
-@@ -129,6 +129,8 @@ void ProcessReaderLinux::Thread::InitializeStack(ProcessReaderLinux* reader) {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -129,6 +129,8 @@ void ProcessReaderLinux::Thread::Initial
                                      : thread_info.thread_context.t32.regs[29];
  #elif defined(ARCH_CPU_RISCV64)
    stack_pointer = thread_info.thread_context.t64.regs[1];
@@ -3107,11 +2965,10 @@ index 45713386d9..3afcd51478 100644
  #else
  #error Port.
  #endif
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/signal_context.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/signal_context.h
-index 89e697a08b..ab04f3a40d 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/signal_context.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/signal_context.h
-@@ -456,6 +456,46 @@ static_assert(offsetof(UContext<ContextTraits64>, mcontext.fpregs) ==
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/signal_context.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/signal_context.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/signal_context.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/signal_context.h	2000-01-01 00:00:00.000000000 +0800
+@@ -456,6 +456,46 @@ static_assert(offsetof(UContext<ContextT
                    offsetof(ucontext_t, uc_mcontext.__fpregs),
                "context offset mismatch");
  
@@ -3158,11 +3015,10 @@ index 89e697a08b..ab04f3a40d 100644
  #else
  #error Port.
  #endif  // ARCH_CPU_X86_FAMILY
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc
-index 20b95fba53..0c0ee9ba03 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc
-@@ -207,6 +207,8 @@ CPUArchitecture SystemSnapshotLinux::GetCPUArchitecture() const {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -208,6 +208,8 @@ CPUArchitecture SystemSnapshotLinux::Get
                                      : kCPUArchitectureMIPSEL;
  #elif defined(ARCH_CPU_RISCV64)
    return kCPUArchitectureRISCV64;
@@ -3171,7 +3027,7 @@ index 20b95fba53..0c0ee9ba03 100644
  #else
  #error port to your architecture
  #endif
-@@ -225,6 +227,9 @@ uint32_t SystemSnapshotLinux::CPURevision() const {
+@@ -226,6 +228,9 @@ uint32_t SystemSnapshotLinux::CPURevisio
  #elif defined(ARCH_CPU_RISCV64)
    // Not implemented
    return 0;
@@ -3181,7 +3037,7 @@ index 20b95fba53..0c0ee9ba03 100644
  #else
  #error port to your architecture
  #endif
-@@ -248,6 +253,9 @@ std::string SystemSnapshotLinux::CPUVendor() const {
+@@ -249,6 +254,9 @@ std::string SystemSnapshotLinux::CPUVend
  #elif defined(ARCH_CPU_RISCV64)
    // Not implemented
    return std::string();
@@ -3191,7 +3047,7 @@ index 20b95fba53..0c0ee9ba03 100644
  #else
  #error port to your architecture
  #endif
-@@ -384,6 +392,9 @@ bool SystemSnapshotLinux::NXEnabled() const {
+@@ -385,6 +393,9 @@ bool SystemSnapshotLinux::NXEnabled() co
  #elif defined(ARCH_CPU_RISCV64)
    // Not implemented
    return false;
@@ -3201,10 +3057,9 @@ index 20b95fba53..0c0ee9ba03 100644
  #else
  #error Port.
  #endif  // ARCH_CPU_X86_FAMILY
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc
-index 85882e8ee4..094a2dbb67 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc	2000-01-01 00:00:00.000000000 +0800
 @@ -196,6 +196,13 @@ bool ThreadSnapshotLinux::Initialize(
    InitializeCPUContextRISCV64(thread.thread_info.thread_context.t64,
                                thread.thread_info.float_context.f64,
@@ -3219,11 +3074,10 @@ index 85882e8ee4..094a2dbb67 100644
  #else
  #error Port.
  #endif
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
-index 5795bfb985..e7866e3c44 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
-@@ -76,6 +76,8 @@ class ThreadSnapshotLinux final : public ThreadSnapshot {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h	2000-01-01 00:00:00.000000000 +0800
+@@ -76,6 +76,8 @@ class ThreadSnapshotLinux final : public
      CPUContextMIPS64 mips64;
  #elif defined(ARCH_CPU_RISCV64)
      CPUContextRISCV64 riscv64;
@@ -3232,11 +3086,10 @@ index 5795bfb985..e7866e3c44 100644
  #else
  #error Port.
  #endif  // ARCH_CPU_X86_FAMILY
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc
-index ec02dff126..92d9c6f78a 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc
-@@ -293,6 +293,30 @@ bool MinidumpContextConverter::Initialize(
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -293,6 +293,30 @@ bool MinidumpContextConverter::Initializ
      memcpy(&context_.riscv64->fpregs, &src->fpregs, sizeof(src->fpregs));
  
      context_.riscv64->fcsr = src->fcsr;
@@ -3267,11 +3120,10 @@ index ec02dff126..92d9c6f78a 100644
    } else {
      // Architecture is listed as "unknown".
      DLOG(ERROR) << "Unknown architecture";
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc
-index 58bd7b3647..dfb673e147 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc
-@@ -70,6 +70,8 @@ CPUArchitecture SystemSnapshotMinidump::GetCPUArchitecture() const {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -70,6 +70,8 @@ CPUArchitecture SystemSnapshotMinidump::
      // No word on how MIPS64 is signalled
      case kMinidumpCPUArchitectureRISCV64Breakpad:
        return kCPUArchitectureRISCV64;
@@ -3280,11 +3132,10 @@ index 58bd7b3647..dfb673e147 100644
  
      default:
        return CPUArchitecture::kCPUArchitectureUnknown;
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/ptracer.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/ptracer.cc
-index d8129ada78..c64b5fb684 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/ptracer.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/ptracer.cc
-@@ -429,6 +429,37 @@ bool GetThreadArea64(pid_t tid,
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/ptracer.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/ptracer.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/ptracer.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/ptracer.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -430,6 +430,37 @@ bool GetThreadArea64(pid_t tid,
    return true;
  }
  
@@ -3322,7 +3173,7 @@ index d8129ada78..c64b5fb684 100644
  #else
  #error Port.
  #endif  // ARCH_CPU_X86_FAMILY
-@@ -533,7 +564,7 @@ bool Ptracer::GetThreadInfo(pid_t tid, ThreadInfo* info) {
+@@ -534,7 +565,7 @@ bool Ptracer::GetThreadInfo(pid_t tid, T
                             can_log_);
    }
  
@@ -3331,10 +3182,9 @@ index d8129ada78..c64b5fb684 100644
    return GetGeneralPurposeRegisters32(tid, &info->thread_context, can_log_) &&
           GetFloatingPointRegisters32(tid, &info->float_context, can_log_) &&
           GetThreadArea32(tid,
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/thread_info.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/thread_info.h
-index 808b35a3af..b7d5cec9e4 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/thread_info.h
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/thread_info.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/thread_info.h b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/thread_info.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/thread_info.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/linux/thread_info.h	2000-01-01 00:00:00.000000000 +0800
 @@ -87,6 +87,8 @@ union ThreadContext {
      uint32_t padding1_;
  #elif defined(ARCH_CPU_RISCV64)
@@ -3396,10 +3246,9 @@ index 808b35a3af..b7d5cec9e4 100644
  #else
  #error Port.
  #endif  // ARCH_CPU_X86
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/misc/capture_context_linux.S b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/misc/capture_context_linux.S
-index cfad85738e..fca10003f7 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/misc/capture_context_linux.S
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/misc/capture_context_linux.S
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/misc/capture_context_linux.S b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/misc/capture_context_linux.S
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/misc/capture_context_linux.S	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/misc/capture_context_linux.S	2000-01-01 00:00:00.000000000 +0800
 @@ -338,6 +338,51 @@ CAPTURECONTEXT_SYMBOL2:
  
    // TODO(https://crashpad.chromium.org/bug/300): save floating-point registers.
@@ -3452,10 +3301,9 @@ index cfad85738e..fca10003f7 100644
    ret
  #elif defined(__mips__)
    .set noat
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc
-index df63a77296..f688ba0c9e 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc
+--- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc	2000-01-01 00:00:00.000000000 +0800
 @@ -239,6 +239,8 @@ std::string UserAgent() {
  #endif
  #elif defined (ARCH_CPU_RISCV64)
@@ -3465,11 +3313,29 @@ index df63a77296..f688ba0c9e 100644
  #else
  #error Port
  #endif
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h
-new file mode 100644
-index 0000000000..947ae991bf
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js b/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js
+--- a/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js	2000-01-01 00:00:00.000000000 +0800
+@@ -19,11 +19,11 @@ export default commandLineArgs => ({
+     sourcemap: Boolean(commandLineArgs.configSourcemaps),
+   }],
+   plugins: [
+-    terser({
+-      compress: {
+-        pure_funcs: commandLineArgs.configDCHECK ? ['Platform.DCHECK'] : [],
+-      },
+-    }),
++    // terser({
++    //   compress: {
++    //     pure_funcs: commandLineArgs.configDCHECK ? ['Platform.DCHECK'] : [],
++    //   },
++    // }),
+     {
+       name: 'devtools-plugin',
+       resolveId(source, importer) {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,764 @@
 +/* Automatically generated by configure - do not modify! */
 +#ifndef FFMPEG_CONFIG_H
@@ -4235,11 +4101,9 @@ index 0000000000..947ae991bf
 +#define CONFIG_WMA_FREQS 0
 +#define CONFIG_WMV2DSP 0
 +#endif /* FFMPEG_CONFIG_H */
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config_components.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config_components.h
-new file mode 100644
-index 0000000000..1beef521b5
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config_components.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config_components.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config_components.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config_components.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config_components.h	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,2187 @@
 +/* Automatically generated by configure - do not modify! */
 +#ifndef FFMPEG_CONFIG_COMPONENTS_H
@@ -6428,19 +6292,15 @@ index 0000000000..1beef521b5
 +#define CONFIG_IPFS_GATEWAY_PROTOCOL 0
 +#define CONFIG_IPNS_GATEWAY_PROTOCOL 0
 +#endif /* FFMPEG_CONFIG_COMPONENTS_H */
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/bsf_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/bsf_list.c
-new file mode 100644
-index 0000000000..7ff70c6e2d
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/bsf_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/bsf_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/bsf_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/bsf_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/bsf_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,2 @@
 +static const FFBitStreamFilter * const bitstream_filters[] = {
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/codec_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/codec_list.c
-new file mode 100644
-index 0000000000..cbd7f3945a
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/codec_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/codec_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/codec_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/codec_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/codec_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,20 @@
 +static const FFCodec * const codec_list[] = {
 +    &ff_h264_decoder,
@@ -6462,11 +6322,9 @@ index 0000000000..cbd7f3945a
 +    &ff_pcm_u8_decoder,
 +    &ff_libopus_decoder,
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/parser_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/parser_list.c
-new file mode 100644
-index 0000000000..50acddb28e
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/parser_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/parser_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/parser_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/parser_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavcodec/parser_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,11 @@
 +static const AVCodecParser * const parser_list[] = {
 +    &ff_aac_parser,
@@ -6479,11 +6337,9 @@ index 0000000000..50acddb28e
 +    &ff_vp8_parser,
 +    &ff_vp9_parser,
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/demuxer_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/demuxer_list.c
-new file mode 100644
-index 0000000000..920b22bfa7
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/demuxer_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/demuxer_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/demuxer_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/demuxer_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/demuxer_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,9 @@
 +static const AVInputFormat * const demuxer_list[] = {
 +    &ff_aac_demuxer,
@@ -6494,27 +6350,21 @@ index 0000000000..920b22bfa7
 +    &ff_ogg_demuxer,
 +    &ff_wav_demuxer,
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/muxer_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/muxer_list.c
-new file mode 100644
-index 0000000000..ae54c39f23
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/muxer_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/muxer_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/muxer_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/muxer_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/muxer_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,2 @@
 +static const FFOutputFormat * const muxer_list[] = {
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/protocol_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/protocol_list.c
-new file mode 100644
-index 0000000000..247e1e4c3a
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/protocol_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/protocol_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/protocol_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/protocol_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavformat/protocol_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,2 @@
 +static const URLProtocol * const url_protocols[] = {
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavutil/avconfig.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavutil/avconfig.h
-new file mode 100644
-index 0000000000..c289fbb551
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavutil/avconfig.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavutil/avconfig.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavutil/avconfig.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavutil/avconfig.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/libavutil/avconfig.h	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,6 @@
 +/* Generated by ffmpeg configure */
 +#ifndef AVUTIL_AVCONFIG_H
@@ -6522,11 +6372,9 @@ index 0000000000..c289fbb551
 +#define AV_HAVE_BIGENDIAN 0
 +#define AV_HAVE_FAST_UNALIGNED 1
 +#endif /* AVUTIL_AVCONFIG_H */
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config.h
-new file mode 100644
-index 0000000000..3863b1089b
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config.h	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,764 @@
 +/* Automatically generated by configure - do not modify! */
 +#ifndef FFMPEG_CONFIG_H
@@ -7292,11 +7140,9 @@ index 0000000000..3863b1089b
 +#define CONFIG_WMA_FREQS 0
 +#define CONFIG_WMV2DSP 0
 +#endif /* FFMPEG_CONFIG_H */
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config_components.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config_components.h
-new file mode 100644
-index 0000000000..21fcd6e8fc
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config_components.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config_components.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config_components.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config_components.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config_components.h	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,2187 @@
 +/* Automatically generated by configure - do not modify! */
 +#ifndef FFMPEG_CONFIG_COMPONENTS_H
@@ -9485,19 +9331,15 @@ index 0000000000..21fcd6e8fc
 +#define CONFIG_IPFS_GATEWAY_PROTOCOL 0
 +#define CONFIG_IPNS_GATEWAY_PROTOCOL 0
 +#endif /* FFMPEG_CONFIG_COMPONENTS_H */
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/bsf_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/bsf_list.c
-new file mode 100644
-index 0000000000..7ff70c6e2d
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/bsf_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/bsf_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/bsf_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/bsf_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/bsf_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,2 @@
 +static const FFBitStreamFilter * const bitstream_filters[] = {
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c
-new file mode 100644
-index 0000000000..653357d362
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,18 @@
 +static const FFCodec * const codec_list[] = {
 +    &ff_theora_decoder,
@@ -9517,11 +9359,9 @@ index 0000000000..653357d362
 +    &ff_pcm_u8_decoder,
 +    &ff_libopus_decoder,
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c
-new file mode 100644
-index 0000000000..f81fbe8bbc
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,9 @@
 +static const AVCodecParser * const parser_list[] = {
 +    &ff_flac_parser,
@@ -9532,11 +9372,9 @@ index 0000000000..f81fbe8bbc
 +    &ff_vp8_parser,
 +    &ff_vp9_parser,
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c
-new file mode 100644
-index 0000000000..1908ba19e7
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,8 @@
 +static const AVInputFormat * const demuxer_list[] = {
 +    &ff_flac_demuxer,
@@ -9546,27 +9384,21 @@ index 0000000000..1908ba19e7
 +    &ff_ogg_demuxer,
 +    &ff_wav_demuxer,
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/muxer_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/muxer_list.c
-new file mode 100644
-index 0000000000..ae54c39f23
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/muxer_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/muxer_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/muxer_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/muxer_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/muxer_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,2 @@
 +static const FFOutputFormat * const muxer_list[] = {
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/protocol_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/protocol_list.c
-new file mode 100644
-index 0000000000..247e1e4c3a
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/protocol_list.c
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/protocol_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/protocol_list.c
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/protocol_list.c	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/protocol_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,2 @@
 +static const URLProtocol * const url_protocols[] = {
 +    NULL };
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavutil/avconfig.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavutil/avconfig.h
-new file mode 100644
-index 0000000000..c289fbb551
---- /dev/null
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavutil/avconfig.h
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavutil/avconfig.h b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavutil/avconfig.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavutil/avconfig.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavutil/avconfig.h	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,6 @@
 +/* Generated by ffmpeg configure */
 +#ifndef AVUTIL_AVCONFIG_H
@@ -9574,11 +9406,10 @@ index 0000000000..c289fbb551
 +#define AV_HAVE_BIGENDIAN 0
 +#define AV_HAVE_FAST_UNALIGNED 1
 +#endif /* AVUTIL_AVCONFIG_H */
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni
-index b46b0a3f31..48dfc2dbbf 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni
-@@ -272,7 +272,7 @@ if ((is_apple && ffmpeg_branding == "Chrome") || (is_win && ffmpeg_branding == "
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni
+--- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni	2000-01-01 00:00:00.000000000 +0800
+@@ -270,7 +270,7 @@ if ((is_apple && ffmpeg_branding == "Chr
    ]
  }
  
@@ -9587,7 +9418,7 @@ index b46b0a3f31..48dfc2dbbf 100644
    ffmpeg_c_sources += [
      "libavcodec/aac_ac3_parser.c",
      "libavcodec/aac_parser.c",
-@@ -424,6 +424,19 @@ if ((is_android && current_cpu == "x64") || (is_apple && current_cpu == "x64") |
+@@ -467,6 +467,19 @@ if ((is_android && current_cpu == "arm64
    ]
  }
  
@@ -9606,115 +9437,11 @@ index b46b0a3f31..48dfc2dbbf 100644
 +
  if ((is_android && current_cpu == "arm" && arm_use_neon) || (use_linux_config && current_cpu == "arm" && arm_use_neon) || (use_linux_config && current_cpu == "arm")) {
    ffmpeg_c_sources += [
-     "libavcodec/arm/fft_init_arm.c",
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/libgav1/options.gni b/qtwebengine/src/3rdparty/chromium/third_party/libgav1/options.gni
-index 0aab011ea8..22b8add635 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/libgav1/options.gni
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/libgav1/options.gni
-@@ -9,5 +9,5 @@ declare_args() {
-   use_libgav1_parser =
-       (is_chromeos || is_linux || is_win) &&
-       (target_cpu == "x86" || target_cpu == "x64" || target_cpu == "arm" ||
--       target_cpu == "arm64" || target_cpu == "ppc64")
-+       target_cpu == "arm64" || target_cpu == "ppc64" || target_cpu == "loong64")
- }
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/libvpx/source/libvpx/vpx_dsp/loongarch/quantize_lsx.c b/qtwebengine/src/3rdparty/chromium/third_party/libvpx/source/libvpx/vpx_dsp/loongarch/quantize_lsx.c
-index 77be0bb4fe..7a2c4794f5 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/libvpx/source/libvpx/vpx_dsp/loongarch/quantize_lsx.c
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/libvpx/source/libvpx/vpx_dsp/loongarch/quantize_lsx.c
-@@ -11,6 +11,8 @@
- #include "./vpx_config.h"
- #include "./vpx_dsp_rtcd.h"
- #include "vpx_util/loongson_intrinsics.h"
-+#include "vp9/common/vp9_scan.h"
-+#include "vp9/encoder/vp9_block.h"
- 
- static INLINE __m128i calculate_qcoeff(__m128i coeff, __m128i coeff_abs,
-                                        __m128i round, __m128i quant,
-@@ -89,14 +91,13 @@ static INLINE int16_t accumulate_eob(__m128i eob) {
- 
- #if !CONFIG_VP9_HIGHBITDEPTH
- void vpx_quantize_b_lsx(const int16_t *coeff_ptr, intptr_t n_coeffs,
--                        const int16_t *zbin_ptr, const int16_t *round_ptr,
--                        const int16_t *quant_ptr,
--                        const int16_t *quant_shift_ptr, int16_t *qcoeff_ptr,
--                        int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
--                        uint16_t *eob_ptr, const int16_t *scan,
--                        const int16_t *iscan) {
-+                        const struct macroblock_plane *const mb_plane,
-+                        tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
-+                        const int16_t *dequant_ptr, uint16_t *eob_ptr,
-+                        const struct ScanOrder *const scan_order) {
-   __m128i zero = __lsx_vldi(0);
-   int index = 16;
-+  const int16_t *iscan = scan_order->iscan;
- 
-   __m128i zbin, round, quant, dequant, quant_shift;
-   __m128i coeff0, coeff1;
-@@ -104,13 +105,11 @@ void vpx_quantize_b_lsx(const int16_t *coeff_ptr, intptr_t n_coeffs,
-   __m128i cmp_mask0, cmp_mask1;
-   __m128i eob, eob0;
- 
--  (void)scan;
--
--  zbin = __lsx_vld(zbin_ptr, 0);
--  round = __lsx_vld(round_ptr, 0);
--  quant = __lsx_vld(quant_ptr, 0);
-+  zbin = __lsx_vld(mb_plane->zbin, 0);
-+  round = __lsx_vld(mb_plane->round, 0);
-+  quant = __lsx_vld(mb_plane->quant, 0);
-   dequant = __lsx_vld(dequant_ptr, 0);
--  quant_shift = __lsx_vld(quant_shift_ptr, 0);
-+  quant_shift = __lsx_vld(mb_plane->quant_shift, 0);
-   // Handle one DC and first 15 AC.
-   DUP2_ARG2(__lsx_vld, coeff_ptr, 0, coeff_ptr, 16, coeff0, coeff1);
-   qcoeff0 = __lsx_vabsd_h(coeff0, zero);
-@@ -167,31 +166,27 @@ void vpx_quantize_b_lsx(const int16_t *coeff_ptr, intptr_t n_coeffs,
-   *eob_ptr = accumulate_eob(eob);
- }
- 
--void vpx_quantize_b_32x32_lsx(const int16_t *coeff_ptr, intptr_t n_coeffs,
--                              const int16_t *zbin_ptr, const int16_t *round_ptr,
--                              const int16_t *quant_ptr,
--                              const int16_t *quant_shift_ptr,
--                              int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
-+void vpx_quantize_b_32x32_lsx(const tran_low_t *coeff_ptr,
-+                              const struct macroblock_plane *const mb_plane,
-+                              tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
-                               const int16_t *dequant_ptr, uint16_t *eob_ptr,
--                              const int16_t *scan, const int16_t *iscan) {
-+                              const struct ScanOrder *const scan_order) {
-   __m128i zero = __lsx_vldi(0);
-   int index;
-+  const int16_t *iscan = scan_order->iscan;
- 
-   __m128i zbin, round, quant, dequant, quant_shift;
-   __m128i coeff0, coeff1, qcoeff0, qcoeff1, cmp_mask0, cmp_mask1;
-   __m128i eob = zero, eob0;
- 
--  (void)scan;
--  (void)n_coeffs;
--
--  zbin = __lsx_vld(zbin_ptr, 0);
-+  zbin = __lsx_vld(mb_plane->zbin, 0);
-   zbin = __lsx_vsrari_h(zbin, 1);
--  round = __lsx_vld(round_ptr, 0);
-+  round = __lsx_vld(mb_plane->round, 0);
-   round = __lsx_vsrari_h(round, 1);
- 
--  quant = __lsx_vld(quant_ptr, 0);
-+  quant = __lsx_vld(mb_plane->quant, 0);
-   dequant = __lsx_vld(dequant_ptr, 0);
--  quant_shift = __lsx_vld(quant_shift_ptr, 0);
-+  quant_shift = __lsx_vld(mb_plane->quant_shift, 0);
-   quant_shift = __lsx_vslli_h(quant_shift, 1);
-   // Handle one DC and first 15 AC.
-   DUP2_ARG2(__lsx_vld, coeff_ptr, 0, coeff_ptr, 16, coeff0, coeff1);
-diff --git a/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn b/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn
-index 59e52303c5..e472aff6e3 100644
---- a/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn
-@@ -156,6 +156,8 @@ swiftshader_llvm_source_set("swiftshader_llvm") {
+     "libavcodec/arm/flacdsp_init_arm.c",
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn b/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn
+--- a/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
+@@ -156,6 +156,8 @@ swiftshader_llvm_source_set("swiftshader
      deps += [ ":swiftshader_llvm_ppc" ]
    } else if (current_cpu == "riscv64") {
      deps += [ ":swiftshader_llvm_riscv64" ]
@@ -9723,140 +9450,10 @@ index 59e52303c5..e472aff6e3 100644
    } else if (current_cpu == "x86" || current_cpu == "x64") {
      deps += [ ":swiftshader_llvm_x86" ]
    } else {
-diff --git a/qtwebengine/src/3rdparty/chromium/v8/src/regexp/loong64/regexp-macro-assembler-loong64.cc b/qtwebengine/src/3rdparty/chromium/v8/src/regexp/loong64/regexp-macro-assembler-loong64.cc
-index bc7657c051..9e7766c091 100644
---- a/qtwebengine/src/3rdparty/chromium/v8/src/regexp/loong64/regexp-macro-assembler-loong64.cc
-+++ b/qtwebengine/src/3rdparty/chromium/v8/src/regexp/loong64/regexp-macro-assembler-loong64.cc
-@@ -717,6 +717,8 @@ Handle<HeapObject> RegExpMacroAssemblerLOONG64::GetCode(Handle<String> source) {
- 
-       ExternalReference stack_limit =
-           ExternalReference::address_of_jslimit(masm_->isolate());
-+      Operand extra_space_for_variables(num_registers_ * kSystemPointerSize);
-+
-       __ li(a0, Operand(stack_limit));
-       __ Ld_d(a0, MemOperand(a0, 0));
-       __ Sub_d(a0, sp, a0);
-@@ -724,15 +726,14 @@ Handle<HeapObject> RegExpMacroAssemblerLOONG64::GetCode(Handle<String> source) {
-       __ Branch(&stack_limit_hit, le, a0, Operand(zero_reg));
-       // Check if there is room for the variable number of registers above
-       // the stack limit.
--      __ Branch(&stack_ok, hs, a0,
--                Operand(num_registers_ * kSystemPointerSize));
-+      __ Branch(&stack_ok, hs, a0, extra_space_for_variables);
-       // Exit with OutOfMemory exception. There is not enough space on the stack
-       // for our working registers.
-       __ li(a0, Operand(EXCEPTION));
-       __ jmp(&return_v0);
- 
-       __ bind(&stack_limit_hit);
--      CallCheckStackGuardState(a0);
-+      CallCheckStackGuardState(a0, extra_space_for_variables);
-       // If returned value is non-zero, we exit with the returned value as
-       // result.
-       __ Branch(&return_v0, ne, a0, Operand(zero_reg));
-@@ -1131,7 +1132,8 @@ void RegExpMacroAssemblerLOONG64::ClearRegisters(int reg_from, int reg_to) {
- 
- // Private methods:
- 
--void RegExpMacroAssemblerLOONG64::CallCheckStackGuardState(Register scratch) {
-+void RegExpMacroAssemblerLOONG64::CallCheckStackGuardState(
-+    Register scratch, Operand extra_space) {
-   DCHECK(!isolate()->IsGeneratingEmbeddedBuiltins());
-   DCHECK(!masm_->options().isolate_independent_code);
- 
-@@ -1144,6 +1146,9 @@ void RegExpMacroAssemblerLOONG64::CallCheckStackGuardState(Register scratch) {
-   __ And(sp, sp, Operand(-stack_alignment));
-   __ St_d(scratch, MemOperand(sp, 0));
- 
-+  // Extra space for variables.
-+  __ li(a3, extra_space);
-+  // RegExp code frame pointer.
-   __ mov(a2, frame_pointer());
-   // InstructionStream of self.
-   __ li(a1, Operand(masm_->CodeObject()), CONSTANT_SIZE);
-@@ -1152,16 +1157,6 @@ void RegExpMacroAssemblerLOONG64::CallCheckStackGuardState(Register scratch) {
-   DCHECK(IsAligned(stack_alignment, kSystemPointerSize));
-   __ Sub_d(sp, sp, Operand(stack_alignment));
- 
--  // The stack pointer now points to cell where the return address will be
--  // written. Arguments are in registers, meaning we treat the return address as
--  // argument 5. Since DirectCEntry will handle allocating space for the C
--  // argument slots, we don't need to care about that here. This is how the
--  // stack will look (sp meaning the value of sp at this moment):
--  // [sp + 3] - empty slot if needed for alignment.
--  // [sp + 2] - saved sp.
--  // [sp + 1] - second word reserved for return value.
--  // [sp + 0] - first word reserved for return value.
--
-   // a0 will point to the return address, placed by DirectCEntry.
-   __ mov(a0, sp);
- 
-@@ -1175,17 +1170,6 @@ void RegExpMacroAssemblerLOONG64::CallCheckStackGuardState(Register scratch) {
-   __ li(kScratchReg, Operand(entry, RelocInfo::OFF_HEAP_TARGET));
-   __ Call(kScratchReg);
- 
--  // DirectCEntry allocated space for the C argument slots so we have to
--  // drop them with the return address from the stack with loading saved sp.
--  // At this point stack must look:
--  // [sp + 7] - empty slot if needed for alignment.
--  // [sp + 6] - saved sp.
--  // [sp + 5] - second word reserved for return value.
--  // [sp + 4] - first word reserved for return value.
--  // [sp + 3] - C argument slot.
--  // [sp + 2] - C argument slot.
--  // [sp + 1] - C argument slot.
--  // [sp + 0] - C argument slot.
-   __ Ld_d(sp, MemOperand(sp, stack_alignment));
- 
-   __ li(code_pointer(), Operand(masm_->CodeObject()));
-@@ -1203,7 +1187,8 @@ static T* frame_entry_address(Address re_frame, int frame_offset) {
- }
- 
- int64_t RegExpMacroAssemblerLOONG64::CheckStackGuardState(
--    Address* return_address, Address raw_code, Address re_frame) {
-+    Address* return_address, Address raw_code, Address re_frame,
-+    uintptr_t extra_space) {
-   InstructionStream re_code = InstructionStream::cast(Object(raw_code));
-   return NativeRegExpMacroAssembler::CheckStackGuardState(
-       frame_entry<Isolate*>(re_frame, kIsolateOffset),
-@@ -1213,7 +1198,8 @@ int64_t RegExpMacroAssemblerLOONG64::CheckStackGuardState(
-       return_address, re_code,
-       frame_entry_address<Address>(re_frame, kInputStringOffset),
-       frame_entry_address<const uint8_t*>(re_frame, kInputStartOffset),
--      frame_entry_address<const uint8_t*>(re_frame, kInputEndOffset));
-+      frame_entry_address<const uint8_t*>(re_frame, kInputEndOffset),
-+      extra_space);
- }
- 
- MemOperand RegExpMacroAssemblerLOONG64::register_location(int register_index) {
-diff --git a/qtwebengine/src/3rdparty/chromium/v8/src/regexp/loong64/regexp-macro-assembler-loong64.h b/qtwebengine/src/3rdparty/chromium/v8/src/regexp/loong64/regexp-macro-assembler-loong64.h
-index 5990a8a5aa..29b595913e 100644
---- a/qtwebengine/src/3rdparty/chromium/v8/src/regexp/loong64/regexp-macro-assembler-loong64.h
-+++ b/qtwebengine/src/3rdparty/chromium/v8/src/regexp/loong64/regexp-macro-assembler-loong64.h
-@@ -87,7 +87,7 @@ class V8_EXPORT_PRIVATE RegExpMacroAssemblerLOONG64
-   // returning.
-   // {raw_code} is an Address because this is called via ExternalReference.
-   static int64_t CheckStackGuardState(Address* return_address, Address raw_code,
--                                      Address re_frame);
-+                                      Address re_frame, uintptr_t extra_space);
- 
-   void print_regexp_frame_constants();
- 
-@@ -162,7 +162,8 @@ class V8_EXPORT_PRIVATE RegExpMacroAssemblerLOONG64
-   void CheckStackLimit();
- 
-   // Generate a call to CheckStackGuardState.
--  void CallCheckStackGuardState(Register scratch);
-+  void CallCheckStackGuardState(Register scratch,
-+                                Operand extra_space = Operand(0));
-   void CallIsCharacterInRangeArray(const ZoneList<CharacterRange>* ranges);
- 
-   // The ebp-relative location of a regexp register.
-diff --git a/qtwebengine/src/3rdparty/gn/src/util/sys_info.cc b/qtwebengine/src/3rdparty/gn/src/util/sys_info.cc
-index c8dc590ac9..3c9f4cb4ed 100644
---- a/qtwebengine/src/3rdparty/gn/src/util/sys_info.cc
-+++ b/qtwebengine/src/3rdparty/gn/src/util/sys_info.cc
-@@ -34,6 +34,8 @@ std::string OperatingSystemArchitecture() {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/gn/src/util/sys_info.cc b/qtwebengine/src/3rdparty/gn/src/util/sys_info.cc
+--- a/qtwebengine/src/3rdparty/gn/src/util/sys_info.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/gn/src/util/sys_info.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -73,6 +73,8 @@ std::string OperatingSystemArchitecture(
      arch = "x86_64";
    } else if (arch == "amd64") {
      arch = "x86_64";
@@ -9865,6 +9462,3 @@ index c8dc590ac9..3c9f4cb4ed 100644
    } else if (os == "AIX" || os == "OS400") {
      arch = "ppc64";
    } else if (std::string(info.sysname) == "OS/390") {
--- 
-2.43.4
-
