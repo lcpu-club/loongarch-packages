@@ -1,0 +1,755 @@
+diff -urN ghc-9.2.8.orig/compiler/GHC/CmmToAsm/Reg/Graph/TrivColorable.hs ghc-9.2.8/compiler/GHC/CmmToAsm/Reg/Graph/TrivColorable.hs
+--- ghc-9.2.8.orig/compiler/GHC/CmmToAsm/Reg/Graph/TrivColorable.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/compiler/GHC/CmmToAsm/Reg/Graph/TrivColorable.hs	2024-09-23 08:53:15.021603075 +0800
+@@ -122,6 +122,7 @@
+                             ArchMipsel    -> panic "trivColorable ArchMipsel"
+                             ArchS390X     -> panic "trivColorable ArchS390X"
+                             ArchRISCV64   -> panic "trivColorable ArchRISCV64"
++                            ArchLoongArch64->panic "trivColorable ArchLoongArch64"
+                             ArchJavaScript-> panic "trivColorable ArchJavaScript"
+                             ArchUnknown   -> panic "trivColorable ArchUnknown")
+         , count2        <- accSqueeze 0 cALLOCATABLE_REGS_INTEGER
+@@ -157,6 +158,7 @@
+                             ArchMipsel    -> panic "trivColorable ArchMipsel"
+                             ArchS390X     -> panic "trivColorable ArchS390X"
+                             ArchRISCV64   -> panic "trivColorable ArchRISCV64"
++                            ArchLoongArch64->panic "trivColorable ArchLoongArch64"
+                             ArchJavaScript-> panic "trivColorable ArchJavaScript"
+                             ArchUnknown   -> panic "trivColorable ArchUnknown")
+         , count2        <- accSqueeze 0 cALLOCATABLE_REGS_FLOAT
+@@ -191,6 +193,7 @@
+                             ArchMipsel    -> panic "trivColorable ArchMipsel"
+                             ArchS390X     -> panic "trivColorable ArchS390X"
+                             ArchRISCV64   -> panic "trivColorable ArchRISCV64"
++                            ArchLoongArch64->panic "trivColorable ArchLoongArch64"
+                             ArchJavaScript-> panic "trivColorable ArchJavaScript"
+                             ArchUnknown   -> panic "trivColorable ArchUnknown")
+         , count2        <- accSqueeze 0 cALLOCATABLE_REGS_DOUBLE
+diff -urN ghc-9.2.8.orig/compiler/GHC/CmmToAsm/Reg/Linear/FreeRegs.hs ghc-9.2.8/compiler/GHC/CmmToAsm/Reg/Linear/FreeRegs.hs
+--- ghc-9.2.8.orig/compiler/GHC/CmmToAsm/Reg/Linear/FreeRegs.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/compiler/GHC/CmmToAsm/Reg/Linear/FreeRegs.hs	2024-09-23 08:54:56.519434650 +0800
+@@ -92,5 +92,6 @@
+    ArchMipseb    -> panic "maxSpillSlots ArchMipseb"
+    ArchMipsel    -> panic "maxSpillSlots ArchMipsel"
+    ArchRISCV64   -> panic "maxSpillSlots ArchRISCV64"
++   ArchLoongArch64->panic "maxSpillSlots ArchLoongArch64"
+    ArchJavaScript-> panic "maxSpillSlots ArchJavaScript"
+    ArchUnknown   -> panic "maxSpillSlots ArchUnknown"
+diff -urN ghc-9.2.8.orig/compiler/GHC/CmmToAsm/Reg/Linear.hs ghc-9.2.8/compiler/GHC/CmmToAsm/Reg/Linear.hs
+--- ghc-9.2.8.orig/compiler/GHC/CmmToAsm/Reg/Linear.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/compiler/GHC/CmmToAsm/Reg/Linear.hs	2024-09-23 08:54:18.022325835 +0800
+@@ -230,6 +230,7 @@
+       ArchMipseb     -> panic "linearRegAlloc ArchMipseb"
+       ArchMipsel     -> panic "linearRegAlloc ArchMipsel"
+       ArchRISCV64    -> panic "linearRegAlloc ArchRISCV64"
++      ArchLoongArch64-> panic "linearRegAlloc ArchLoongArch64"
+       ArchJavaScript -> panic "linearRegAlloc ArchJavaScript"
+       ArchUnknown    -> panic "linearRegAlloc ArchUnknown"
+  where
+diff -urN ghc-9.2.8.orig/compiler/GHC/CmmToAsm/Reg/Target.hs ghc-9.2.8/compiler/GHC/CmmToAsm/Reg/Target.hs
+--- ghc-9.2.8.orig/compiler/GHC/CmmToAsm/Reg/Target.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/compiler/GHC/CmmToAsm/Reg/Target.hs	2024-09-23 08:56:32.063866778 +0800
+@@ -55,6 +55,7 @@
+       ArchMipseb    -> panic "targetVirtualRegSqueeze ArchMipseb"
+       ArchMipsel    -> panic "targetVirtualRegSqueeze ArchMipsel"
+       ArchRISCV64   -> panic "targetVirtualRegSqueeze ArchRISCV64"
++      ArchLoongArch64->panic "targetVirtualRegSqueeze ArchLoongArch64"
+       ArchJavaScript-> panic "targetVirtualRegSqueeze ArchJavaScript"
+       ArchUnknown   -> panic "targetVirtualRegSqueeze ArchUnknown"
+ 
+@@ -75,6 +76,7 @@
+       ArchMipseb    -> panic "targetRealRegSqueeze ArchMipseb"
+       ArchMipsel    -> panic "targetRealRegSqueeze ArchMipsel"
+       ArchRISCV64   -> panic "targetRealRegSqueeze ArchRISCV64"
++      ArchLoongArch64->panic "targetRealRegSqueeze ArchLoongArch64"
+       ArchJavaScript-> panic "targetRealRegSqueeze ArchJavaScript"
+       ArchUnknown   -> panic "targetRealRegSqueeze ArchUnknown"
+ 
+@@ -94,6 +96,7 @@
+       ArchMipseb    -> panic "targetClassOfRealReg ArchMipseb"
+       ArchMipsel    -> panic "targetClassOfRealReg ArchMipsel"
+       ArchRISCV64   -> panic "targetClassOfRealReg ArchRISCV64"
++      ArchLoongArch64->panic "targetClassOfRealReg ArchLoongArch64"
+       ArchJavaScript-> panic "targetClassOfRealReg ArchJavaScript"
+       ArchUnknown   -> panic "targetClassOfRealReg ArchUnknown"
+ 
+@@ -113,6 +116,7 @@
+       ArchMipseb    -> panic "targetMkVirtualReg ArchMipseb"
+       ArchMipsel    -> panic "targetMkVirtualReg ArchMipsel"
+       ArchRISCV64   -> panic "targetMkVirtualReg ArchRISCV64"
++      ArchLoongArch64->panic "targetMkVirtualReg ArchLoongArch64"
+       ArchJavaScript-> panic "targetMkVirtualReg ArchJavaScript"
+       ArchUnknown   -> panic "targetMkVirtualReg ArchUnknown"
+ 
+@@ -132,6 +136,7 @@
+       ArchMipseb    -> panic "targetRegDotColor ArchMipseb"
+       ArchMipsel    -> panic "targetRegDotColor ArchMipsel"
+       ArchRISCV64   -> panic "targetRegDotColor ArchRISCV64"
++      ArchLoongArch64->panic "targetRegDotColor ArchLoongArch64"
+       ArchJavaScript-> panic "targetRegDotColor ArchJavaScript"
+       ArchUnknown   -> panic "targetRegDotColor ArchUnknown"
+ 
+diff -urN ghc-9.2.8.orig/compiler/GHC/CmmToAsm.hs ghc-9.2.8/compiler/GHC/CmmToAsm.hs
+--- ghc-9.2.8.orig/compiler/GHC/CmmToAsm.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/compiler/GHC/CmmToAsm.hs	2024-09-23 08:44:30.442312992 +0800
+@@ -173,6 +173,7 @@
+       ArchMipseb    -> panic "nativeCodeGen: No NCG for mipseb"
+       ArchMipsel    -> panic "nativeCodeGen: No NCG for mipsel"
+       ArchRISCV64   -> panic "nativeCodeGen: No NCG for RISCV64"
++      ArchLoongArch64 -> panic "nativeCodeGen: No NCG for LoongArch64"
+       ArchUnknown   -> panic "nativeCodeGen: No NCG for unknown arch"
+       ArchJavaScript-> panic "nativeCodeGen: No NCG for JavaScript"
+ 
+diff -urN ghc-9.2.8.orig/compiler/GHC/CmmToLlvm/Mangler.hs ghc-9.2.8/compiler/GHC/CmmToLlvm/Mangler.hs
+--- ghc-9.2.8.orig/compiler/GHC/CmmToLlvm/Mangler.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/compiler/GHC/CmmToLlvm/Mangler.hs	2024-09-07 15:51:00.554440498 +0800
+@@ -43,7 +43,7 @@
+ 
+ -- | These are the rewrites that the mangler will perform
+ rewrites :: [Rewrite]
+-rewrites = [rewriteSymType, rewriteAVX]
++rewrites = [rewriteSymType, rewriteAVX, rewriteJump]
+ 
+ type Rewrite = DynFlags -> B.ByteString -> Maybe B.ByteString
+ 
+@@ -107,6 +107,29 @@
+     isVmovdqa = B.isPrefixOf (B.pack "vmovdqa")
+     isVmovap = B.isPrefixOf (B.pack "vmovap")
+ 
++-- | This rewrites bl and b jump inst to avoid creating PLT entries for
++-- functions on loongarch64, because there is no separate call instruction
++-- for function calls in loongarch64. Also, this replacement will load
++-- the function address from the GOT, which is resolved to point to the
++-- real address of the function.
++rewriteJump :: Rewrite
++rewriteJump platform l
++  | not isLoongArch64 = Nothing
++  | isBL l            = Just $ replaceJump "bl" "$ra" "$ra" l
++  | isB l             = Just $ replaceJump "b" "$zero" "$t0" l
++  | otherwise         = Nothing
++  where
++    isLoongArch64 = platformArch platform == ArchLoongArch64
++    isBL = B.isPrefixOf (B.pack "bl\t")
++    isB = B.isPrefixOf (B.pack "b\t")
++
++    replaceJump jump rd rj l =
++        appendInsn ("jirl" ++ "\t" ++ rd ++ ", " ++ rj ++ ", 0") $ removeBracket $
++        replaceOnce (B.pack (jump ++ "\t%plt(")) (B.pack ("la\t" ++ rj ++ ", ")) l
++      where
++        removeBracket = replaceOnce (B.pack ")") (B.pack "")
++        appendInsn i = (`B.append` B.pack ("\n\t" ++ i))
++
+ -- | @replaceOnce match replace bs@ replaces the first occurrence of the
+ -- substring @match@ in @bs@ with @replace@.
+ replaceOnce :: B.ByteString -> B.ByteString -> B.ByteString -> B.ByteString
+diff -urN ghc-9.2.8.orig/compiler/GHC/Driver/Pipeline.hs ghc-9.2.8/compiler/GHC/Driver/Pipeline.hs
+--- ghc-9.2.8.orig/compiler/GHC/Driver/Pipeline.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/compiler/GHC/Driver/Pipeline.hs	2024-09-23 08:58:47.325425291 +0800
+@@ -1097,6 +1097,7 @@
+         abi :: String
+         abi = case platformArch (targetPlatform dflags) of
+                 ArchRISCV64 -> "lp64d"
++                ArchLoongArch64 -> "lp64d"
+                 _           -> ""
+ 
+ -- -----------------------------------------------------------------------------
+diff -urN ghc-9.2.8.orig/compiler/GHC/Platform/LoongArch64.hs ghc-9.2.8/compiler/GHC/Platform/LoongArch64.hs
+--- ghc-9.2.8.orig/compiler/GHC/Platform/LoongArch64.hs	1970-01-01 08:00:00.000000000 +0800
++++ ghc-9.2.8/compiler/GHC/Platform/LoongArch64.hs	2024-09-23 09:00:46.086795964 +0800
+@@ -0,0 +1,9 @@
++{-# LANGUAGE CPP #-}
++
++module GHC.Platform.LoongArch64 where
++
++import GHC.Prelude
++
++#define MACHREGS_NO_REGS 0
++#define MACHREGS_loongarch64 1
++#include "../../../includes/CodeGen.Platform.hs"
+diff -urN ghc-9.2.8.orig/compiler/GHC/Platform/Regs.hs ghc-9.2.8/compiler/GHC/Platform/Regs.hs
+--- ghc-9.2.8.orig/compiler/GHC/Platform/Regs.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/compiler/GHC/Platform/Regs.hs	2024-09-23 09:02:32.224689035 +0800
+@@ -16,6 +16,7 @@
+ import qualified GHC.Platform.X86        as X86
+ import qualified GHC.Platform.X86_64     as X86_64
+ import qualified GHC.Platform.RISCV64    as RISCV64
++import qualified GHC.Platform.LoongArch64 as LoongArch64
+ import qualified GHC.Platform.NoRegs     as NoRegs
+ 
+ -- | Returns 'True' if this global register is stored in a caller-saves
+@@ -33,6 +34,7 @@
+    ArchARM {}  -> ARM.callerSaves
+    ArchAArch64 -> AArch64.callerSaves
+    ArchRISCV64 -> RISCV64.callerSaves
++   ArchLoongArch64 -> LoongArch64.callerSaves
+    arch
+     | arch `elem` [ArchPPC, ArchPPC_64 ELF_V1, ArchPPC_64 ELF_V2] ->
+         PPC.callerSaves
+@@ -56,6 +58,7 @@
+    ArchARM {}  -> ARM.activeStgRegs
+    ArchAArch64 -> AArch64.activeStgRegs
+    ArchRISCV64 -> RISCV64.activeStgRegs
++   ArchLoongArch64 -> LoongArch64.activeStgRegs
+    arch
+     | arch `elem` [ArchPPC, ArchPPC_64 ELF_V1, ArchPPC_64 ELF_V2] ->
+         PPC.activeStgRegs
+@@ -74,6 +77,7 @@
+    ArchARM {}  -> ARM.haveRegBase
+    ArchAArch64 -> AArch64.haveRegBase
+    ArchRISCV64 -> RISCV64.haveRegBase
++   ArchLoongArch64 -> LoongArch64.haveRegBase
+    arch
+     | arch `elem` [ArchPPC, ArchPPC_64 ELF_V1, ArchPPC_64 ELF_V2] ->
+         PPC.haveRegBase
+@@ -92,6 +96,7 @@
+    ArchARM {}  -> ARM.globalRegMaybe
+    ArchAArch64 -> AArch64.globalRegMaybe
+    ArchRISCV64 -> RISCV64.globalRegMaybe
++   ArchLoongArch64 -> LoongArch64.globalRegMaybe
+    arch
+     | arch `elem` [ArchPPC, ArchPPC_64 ELF_V1, ArchPPC_64 ELF_V2] ->
+         PPC.globalRegMaybe
+@@ -110,6 +115,7 @@
+    ArchARM {}  -> ARM.freeReg
+    ArchAArch64 -> AArch64.freeReg
+    ArchRISCV64 -> RISCV64.freeReg
++   ArchLoongArch64 -> LoongArch64.freeReg
+    arch
+     | arch `elem` [ArchPPC, ArchPPC_64 ELF_V1, ArchPPC_64 ELF_V2] ->
+         PPC.freeReg
+diff -urN ghc-9.2.8.orig/compiler/GHC/Platform.hs ghc-9.2.8/compiler/GHC/Platform.hs
+--- ghc-9.2.8.orig/compiler/GHC/Platform.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/compiler/GHC/Platform.hs	2024-09-23 08:59:16.195758320 +0800
+@@ -218,6 +218,7 @@
+   ArchPPC_64 _ -> True
+   ArchS390X    -> True
+   ArchRISCV64  -> True
++  ArchLoongArch64 -> True
+   ArchAArch64
+       -- Apple's AArch64 ABI requires that the caller sign-extend
+       -- small integer arguments. See
+diff -urN ghc-9.2.8.orig/compiler/ghc.cabal.in ghc-9.2.8/compiler/ghc.cabal.in
+--- ghc-9.2.8.orig/compiler/ghc.cabal.in	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/compiler/ghc.cabal.in	2024-09-05 13:51:40.307548994 +0800
+@@ -499,6 +499,7 @@
+         GHC.Platform.Reg.Class
+         GHC.Platform.Regs
+         GHC.Platform.RISCV64
++        GHC.Platform.LoongArch64
+         GHC.Platform.S390X
+         GHC.Platform.SPARC
+         GHC.Platform.Ways
+diff -urN ghc-9.2.8.orig/configure ghc-9.2.8/configure
+--- ghc-9.2.8.orig/configure	2023-05-26 18:58:09.000000000 +0800
++++ ghc-9.2.8/configure	2024-09-07 16:09:46.163082409 +0800
+@@ -11154,6 +11154,9 @@
+         riscv64)
+             test -z "$2" || eval "$2=ArchRISCV64"
+             ;;
++        loongarch64)
++            test -z "$2" || eval "$2=ArchLoongArch64"
++            ;;
+         hppa|hppa1_1|ia64|m68k|nios2|riscv32|rs6000|s390|sh4|vax)
+             test -z "$2" || eval "$2=ArchUnknown"
+             ;;
+diff -urN ghc-9.2.8.orig/configure.ac ghc-9.2.8/configure.ac
+--- ghc-9.2.8.orig/configure.ac	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/configure.ac	2024-09-23 09:11:28.813880728 +0800
+@@ -287,7 +287,7 @@
+ 
+ AC_MSG_CHECKING(whether target supports a registerised ABI)
+ case "$TargetArch" in
+-    i386|x86_64|powerpc|powerpc64|powerpc64le|s390x|arm|aarch64|riscv64)
++    i386|x86_64|powerpc|powerpc64|powerpc64le|s390x|arm|aarch64|riscv64|loongarch64)
+         UnregisterisedDefault=NO
+         AC_MSG_RESULT([yes])
+         ;;
+@@ -351,7 +351,7 @@
+ dnl ** Does target have runtime linker support?
+ dnl --------------------------------------------------------------
+ case "$target" in
+-    powerpc64-*|powerpc64le-*|powerpc-ibm-aix*|s390x-ibm-linux|riscv64-*)
++    powerpc64-*|powerpc64le-*|powerpc-ibm-aix*|s390x-ibm-linux|riscv64-*|loongarch64-*)
+         TargetHasRTSLinker=NO
+         ;;
+     *)
+diff -urN ghc-9.2.8.orig/hadrian/src/Oracles/Flag.hs ghc-9.2.8/hadrian/src/Oracles/Flag.hs
+--- ghc-9.2.8.orig/hadrian/src/Oracles/Flag.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/hadrian/src/Oracles/Flag.hs	2024-09-23 09:05:29.990078739 +0800
+@@ -81,7 +81,8 @@
+                             , "arm"
+                             , "aarch64"
+                             , "s390x"
+-                            , "riscv64"]
++                            , "riscv64"
++                            , "loongarch64"]
+   if   -- The THREADED_RTS requires `BaseReg` to be in a register and the
+        -- Unregisterised mode doesn't allow that.
+      | unreg                -> return False
+diff -urN ghc-9.2.8.orig/includes/CodeGen.Platform.hs ghc-9.2.8/includes/CodeGen.Platform.hs
+--- ghc-9.2.8.orig/includes/CodeGen.Platform.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/includes/CodeGen.Platform.hs	2024-09-23 09:22:11.793782390 +0800
+@@ -449,6 +449,74 @@
+ # define ft10 62
+ # define ft11 63
+ 
++#elif defined(MACHREGS_loongarch64)
++
++# define zero 0
++# define ra   1
++# define tp   2
++# define sp   3
++# define a0   4
++# define a1   5
++# define a2   6
++# define a3   7
++# define a4   8
++# define a5   9
++# define a6  10
++# define a7  11
++# define t0  12
++# define t1  13
++# define t2  14
++# define t3  15
++# define t4  16
++# define t5  17
++# define t6  18
++# define t7  19
++# define t8  20
++# define u0  21
++# define fp  22
++# define s0  23
++# define s1  24
++# define s2  25
++# define s3  26
++# define s4  27
++# define s5  28
++# define s6  29
++# define s7  30
++# define s8  31
++
++# define fa0  32
++# define fa1  33
++# define fa2  34
++# define fa3  35
++# define fa4  36
++# define fa5  37
++# define fa6  38
++# define fa7  39
++# define ft0  40
++# define ft1  41
++# define ft2  42
++# define ft3  43
++# define ft4  44
++# define ft5  45
++# define ft6  46
++# define ft7  47
++# define ft8  48
++# define ft9  49
++# define ft10 50
++# define ft11 51
++# define ft12 52
++# define ft13 53
++# define ft14 54
++# define ft15 55
++# define fs0  56
++# define fs1  57
++# define fs2  58
++# define fs3  59
++# define fs4  60
++# define fs5  61
++# define fs6  62
++# define fs7  63
++
+ #endif
+ 
+ callerSaves :: GlobalReg -> Bool
+@@ -736,7 +804,8 @@
+ #if defined(MACHREGS_i386) || defined(MACHREGS_x86_64) \
+     || defined(MACHREGS_sparc) || defined(MACHREGS_powerpc) \
+     || defined(MACHREGS_arm) || defined(MACHREGS_aarch64) \
+-    || defined(MACHREGS_s390x) || defined(MACHREGS_riscv64)
++    || defined(MACHREGS_s390x) || defined(MACHREGS_riscv64) \
++    || defined(MACHREGS_loongarch64)
+ # if defined(REG_Base)
+ globalRegMaybe BaseReg                  = Just (RealRegSingle REG_Base)
+ # endif
+diff -urN ghc-9.2.8.orig/includes/stg/MachRegsForHost.h ghc-9.2.8/includes/stg/MachRegsForHost.h
+--- ghc-9.2.8.orig/includes/stg/MachRegsForHost.h	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/includes/stg/MachRegsForHost.h	2024-09-23 09:16:18.630067821 +0800
+@@ -75,6 +75,10 @@
+ #define MACHREGS_riscv64  1
+ #endif
+ 
++#if defined(loongarch64_HOST_ARCH)
++#define MACHREGS_loongarch64  1
++#endif
++
+ #endif
+ 
+ #include "MachRegs.h"
+diff -urN ghc-9.2.8.orig/includes/stg/MachRegs.h ghc-9.2.8/includes/stg/MachRegs.h
+--- ghc-9.2.8.orig/includes/stg/MachRegs.h	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/includes/stg/MachRegs.h	2024-09-23 09:15:31.806258388 +0800
+@@ -725,6 +725,57 @@
+ #define MAX_REAL_FLOAT_REG   6
+ #define MAX_REAL_DOUBLE_REG  6
+ 
++/* -----------------------------------------------------------------------------
++   The loongarch64 register mapping
++
++   Register    | Role(s)                                 | Call effect
++   ------------+-----------------------------------------+-------------
++   zero        | Hard-wired zero                         | -
++   ra          | Return address                          | caller-saved
++   tp          | Thread pointer                          | -
++   sp          | Stack pointer                           | callee-saved
++   a0,a1       | Arguments / return values               | caller-saved
++   a2..a7      | Arguments                               | caller-saved
++   t0..t8      | -                                       | caller-saved
++   u0          | Reserve                                 | -
++   fp          | Frame pointer                           | callee-saved
++   s0..s8      | -                                       | callee-saved
++   fa0,fa1     | Arguments / return values               | caller-saved
++   fa2..fa7    | Arguments                               | caller-saved
++   ft0..ft15   | -                                       | caller-saved
++   fs0..fs7    | -                                       | callee-saved
++
++   Each general purpose register as well as each floating-point
++   register is 64 bits wide, also, the u0 register is called r21 in some cases.
++
++   -------------------------------------------------------------------------- */
++#elif defined(MACHREGS_loongarch64)
++
++#define REG(x) __asm__("$" #x)
++
++#define REG_Base        s0
++#define REG_Sp          s1
++#define REG_Hp          s2
++#define REG_R1          s3
++#define REG_R2          s4
++#define REG_R3          s5
++#define REG_R4          s6
++#define REG_R5          s7
++#define REG_SpLim       s8
++
++#define REG_F1          fs0
++#define REG_F2          fs1
++#define REG_F3          fs2
++#define REG_F4          fs3
++
++#define REG_D1          fs4
++#define REG_D2          fs5
++#define REG_D3          fs6
++#define REG_D4          fs7
++
++#define MAX_REAL_FLOAT_REG   4
++#define MAX_REAL_DOUBLE_REG  4
++
+ #else
+ 
+ #error Cannot find platform to give register info for
+diff -urN ghc-9.2.8.orig/includes/stg/SMP.h ghc-9.2.8/includes/stg/SMP.h
+--- ghc-9.2.8.orig/includes/stg/SMP.h	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/includes/stg/SMP.h	2024-09-23 09:17:49.714340163 +0800
+@@ -397,6 +397,8 @@
+     __asm__ __volatile__ ("dmb  st" : : : "memory");
+ #elif defined(riscv64_HOST_ARCH)
+     __asm__ __volatile__ ("fence w,w" : : : "memory");
++#elif defined(loongarch64_HOST_ARCH)
++    __asm__ __volatile__ ("dbar 0" : : : "memory");
+ #else
+ #error memory barriers unimplemented on this architecture
+ #endif
+@@ -423,6 +425,8 @@
+     __asm__ __volatile__ ("dmb sy" : : : "memory");
+ #elif defined(riscv64_HOST_ARCH)
+     __asm__ __volatile__ ("fence w,r" : : : "memory");
++#elif defined(loongarch64_HOST_ARCH)
++    __asm__ __volatile__ ("dbar 0" : : : "memory");
+ #else
+ #error memory barriers unimplemented on this architecture
+ #endif
+@@ -450,6 +454,8 @@
+     __asm__ __volatile__ ("dmb sy" : : : "memory");
+ #elif defined(riscv64_HOST_ARCH)
+     __asm__ __volatile__ ("fence w,r" : : : "memory");
++#elif defined(loongarch64_HOST_ARCH)
++    __asm__ __volatile__ ("dbar 0" : : : "memory");
+ #else
+ #error memory barriers unimplemented on this architecture
+ #endif
+diff -urN ghc-9.2.8.orig/libraries/base/System/Info.hs ghc-9.2.8/libraries/base/System/Info.hs
+--- ghc-9.2.8.orig/libraries/base/System/Info.hs	2023-05-26 07:02:59.000000000 +0800
++++ ghc-9.2.8/libraries/base/System/Info.hs	2024-09-23 09:06:02.627123204 +0800
+@@ -89,6 +89,8 @@
+ --    * "powerpc64le"
+ --    * "riscv32"
+ --    * "riscv64"
++--    * "loongarch32"
++--    * "loongarch64"
+ --    * "rs6000"
+ --    * "s390"
+ --    * "s390x"
+diff -urN ghc-9.2.8.orig/libraries/ghc-boot/GHC/Platform/ArchOS.hs ghc-9.2.8/libraries/ghc-boot/GHC/Platform/ArchOS.hs
+--- ghc-9.2.8.orig/libraries/ghc-boot/GHC/Platform/ArchOS.hs	2023-05-26 07:03:00.000000000 +0800
++++ ghc-9.2.8/libraries/ghc-boot/GHC/Platform/ArchOS.hs	2024-09-23 09:06:49.034327183 +0800
+@@ -46,6 +46,7 @@
+    | ArchMipseb
+    | ArchMipsel
+    | ArchRISCV64
++   | ArchLoongArch64
+    | ArchJavaScript
+    deriving (Read, Show, Eq)
+ 
+@@ -136,6 +137,7 @@
+   ArchMipseb        -> "mipseb"
+   ArchMipsel        -> "mipsel"
+   ArchRISCV64       -> "riscv64"
++  ArchLoongArch64   -> "loongarch64"
+   ArchJavaScript    -> "js"
+ 
+ -- | See Note [Platform Syntax].
+diff -urN ghc-9.2.8.orig/libraries/ghci/GHCi/InfoTable.hsc ghc-9.2.8/libraries/ghci/GHCi/InfoTable.hsc
+--- ghc-9.2.8.orig/libraries/ghci/GHCi/InfoTable.hsc	2023-05-26 07:03:00.000000000 +0800
++++ ghc-9.2.8/libraries/ghci/GHCi/InfoTable.hsc	2024-09-07 15:52:09.679328843 +0800
+@@ -241,6 +241,15 @@
+                   0xC0, 0x19, byte3 w64, byte2 w64, byte1 w64, byte0 w64,
+                   0x07, 0xF1 ]
+ 
++    ArchLoongArch64 -> pure $
++        let w64 = fromIntegral (funPtrToInt a) :: Word64
++        in Right [ 0x1c00000c          -- pcaddu12i $t0,0
++                 , 0x28c0418c          -- ld.d      $t0,$t0,16
++                 , 0x4c000180          -- jr        $t0
++                 , 0x03400000          -- nop
++                 , fromIntegral w64
++                 , fromIntegral (w64 `shiftR` 32) ]
++
+     arch ->
+       -- The arch isn't supported. You either need to add your architecture as a
+       -- distinct case, or use non-TABLES_NEXT_TO_CODE mode.
+diff -urN ghc-9.2.8.orig/llvm-targets ghc-9.2.8/llvm-targets
+--- ghc-9.2.8.orig/llvm-targets	2023-05-26 07:03:00.000000000 +0800
++++ ghc-9.2.8/llvm-targets	2024-09-23 09:07:52.328393550 +0800
+@@ -40,6 +40,8 @@
+ ,("s390x-ibm-linux", ("E-m:e-i1:8:16-i8:8:16-i64:64-f128:64-a:8:16-n32:64", "z10", ""))
+ ,("riscv64-unknown-linux-gnu", ("e-m:e-p:64:64-i64:64-i128:128-n64-S128", "", "+m +a +f +d +c +relax"))
+ ,("riscv64-unknown-linux", ("e-m:e-p:64:64-i64:64-i128:128-n64-S128", "", "+m +a +f +d +c +relax"))
++,("loongarch64-unknown-linux-gnu", ("e-m:e-p:64:64-i64:64-i128:128-n64-S128", "", "+f +d"))
++,("loongarch64-unknown-linux", ("e-m:e-p:64:64-i64:64-i128:128-n64-S128", "", "+f +d"))
+ ,("i386-apple-darwin", ("e-m:o-p:32:32-p270:32:32-p271:32:32-p272:64:64-f64:32:64-f80:128-n8:16:32-S128", "penryn", ""))
+ ,("x86_64-apple-darwin", ("e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128", "penryn", ""))
+ ,("arm64-apple-darwin", ("e-m:o-i64:64-i128:128-n32:64-S128", "generic", "+v8.3a +fp-armv8 +neon +crc +crypto +fullfp16 +ras +lse +rdm +rcpc +zcm +zcz +sha2 +aes"))
+diff -urN ghc-9.2.8.orig/m4/fptools_set_haskell_platform_vars.m4 ghc-9.2.8/m4/fptools_set_haskell_platform_vars.m4
+--- ghc-9.2.8.orig/m4/fptools_set_haskell_platform_vars.m4	2023-05-26 07:03:00.000000000 +0800
++++ ghc-9.2.8/m4/fptools_set_haskell_platform_vars.m4	2024-09-23 09:09:16.099335885 +0800
+@@ -48,7 +48,10 @@
+         riscv64)
+             test -z "[$]2" || eval "[$]2=ArchRISCV64"
+             ;;
+-        hppa|hppa1_1|ia64|m68k|nios2|riscv32|rs6000|s390|sh4|vax)
++        loongarch64)
++            test -z "[$]2" || eval "[$]2=ArchLoongArch64"
++            ;;
++        hppa|hppa1_1|ia64|loongarch32|m68k|nios2|riscv32|rs6000|s390|sh4|vax)
+             test -z "[$]2" || eval "[$]2=ArchUnknown"
+             ;;
+         *)
+diff -urN ghc-9.2.8.orig/m4/ghc_convert_cpu.m4 ghc-9.2.8/m4/ghc_convert_cpu.m4
+--- ghc-9.2.8.orig/m4/ghc_convert_cpu.m4	2023-05-26 07:03:00.000000000 +0800
++++ ghc-9.2.8/m4/ghc_convert_cpu.m4	2024-09-23 09:09:55.883024432 +0800
+@@ -56,6 +56,12 @@
+   riscv|riscv32*)
+     $2="riscv32"
+     ;;
++  loongarch64*)
++    $2="loongarch64"
++    ;;
++  loongarch32*)
++    $2="loongarch32"
++    ;;
+   rs6000)
+     $2="rs6000"
+     ;;
+@@ -80,6 +86,9 @@
+   x86_64|amd64)
+     $2="x86_64"
+     ;;
++  loongarch64)
++    $2="loongarch64"
++    ;;
+   *)
+     echo "Unknown CPU $1"
+     exit 1
+diff -urN ghc-9.2.8.orig/rts/linker/Elf.c ghc-9.2.8/rts/linker/Elf.c
+--- ghc-9.2.8.orig/rts/linker/Elf.c	2023-05-26 07:03:00.000000000 +0800
++++ ghc-9.2.8/rts/linker/Elf.c	2024-09-23 09:18:39.234856994 +0800
+@@ -421,6 +421,12 @@
+                      oc->fileName);
+           return 0;
+ #endif
++#if defined(EM_LOONGARCH)
++      case EM_LOONGARCH:  IF_DEBUG(linker,debugBelch( "loongarch64" ));
++          errorBelch("%s: RTS linker not implemented on loongarch64",
++                     oc->fileName);
++          return 0;
++#endif
+        default:       IF_DEBUG(linker,debugBelch( "unknown" ));
+                      errorBelch("%s: unknown architecture (e_machine == %d)"
+                                 , oc->fileName, ehdr->e_machine);
+diff -urN ghc-9.2.8.orig/rts/rts.cabal.in ghc-9.2.8/rts/rts.cabal.in
+--- ghc-9.2.8.orig/rts/rts.cabal.in	2023-05-26 07:03:00.000000000 +0800
++++ ghc-9.2.8/rts/rts.cabal.in	2024-09-23 09:18:59.871740223 +0800
+@@ -451,7 +451,7 @@
+         c-sources: adjustor/NativeSparc.c
+ 
+     -- Use assembler STG entrypoint on archictures where it is used
+-    if arch(ppc) || arch(ppc64) || arch(s390x) || arch(riscv64)
++    if arch(ppc) || arch(ppc64) || arch(s390x) || arch(riscv64) || arch(loongarch64)
+       asm-sources: StgCRunAsm.S
+ 
+     c-sources: Adjustor.c
+diff -urN ghc-9.2.8.orig/rts/StgCRunAsm.S ghc-9.2.8/rts/StgCRunAsm.S
+--- ghc-9.2.8.orig/rts/StgCRunAsm.S	2023-05-26 07:03:00.000000000 +0800
++++ ghc-9.2.8/rts/StgCRunAsm.S	2024-09-23 09:13:25.708336130 +0800
+@@ -376,6 +376,126 @@
+ 	.size StgReturn, .-StgReturn
+ 
+ 	.section	.note.GNU-stack,"",@progbits
++
++#elif defined(loongarch64_HOST_ARCH)
++# define STACK_FRAME_SIZE (RESERVED_C_STACK_BYTES+160)
++       .text
++       .align 1
++       .globl StgRun
++       .type StgRun, @function
++StgRun:
++       .cfi_startproc
++       addi.d  $sp,$sp,-160
++       .cfi_def_cfa_offset 160
++       /* save callee-saved registers plus ra */
++       st.d    $ra,$sp,152
++       st.d    $fp,$sp,144
++       st.d    $s0,$sp,136
++       st.d    $s1,$sp,128
++       st.d    $s2,$sp,120
++       st.d    $s3,$sp,112
++       st.d    $s4,$sp,104
++       st.d    $s5,$sp,96
++       st.d    $s6,$sp,88
++       st.d    $s7,$sp,80
++       st.d    $s8,$sp,72
++       fst.d   $fs0,$sp,56
++       fst.d   $fs1,$sp,48
++       fst.d   $fs2,$sp,40
++       fst.d   $fs3,$sp,32
++       fst.d   $fs4,$sp,24
++       fst.d   $fs5,$sp,16
++       fst.d   $fs6,$sp,8
++       fst.d   $fs7,$sp,0
++       /* allocate stack frame */
++       li.d    $t0,RESERVED_C_STACK_BYTES
++       sub.d   $sp,$sp,$t0
++       .cfi_def_cfa_offset STACK_FRAME_SIZE
++       .cfi_offset 1, -8
++       .cfi_offset 22, -16
++       .cfi_offset 23, -24
++       .cfi_offset 24, -32
++       .cfi_offset 25, -40
++       .cfi_offset 26, -48
++       .cfi_offset 27, -56
++       .cfi_offset 28, -64
++       .cfi_offset 29, -72
++       .cfi_offset 30, -80
++       .cfi_offset 31, -88
++       .cfi_offset 56, -104
++       .cfi_offset 57, -112
++       .cfi_offset 58, -120
++       .cfi_offset 59, -128
++       .cfi_offset 60, -136
++       .cfi_offset 61, -144
++       .cfi_offset 62, -152
++       .cfi_offset 63, -160
++       /* set STGs BaseReg from LoongArch a1 */
++       move    $s0,$a1
++       /* jump to STG function */
++       jr      $a0
++       .cfi_endproc
++       .size StgRun, .-StgRun
++
++       .text
++       .align 2
++       .globl StgReturn
++       .type StgReturn, @function
++StgReturn:
++       .cfi_startproc
++       /* set return value from STGs R1 (LoongArch64 s3) */
++       move    $a0,$s3
++       /* deallocate stack frame */
++       li.d    $t0,RESERVED_C_STACK_BYTES
++       add.d   $sp,$sp,$t0
++       .cfi_def_cfa_offset 160
++       /* restore callee-saved registers and ra */
++       ld.d    $ra,$sp,152
++       .cfi_restore 1
++       ld.d    $fp,$sp,144
++       .cfi_restore 22
++       ld.d    $s0,$sp,136
++       .cfi_restore 23
++       ld.d    $s1,$sp,128
++       .cfi_restore 24
++       ld.d    $s2,$sp,120
++       .cfi_restore 25
++       ld.d    $s3,$sp,112
++       .cfi_restore 26
++       ld.d    $s4,$sp,104
++       .cfi_restore 27
++       ld.d    $s5,$sp,96
++       .cfi_restore 28
++       ld.d    $s6,$sp,88
++       .cfi_restore 29
++       ld.d    $s7,$sp,80
++       .cfi_restore 30
++       ld.d    $s8,$sp,72
++       .cfi_restore 31
++       fld.d   $fs0,$sp,56
++       .cfi_restore 56
++       fld.d   $fs1,$sp,48
++       .cfi_restore 57
++       fld.d   $fs2,$sp,40
++       .cfi_restore 58
++       fld.d   $fs3,$sp,32
++       .cfi_restore 59
++       fld.d   $fs4,$sp,24
++       .cfi_restore 60
++       fld.d   $fs5,$sp,16
++       .cfi_restore 61
++       fld.d   $fs6,$sp,8
++       .cfi_restore 62
++       fld.d   $fs7,$sp,0
++       .cfi_restore 63
++       addi.d  $sp,$sp,160
++       .cfi_def_cfa_offset 0
++       /* jump back to caller of StgRun() */
++       ret
++       .cfi_endproc
++       .size StgReturn, .-StgReturn
++
++       .section        .note.GNU-stack,"",@progbits
+ #endif
+ 
+ #endif /* !USE_MINIINTERPRETER */
+diff -urN ghc-9.2.8.orig/utils/llvm-targets/gen-data-layout.sh ghc-9.2.8/utils/llvm-targets/gen-data-layout.sh
+--- ghc-9.2.8.orig/utils/llvm-targets/gen-data-layout.sh	2023-05-26 07:03:00.000000000 +0800
++++ ghc-9.2.8/utils/llvm-targets/gen-data-layout.sh	2024-09-23 09:19:27.292028978 +0800
+@@ -79,6 +79,9 @@
+     # Linux riscv64
+     "riscv64-unknown-linux-gnu"
+     "riscv64-unknown-linux"
++    # Linux loongarch64
++    "loongarch64-unknown-linux-gnu"
++    "loongarch64-unknown-linux"
+ 
+     #########################
+     # Darwin
