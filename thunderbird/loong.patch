@@ -1,18 +1,22 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 6dda290..a846a0c 100644
+index c53352d..786cde4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -334,4 +334,13 @@ sha512sums=('24af7d705c13a0b49b0f9fa66a4d17ce4e95b65cc60f84f56364dc8fb480fb61b80
-             '647dfe19d2866e1455d9c21ff0576f7a6ee5a780f5d07ca11cc02bade2a50cf42f21270d573f74258feba2a9adbede415fa4ae4a71e87f77a133e8931c259b47'
-             '162d5a7ef2e84e55424a6fcb14d18999d0b4c781045180a30394d7f767507dc6b1b084b2d4f3bed63b11d605560bf1fd59fbed7ed0d1e0dce6e47511ed7e6a8e')
+@@ -334,4 +334,17 @@ sha512sums=('5f0f36409c6cb12cd66b0722e04e44cb07d9c9bf5982db881d50087512a1bcb18cf
+             'c79b07a54e2f3249d7372d86d9e1d5b57c09f05a1a1d1a9107084ae2eaaf9ba4d4c2c8a167c1d21978617805cf5b12f2d7449bf79ef2cc01459277468945d22f'
+             '3b915095dbefba250588eec66df5eeaf303e93a8585120bf8fc731728ab777fe2a57bc5ec4f29ba6b7a476f916d9676903c2de49b362663bb3b5ee5b927fc663')
  
-+source+=('0010-Fix-libyuv-build-with-LSX-LASX.patch'
-+         '0011-Add-missing-loongarch-lsx-code-for-libpng.patch'
-+         '0012-Add-support-for-LoongArch64.patch'
-+         '0013-Enable-WebRTC-for-LoongArch.patch')
-+sha512sums+=('f74ccb758ff6058e4897f2045b08f0e35eb37b7faef33fb9bda70e16a8363070c983179a34283471dcb26df72a15b4f296f2c4f3bce5c8df7c6f03a1e5b5f4d4'
-+             '3715431cf206df5cd7a639a949fe7daeacf2781d84bc9ff2b228b88e735d866bf2248e163e0d700f43511fcc79ef47fb606fdbd0c1d01405cf2276cd9534c13c'
-+             '47c9429dbfdfde97366eba5dc65f696691b681b166c6e82765f9ee4135c0f32a3acde2056d21e9ab5cd7ac3b2c0e904c8779a9d4b151b3278d4c0175315990fe'
-+             '787b6c919a803ecaa4fee9e0004ed1e29b2c2d26cb9377ce1ac08579650df04179079652cdec923fe2f3e1b30aee3a1569812e2a01987fb58f0933cd6fed5a90')
++source+=('0001-Add-support-for-LoongArch64.patch'
++         '0003-update-gn_processor.py-to-support-linux-on-loong64.patch'
++         '0004-Re-generate-libwebrtc-moz.build-files.patch'
++         '0005-enable-webrtc-for-loongarch64-in-toolkit-moz.configu.patch'
++         '0006-Fix-libyuv-unified-source-and-LoongArch-SIMD-build.patch'
++         '0011-Add-missing-loongarch-lsx-code-for-libpng.patch')
++sha512sums+=('2f794d6d14fb55bd046f5e85fe6718dedd5408fe01707ab9c5a635a09001cdac2f2b72a02990564ae71c27921080685da6d915564c5322e30796a8142c78cf96'
++            'ec70b7ee5fd340c4284d56659027b8359d2d67e5b9ccb4d21d7bbd7a65afdbef5d6b0206bab895cf6d03ee5b603effa32828c0b0c7ce3941e1f8ff16ef194fed'
++            '15d0b54f3a5c02fdca233426a332b7ef47ecc0f9cc9e057e12f1e9a5cacb4a99ddd37a89fe02419b4216caca16c1c8935bd2ad018012c940531aa5b9e7836e58'
++            '66566b819b8c488e7ae3fc4e0b0f6340f0839c089ed87d130ab2a9eeed5367de6c493400e81973a0a6340692a1754a71be9b10eeb1d67ed920373fcad620a400'
++            '186c37cca9872b471db17f25adb2a64588abb27708f489e0511e70d099c0841a9d7ad846d60d86d4fcf547a8096805fa1dfb8e55f1f753710ade96dfbb2b01fe'
++            '3715431cf206df5cd7a639a949fe7daeacf2781d84bc9ff2b228b88e735d866bf2248e163e0d700f43511fcc79ef47fb606fdbd0c1d01405cf2276cd9534c13c')
 +
  # vim:set sw=2 et:
