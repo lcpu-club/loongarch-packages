@@ -1,16 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -5,13 +5,13 @@
- # TODO add test, see about packaging jtreg and using it here
- 
- pkgbase=java-openjdk
--pkgname=('jre-openjdk-headless' 'jre-openjdk' 'jdk-openjdk' 'openjdk-src' 'openjdk-doc')
-+pkgname=('jre-openjdk-headless' 'jre-openjdk' 'jdk-openjdk' 'openjdk-src')
- # on a majorver change, don't forget to update the misc files that come along this PKGBUILD
- _majorver=22
+@@ -11,7 +11,7 @@ _majorver=23
  _minorver=0
- _securityver=2
- _updatever=9
+ _securityver=1
+ _updatever=0
 -pkgver=${_majorver}.${_minorver}.${_securityver}.u${_updatever}
 +pkgver=${_majorver}.${_minorver}.ls.0
  # pkgver=${_majorver}.u${_updatever}
@@ -19,7 +12,7 @@
 @@ -20,17 +20,17 @@ arch=('x86_64')
  url='https://openjdk.java.net/'
  license=('LicenseRef-Java')
- makedepends=('java-environment=21' 'cpio' 'unzip' 'zip' 'libelf' 'libcups' 'libx11'
+ makedepends=('java-environment>=22' 'cpio' 'unzip' 'zip' 'libelf' 'libcups' 'libx11'
 -             'libxrender' 'libxtst' 'libxt' 'libxext' 'libxrandr' 'alsa-lib' 'pandoc'
 +             'libxrender' 'libxtst' 'libxt' 'libxext' 'libxrandr' 'alsa-lib'
               'graphviz' 'freetype2' 'libjpeg-turbo' 'giflib' 'libpng' 'lcms2'
@@ -28,34 +21,53 @@
    'gvfs: open links e.g. hyperlinks'
  )             
 -source=(https://github.com/openjdk/jdk${_majorver}u/archive/${_git_tag}.tar.gz
-+source=(https://github.com/loongson/jdk/archive/refs/tags/jdk-${_majorver}+${_minorver}-ls-0.tar.gz
++source=(https://github.com/loongson/jdk/archive//refs/tags/jdk-23+0-ls-0.tar.gz
          freedesktop-java.desktop
          freedesktop-jconsole.desktop
          freedesktop-jshell.desktop)
--sha256sums=('f3bc990ed34dd0c9a1467640a9c654df4375ff948e854038b913abec12be6179'
-+sha256sums=('53df768a3d2d34e6bb7a0b41bc9965201f2c9e0007515c54feaab5b7260b0f70'
-             '228fb453e6c652baad71abf734430cda08c287cb8df935ad3ad6d2e9346c7fdf'
-             'ed9e43756f450ca01647c495070044276ee9fa7810eb90c99d7e2a29c4a61ef2'
-             '93697b752739c1f233cf98f3fa3b945fc775de4d40a31dd21afccda7d0c9d01e')
-@@ -38,10 +38,11 @@ sha256sums=('f3bc990ed34dd0c9a1467640a9c654df4375ff948e854038b913abec12be6179'
+-sha256sums=('1399fcd6053c160916960cefcd1c266df85cecc72933d7b3c1e9fe420effcb67'
++sha256sums=('77fe735ed701369cdc79c511c759667c0bb7ffc53b08fdb38bda52df6a5e2df2'
+             '427269f9910ea2b965fd3f4755c16263053414df53020946b27ed9a5b9f98d36'
+             'b8e29678081f81057aa6020b74b3299dde5703d0cc43e55807413aed65f0c6e8'
+             'eeb631d0216ccfe885cfaa72bbed44f8d3d9995b3d61e837295e8375f110434f')
+@@ -38,10 +38,12 @@ sha256sums=('1399fcd6053c160916960cefcd1c266df85cecc72933d7b3c1e9fe420effcb67'
  case "${CARCH}" in
    x86_64) _JARCH='x86_64';;
    i686)   _JARCH='x86';;
-+  loong64)   _JARCH='loongarch64';;
++  loong64) _JARCH='loongarch64';;
  esac
++options=(!lto)
  
  _jvmdir=/usr/lib/jvm/java-${_majorver}-openjdk
 -_jdkdir=jdk${_majorver}u-${_git_tag//+/-}
-+_jdkdir=jdk-jdk-${_majorver}-${_minorver}-ls-0
++_jdkdir=jdk-jdk-23-0-ls-0
  _imgdir=${_jdkdir}/build/linux-${_JARCH}-server-release/images
  
  _nonheadless=(lib/libawt_xawt.so
-@@ -122,7 +123,7 @@ build() {
+@@ -101,7 +103,7 @@ build() {
+ 
+ 
+   bash configure \
+-    --with-version-build="${_updatever}" \
++    --with-version-build="" \
+     --with-version-pre="" \
+     --with-version-opt="" \
+     --with-stdc++lib=dynamic \
+@@ -122,7 +124,7 @@ build() {
      ${NUM_PROC_OPT}
      #--disable-javac-server
  
 -  make images legacy-jre-image docs
-+  make images legacy-jre-image
++  make images legacy-jre-image # docs
  
    # https://bugs.openjdk.java.net/browse/JDK-8173610
    find "${srcdir}/${_imgdir}" -iname '*.so' -exec chmod +x {} \;
+@@ -353,7 +355,7 @@ package_openjdk-doc() {
+   provides=("openjdk${_majorver}-doc=${pkgver}-${pkgrel}")
+ 
+   install -dm 755 "${pkgdir}/usr/share/doc"
+-  cp -r ${_imgdir}/docs "${pkgdir}/usr/share/doc/${pkgbase}"
++  #cp -r ${_imgdir}/docs "${pkgdir}/usr/share/doc/${pkgbase}"
+ 
+   install -dm 755 "${pkgdir}/usr/share/licenses"
+   ln -s ${pkgbase} "${pkgdir}/usr/share/licenses/${pkgname}"
