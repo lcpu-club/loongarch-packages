@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a0acc39..7e11dcc 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,6 +22,7 @@ replaces=('ntfsprogs')
+ prepare() {
+   cd ${_pkgname}-${pkgver}
+   sed 's|$(DESTDIR)/sbin|$(DESTDIR)/usr/bin|' -i {ntfsprogs,src}/Makefile.in
++  ./autogen.sh
+ }
+ 
+ build() {
