@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a8a0335..1bd1112 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -29,6 +29,9 @@ prepare() {
+   # ensure reproducible builds with pinned dependencies
+   cp ../go.{mod,sum} .
+ 
++  go mod edit -replace=golang.org/x/sys=golang.org/x/sys@v0.26.0
++  go mod tidy
++
+   # download dependencies
+   go mod download
+ }
