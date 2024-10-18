@@ -1,0 +1,54 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,27 +25,35 @@
+ source=(
+   "$pkgname::git+https://github.com/attilammagyar/js80p#tag=v$pkgver"
+   'do-not-run-cppcheck.patch'
++  'loong64-mkfile.patch'
++
+ )
+ sha512sums=('3fb858d212040bea951ff4cf7cf32037a6b3b3cf745421f8dd7987b92e990b3a89a01aad97b622f656e8ed0dd9abb40840099e9cf0b0f81e6e776fed4d95d3be'
+-            'e3f6e69f8fd81bd28883a6e74f19e72a887f1c53eb695cd3e6eecd8d15ce457417dbdc635bf8273b4f51490284033112723db288689d80cf39f59b54cfc439f2')
++            'e3f6e69f8fd81bd28883a6e74f19e72a887f1c53eb695cd3e6eecd8d15ce457417dbdc635bf8273b4f51490284033112723db288689d80cf39f59b54cfc439f2'
++            '54ad35dbbc74b4cba8adb85e8bfb28458e0e6811fe42831bfa965196c3c84b7507d511185c64bd9c2b5443a243fc46c2a9f2dd179d4b7a9f64c08b615b00ccda')
+ b2sums=('2478479737e81c2acaee3c446186813186b9ab45d404e5fe810f1ebe74eb2d8ad8d4035e09c0b4a2414275189bcd0d3fd7435500f656e27a50faf18ccb78a220'
+-        '9042a7bdde673d0a6884b047f9d37362cb4b4a1b00e13129c73ceb233a4235a677c990f872f58d9c3bf79b74786f6ccc96426a742baaf9b9cea27d475a9b931f')
++        '9042a7bdde673d0a6884b047f9d37362cb4b4a1b00e13129c73ceb233a4235a677c990f872f58d9c3bf79b74786f6ccc96426a742baaf9b9cea27d475a9b931f'
++        '9f74fb4b2a912f6a6c4db67526ef300c241032bf4dad333d432d88bd9de86c363da1c0814bee328cac772eb234ed535620bf5302ec3a1b2ed8c0fb36d304629b')
+ 
+ prepare() {
+   cd "$pkgname"
+ 
+   # remove cppcheck from makedepends
+   patch -p1 -i "$srcdir/do-not-run-cppcheck.patch"
++
++  # add loong makefile
++  patch -p1 -i "$srcdir/loong64-mkfile.patch"
+ }
+ 
+ build() {
+   cd "$pkgname"
+ 
+   # supports AVX, but that's not in x86_64_v1
++  # make sse2 to lsx to fit loongarch
+   make \
+     SYS_LIB_PATH=/usr/lib \
+     TARGET_PLATFORM="$CARCH-gpp" \
+-    INSTRUCTION_SET=sse2 \
++    INSTRUCTION_SET=lsx \
+     VERSION_STR=$(git describe --tags) \
+     VERSION_INT=$(git describe --tags | sed "s/[^0-9]//g") \
+     vst3
+@@ -54,9 +62,10 @@
+ package() {
+   cd "$pkgname"
+ 
+-  # vst3
++  # vst3 
++  # change -ss2-vst3- to -lsx-vst3-
+   install -vDm644 \
+-    "dist/js80p-dev-linux-$CARCH-sse2-vst3_single_file/js80p.vst3" \
++    "dist/js80p-dev-linux-$CARCH-lsx-vst3_single_file/js80p.vst3" \
+     "$pkgdir/usr/lib/vst3/$pkgname.vst3/Contents/$CARCH-linux/$pkgname.so"
+ 
+   # presets
