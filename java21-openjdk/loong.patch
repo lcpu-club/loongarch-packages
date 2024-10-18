@@ -1,26 +1,24 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -17,15 +17,15 @@ pkgrel=1
- arch=('x86_64')
+@@ -18,14 +18,14 @@ arch=('x86_64')
  url='https://openjdk.java.net/'
  license=('LicenseRef-Java')
--makedepends=('java-environment=21' 'cpio' 'unzip' 'zip' 'libelf' 'libcups' 'libx11'
+ makedepends=('java-environment=21' 'cpio' 'unzip' 'zip' 'libelf' 'libcups' 'libx11'
 -             'libxrender' 'libxtst' 'libxt' 'libxext' 'libxrandr' 'alsa-lib' 'pandoc'
-+makedepends=('jdk-openjdk' 'cpio' 'unzip' 'zip' 'libelf' 'libcups' 'libx11'
 +             'libxrender' 'libxtst' 'libxt' 'libxext' 'libxrandr' 'alsa-lib'
               'graphviz' 'freetype2' 'libjpeg-turbo' 'giflib' 'libpng' 'lcms2'
               'libnet' 'bash' 'harfbuzz' 'gcc-libs' 'glibc')
 -source=(https://github.com/openjdk/jdk${_majorver}u/archive/${_git_tag}.tar.gz
-+source=(https://github.com/loongson/jdk${_majorver}u/archive/refs/tags/${_git_tag}-ls-ga.tar.gz
++source=(https://github.com/loongson/jdk${_majorver}u/archive/${_git_tag}-ls-0.tar.gz
          freedesktop-java.desktop
          freedesktop-jconsole.desktop
          freedesktop-jshell.desktop)
--sha256sums=('b8b37fa6fcc284d91e7458c703ca4c893a1dd5a6e0f6b9e198e7d13cd8efd24d'
-+sha256sums=('c0562c564f9872bf76ba1835b8be860418895dd413f7e0bbdd6aa69d1473884e'
+-sha256sums=('8d57ea0ba57310fffb9257d8018e54a264d940c472228eb04d37a21b584885ac'
++sha256sums=('1c9c446fc3b99996589f6d0753090a9e71cb4aab1d3b34b6d87a6678500af8c1'
              '72111743ab6ab36854b0c85a504172983715d0798fce10bc4e35689b7d15fd93'
              '8ecdf5c1605bafa58b3f7da615e6d8d3d943e3a2d3831930d6efa7815aacce07'
              '50fc0d677489b73d549df2f08d759d5f057f200adbbab83ea5e87456152ee03e')
-@@ -33,10 +33,11 @@ sha256sums=('b8b37fa6fcc284d91e7458c703ca4c893a1dd5a6e0f6b9e198e7d13cd8efd24d'
+@@ -33,10 +33,11 @@ sha256sums=('8d57ea0ba57310fffb9257d8018e54a264d940c472228eb04d37a21b584885ac'
  case "${CARCH}" in
    x86_64) _JARCH='x86_64';;
    i686)   _JARCH='x86';;
@@ -29,7 +27,7 @@
  
  _jvmdir=/usr/lib/jvm/java-${_majorver}-openjdk
 -_jdkdir=jdk${_majorver}u-${_git_tag//+/-}
-+_jdkdir=jdk${_majorver}u-${_git_tag//+/-}-ls-ga
++_jdkdir=jdk${_majorver}u-${_git_tag//+/-}-ls-0
  _imgdir=${_jdkdir}/build/linux-${_JARCH}-server-release/images
  
  _nonheadless=(lib/libawt_xawt.so
