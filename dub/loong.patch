@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8deaaa1..27c12a2 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,7 +19,7 @@ sha512sums=('d08afc9c5266fa5df78cefd3439f4477a80a6441446e202ee5d07bfac35db7521b8
+ build() {
+ 	cd "$pkgname-$pkgver"
+ 
+-	GITVER=$pkgver DMD=ldmd2 ldmd2 -run build.d -release -O3 -linker=gold --flto=thin -link-defaultlib-shared=false -L--build-id
++	GITVER=$pkgver DMD=ldmd2 ldmd2 -run build.d -release -O3 --flto=thin -link-defaultlib-shared=false -L--build-id
+ 
+ 	# Build man pages
+ 	bin/dub --single scripts/man/gen_man.d
