@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b476744..ad0daf8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,6 +15,7 @@ sha256sums=('4b0fa5d73621ef42d6d0040ec2147a43bae2337ea722651525f080f2ae78bea3')
+ prepare() {
+   # Use standard icon name
+   sed -i 's/process-completed/gtk-apply/' $pkgname-$pkgver/src/Widgets/*.vala
++  patch -d $pkgname-$pkgver -p1 -i "${srcdir}/fix-meson-build-config.patch"
+ }
+ 
+ build() {
+@@ -26,3 +27,6 @@ package() {
+   meson install -C build --destdir "$pkgdir"
+   ln -s com.github.muriloventuroso.pdftricks "$pkgdir/usr/bin/$pkgname"
+ }
++
++source+=("fix-meson-build-config.patch::https://github.com/maxmbed/pdftricks/commit/6121091c0bf82cdf9aa1a12ca91b5fd605a65f69.patch")
++sha256sums+=('1d6f38b757f530a6583176306cda1d63c9d6997dbf7e6065ed18bf86019594e1')
