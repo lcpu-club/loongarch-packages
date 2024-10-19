@@ -1,0 +1,29 @@
+--- a/textfunc.c      2006-11-06 16:59:12.000000000 +0800
++++ b/textfunc.c      2024-10-19 11:55:31.023778932 +0800
+@@ -34,7 +34,7 @@
+  */
+ 
+ void CenterText(int line, char *text) {
+-   mvprintw(line,(COLS/2)-((int)strlen(text)/2),text);
++   mvprintw(line,(COLS/2)-((int)strlen(text)/2),"%s",text);
+ }
+ 
+ /* Convert hex digit to integer */
+@@ -227,7 +227,7 @@
+ 
+ 	while((percent=strchr(format,'%'))) {
+ 		*percent=0;
+-		printf(format);
++		printf("%s", format);
+ 		*percent='%';
+ 		code=percent+1;
+ 		while(*code && (code[0] != '%' && !isalpha(*code))) code++;
+@@ -354,7 +354,7 @@
+ 		}
+ 		
+ 	}
+-	printf(format);
++	printf("%s", format);
+ }
+ 
+ 
