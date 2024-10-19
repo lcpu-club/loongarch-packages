@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 72cc0dd..e50b802 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -29,3 +29,10 @@ package() {
+   cd brook-$pkgver/cli/brook
+   install -Dm755 brook -t "$pkgdir"/usr/bin/
+ }
++
++prepare() {
++  cd brook-$pkgver/cli/brook
++  go mod edit -replace=golang.org/x/sys=golang.org/x/sys@v0.26.0
++  go mod edit -replace=golang.org/x/net=golang.org/x/net@v0.30.0
++  go mod tidy
++}
