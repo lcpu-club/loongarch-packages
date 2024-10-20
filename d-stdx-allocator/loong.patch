@@ -6,7 +6,7 @@ index df3e7ba..ca658d0 100644
    cd $_pkgname-$pkgver
  
    patch -p1 < ../add-dependency.patch
-+  patch -p1 < ../add-definition.patch
++  patch -p1 < ../add-loong64-definition.patch
  }
  
  build() {
