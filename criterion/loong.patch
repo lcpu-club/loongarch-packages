@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d635162..bb8d82f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,6 +36,8 @@ prepare() {
+   # Download of nanopb produces an error as it does not contain a meson.build
+   # file. A meson.build file is not necessary, so ignore the error.
+   meson subprojects download || :
++
++  patch -d subprojects/boxfort -p1 -i "${srcdir}/boxfort-support-loongarch64.patch"
+ }
+ 
+ build() {
+@@ -54,3 +56,6 @@ package() {
+   meson install -C build --destdir "$pkgdir"
+   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
+ }
++
++source+=("boxfort-support-loongarch64.patch::https://github.com/Snaipe/BoxFort/commit/4f5d7340a7fdf602be10f2fc40a169627d98ddc9.patch")
++sha256sums+=('d2d59ce310611bc4cad90b6e595034e7879e7f72c6d69f3996280214cb93a73c')
