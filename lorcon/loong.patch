@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,6 +21,8 @@ b2sums=('6fe0d3578b8f91ed9ed0ea12ce110afc6764b694c78c57935b835e4fb8e4c4c81e07f7a
+ 
+ prepare() {
+   cd ${pkgbase}-${pkgver}
++  sed -i '/drv_mac80211.h/a #include "iwcontrol.h"' drv_mac80211.c
++  sed -i '/drv_madwifing.h/a #include "lorcon_packasm.h"' drv_madwifing.c
+   autoreconf -fiv
+ }
+ 
