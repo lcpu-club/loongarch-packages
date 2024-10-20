@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index df3e7ba..38e4465 100644
+index df3e7ba..ca658d0 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -19,6 +19,7 @@ prepare() {
@@ -10,15 +10,6 @@ index df3e7ba..38e4465 100644
  }
  
  build() {
-@@ -26,7 +27,7 @@ build() {
-   cd $_pkgname-$pkgver/build
- 
-   export DC=ldc
--  export LDFLAGS="$(echo -ne $LDFLAGS | sed -e 's/-flto=auto/-flto=full/')"
-+  export LDFLAGS="$(echo -ne $LDFLAGS | sed -e 's/-flto=auto//')"
- 
-   arch-meson ..
- 
 @@ -44,3 +45,5 @@ package() {
  
    DESTDIR="$pkgdir" ninja install
