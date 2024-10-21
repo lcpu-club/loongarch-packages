@@ -1,22 +1,13 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 5aac41d..5d82afa 100644
+index 5318e60..b8033e0 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -9,7 +9,7 @@ arch=(x86_64)
  url='https://github.com/containers/toolbox'
  license=(APACHE)
  depends=(podman bash flatpak)
--makedepends=(go shellcheck go-md2man bash-completion ninja git meson podman)
-+makedepends=(go go-md2man bash-completion ninja git meson podman)
- _commit=ccc3eee72722e29172ec35184df89cad7c100a5b	#refs/tags/0.0.99.5^{}
- source=("git+$url#commit=$_commit")
- sha256sums=('SKIP')
-@@ -24,6 +24,8 @@ prepare() {
-   # Fixes FS#79769
-   git cherry-pick -n 1cc9e07b7c36fe9f9784b40b58f0a2a3694dd328
-   git cherry-pick -n 219f5b4be428388f2b8cc12a7480c4a6922b59ca
-+  # Add loongarch64 support
-+  git cherry-pick -n d7bafb82ed9b3814ccaba5788501f429aa154278
- }
+-makedepends=(go shellcheck go-md2man bash-completion ninja git meson podman fish)
++makedepends=(go go-md2man bash-completion ninja git meson podman fish)
+ source=("git+$url#tag=$pkgver")
+ sha256sums=('9b17fc5298d1c60aeca593b72fc47b42dd2d24d675a851dfb4538be025a2e069')
  
- build() {
