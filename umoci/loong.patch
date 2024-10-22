@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 1a129e5..a6727e8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,6 +20,9 @@ prepare() {
+   rm -rf "$srcdir/src/$_repo_name"
+   mkdir -p "$srcdir/src/$_repo_name"
+   mv -Tf "$srcdir/$pkgname-$pkgver" "$srcdir/src/$_repo_name"
++  cd "$srcdir/src/$_repo_name"
++  go mod edit -replace=golang.org/x/sys=golang.org/x/sys@v0.26.0
++  go mod tidy
+ }
+ 
+ build() {
