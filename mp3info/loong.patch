@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a0c5bad..d30968f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,3 +32,12 @@ package() {
+   make prefix="$pkgdir"/usr mandir="$pkgdir"/usr/share/man/man1 install
+   install -Dm644 "$srcdir"/gmp3info.desktop "$pkgdir"/usr/share/applications/gmp3info.desktop
+ }
++
++prepare(){
++  cd "$srcdir"/$pkgname-$pkgver
++
++  patch  -Np1 -i "${srcdir}/fix-format-not-a-string-literal-and-no-format-arguments.patch"
++}
++
++source+=("fix-format-not-a-string-literal-and-no-format-arguments.patch")
++sha256sums+=('87077cd86ccf028709f5d35797bb5c5c700df5a7e689a2011b419e3df2a3a4ca')

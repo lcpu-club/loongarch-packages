@@ -1,0 +1,22 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -27,6 +27,10 @@ validpgpkeys=('DC4A655BD993CD4871FA8210E412B156EFF3855A') # "Matthias Andree <ma
+ 
+ prepare() {
+ #  pwd && sleep 5
++  cd "$pkgbase-$pkgver"/
++  for c_s in $(find -type f -name config.sub -o -name configure.sub); do cp -f /usr/share/automake-1.1?/config.sub "$c_s"; done
++  for c_g in $(find -type f -name config.guess -o -name configure.guess); do cp -f /usr/share/automake-1.1?/config.guess "$c_g"; done
++  cd ..
+   mkdir ${srcdir}/build-{db,kyotocabinet,lmdb,sqlite}
+   cp -av "$pkgbase-$pkgver"/* ${srcdir}/build-db/
+   cp -av "$pkgbase-$pkgver"/* ${srcdir}/build-kyotocabinet/
+@@ -49,6 +53,8 @@ prepare() {
+ build() {
+   # Berkeley DB v5.3 backend
+   cd ${srcdir}/build-db
++  for c_s in $(find -type f -name config.sub -o -name configure.sub); do cp -f /usr/share/automake-1.1?/config.sub "$c_s"; done
++  for c_g in $(find -type f -name config.guess -o -name configure.guess); do cp -f /usr/share/automake-1.1?/config.guess "$c_g"; done
+   ./configure CFLAGS="$CFLAGS -I/usr/include/db5.3" \
+     --prefix=/usr \
+     --sysconfdir=/etc/bogofilter  \
