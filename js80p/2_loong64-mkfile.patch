@@ -1,6 +1,8 @@
---- a/make/linux-loong64-gpp.mk
+diff --git a/make/linux-loong64-gpp.mk b/make/linux-loong64-gpp.mk
+new file mode 100644
+index 00000000..7022e912
+--- /dev/null
 +++ b/make/linux-loong64-gpp.mk
-
 @@ -0,0 +1,30 @@
 +###############################################################################
 +# This file is part of JS80P, a synthesizer plugin.
