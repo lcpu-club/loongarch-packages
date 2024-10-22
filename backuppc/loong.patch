@@ -1,0 +1,25 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -59,6 +59,7 @@ prepare() {
+ build() {
+   echo 'rsync-bpc'
+   cd "$srcdir"/rsync-bpc-$_rbpcver
++  cp /usr/share/autoconf/build-aux/config.{sub,guess} .
+   CFLAGS+=" -Wno-implicit-function-declaration" \
+   ./configure --prefix=/usr/share/backuppc
+   make
+@@ -71,12 +72,14 @@ package() {
+ 
+   echo 'backuppc-xs'
+   cd "$srcdir"/BackupPC-XS-$_xsver
++  cp /usr/share/autoconf/build-aux/config.{sub,guess} .
+   perl Makefile.PL INSTALLDIRS=vendor
+   make -j1 # parallel build fail
+   make install DESTDIR="$pkgdir"
+ 
+   echo 'backuppc'
+   cd "$srcdir"/BackupPC-$pkgver
++  cp /usr/share/autoconf/build-aux/config.{sub,guess} .
+   export PERLLIB=$(echo "$pkgdir"/usr/lib/perl5/*/vendor_perl/)
+   perl configure.pl \
+     --batch \
