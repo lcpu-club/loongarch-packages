@@ -1,15 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4a03ce2..3536bf4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -21,7 +21,7 @@ makedepends=(
-   python-setuptools
-   python-wheel
- )
--checkdepends=(
-+makedepends+=(
+@@ -25,7 +25,6 @@ checkdepends=(
    boost
    clang
    cmake
-@@ -39,18 +39,18 @@ checkdepends=(
+-  cuda
+   cython
+   doxygen
+   gcc-fortran
+@@ -39,7 +38,7 @@ checkdepends=(
    graphviz
    gtest
    gtk-doc
@@ -18,11 +19,7 @@
    gtk3
    gtkmm3
    hotdoc
-   itstool
-   java-environment=8
--  ldc
-+#  ldc
-   libelf
+@@ -50,7 +49,7 @@ checkdepends=(
    libwmf
    llvm
    mercurial
@@ -31,3 +28,12 @@
    nasm
    netcdf-fortran
    openmpi
+@@ -64,7 +63,7 @@ checkdepends=(
+   rust-bindgen
+   sdl2
+   vala
+-  valgrind
++#  valgrind
+   vulkan-validation-layers
+   wxgtk3
+ )

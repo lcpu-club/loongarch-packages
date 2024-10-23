@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f026859..df07483 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,4 +31,8 @@ package() {
+   make DESTDIR="${pkgdir}" install
+ }
+ 
++prepare () {
++  export CFLAGS="${CFLAGS} -Wno-implicit-function-declaration"
++}
++
+ # vim: ts=2 sw=2 et:

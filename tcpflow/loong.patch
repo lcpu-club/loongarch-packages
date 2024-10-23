@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index bb3dbec..e3265b9 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,6 +32,7 @@ prepare() {
+   git format-patch -1 --stdout a0697509c465 | patch -Np1
+ 
+   autoreconf -vi
++  patch -p1 -i "${srcdir}/Fix-build-with-GCC-13.patch"
+ }
+ 
+ build() {
+@@ -45,3 +46,6 @@ package() {
+   cd $pkgname
+   make DESTDIR="$pkgdir" install
+ }
++
++source+=("Fix-build-with-GCC-13.patch::https://github.com/simsong/tcpflow/commit/b1479db14b1604e00d35c2d39566c54e8b1785d0.patch")
++sha512sums+=('6dab5b751e16c4fdce8572aead939dfc1661466c471efbe1692b84ee59833c458160ff1f5d047a3702c17486126c8e385a77bd558f6ec8cf185a4901badc8934')

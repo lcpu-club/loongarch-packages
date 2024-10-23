@@ -1,5 +1,3 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 2f759c9..79b6f57 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -5,8 +5,7 @@
@@ -10,12 +8,13 @@ index 2f759c9..79b6f57 100644
 -         opencv-cuda)
 +         python-opencv)
  pkgver=4.10.0
- pkgrel=4
+ pkgrel=10
  pkgdesc='Open Source Computer Vision Library'
-@@ -40,10 +39,8 @@ depends=(abseil-cpp
+@@ -39,11 +38,8 @@ depends=(abseil-cpp
+          zlib)
  makedepends=(ant
               cmake
-              cuda
+-             cuda
 -             cudnn
               eigen
               fmt
@@ -23,7 +22,7 @@ index 2f759c9..79b6f57 100644
               git
               glew
               hdf5
-@@ -107,7 +104,6 @@ build() {
+@@ -108,7 +104,6 @@ build() {
           -DINSTALL_PYTHON_EXAMPLES=ON \
           -DCMAKE_INSTALL_PREFIX=/usr \
           -DCPU_BASELINE_DISABLE=SSE3 \
@@ -31,7 +30,7 @@ index 2f759c9..79b6f57 100644
           -DOPENCV_EXTRA_MODULES_PATH=$srcdir/opencv_contrib/modules \
           -DOPENCV_SKIP_PYTHON_LOADER=ON \
           -DLAPACK_LIBRARIES=/usr/lib/liblapack.so;/usr/lib/libblas.so;/usr/lib/libcblas.so \
-@@ -125,6 +121,8 @@ build() {
+@@ -126,6 +121,8 @@ build() {
      -DBUILD_WITH_DEBUG_INFO=ON
    cmake --build build
  
@@ -40,7 +39,7 @@ index 2f759c9..79b6f57 100644
    CFLAGS="${CFLAGS} -fno-lto" CXXFLAGS="${CXXFLAGS} -fno-lto" LDFLAGS="${LDFLAGS} -fno-lto" \
    cmake -B build-cuda -S $pkgname $_opts \
      -DBUILD_WITH_DEBUG_INFO=OFF \
-@@ -135,6 +133,7 @@ build() {
+@@ -136,6 +133,7 @@ build() {
      -DCUDA_ARCH_BIN='52-real;53-real;60-real;61-real;62-real;70-real;72-real;75-real;80-real;86-real;87-real;89-real;90-real;90-virtual' \
      -DCUDA_ARCH_PTX='90-virtual'
    cmake --build build-cuda

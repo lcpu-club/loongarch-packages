@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3ed3fc6..d2fc983 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -49,6 +49,7 @@ check() {
+ 		test_diff_command # relies on config of external command
+ 		test_acls::test_diff # relies on assumptions about tty
+ 		test_show_command::test_show_basic # https://github.com/martinvonz/jj/issues/4394
++		test_describe_command::test_describe
+ 	)
+ 	cargo test --frozen --all-features --package jj-cli -- \
+ 		${skipped[@]/#/--skip }

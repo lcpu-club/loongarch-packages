@@ -1,0 +1,23 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 48a9fd3..be6eac6 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,16 +15,14 @@ sha256sums=('becc47f5ca6e549393ea70147f7dc7b52d88af0ed5bfb9f2e3a4c47658bf48e9')
+ prepare() {
+   cd gf2x
+   git cherry-pick -n a2f0fd388c12ca0b9f4525c6cfbc515418dcbaf8 # Fix build
+-  autoreconf -vi
++  autoreconf -fvi
+ }
+ 
+ build() {
+   cd gf2x
+   ./configure \
+     --prefix=/usr \
+-    --enable-sse2 \
+-    --disable-pclmul \
+-    CFLAGS="$CFLAGS -msse2"
++    --disable-pclmul
+   make
+ }
+ 

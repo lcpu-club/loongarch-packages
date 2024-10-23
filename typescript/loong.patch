@@ -1,0 +1,35 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 738efa6..2ee0446 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,6 +21,19 @@ b2sums=('3690e9e6eca5ac27d7f5f76313282517c4b95bfcf22491d3991a1b649f38e7fd9746c97
+ 
+ prepare() {
+   cd $_name
++
++  # Remove dprint from dependencies and disable formatting when building code
++  # dprint itself requires prebuilt binary available, and some of its plugins uses prebuilts as well
++  # Building dprint from source from NPM package is upstreamed to https://github.com/dprint/dprint/pull/820
++  patch -Np1 -i ../remove-dprint.patch
++
++  # Increase test timeout from 40s to 4000s
++  patch -Np1 -i ../increase-timeout.patch
++
++  # Disable baseline check for typescript.d.ts
++  # This should not affect functionality since the diffs are solely code format variations
++  patch -Np1 -i ../remove-typescript.d.ts-baseline-check.patch
++
+   npm ci
+ }
+ 
+@@ -46,3 +59,10 @@ package() {
+   install -Dm644 -t "$pkgdir"/usr/share/licenses/$pkgname \
+     ThirdPartyNoticeText.txt
+ }
++
++source+=("remove-dprint.patch::https://github.com/wszqkzqk/TypeScript/commit/506176c87436500bd2e92275213b82038012ab5c.patch"
++         "increase-timeout.patch"
++         "remove-typescript.d.ts-baseline-check.patch")
++b2sums+=('23592c789b16183c2fb35edbeeb1f0c29dcd31f8c1dc399c9ab6307628eaafb8f7d83b55d745227610b5807147a2adfc66024e6dc94cd6068b1b4d59fea524fd'
++         '216abfce117ae52b4dbc49bd94eac6096c1606a1b50fab90af94f6611acad8e33e4ef497c6f8002af078caa9297ac84a2c4291b620836b4007b02f4add28bc98'
++         '38dc4bfd4a53613eb6406b4966d39a7c26f49fdb3eee626739773a0f16bd177e0ba735e70a34b8fb4bfbdd745392a0ac09429d2e21086e04bd28ba6cbaa080ef')

@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b019283..472dd50 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,3 +36,10 @@ package() {
+ 
+   install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+ }
++
++prepare() {
++  patch -d "oneDNN-$pkgver" -p1 -i "${srcdir}/add-loong64-support.patch"
++}
++
++source+=("add-loong64-support.patch::https://github.com/oneapi-src/oneDNN/commit/bf26f18df89099e491188d5382b990e190dfe450.patch")
++sha256sums+=('e415e5edb514767276979a4e6117124e629625faea4840b23b95dd2441111b83')

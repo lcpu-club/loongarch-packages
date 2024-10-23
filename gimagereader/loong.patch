@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 38244a2..38ba3b7 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -57,3 +57,10 @@ package_gimagereader-common() {
+   mkdir -p "$pkgdir"/usr/share
+   mv gimagereader-common/* "$pkgdir/usr/share"
+ }
++
++prepare() {
++  patch -d "$pkgbase-$pkgver" -p1 -i "${srcdir}/work-around-enchant_get_prefix_dir-which-is-not-available.patch"
++}
++
++source+=("work-around-enchant_get_prefix_dir-which-is-not-available.patch::https://github.com/manisandro/gImageReader/commit/e72d657a408dc6b77c48c086feede31e08700b4c.patch")
++sha256sums+=('2825615cac6b1d112663fa57c849a812db4d859efdb2c430da52bfe889f82c4e')

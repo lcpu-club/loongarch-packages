@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,7 @@ sha256sums=('e065ce42996ce96dec3f28b6d8c5eecb9d183bebb355367ef3eae6db261026e5')
+ prepare() {
+   cd $pkgbase-$pkgver
+   ./autogen.sh
++  autoreconf -ifv
+ }
+ 
+ build() {

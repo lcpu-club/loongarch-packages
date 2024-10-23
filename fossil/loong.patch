@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -24,6 +24,8 @@ sha256sums=('f885e17998dc1eece1688a75e516663462fe72a7f4f132def4132055777c7ff8'
+ 
+ build() {
+   cd fossil-src-$pkgver
++  for c_s in $(find -type f -name autosetup-config.sub -o -name configure.sub); do cp -f /usr/share/automake-1.1?/config.sub "$c_s"; done
++  for c_g in $(find -type f -name autosetup-config.guess -o -name configure.guess); do cp -f /usr/share/automake-1.1?/config.guess "$c_g"; done
+   ./configure --prefix=/usr --json --disable-internal-sqlite --with-tcl=/usr --with-tcl-private-stubs=1
+   # headers and translate targets are problematic with parallel jobs
+   #make -j1 bld bld/headers

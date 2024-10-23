@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0b08895..94e4f58 100644
+index 7b503dd..c73a329 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -7,7 +7,6 @@
@@ -19,24 +19,35 @@ index 0b08895..94e4f58 100644
    libffi
    lld
    llvm
-@@ -99,9 +96,8 @@ link-shared = true
+@@ -76,6 +73,10 @@ validpgpkeys=(
+ prepare() {
+   cd rustc-$pkgver-src
+ 
++  export CFLAGS="${CFLAGS} -mcmodel=medium"
++  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
++  export RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
++
+   # Patch bootstrap so that rust-analyzer-proc-macro-srv
+   # is in /usr/lib instead of /usr/libexec
+   patch -Np1 -i ../0001-bootstrap-Change-libexec-dir.patch
+@@ -105,9 +106,8 @@ link-shared = true
  
  [build]
  target = [
 -  "x86_64-unknown-linux-gnu",
 -  "i686-unknown-linux-gnu",
 -  "x86_64-unknown-linux-musl",
-+  "`uname -m`-unknown-linux-gnu",
-+  "`uname -m`-unknown-linux-musl",
++  "$(uname -m)-unknown-linux-gnu",
++  "$(uname -m)-unknown-linux-musl",
    "wasm32-unknown-unknown",
    "wasm32-wasi",
    "wasm32-wasip1",
-@@ -149,20 +145,14 @@ jemalloc = true
- [dist]
+@@ -157,24 +157,20 @@ jemalloc = true
  compression-formats = ["gz"]
+ compression-profile = "fast"
  
 -[target.x86_64-unknown-linux-gnu]
-+[target.`uname -m`-unknown-linux-gnu]
++[target.$(uname -m)-unknown-linux-gnu]
  cc = "/usr/bin/gcc"
  cxx = "/usr/bin/g++"
  ar = "/usr/bin/gcc-ar"
@@ -44,28 +55,34 @@ index 0b08895..94e4f58 100644
  llvm-config = "/usr/bin/llvm-config"
  
 -[target.i686-unknown-linux-gnu]
--cc = "/usr/bin/gcc"
++[target.$(uname -m)-unknown-linux-musl]
++# Failed with musl-gcc: ld.lld: error: unable to find library -lgcc_s
++# Temporarily switch from musl-gcc to gcc
+ cc = "/usr/bin/gcc"
+ cxx = "/usr/bin/g++"
+ ar = "/usr/bin/gcc-ar"
+ ranlib = "/usr/bin/gcc-ranlib"
+-
+-[target.x86_64-unknown-linux-musl]
+-cc = "/usr/bin/musl-gcc"
 -cxx = "/usr/bin/g++"
 -ar = "/usr/bin/gcc-ar"
 -ranlib = "/usr/bin/gcc-ranlib"
--
--[target.x86_64-unknown-linux-musl]
-+[target.`uname -m`-unknown-linux-musl]
  sanitizers = false
  musl-root = "/usr/lib/musl"
  
-@@ -230,12 +220,9 @@ build() {
+@@ -267,12 +263,9 @@ build() {
  
    # rustbuild always installs copies of the shared libraries to /usr/lib,
    # overwrite them with symlinks to the per-architecture versions
 -  mkdir -pv usr/lib32
 -  ln -srvft usr/lib   usr/lib/rustlib/x86_64-unknown-linux-gnu/lib/*.so
 -  ln -srvft usr/lib32 usr/lib/rustlib/i686-unknown-linux-gnu/lib/*.so
-+  ln -srvft usr/lib   usr/lib/rustlib/`uname -m`-unknown-linux-gnu/lib/*.so
++  ln -srvft usr/lib   usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/lib/*.so
  
 -  _pick dest-i686 usr/lib/rustlib/i686-unknown-linux-gnu usr/lib32
 -  _pick dest-musl usr/lib/rustlib/x86_64-unknown-linux-musl
-+  _pick dest-musl usr/lib/rustlib/`uname -m`-unknown-linux-musl
++  _pick dest-musl usr/lib/rustlib/$(uname -m)-unknown-linux-musl
    _pick dest-wasm usr/lib/rustlib/wasm32-*
    _pick dest-src  usr/lib/rustlib/src
  }

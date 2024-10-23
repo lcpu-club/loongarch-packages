@@ -1,0 +1,30 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7c4e0c0..1d204ba 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -55,7 +55,6 @@ makedepends=(
+   meson
+   noto-fonts
+   noto-fonts-cjk
+-  pandoc
+   python-cairo
+   python-dbus
+   python-gobject
+@@ -81,6 +80,7 @@ build() {
+     -D docs=enabled
+     -D efi_binary=false
+     -D launchd=disabled
++    -D plugin_msr=disabled
+     -D supported_build=enabled
+     -D systemd_unit_user=fwupd
+   )
+@@ -136,9 +136,6 @@ package_fwupd() {
+   # Conflicts with the dbxtool package
+   mv "${pkgdir}"/usr/bin/{,fwupd-}dbxtool
+   mv "${pkgdir}"/usr/share/man/man1/{,fwupd-}dbxtool.1
+-  # Remove msr module-load config as it is built-in
+-  rm "${pkgdir}"/usr/lib/modules-load.d/fwupd-msr.conf
+-  rmdir "${pkgdir}"/usr/lib/modules-load.d
+ 
+   _pick docs "${pkgdir}"/usr/share/doc/{,fwupd/}{libfwupdplugin,libfwupd}
+ }

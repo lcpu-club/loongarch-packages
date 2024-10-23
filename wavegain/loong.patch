@@ -1,0 +1,24 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 40789dd..7f91fef 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -30,4 +30,19 @@ package() {
+     "$pkgdir/usr/bin/wavegain"
+ }
+ 
++prepare() {
++  patch -Np1 < fix-io-header.patch -d "$srcdir/$_realname-$pkgver"
++  patch -Np1 < add-generic-asm.patch -d "$srcdir/$_realname-$pkgver"
++  patch -Np1 < fix-werror-format-security.patch -d "$srcdir/$_realname-$pkgver"
++
++  export CFLAGS="${CFLAGS} -Wno-implicit-function-declaration"
++}
++
++source+=(fix-io-header.patch
++         add-generic-asm.patch
++         fix-werror-format-security.patch)
++sha512sums+=('9accb9b15968fe342d623b8ce7ed404076d5d120257601ec4aa470f4ae8ba458d75e9175c1f6eda8a1e8e7cbf56a631ade81af2c30c47f31e2d902cd01942028'
++             '8875c4313f331e4ca692c631e3cbf12cc7b8c7471aa505c18e725aa561a32654cee56a324cf212ef677b4cf0c7e0e72a2d895fe89cbe6878c3e82eb67d26e601'
++             '11b4bb6646e6dd2ffa5fc03454ff037ce8c7c380824d41de6558dba2a7777bea849a9ca02091ef3e6c51150f707d476b6433036fdc013145353c480f0db60cbf')
++
+ # vim:set ts=2 sw=2 et:

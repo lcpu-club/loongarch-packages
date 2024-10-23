@@ -1,0 +1,19 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,7 +26,6 @@ checkdepends=(
+     python-pytest
+     python-pytest-qt
+     python-pyqt5
+-    python-pyqt5-webengine
+     python-pyqt6
+     python-pyqt6-3d
+     python-pyqt6-datavisualization
+@@ -44,6 +43,8 @@ checkdepends=(
+     qt5-websockets
+     qt5-x11extras
+     qt5-xmlpatterns
++    qt5-location
++    qt5-webchannel
+     qt6-multimedia
+     qt6-remoteobjects
+     qt6-sensors

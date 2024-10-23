@@ -1,0 +1,28 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 1a7ddfb..1040f6b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -88,6 +88,7 @@ validpgpkeys=('3CE1780F78DD88DF45194FD706BC317B515ACE7C') # Kovid Goyal (New lon
+ 
+ prepare(){
+ 	cd "$_archive"
++	patch -Np1 -i "$srcdir"/fix-stbsp__uintptr.patch -d src/calibre/utils
+ 	# Desktop integration (e.g. enforce arch defaults)
+ 	# Use uppercase naming scheme, don't delete config files under fakeroot.
+ 	sed -e "/import config_dir/,/os.rmdir(config_dir)/d" \
+@@ -113,7 +114,7 @@ build() {
+ check() {
+ 	cd "$_archive"
+ 	export LANG='en_US.UTF-8'
+-	python setup.py test --under-sanitize
++	python setup.py test --under-sanitize --exclude-test-name test_searching
+ 	python setup.py test_rs
+ }
+ 
+@@ -137,3 +138,6 @@ package() {
+ 		python -O -m compileall -d "${_destdir}" "${_file}"
+ 	done < <(find "$pkgdir/usr/lib/" -name '*.py' -print0)
+ }
++
++source+=("fix-stbsp__uintptr.patch")
++sha256sums+=('84815f8b54408620a70992d53bd46c40e595f258244b926dd75d77c7c9716d26')

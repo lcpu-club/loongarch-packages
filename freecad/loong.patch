@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8d2eb62..9a8c3e9 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,7 +25,7 @@ depends=(asciidoctor boost-libs coin fmt glew jsoncpp libspnav med-openmpi
+          python-markdown python-matplotlib python-pip python-pivy python-ply
+          python-yaml qt6-svg qt6-tools qt6-webengine verdict xerces-c)
+ makedepends=(boost cgns cmake eigen git libharu liblas ninja nlohmann-json
+-             openvdb openvr ospray pdal postgresql-libs python-mpi4py shiboken6
++             openvdb openvr pdal postgresql-libs python-mpi4py shiboken6
+              swig utf8cpp dos2unix microsoft-gsl)
+ optdepends=('graphviz: dependency graph support'
+             'opencamlib: CAM workbench support'

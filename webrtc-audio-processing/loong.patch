@@ -1,0 +1,16 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,9 +21,13 @@ pkgver() {
+ 
+ prepare() {
+   cd $pkgname
++  patch -Np1 -i ../webrtc-audio-processing-la64.patch
+   NOCONFIGURE=1 ./autogen.sh
+ }
+ 
++source+=('webrtc-audio-processing-la64.patch')
++b2sums+=('954416ea52ed2d0f3e1cf2354956010f159bcf543a9a504df7e4269f6677191e84c33b4202d2fb19883cc0298a97a65a2a8a7d2466dd16d92668a62f080b775a')
++
+ build() {
+   local configure_options=(
+     --prefix /usr

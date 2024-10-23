@@ -1,0 +1,55 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -33,14 +33,15 @@ optdepends=(
+   'gvfs: open links e.g. hyperlinks'
+ )
+ options=(!lto)
+-source=(https://github.com/openjdk/jdk${_majorver}u/archive/refs/tags/jdk${_majorver}u${_minorver}-b${_updatever}.tar.gz
++source=(https://github.com/loongson/jdk${_majorver}u/archive/refs/tags/jdk${_majorver}u${_minorver}-b${_updatever}-ls-0.tar.gz
+         gcc11.patch)
+-b2sums=('78fdd9d59d9f9f5bf3d65901fa8cf44d42ffedf3bd48552575febeb3a35d24567b209e234988a071fe68c6d26737c69719c6c0fa861fa4d1ebb69337cb9d7d8b'
++b2sums=('bf6d2cd5ecffdb830ee6cb973ec563423b1b4324994cfecccd9dc03d2d27f2206df21284486d7414e0f9fcb9b34d9934e20162b90fe1ad4238dd3113d845e7dc'
+         '9679e4dfb6027a87376081489c09810812d6849573afac4ea96abe3a3e00ca5b6af7d0ffb010c43b93cfa913f9e97fbb9f11e19fcc86a89b4548442671c32da1')
+ 
+ case "${CARCH}" in
+   'x86_64') _JARCH=amd64 ; _DOC_ARCH=x86_64 ;;
+   'i686'  ) _JARCH=i386  ; _DOC_ARCH=x86    ;;
++  'loong64') _JARCH=loongarch64; _DOC_ARCH=loongarch64 ;;
+ esac
+ 
+ _jdkname=openjdk8
+@@ -53,14 +54,14 @@ _nonheadless=(bin/policytool
+               lib/${_JARCH}/libsplashscreen.so)
+ 
+ prepare() {
+-  cd jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}
++  cd jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}-ls-0
+ 
+   # Fix build with C++17 (Fedora)
+   patch -Np1 -i "${srcdir}"/gcc11.patch
+ }
+ 
+ build() {
+-  cd jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}
++  cd jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}-ls-0
+ 
+   unset JAVA_HOME
+   # http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=1346
+@@ -108,7 +109,7 @@ build() {
+ }
+ 
+ check() {
+-  cd jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}
++  cd jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}-ls-0
+   #make -k test
+ }
+ 
+@@ -279,7 +280,7 @@ package_openjdk8-doc() {
+   pkgdesc='OpenJDK Java 8 documentation'
+ 
+   install -d -m 755 "${pkgdir}/usr/share/doc/${pkgbase}/"
+-  cp -r "${srcdir}"/jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}/build/linux-${_DOC_ARCH}-normal-server-release/docs/* \
++  cp -r "${srcdir}"/jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}-ls-0/build/linux-${_DOC_ARCH}-normal-server-release/docs/* \
+     "${pkgdir}/usr/share/doc/${pkgbase}/"
+ }
+ 

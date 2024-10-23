@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,6 +17,7 @@ b2sums=('SKIP')
+ build() {
+   cd cl
+   CFLAGS+=' -D_FORTIFY_SOURCE=2 -ffat-lto-objects -fPIE'
++  sed -i 's/ -m64//g' c_src/Makefile
+   rebar compile
+ }
+ 

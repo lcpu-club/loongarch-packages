@@ -1,0 +1,52 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -55,13 +55,13 @@ makedepends=(
+   mariadb-libs
+   netcdf
+   opencascade
+-  openimagedenoise
++#  openimagedenoise
+   openmp
+   openmpi
+   openvdb
+   openvr
+   openxr
+-  ospray
++#  ospray
+   pdal
+   postgresql-libs
+   proj
+@@ -142,8 +142,12 @@ prepare() {
+   patch -Np1 -i ../ospray-3.patch # Fix build with ospray 3.0
+   patch -Np1 -i "$srcdir"/761aa1d15970fcb6aadb7d6152737fa9b2d4b0d0.patch # Fix OCCT 7.8.0
+   patch -p1 -i ../fmt-11.patch # Fix build with fmt 11
++  patch -Np1 -i ../0001-Use-freshly-built-libraries-for-qmlvtkplugin.patch
+ }
+ 
++source+=(0001-Use-freshly-built-libraries-for-qmlvtkplugin.patch::https://gitlab.kitware.com/vtk/vtk/-/commit/25a28fb1a625d0126fd8ee3f8a37f60b6868e56f.diff)
++sha256sums+=('102457eeda790830877c2d227153f13579c5a7ad8a2cbb8827c0376e11ab47a0')
++
+ build() {
+   # To help cmake find java
+   export JAVA_HOME=/usr/lib/jvm/default
+@@ -170,7 +174,8 @@ build() {
+     -DVTK_VERSIONED_INSTALL=OFF \
+     -DVTK_WRAP_JAVA=ON \
+     -DVTK_WRAP_PYTHON=ON \
+-    -DVTKOSPRAY_ENABLE_DENOISER=ON \
++    -DVTK_ENABLE_OSPRAY=OFF \
++    -DVTKOSPRAY_ENABLE_DENOISER=OFF \
+     -DVTKm_ENABLE_HDF5_IO=ON \
+     -DVTKm_ENABLE_MPI=ON \
+     -DVTKm_ENABLE_OPENMP=ON \
+@@ -195,8 +200,8 @@ package() {
+   install -dv "${pkgdir}"/usr/share/java/vtk
+   mv -v "${pkgdir}"/usr/lib/java/vtk.jar "${pkgdir}"/usr/share/java/vtk
+   # …and the libs to the proper place
+-  mv "${pkgdir}"/usr/lib/java/vtk-Linux-${CARCH}/*.so "${pkgdir}"/usr/lib/
+-  rmdir "${pkgdir}"/usr/lib/java/{vtk-Linux-${CARCH}/,}
++  mv "${pkgdir}"/usr/lib/java/vtk-Linux-`uname -m`/*.so "${pkgdir}"/usr/lib/
++  rmdir "${pkgdir}"/usr/lib/java/{vtk-Linux-`uname -m`/,}
+ 
+   # byte-compile python modules since the CMake build does not do it
+   local site_packages=$(python -c "import site; print(site.getsitepackages()[0])")

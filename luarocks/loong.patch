@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -48,6 +48,14 @@ sha512sums=('1e214fd41711f62fda122d73441165a2d0ffe7ed29d3d3d7690b9a1a272c03e269f
+             'f6ab6c65aaaa2680ce83a3277a2aec4400d234ddfc17c62f44190928a53b7146c38f8a779aedc1c71fed3dd2f1833e1ca924080e98ecf7462274b0d9acb07f90')
+ validpgpkeys=('8460980B2B79786DE0C7FCC83FD8F43C2BB3C478')
+ 
++prepare() {
++  cd "$pkgname-$pkgver"
++  patch -p1 -i $srcdir/luarocks-la64.patch
++}
++
++source+=("luarocks-la64.patch")
++sha512sums+=('6d704581d6f21a5887e2c272fea58fa13a345a702234b0cc9f2141bfb7b9f51759b256aec57560222021f0cebaf8ff4a3ac9a92e0e06492de0a1b3458eb0a7ed')
++
+ build() {
+   cd "$pkgname-$pkgver"
+   ./configure --prefix=/usr

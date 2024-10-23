@@ -1,9 +1,0 @@
---- a/PKGBUILD
-+++ b/PKGBUILD
-@@ -50,5 +50,5 @@ build() {
- package() {
-   cd ${pkgname}-dev
-   make PKG_USER=root PKG_GROUP=root DIST_ROOT="${pkgdir}" \
--       PKG_ROOT_SBIN_DIR="/usr/bin" install install-dev
-+       PKG_ROOT_SBIN_DIR="/usr/bin" install install-dev -j1
- }

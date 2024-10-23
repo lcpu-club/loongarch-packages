@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 82d56e4..ad608db 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -78,8 +78,8 @@ makedepends=(
+ )
+ checkdepends=(
+   'python-pytest' 'python-jsbeautifier' 'python-h5py' 'acl' 'binutils' 'bzip2' 'cdrtools' 'cpio' 'e2fsprogs' 'enjarify'
+-  'hdf5' 'imagemagick' 'java-environment=11' 'fontforge' 'gettext' 'ghc' 'gnupg' 'mono' 'pgpdump' 'poppler' 'sqlite' 'squashfs-tools'
+-  'libxmlb' 'lz4' 'unzip' 'gzip' 'tar' 'tcpdump' 'vim' 'xz' 'llvm' 'colord' 'fpc' 'openssh' 'openssl' 'odt2txt' 'docx2txt' 'r' 'dtc'
++  'hdf5' 'imagemagick' 'java-environment=11' 'fontforge' 'gettext' 'gnupg' 'pgpdump' 'poppler' 'sqlite' 'squashfs-tools'
++  'libxmlb' 'lz4' 'unzip' 'gzip' 'tar' 'tcpdump' 'vim' 'xz' 'llvm' 'colord' 'openssh' 'openssl' 'odt2txt' 'docx2txt' 'r' 'dtc'
+   'giflib' 'gnumeric' 'python-progressbar' 'binwalk' 'python-argcomplete' 'zstd' 'uboot-tools')
+ source=(https://diffoscope.org/archive/diffoscope-${pkgver}.tar.bz2{,.asc})
+ sha512sums=('564e731847cbc68a6d8612f543d9d40575c4e9240acc7ec405310878c9288566a5c6dd4aa87e2517db5ef1abcc4ab6e29d3002ee5cce281200d9381de103243b'

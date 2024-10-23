@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index fe2148c..d139bba 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -52,6 +52,7 @@ build() {
+     -DLDC_WITH_LLD=OFF \
+     -DD_COMPILER_FLAGS="-link-defaultlib-shared=false -linker=lld --flto=thin" \
+     -DADDITIONAL_DEFAULT_LDC_SWITCHES="\"-link-defaultlib-shared\"," \
++    -DLD_FLAGS="-Wl,--no-as-needed -latomic -Wl,--as-needed" \
+     ..
+     ninja
+ }

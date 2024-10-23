@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 35dbec1..d25761d 100644
+index 6768464..62dc6b6 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -135,6 +135,13 @@ prepare() {
+@@ -133,6 +133,13 @@ prepare() {
      done
      popd
  
@@ -13,10 +13,10 @@ index 35dbec1..d25761d 100644
 +    # use `0001-firebird-la64-support.patch`
 +    patch external/firebird/UnpackedTarball_firebird.mk < "${srcdir}/0002-UnpackedTarball_firebird.mk-apply-la64-support.diff"
 +
- # should be obsolete - Debian has dropped this long time ago
-     # fix not upstreamable pyuno paths - FS#54250
- #    patch -Np1 -i "${srcdir}"/make-pyuno-work-with-system-wide-module-install.diff
-@@ -424,3 +431,8 @@ package_libreoffice-still() {
+     # fix build - https://gerrit.libreoffice.org/c/core/+/145421
+     patch -Np1 -i "${srcdir}"/623ea5c.diff
+ 
+@@ -432,3 +439,8 @@ package_libreoffice-still() {
      'sid','sk','sl','sq','sv','ta','tg','tr','ug','uk','vi','zh-CN','zh-TW'])" \
          > "${pkgdir}"/usr/lib/libreoffice/help/languages.js
  }

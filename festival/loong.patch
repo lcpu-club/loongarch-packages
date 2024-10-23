@@ -1,0 +1,16 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -49,11 +49,13 @@ build() {
+ 
+   # Build Speech Tools first
+   cd speech_tools
++  autoreconf -fi
+   ./configure --prefix=/usr --sysconfdir=/etc
+   make OPTIMISE_CXXFLAGS="$CPPFLAGS $CXXFLAGS" OPTIMISE_CCFLAGS="$CPPFLAGS $CFLAGS $LDFLAGS" LINKFLAGS="$LDFLAGS" MAKE_SHARED_LIB='$(CXX) $(LINKFLAGS) -shared -o XXX -Wl,-soname,YYY'
+ 
+   # Build Festival itself
+   cd ../festival
++  autoreconf -fi
+   ./configure --prefix=/usr --sysconfdir=/etc
+   make OPTIMISE_CXXFLAGS="$CPPFLAGS $CXXFLAGS" OPTIMISE_CCFLAGS="$CPPFLAGS $CFLAGS $LDFLAGS" LINKFLAGS="$LDFLAGS" MAKE_SHARED_LIB='$(CXX) $(LINKFLAGS) -shared -o XXX -Wl,-soname,YYY'
+ }

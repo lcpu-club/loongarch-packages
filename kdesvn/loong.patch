@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -8,7 +8,7 @@ arch=('x86_64')
+ url="https://invent.kde.org/sdk/kdesvn"
+ license=('GPL')
+ depends=('subversion' 'kcoreaddons5' 'kdoctools5' 'kio5' 'knotifications5' 'kparts5' 'ktexteditor5')
+-makedepends=('extra-cmake-modules')
++makedepends=('extra-cmake-modules' 'db')
+ changelog=$pkgname.changelog
+ source=(https://download.kde.org/stable/$pkgname/$pkgver/$pkgname-$pkgver.tar.xz)
+ sha256sums=('515eb95d5d2a51b495df01adf56ef0af703c5d344bb49bc2a6390ef57bba027b')

@@ -1,0 +1,29 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4b578bc..7eab10f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -33,7 +33,7 @@ build() {
+     -D CMAKE_BUILD_TYPE=None
+     -D CMAKE_INSTALL_PREFIX=/usr
+     -D BUILD_GUI=ON
+-    -D BUILD_SSE=ON
++    -D BUILD_SSE=OFF
+     -S openAV-ArtyFX-release-$pkgver
+     -W no-dev
+   )
+@@ -54,3 +54,15 @@ package() {
+   DESTDIR="$pkgdir" cmake --install build
+   install -vDm 644 openAV-ArtyFX-release-$pkgver/{CHANGELOG,README.md} -t "$pkgdir/usr/share/doc/$pkgname"
+ }
++
++prepare() {
++  cd openAV-ArtyFX-release-$pkgver
++  # replace -lpthread with pthread
++  sed -i 's/-lpthread/-pthread/g' CMakeLists.txt
++  # disable sse https://github.com/openAVproductions/openAV-ArtyFX/issues/47
++  patch -Np1 -i ../disable-sse.patch
++}
++
++source+=("disable-sse.patch")
++sha512sums+=('8adc6118d473c968958007da1a4a5b9e9c730a35f4f7ffe1ec09f1214be6f0894e1c0e32f5d263c410126b5ee3003fc2db40ca0e8b6bb42712d8642bf9b930c6')
++b2sums+=('c556e4a76ccf5becb4c5c0c600ad0ff7c40b6b6da2b0832f81b8756440d083df0027b96439eaac3aca84562311fe4c00e0dd51f88abf34eca2bbb0ee19b68909')

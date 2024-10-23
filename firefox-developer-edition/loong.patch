@@ -1,0 +1,66 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7dd56a8..3a8d3eb 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -113,6 +113,20 @@ prepare() {
+   patch -Np1 -i ../firefox-install-dir.patch
+ 
+   echo -n "$_google_api_key" >google-api-key
++  
++  # Patches for loong64
++  patch -Np1 -i ../0001-Add-support-for-LoongArch64.patch
++  patch -Np1 -i ../0003-update-gn_processor.py-to-support-linux-on-loong64.patch
++  patch -Np1 -i ../0004-Re-generate-libwebrtc-moz.build-files.patch
++  patch -Np1 -i ../0005-enable-webrtc-for-loongarch64-in-toolkit-moz.configu.patch
++  patch -Np1 -i ../0006-Fix-libyuv-unified-source-and-LoongArch-SIMD-build.patch
++  patch -Np1 -i ../0011-Add-missing-loongarch-lsx-code-for-libpng.patch
++
++  # Add ` -mcmodel=medium` to CFLAGS etc.
++  # to avoid `relocation R_LARCH_B26 overflow`
++  export CFLAGS="${CFLAGS} -mcmodel=medium"
++  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
++  export RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
+ 
+   cat >../mozconfig <<END
+ ac_add_options --enable-application=browser
+@@ -125,7 +139,6 @@ ac_add_options --enable-optimize
+ ac_add_options --enable-rust-simd
+ ac_add_options --enable-linker=lld
+ ac_add_options --disable-install-strip
+-ac_add_options --disable-elf-hack
+ ac_add_options --disable-bootstrap
+ ac_add_options --with-wasi-sysroot=/usr/share/wasi-sysroot
+ 
+@@ -151,7 +164,7 @@ ac_add_options --with-system-nss
+ # Features
+ ac_add_options --enable-alsa
+ ac_add_options --enable-jack
+-ac_add_options --enable-crashreporter
++ac_add_options --disable-crashreporter
+ ac_add_options --disable-updater
+ ac_add_options --disable-tests
+ END
+@@ -286,4 +299,23 @@ Version=2
+ END
+ }
+ 
++source+=('0001-Add-support-for-LoongArch64.patch'
++         '0003-update-gn_processor.py-to-support-linux-on-loong64.patch'
++         '0004-Re-generate-libwebrtc-moz.build-files.patch'
++         '0005-enable-webrtc-for-loongarch64-in-toolkit-moz.configu.patch'
++         '0006-Fix-libyuv-unified-source-and-LoongArch-SIMD-build.patch'
++         '0011-Add-missing-loongarch-lsx-code-for-libpng.patch')
++sha256sums+=('348e1a20000db9fac4715580581163495de4380d446ab01177671719b41082b3'
++             '5c29035ab562b0f722b1975f02def279f3cccf3fd3d153c6e54126289b095c99'
++             'd0ef34bade8bed6072166eafc651b0703f90732f257215390421adb76c96e2b3'
++             '9bd75fce6d86d5d755e6ab047e7eaa39f87a19e596ee20e3f6c03cd4c4a7d348'
++             '62574c6426173eebd80d4676ede30214050e2b6be87e293f906aaba85214b277'
++             'da6733b8ca23d9de4f4c2ee1ff2bdc111128da4ec403e385bb576f2e229d1f6e')
++b2sums+=('28f29b1fe9f8f2a80f9ea5ddebd459c21f54ee0523bd5781888d213945333613c963abbab175ca8a2386270d0caaaa0f247c26f725a2695fb520ef5f094f978d'
++         '178bb4227daadd9c6872cc3ed0c795257023fadd8e5572e28a1c6f0825066be4e6fbb23bd3b67f7883645ac6dd567aeacdff20e383ba3482860852d256d7a75e'
++         '0495057c581f405b08b28debfaf2f98801b1a7344269985f7660fa803ca2caa8b55427d406b22684ee5980faac3dfb3de763e5b3ff892cc9b1487a21ae2c2f7f'
++         '8fead507b6662bb2c0bdc85a55c9ce0d7780376235adff616f0aa0fa7c9121d57bebbbbd996a75e129f92478fe41fae17948a887ca5f45d24284a243ee3048a5'
++         '814ee097d8539a7170f099ce1d3e2350ca6f2b8b7a252b4abfca0065d78d463773fb1f64014d7869fe3916ba20286f0e9612b8700c8b0a8410e0ee0a85236bf1'
++         '4b0f39835f67b6b1ab120f4cb038e1afd169b84b4f8bf18b669468b6ac3543de3e131947aca616ca5db6f9cb0f97c58dd6115af9c0138a41f5f990a5b6e304c7')
++
+ # vim:set sw=2 sts=-1 et:

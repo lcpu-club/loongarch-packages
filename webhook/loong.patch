@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3e5db56..e953c51 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,9 @@ prepare() {
+ 
+   rm -r vendor
+ 
++  go mod edit -replace=golang.org/x/sys=golang.org/x/sys@v0.26.0
++  go mod tidy
++
+   go get github.com/codegangsta/negroni github.com/gorilla/mux github.com/satori/go.uuid \
+          gopkg.in/fsnotify.v1 github.com/ghodss/yaml
+ }

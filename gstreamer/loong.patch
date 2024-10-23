@@ -1,24 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 9268cf2..87a5027 100644
+index df136d1..f785da2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -11,7 +11,6 @@ pkgname=(
-   gst-plugins-bad
-   gst-plugin-gtk
-   gst-plugin-msdk
--  gst-plugin-onnx
-   gst-plugin-opencv
-   gst-plugin-qml6
-   gst-plugin-qmlgl
-@@ -127,7 +126,6 @@ makedepends=(
-   nasm
-   neon
-   nettle
--  onnxruntime
-   openal
-   opencore-amr
-   opencv
-@@ -159,7 +157,6 @@ makedepends=(
+@@ -160,7 +160,6 @@ makedepends=(
    spandsp
    speex
    svt-av1
@@ -26,12 +10,7 @@ index 9268cf2..87a5027 100644
    systemd-libs
    taglib
    twolame
-@@ -219,10 +216,12 @@ build() {
-     -D gst-plugins-bad:isac=disabled
-     -D gst-plugins-bad:magicleap=disabled
-     -D gst-plugins-bad:mfx_api=oneVPL
-+    -D gst-plugins-bad:onnx=disabled
-     -D gst-plugins-bad:openh264=disabled
+@@ -230,6 +229,7 @@ build() {
      -D gst-plugins-bad:openni2=disabled
      -D gst-plugins-bad:opensles=disabled
      -D gst-plugins-bad:qt6d3d11=disabled
@@ -39,7 +18,7 @@ index 9268cf2..87a5027 100644
      -D gst-plugins-bad:tinyalsa=disabled
      -D gst-plugins-bad:voaacenc=disabled
      -D gst-plugins-bad:voamrwbenc=disabled
-@@ -731,7 +730,6 @@ package_gst-plugins-bad() {
+@@ -738,7 +738,6 @@ package_gst-plugins-bad() {
      spandsp
      srt
      svt-av1
@@ -47,7 +26,7 @@ index 9268cf2..87a5027 100644
      webrtc-audio-processing-1
      wildmidi
      x265
-@@ -794,7 +792,6 @@ package_gst-plugins-bad() {
+@@ -801,7 +800,6 @@ package_gst-plugins-bad() {
      usr/lib/gstreamer-1.0/libgstsrt.so
      usr/lib/gstreamer-1.0/libgstsrtp.so
      usr/lib/gstreamer-1.0/libgstsvtav1.so
@@ -55,27 +34,3 @@ index 9268cf2..87a5027 100644
      usr/lib/gstreamer-1.0/libgstteletext.so
      usr/lib/gstreamer-1.0/libgsttimecode.so
      usr/lib/gstreamer-1.0/libgstttmlsubs.so
-@@ -865,23 +862,6 @@ package_gst-plugin-opencv() {
-   ); _install
- }
- 
--package_gst-plugin-onnx() {
--  pkgdesc+=" - onnx plugin"
--  depends=(
--    "gst-plugins-bad-libs=$pkgver-$pkgrel"
--    "gst-plugins-base-libs=$pkgver-$pkgrel"
--    "gstreamer=$pkgver-$pkgrel"
--    gcc-libs
--    glib2
--    glibc
--    onnxruntime
--  )
--
--  cd root; local files=(
--    usr/lib/gstreamer-1.0/libgstonnx.so
--  ); _install
--}
--
- package_gst-plugin-qml6() {
-   pkgdesc+=" - qml6 plugin"
-   depends=(

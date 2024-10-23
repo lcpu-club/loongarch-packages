@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5411038..dafbc15 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -33,3 +33,10 @@ package() {
+ 
+   DESTDIR="$pkgdir" ninja -C build install
+ }
++
++prepare() {
++  patch -d OpenXR-SDK-Source-release-${pkgver} -p1 -i "${srcdir}/add-loong64-support.patch"
++}
++
++source+=("add-loong64-support.patch")
++sha512sums+=('fc739951a179f2af9598eef6988f95f799da454593d05b7c7827a43be18103f2ebf4d05bb738b09588a410b44301d3bfc42679e0514452d671e5455f3a26b7da')

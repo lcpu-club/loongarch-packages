@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 53dde02..7fcda50 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -42,7 +42,7 @@ prepare() {
+ 
+   # Only LDC have -O5
+   export _ldFlags="$(echo -ne $LDFLAGS | sed -e 's/-Wl,/-L=/g' -e 's/=auto/=full')"
+-  sed -i "/-O5/ a -linker=gold -link-defaultlib-shared=false $ldFlags\\\\" makefile
++  sed -i "/-O5/ a -link-defaultlib-shared=false $ldFlags\\\\" makefile
+ }
+ 
+ build() {

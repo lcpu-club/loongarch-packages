@@ -1,0 +1,33 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index feb5e10..614ce30 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,7 +23,11 @@ prepare() {
+   cd "$_name-$pkgver"
+   # create build dir and add symlink to built executable so tests can find it
+   mkdir -p build
+-  ln -sv $pkgname build/$_name-linux-amd64
++  _GOARCH=$(go env GOARCH)
++  ln -sv $pkgname build/$_name-linux-$_GOARCH
++  
++  go mod edit -replace=go.etcd.io/bbolt=go.etcd.io/bbolt@v1.3.7-0.20221114114133-eedea6cb26ef
++  go mod tidy
+ 
+   # replace hardcoded test assumptions
+   sed -e "s/<local-build>/${pkgver}/" -i ./main_test.go
+@@ -42,13 +46,14 @@ build() {
+   export CGO_CFLAGS="${CFLAGS}"
+   export CGO_CXXFLAGS="${CXXFLAGS}"
+   export CGO_LDFLAGS="${LDFLAGS}"
++  _GOARCH=$(go env GOARCH)
+ 
+   go build -o build/$pkgname \
+     -trimpath \
+     -buildmode=pie \
+     -mod=readonly \
+     -modcacherw \
+-    -ldflags "-linkmode external -extldflags '${LDFLAGS}' -X '${_repo}/pkg/version.OS=linux' -X '${_repo}/pkg/version.Arch=amd64' -X '${_repo}/pkg/version.BuildDate=${_date}' -X '${_repo}/pkg/version.Commit=${_commit}' -X '${_repo}/pkg/version.Version=${pkgver}'"
++    -ldflags "-linkmode external -extldflags '${LDFLAGS}' -X '${_repo}/pkg/version.OS=linux' -X '${_repo}/pkg/version.Arch=${_GOARCH}' -X '${_repo}/pkg/version.BuildDate=${_date}' -X '${_repo}/pkg/version.Commit=${_commit}' -X '${_repo}/pkg/version.Version=${pkgver}'"
+ }
+ 
+ check () {

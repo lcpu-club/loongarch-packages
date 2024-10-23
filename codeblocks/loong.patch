@@ -1,0 +1,27 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 22a0af3..98e9559 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -69,11 +69,14 @@ prepare() {
+   patch -p1 < ../29315df024251850832583f73e67e515dae10830.patch
+   patch -p1 < ../46720043319758cb0e798eb23520063583c40eaa.patch
+   patch -p1 < ../sc_wxtypes-normalize.patch
++  patch -p1 < ../add-loong64-support.patch
+ }
+ 
+ build() {
+   cd $pkgname-$pkgver
+-  ./configure --prefix=/usr --with-contrib-plugins=all,-FileManager
++  cp /usr/share/automake-1.1?/config.sub .
++  cp /usr/share/automake-1.1?/config.guess .
++  ./configure --prefix=/usr --with-contrib-plugins=all,-FileManager --with-boost-libdir=/usr/lib
+   sed -i 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+   make
+ }
+@@ -82,3 +85,6 @@ package() {
+   cd $pkgname-$pkgver
+   make DESTDIR="$pkgdir" install
+ }
++
++source+=("add-loong64-support.patch")
++sha256sums+=('4691ea04a7bb73c6e6634124419c27b7882a1633f01ed1728085515f7abbfbdf')

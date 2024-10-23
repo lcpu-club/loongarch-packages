@@ -1,0 +1,18 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c4ba440..2852325 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,10 +38,12 @@ prepare() {
+ }
+ 
+ build() {
++  # disable self-pack test for loong64
++  # https://github.com/upx/upx/blob/d7142312c9d65e4daa0c7fe504af196cd96e88d7/CMakeLists.txt#L48-L49
+   make -C $pkgname \
+     CHECK_WHITESPACE=/bin/true \
+     CXXFLAGS_WERROR="" \
+-    UPX_CMAKE_CONFIG_FLAGS='-D UPX_CONFIG_DISABLE_GITREV=1 -D UPX_CONFIG_DISABLE_SANITIZE=1 -D UPX_CONFIG_DISABLE_WERROR=1' \
++    UPX_CMAKE_CONFIG_FLAGS='-D UPX_CONFIG_DISABLE_GITREV=1 -D UPX_CONFIG_DISABLE_SANITIZE=1 -D UPX_CONFIG_DISABLE_WERROR=1 -D UPX_CONFIG_DISABLE_SELF_PACK_TEST=1' \
+     UPX_LZMA_VERSION=0x465 \
+     UPX_LZMADIR="$srcdir"
+ }

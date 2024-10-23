@@ -1,0 +1,18 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 988c1f3..554c39c 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,4 +25,13 @@ package() {
+   make DESTDIR="$pkgdir/" install
+ }
+ 
++prepare() {
++  cd $_pkgname-$pkgver
++  patch -Np1 -i "../fix_not_literal_string.patch"
++  autoreconf -fvi
++}
++
++source+=("fix_not_literal_string.patch")
++sha256sums+=('d39e618fc2b0469d22340361392029c641e27634e8b66c60a660cd5f86ea43ab')
++
+ # vim:set ts=2 sw=2 et:

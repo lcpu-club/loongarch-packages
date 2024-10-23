@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,6 +26,7 @@ makedepends=(
+   python-wheel
+ )
+ checkdepends=(
++  rust
+   python-pytest
+   python-pytest-mock
+ )
