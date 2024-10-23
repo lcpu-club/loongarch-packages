@@ -1,67 +1,17 @@
---- a/PKGBUILD
-+++ b/PKGBUILD
-@@ -25,27 +25,50 @@
- source=(
-   "$pkgname::git+https://github.com/attilammagyar/js80p#tag=v$pkgver"
-   'do-not-run-cppcheck.patch'
-+  '1_fst.patch'
-+  '2_loong64-mkfile.patch'
-+  '3_build_and_deploy.patch'
-+  '4_gen.patch'
-+  '5_release.patch'
- )
- sha512sums=('3fb858d212040bea951ff4cf7cf32037a6b3b3cf745421f8dd7987b92e990b3a89a01aad97b622f656e8ed0dd9abb40840099e9cf0b0f81e6e776fed4d95d3be'
--            'e3f6e69f8fd81bd28883a6e74f19e72a887f1c53eb695cd3e6eecd8d15ce457417dbdc635bf8273b4f51490284033112723db288689d80cf39f59b54cfc439f2')
-+      'e3f6e69f8fd81bd28883a6e74f19e72a887f1c53eb695cd3e6eecd8d15ce457417dbdc635bf8273b4f51490284033112723db288689d80cf39f59b54cfc439f2'
-+      'fe0f12d485fcb5d1bed54a5c08ba96bb7b9bce2486bc8f63a133e3dede98147d8249e998cc40118d829cdbad7b0d88bd259373c3962212bb74a0d7af62bfc120'
-+      'c5d37f5e7e58546f0f9e48123e1e32bd65ba343f249161d8f688fc0288e286eee2230b7decffea9e0d9976d787ac89833382f8e49d15e6049892e499ac8c3bf6'
-+      'b311cc16ac9c74364641f081013cea883e6726dd9bfc0535c4023e5c21bd6c91e9b7109f4830ecc787334bc1b6f04da5a1e484d40d6a9563f25a77bef446a9b2'
-+      '7b790289b94603c051393a8dfbd7f6c8a3016ec5038a231a121ab59a146c17a371f997814e3f286c32db45b9b49aa2d4b4a55dbd7baf8e78c46cc7758f3d5d87'
-+      'c26845bdfbaf31791339c0f290f5d5d75e81d2bbf1c6525f82b0469ac73920f67d30bd3eae5f07dd9c054bca29da8e2de683a1ff530f7c8398ce9decd12d6baf')
- b2sums=('2478479737e81c2acaee3c446186813186b9ab45d404e5fe810f1ebe74eb2d8ad8d4035e09c0b4a2414275189bcd0d3fd7435500f656e27a50faf18ccb78a220'
--        '9042a7bdde673d0a6884b047f9d37362cb4b4a1b00e13129c73ceb233a4235a677c990f872f58d9c3bf79b74786f6ccc96426a742baaf9b9cea27d475a9b931f')
-+    '9042a7bdde673d0a6884b047f9d37362cb4b4a1b00e13129c73ceb233a4235a677c990f872f58d9c3bf79b74786f6ccc96426a742baaf9b9cea27d475a9b931f'
-+    '3825e5632c9c56ddff615dc2d7b96d70b1054140671df2b2a24b9fbcbda727178f7e58fb2c12f3296f65aa82df80a82c01285d7cd565e133a8023f0e47b3c7dc'
-+    '0c84e6663bbbf551c0e34cf7b6e71e67206a5b9fc76ed048f7a65b26d8e4f0846c12e1e3ab119bae229f1da9a6f7075905aacde529da118a1aa574c27afd6785'
-+    '3e8db93704008f0a674553c602584a07f9e9f4612ff17253d0ed07a90dfa96ca4f4ef7a9597b61513689abb029d6374541f749337a19ed8bb54e6e875a06f0a1'
-+    'c3a9a2b9438ff10428518b00f9105d5290ca66facecd9290b57926f9d2ee45e5a212133cb543b3bb677beb7a9a994325070fcbefd3f49e7e1d5c661371458f3b'
-+    '22739db292770add8ba2bb3d7f3f7cd0fce965e49058e631609b30139890d599aab534da627c9f7734aea0ff7cd0ad4e787953620f56ce586f485e70508f4237')
- 
- prepare() {
-   cd "$pkgname"
+--- PKGBUILD
++++ PKGBUILD
+@@ -36,6 +36,14 @@
  
    # remove cppcheck from makedepends
    patch -p1 -i "$srcdir/do-not-run-cppcheck.patch"
 +
-+  # add loong patch
-+  patch -p1 -i "$srcdir/1_fst.patch"
-+  patch -p1 -i "$srcdir/2_loong64-mkfile.patch"
-+  patch -p1 -i "$srcdir/3_build_and_deploy.patch"
-+  patch -p1 -i "$srcdir/4_gen.patch"
-+  patch -p1 -i "$srcdir/5_release.patch"
++  # add loong64 support
++  git cherry-pick -n afa480b48ce398250f42df5fe918254ddee1faa4
++  git cherry-pick -n 31d4bd535aa18efa44b05df0d08f9cb832c6402b
++  git cherry-pick -n 5090c2b53c5c4097cd52b158a2e3851a77b3c6ad
++  git cherry-pick -n 2bcb821bd028a30ad5c49c5f00f7697e159bedf6
++  git cherry-pick -n 7a9f8c0ce0076e51d589c09eeae70dc7e3e7cf50
++  git cherry-pick -n bef8ba950388f585442fb96dc57aae52597144b0
  }
  
  build() {
-   cd "$pkgname"
- 
-   # supports AVX, but that's not in x86_64_v1
-+  # change sse2 to lsx
-   make \
-     SYS_LIB_PATH=/usr/lib \
-     TARGET_PLATFORM="$CARCH-gpp" \
--    INSTRUCTION_SET=sse2 \
-+    INSTRUCTION_SET=lsx \
-     VERSION_STR=$(git describe --tags) \
-     VERSION_INT=$(git describe --tags | sed "s/[^0-9]//g") \
-     vst3
-@@ -55,8 +78,9 @@
-   cd "$pkgname"
- 
-   # vst3
-+  # change sse2 to lsx
-   install -vDm644 \
--    "dist/js80p-dev-linux-$CARCH-sse2-vst3_single_file/js80p.vst3" \
-+    "dist/js80p-dev-linux-$CARCH-lsx-vst3_single_file/js80p.vst3" \
-     "$pkgdir/usr/lib/vst3/$pkgname.vst3/Contents/$CARCH-linux/$pkgname.so"
- 
-   # presets
