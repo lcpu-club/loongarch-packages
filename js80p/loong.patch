@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -36,16 +36,25 @@
+@@ -36,6 +36,14 @@
  
    # remove cppcheck from makedepends
    patch -p1 -i "$srcdir/do-not-run-cppcheck.patch"
@@ -15,10 +15,7 @@
  }
  
  build() {
-   cd "$pkgname"
- 
-   # supports AVX, but that's not in x86_64_v1
-+  # change sse2 to lsx to fit loongarch
+@@ -45,7 +53,7 @@
    make \
      SYS_LIB_PATH=/usr/lib \
      TARGET_PLATFORM="$CARCH-gpp" \
@@ -27,11 +24,9 @@
      VERSION_STR=$(git describe --tags) \
      VERSION_INT=$(git describe --tags | sed "s/[^0-9]//g") \
      vst3
-@@ -55,8 +64,9 @@
-   cd "$pkgname"
+@@ -56,7 +64,7 @@
  
    # vst3
-+  # change sse2 to lsx to fit loongarch
    install -vDm644 \
 -    "dist/js80p-dev-linux-$CARCH-sse2-vst3_single_file/js80p.vst3" \
 +    "dist/js80p-dev-linux-$CARCH-lsx-vst3_single_file/js80p.vst3" \
