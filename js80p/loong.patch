@@ -1,17 +1,40 @@
---- PKGBUILD
-+++ PKGBUILD
-@@ -36,6 +36,14 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,16 +36,25 @@
  
    # remove cppcheck from makedepends
    patch -p1 -i "$srcdir/do-not-run-cppcheck.patch"
 +
 +  # add loong64 support
-+  git cherry-pick -n afa480b48ce398250f42df5fe918254ddee1faa4
-+  git cherry-pick -n 31d4bd535aa18efa44b05df0d08f9cb832c6402b
-+  git cherry-pick -n 5090c2b53c5c4097cd52b158a2e3851a77b3c6ad
-+  git cherry-pick -n 2bcb821bd028a30ad5c49c5f00f7697e159bedf6
-+  git cherry-pick -n 7a9f8c0ce0076e51d589c09eeae70dc7e3e7cf50
-+  git cherry-pick -n bef8ba950388f585442fb96dc57aae52597144b0
++  git cherry-pick -m 1 -n afa480b48ce398250f42df5fe918254ddee1faa4
++  git cherry-pick -m 1 -n 31d4bd535aa18efa44b05df0d08f9cb832c6402b
++  git cherry-pick -m 1 -n 5090c2b53c5c4097cd52b158a2e3851a77b3c6ad
++  git cherry-pick -m 1 -n 2bcb821bd028a30ad5c49c5f00f7697e159bedf6
++  git cherry-pick -m 1 -n 7a9f8c0ce0076e51d589c09eeae70dc7e3e7cf50
++  git cherry-pick -m 1 -n bef8ba950388f585442fb96dc57aae52597144b0
  }
  
  build() {
+   cd "$pkgname"
+ 
+   # supports AVX, but that's not in x86_64_v1
++  # change sse2 to lsx to fit loongarch
+   make \
+     SYS_LIB_PATH=/usr/lib \
+     TARGET_PLATFORM="$CARCH-gpp" \
+-    INSTRUCTION_SET=sse2 \
++    INSTRUCTION_SET=lsx \
+     VERSION_STR=$(git describe --tags) \
+     VERSION_INT=$(git describe --tags | sed "s/[^0-9]//g") \
+     vst3
+@@ -55,8 +64,9 @@
+   cd "$pkgname"
+ 
+   # vst3
++  # change sse2 to lsx to fit loongarch
+   install -vDm644 \
+-    "dist/js80p-dev-linux-$CARCH-sse2-vst3_single_file/js80p.vst3" \
++    "dist/js80p-dev-linux-$CARCH-lsx-vst3_single_file/js80p.vst3" \
+     "$pkgdir/usr/lib/vst3/$pkgname.vst3/Contents/$CARCH-linux/$pkgname.so"
+ 
+   # presets
