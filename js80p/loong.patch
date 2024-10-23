@@ -1,0 +1,37 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 40e4706..f24fefe 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,6 +36,14 @@ prepare() {
+ 
+   # remove cppcheck from makedepends
+   patch -p1 -i "$srcdir/do-not-run-cppcheck.patch"
++
++  # add loong64 support
++  git cherry-pick -m 1 -n afa480b48ce398250f42df5fe918254ddee1faa4
++  git cherry-pick -n 31d4bd535aa18efa44b05df0d08f9cb832c6402b
++  git cherry-pick -n 5090c2b53c5c4097cd52b158a2e3851a77b3c6ad
++  git cherry-pick -n 2bcb821bd028a30ad5c49c5f00f7697e159bedf6
++  git cherry-pick -n 7a9f8c0ce0076e51d589c09eeae70dc7e3e7cf50
++  git cherry-pick -n bef8ba950388f585442fb96dc57aae52597144b0
+ }
+ 
+ build() {
+@@ -45,7 +53,7 @@ build() {
+   make \
+     SYS_LIB_PATH=/usr/lib \
+     TARGET_PLATFORM="$CARCH-gpp" \
+-    INSTRUCTION_SET=sse2 \
++    INSTRUCTION_SET=lsx \
+     VERSION_STR=$(git describe --tags) \
+     VERSION_INT=$(git describe --tags | sed "s/[^0-9]//g") \
+     vst3
+@@ -56,7 +64,7 @@ package() {
+ 
+   # vst3
+   install -vDm644 \
+-    "dist/js80p-dev-linux-$CARCH-sse2-vst3_single_file/js80p.vst3" \
++    "dist/js80p-dev-linux-$CARCH-lsx-vst3_single_file/js80p.vst3" \
+     "$pkgdir/usr/lib/vst3/$pkgname.vst3/Contents/$CARCH-linux/$pkgname.so"
+ 
+   # presets
