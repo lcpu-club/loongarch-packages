@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4649b53..87ef03c 100644
+index f6c80df..31b56ea 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -80,6 +80,22 @@ prepare() {
+@@ -82,6 +82,22 @@ prepare() {
    git submodule init
    git submodule set-url src/3rdparty "$srcdir"/qtwebengine-chromium
    git -c protocol.file.allow=always submodule update
@@ -25,7 +25,7 @@ index 4649b53..87ef03c 100644
  }
  
  build() {
-@@ -100,3 +116,12 @@ package() {
+@@ -104,3 +120,13 @@ package() {
  
    install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
  }
@@ -37,4 +37,5 @@ index 4649b53..87ef03c 100644
 +             "77e8dcf1519b30f801e5783b9604b2147749034c3f10a65e40aa9038cd2d3bcd"
 +             "649443ce93aacaa10371b9632a8eedc8e9f8c5f15dbd2ecc3079d06d7cd89478")
 +# Temporarily switch to mold to workaround with binutils's bfd's bug
-+makedepends+=(mold)
++# Add ffmpeg to fix missing header
++makedepends+=(mold ffmpeg)
