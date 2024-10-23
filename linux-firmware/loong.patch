@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 9531646..16d1b5c 100644
+index 805d625..268a642 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -2,7 +2,7 @@
@@ -10,8 +10,8 @@ index 9531646..16d1b5c 100644
 +pkgname=(linux-firmware-whence linux-firmware
           linux-firmware-{nfp,mellanox,marvell,qcom,liquidio,qlogic,bnx2x}
  )
- _tag=20240909
-@@ -63,6 +63,11 @@ build() {
+ _tag=20241017
+@@ -64,6 +64,14 @@ build() {
    echo kernel/x86/microcode/AuthenticAMD.bin |
      bsdtar --uid 0 --gid 0 -cnf - -T - |
      bsdtar --null -cf - --format=newc @- > amd-ucode.img
@@ -19,16 +19,18 @@ index 9531646..16d1b5c 100644
 +  # Add gsgpu firmware
 +  echo 'File: loongson/lg100_cp.bin' >> "${pkgbase}/WHENCE"
 +  install -Dm644 "${srcdir}/lg100_cp.bin" -t "${pkgbase}/loongson"
-+
++  # It use git file to find firmwares
++  # https://gitlab.com/kernel-firmware/linux-firmware/-/blob/e1d95775eb3db64ab3740701bf9682e5856aab2e/check_whence.py#L157
++  cd "${pkgbase}"
++  git add "loongson/lg100_cp.bin"
  }
  
  _pick() {
-@@ -178,4 +183,8 @@ package_linux-firmware-bnx2x() {
+@@ -178,3 +186,7 @@ package_linux-firmware-bnx2x() {
+ 
    mv -v linux-firmware-bnx2x/* "${pkgdir}"
  }
- 
++
 +source+=("lg100_cp.bin::https://github.com/cl91/linux-gsgpu-archpkg/raw/master/gsgpu-firmware/lg100_cp.bin")
 +b2sums+=('68301cdbdbb7b03c8a8c3c051ad415f2e6313306ea725664628a6606c049b1f69200464ef16fc74e0462c9b9ac926342646e7518f90a6424ad82f240925d903a')
 +noextract=('lg100_cp.bin')
-+
- # vim:set sw=2 et:
