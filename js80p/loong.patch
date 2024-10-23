@@ -1,6 +1,8 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 40e4706..1cf0774 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -36,6 +36,14 @@
+@@ -36,6 +36,14 @@ prepare() {
  
    # remove cppcheck from makedepends
    patch -p1 -i "$srcdir/do-not-run-cppcheck.patch"
@@ -15,7 +17,7 @@
  }
  
  build() {
-@@ -45,7 +53,7 @@
+@@ -45,7 +53,7 @@ build() {
    make \
      SYS_LIB_PATH=/usr/lib \
      TARGET_PLATFORM="$CARCH-gpp" \
@@ -24,7 +26,7 @@
      VERSION_STR=$(git describe --tags) \
      VERSION_INT=$(git describe --tags | sed "s/[^0-9]//g") \
      vst3
-@@ -56,7 +64,7 @@
+@@ -56,7 +64,7 @@ package() {
  
    # vst3
    install -vDm644 \
