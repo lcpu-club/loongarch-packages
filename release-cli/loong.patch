@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a6325e5..e267d7d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,9 @@ b2sums=('f0a611b73f914ae2c8108b374fbd20c53b3e237a9a8dc8e733183b65449148384093a8f
+ 
+ prepare() {
+   mkdir -vp $pkgname-v$pkgver/build
++  cd $pkgname-v$pkgver
++  go mod edit -replace=golang.org/x/sys=golang.org/x/sys@v0.26.0
++  go mod tidy
+ }
+ 
+ build() {
