@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -179,6 +179,6 @@ package_dragonfly-reverb-vst3() {
+ 
+   cd $pkgbase-$pkgver
+   for name in "${_names[@]}"; do
+-    install -vDm 755 bin/$name.vst3/Contents/$CARCH-linux/$name.so -t "$pkgdir/usr/lib/vst3/"
++    install -vDm 755 bin/$name.vst3/Contents/`uname -m`-linux/$name.so -t "$pkgdir/usr/lib/vst3/"
+   done
+ }

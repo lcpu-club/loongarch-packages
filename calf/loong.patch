@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,7 +38,6 @@ prepare(){
+ build() {
+   local configure_options=(
+     --enable-experimental
+-    --enable-sse
+     --prefix=/usr
+     --with-lv2
+   )
