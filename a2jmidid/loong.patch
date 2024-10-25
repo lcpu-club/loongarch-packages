@@ -1,0 +1,23 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index eb0e834..ec7a7e7 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,6 +26,10 @@ source=($url/archive/$pkgver/$pkgname-$pkgver.tar.gz)
+ sha512sums=('5bd13b6904ed68c5bfe40ca516fd49b7eb4d4a946b9908ee04687265848734c8e1a81579f0f1a5bd0752595be8858dc748da10487b7f366394c09a5ffc7d5e5c')
+ b2sums=('ad079e76a54f56ee8f82150c306f91aead52f86632978ea6f3376a0bf163744379210b34701b39da4ee14fc4d8a1c6be82d1052abeb8ccf79410bc242d174d62')
+ 
++prepare() {
++  cd a2jmidid-9
++  patch -p1 < ../enable-loong64-build.patch
++}
+ build() {
+   arch-meson build $pkgname-$pkgver
+   ninja -C build
+@@ -41,3 +45,7 @@ package() {
+   DESTDIR="$pkgdir" meson install -C build
+   install -vDm 644 $pkgname-$pkgver/{AUTHORS,CHANGELOG,INSTALLATION,README}.rst -t "$pkgdir/usr/share/doc/$pkgname/"
+ }
++
++source+=(enable-loong64-build.patch::https://patch-diff.githubusercontent.com/raw/jackaudio/a2jmidid/pull/28.diff)
++sha512sums+=('d292bb5709821b5af7d710d0588acaff8f2f667902cbde4945b53599c9c615d989783800949fe7890e80f04256c3b02e03849004d9236e8f60e0ab36cf592916')
++b2sums+=('cf87392550e5e262897589cc85a7f4d7047b1ec6450c5abe9f699d11951e9800a043fe37b1f34f160894d1a37bd05fc5d45d3164b96adcdbbbe504811bb5678f')
