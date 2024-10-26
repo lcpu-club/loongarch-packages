@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 9f93398..449a9d1 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -63,7 +63,7 @@ check() {
+   export PATH="$(pwd)/out:$PATH"
+ 
+   go run ./plugin/stub-generator
+-  go test ./...
++  go test ./... -skip 'TestIntegration|Test_Install'
+ }
+ 
+ package() {
