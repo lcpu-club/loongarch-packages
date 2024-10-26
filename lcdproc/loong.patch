@@ -1,0 +1,18 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7fe2a83..9f01874 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,6 +32,7 @@ sha512sums=('48e11a587570376b9524591f4c23deace9ac1609b83ba9e17f2a4e950d5598f8f88
+ prepare() {
+     cd "$pkgname-$pkgver"
+     patch -p1 -i "$srcdir/lcdproc-0.5.9-fix-fno-common-build.patch"
++    autoreconf -fiv
+ }
+ 
+ build() {
+@@ -54,3 +55,5 @@ package() {
+     install -Dm644 "$srcdir/lcdd.service" "$pkgdir/usr/lib/systemd/system/lcdd.service"
+     install -Dm644 "$srcdir/lcdproc.service" "$pkgdir/usr/lib/systemd/system/lcdproc.service"
+ }
++
++options=(!lto)
