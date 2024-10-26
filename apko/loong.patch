@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b068004..3542e9a 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -41,7 +41,7 @@ build() {
+ check() {
+   cd "${pkgname}-${pkgver}"
+   # skip TestPublish: https://github.com/chainguard-dev/apko/issues/881
+-  go test ./... -skip 'TestPublish|TestBuild'
++  go test ./... -skip 'TestPublish|TestBuild|TestTarFS|TestAuth_good' # No loong64 depnedency
+ }
+ 
+ package() {
