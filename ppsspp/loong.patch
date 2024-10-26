@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 97aa2f5..1ac760f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -94,8 +94,6 @@ prepare() {
+ }
+ 
+ build() {
+-  export CC=clang
+-  export CXX=clang++
+   cmake -S ppsspp -B build-sdl -G Ninja \
+     -DCMAKE_BUILD_TYPE=None \
+     -DCMAKE_SKIP_RPATH=ON \
