@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4dd649f..31f2e09 100644
+index d9cbbc5..20c4841 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -76,6 +76,10 @@ prepare() {
@@ -62,10 +62,10 @@ index 4dd649f..31f2e09 100644
 +source+=('loong-addition.config'
 +         '0001-LOONGARCH64-drm-xe-fix-build-on-non-4K-kernels.patch'
 +         '0002-LOONGARCH64-drm-radeon-Call-mmiowb-at-the-end-of-rad.patch')
-+sha256sums+=('d2e3b532fc120e61260bf7d814a858423f8b849a80ee20962f82e1d529254782'
++sha256sums+=('d871f7bb9f204d144bb2c8996d79f3f951183763944539c1a66d3bb8058b3613'
 +             '83fa0ac8b4874311b8c590b1fd8d9036679f8bbd51c10da5509742167456b9ed'
 +             'b25bbb9d0afe724aa49cf96ffbd5e88e8b39414309d9b690b64c664d18b54834')
-+b2sums+=('2c970f64f11d8b23ba88c38d5991f886f3578a20995283be97fb9e6ea242f3579cbcee4f7c2e2de133be6ae98b99d6e7055396652ce884c228738a7bea7c5905'
++b2sums+=('383d8563c9a3117f560840f3880634b9e79892398bba5cf97372751eddbe7e129069b26ca3863fc8761f60e9c11d087ebfc799e883fcd6a03bb06cd0a68ac8f8'
 +         '264d58172c877b1cda3f2016c4f3e4a6fcf37b17e4a2de2713bc99570c597f9ef0f947df6cdff5a93cc96849fe10582fb2decf54baabcc803fde96e889c107d7'
 +         '3fca438a40be08dede4badcf973629070cb6c50567d215d6d42638dfcf3452d01aae9c253b783459d9cdf8ee1c08a394c47db2e2e2b1394898c0b03f3df8407f')
 +
