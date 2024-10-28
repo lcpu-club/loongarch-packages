@@ -1,0 +1,62 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4f4e75a..8b1386f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,11 +20,10 @@ arch=('x86_64')
+ license=('GPL-2.0-or-later')
+ url='https://valgrind.org/'
+ depends=('glibc' 'perl' 'debuginfod')
+-makedepends=('gdb' 'lib32-glibc' 'lib32-gcc-libs' 'docbook-xml'
++makedepends=('gdb' 'docbook-xml'
+              'docbook-xsl' 'docbook-sgml')
+ checkdepends=('procps-ng')
+ optdepends=(
+-  'lib32-glibc: 32-bit ABI support'
+   'python: cg_* scripts'
+ )
+ provides=('valgrind-multilib')
+@@ -45,7 +44,7 @@ b2sums=('9312761b0531006725f13270984b26c48f71ebe66e355b04410d7c01773c9b78ec21db3
+ options=(!lto) # https://bugs.kde.org/show_bug.cgi?id=338252
+ 
+ prepare() {
+-  cd valgrind-${pkgver}
++  cd valgrind-loongarch64-${pkgver%.*}-GIT
+   patch -Np1 < ../valgrind-3.7.0-respect-flags.patch
+   sed -i 's|sgml/docbook/xsl-stylesheets|xml/docbook/xsl-stylesheets-1.79.2-nons|' docs/Makefile.am
+ 
+@@ -53,7 +52,7 @@ prepare() {
+ }
+ 
+ build() {
+-  cd valgrind-${pkgver}
++  cd valgrind-loongarch64-${pkgver%.*}-GIT
+   ./configure \
+     --prefix=/usr \
+     --sysconfdir=/etc \
+@@ -69,7 +68,7 @@ check() {
+   # only run if glibc-debug is supplied manually
+   if ! pacman -Q glibc-debug; then echo -e "\033[1;31mcheck() not run, supply glibc-debug if unintended!\033[0m"; return 0; fi
+ 
+-  cd valgrind-${pkgver}
++  cd valgrind-loongarch64-${pkgver%.*}-GIT
+ 
+   # Make sure a basic binary runs. There should be no errors.
+   ./vg-in-place --error-exitcode=1 /bin/true
+@@ -107,7 +106,7 @@ check() {
+ }
+ 
+ package() {
+-  cd valgrind-${pkgver}
++  cd valgrind-loongarch64-${pkgver%.*}-GIT
+   make DESTDIR="${pkgdir}" install
+ 
+   install -Dm644 docs/*.1 -t "$pkgdir/usr/share/man/man1"
+@@ -117,4 +116,8 @@ package() {
+   fi
+ }
+ 
++source+=("valgrind-loongarch64-${pkgver%.*}-GIT.tar.gz::https://github.com/FreeFlyingSheep/valgrind-loongarch64/archive/refs/tags/v${pkgver%.*}-GIT.tar.gz")
++sha512sums+=('SKIP')
++b2sums+=('SKIP')
++
+ # vim: ts=2 sw=2 et:
