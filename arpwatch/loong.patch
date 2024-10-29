@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 2d8e2c8..7d8fc21 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,6 +22,8 @@ prepare() {
+   cd $pkgname-$pkgver
+   sed -i '/@HAVE_FREEBSD_TRUE@/d' Makefile.in
+   sed -i '1i#include <time.h>' report.c
++  export CFLAGS="${CFLAGS} -Wno-implicit-function-declaration"
++  autoreconf -fiv
+ }
+ 
+ build() {
