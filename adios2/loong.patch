@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f8089cf..3d3e518 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,6 +17,7 @@ sha256sums=('ce776f3a451994f4979c6bd6d946917a749290a37b7433c0254759b02695ad85')
+ build() {
+   cmake -B build -S ${pkgname^^}-${pkgver} \
+     -DCMAKE_INSTALL_PREFIX=/usr \
++    -DDILL_NATIVE_ONLY=OFF \
+     -DADIOS2_USE_EXTERNAL_DEPENDENCIES=ON \
+     -DADIOS2_HAVE_HDF5_VOL=OFF \
+     -DADIOS2_BUILD_EXAMPLES=OFF #\
