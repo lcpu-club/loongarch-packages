@@ -1,12 +1,13 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index f6c80df..31b56ea 100644
+index 9f8ad50..e553f01 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -82,6 +82,22 @@ prepare() {
-   git submodule init
-   git submodule set-url src/3rdparty "$srcdir"/qtwebengine-chromium
-   git -c protocol.file.allow=always submodule update
+@@ -86,6 +86,23 @@ prepare() {
+ 
+   cd src/3rdparty
+   git cherry-pick -n 3b9f0ed808a23cf5849ea3b82a61ef7ab566ad68 # Fix mp3 playback
 +
++  cd "${srcdir}/${_pkgfn}"
 +  # Fix libyuv's lsx and lsax
 +  patch -d src/3rdparty -p1 -i "$srcdir/0001-fix-libyuv-unified-source-and-LoongArch-SIMD-build.patch"
 +  # Fix build for loong64 (Chen Jiajie's patch)
@@ -25,7 +26,7 @@ index f6c80df..31b56ea 100644
  }
  
  build() {
-@@ -104,3 +120,13 @@ package() {
+@@ -108,3 +125,12 @@ package() {
  
    install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
  }
@@ -37,5 +38,4 @@ index f6c80df..31b56ea 100644
 +             "77e8dcf1519b30f801e5783b9604b2147749034c3f10a65e40aa9038cd2d3bcd"
 +             "649443ce93aacaa10371b9632a8eedc8e9f8c5f15dbd2ecc3079d06d7cd89478")
 +# Temporarily switch to mold to workaround with binutils's bfd's bug
-+# Add ffmpeg to fix missing header
-+makedepends+=(mold ffmpeg)
++makedepends+=(mold)
