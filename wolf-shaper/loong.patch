@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -120,6 +120,6 @@ package_wolf-shaper-vst3() {
+   pkgdesc+=" - VST3 plugin"
+   groups=(pro-audio vst3-plugins)
+ 
+-  install -vDm 755 $pkgbase/bin/$pkgbase.vst3/Contents/$CARCH-linux/*.so -t "$pkgdir/usr/lib/vst3/$pkgbase.vst3/Contents/$CARCH-linux/"
++  install -vDm 755 $pkgbase/bin/$pkgbase.vst3/Contents/$(uname -m)-linux/*.so -t "$pkgdir/usr/lib/vst3/$pkgbase.vst3/Contents/$(uname -m)-linux/"
+ }
+ 
