@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d540ab7..b39d36d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,6 +36,7 @@ build() {
+     -D CMAKE_INSTALL_PREFIX=/usr
+     -S openAV-$_name-release-$pkgver
+     -W no-dev
++    -D BUILD_SSE=OFF
+   )
+ 
+   cmake "${cmake_options[@]}"
