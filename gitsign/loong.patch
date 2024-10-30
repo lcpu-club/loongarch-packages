@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4cceb3c..03ed8df 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,7 +18,7 @@ build() {
+   export CGO_CFLAGS="${CFLAGS}"
+   export CGO_CPPFLAGS="${CPPFLAGS}"
+   export CGO_CXXFLAGS="${CXXFLAGS}"
+-  export GOFLAGS="-buildmode=pie -trimpath -mod=readonly -modcacherw"
++  export GOFLAGS="-trimpath -mod=readonly -modcacherw"
+   make build-all
+ }
+ 
