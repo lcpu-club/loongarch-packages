@@ -1,0 +1,16 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,9 +15,13 @@ sha256sums=("cff417d0ccbece766c66a183413e167868fdbd98b8129516ff9021a4b11a5647")
+ 
+ prepare() {
+   cd "$pkgname-$pkgver"
++  patch -Np1 -i ../update-nix.patch
+   cargo fetch --locked
+ }
+ 
++source+=("update-nix.patch::https://github.com/Soft/xcolor/pull/46.patch")
++sha256sums+=("afe25f4870037fd3e7bb3666e2c4cc6a5a26e3faab52b64a30b9b5d80c417de1")
++
+ build() {
+   cd "$pkgname-$pkgver"
+   cargo build --release --frozen
