@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 2bc2149..4d54d46 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -49,6 +49,7 @@ prepare() {
+   # symlink tests data to top-level location so that tests can get to them (we build out of tree)
+   ln -sv $pkgbase-$pkgver/tests .
+   patch --directory="$pkgbase-$pkgver" --forward --strip=1 --input="${srcdir}/sfizz-1_2_3-absl_20240116_1-fix-build.patch"
++  patch --directory="$pkgbase-$pkgver" --forward --strip=1 --input="${srcdir}/add-loong64-support.patch"
+ }
+ 
+ build() {
+@@ -130,3 +131,7 @@ package_sfizz-standalone() {
+   install -vDm 644 $pkgbase-$pkgver/LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
+   install -vDm 644 $pkgbase-$pkgver/{AUTHORS,CONTRIBUTING,GOVERNANCE,README}.md -t "$pkgdir/usr/share/doc/$pkgname/"
+ }
++
++source+=("add-loong64-support.patch::https://github.com/NakanoMiku39/sfizz/commit/261b5f3e1a4c3eef145521125088b2bb1567f544.patch")
++sha512sums+=('6e262ec80f3eea25e09d52ea10ed6ab148c97a3606f9281d2cb1c8a32f2bf8ca9e694382cb7aba8ca6c59f4a6da7f690b4a981b033c6b1c821518313693c85f7')
++b2sums+=('b4815f9a32da75423c0ababe99128bd8fe4f7bb6fed7a7d595ca4deed806c17281880cab0b77d5acd071fae5f820e854a6a6ca3a70ab9b4d40fbff1b8ff2f9c2')
