@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 34ef602..425e908 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -66,6 +66,9 @@ prepare() {
+   # fix FTBFS due to redefined -D_FORTIFY_SOURCE
+   # arch uses v3, upstream still uses v2
+   patch -p1 -i "$srcdir/ftbfs-redefined-fortify_source.patch"
++
++  go mod edit -replace=github.com/cilium/ebpf=github.com/cilium/ebpf@v0.10.1-0.20230613102335-1140a754d780
++  go mod tidy
+ }
+ 
+ build() {
