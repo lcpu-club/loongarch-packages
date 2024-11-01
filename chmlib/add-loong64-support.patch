@@ -1,0 +1,14 @@
+--- chmlib-0.40-orig/src/chm_lib.c
++++ chmlib-0.40/src/chm_lib.c
+@@ -162,9 +162,10 @@
+ typedef long long               Int64;
+ typedef unsigned long long      UInt64;
+ 
+ /* x86-64 */
++/* loong64 */
+ /* Note that these may be appropriate for other 64-bit machines. */
+-#elif __x86_64__ || __ia64__
++#elif __x86_64__ || __ia64__ || __loongarch_lp64
+ typedef unsigned char           UChar;
+ typedef short                   Int16;
+ typedef unsigned short          UInt16;

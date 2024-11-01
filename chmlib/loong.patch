@@ -1,0 +1,18 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6a57ec6..9adaa83 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -27,3 +27,13 @@ package() {
+ 
+   make DESTDIR="${pkgdir}" install
+ }
++
++prepare() {
++  cd "${srcdir}"/${pkgname}-${pkgver}
++  patch -p1 -i "${srcdir}/add-loong64-support.patch"
++  cp /usr/share/automake-1.1?/config.sub .
++  cp /usr/share/automake-1.1?/config.guess .
++}
++
++source+=("add-loong64-support.patch")
++sha256sums+=('031e50d41e1e6d80a5c7735bc00bc5c83958756d585931f5020a50aa5889ff85')
