@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 987478d..d290d89 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -59,6 +59,7 @@ b2sums=('1b258724dd986eea63921e36b43235eb05702729ee31e40ef724f7e7644755adeb5a3ab
+ prepare() {
+   # fix file permissions in html manual
+   find html/ -type f -exec chmod -c 644 {} \;
++  export CFLAGS="${CFLAGS} -Wno-incompatible-pointer-types"
+ }
+ 
+ build() {
