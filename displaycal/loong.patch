@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d707ff0..60bd19d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -37,3 +37,11 @@ package() {
+   mv "${pkgdir}"/{$site_packages/build/.config,etc/xdg}/autostart/z-displaycal-apply-profiles.desktop
+   rmdir "${pkgdir}"/$site_packages/build/{.config{/autostart,},}
+ }
++
++prepare() {
++  cd ${_pkgname}-${pkgver}
++  patch -p1 -i "${srcdir}/fix-build-with-gcc14.patch"
++}
++
++source+=("fix-build-with-gcc14.patch::https://github.com/eoyilmaz/displaycal-py3/commit/eda424388be5dc18f76b02f8d015d6b2ddafa174.patch")
++sha256sums+=('02c20be9e20d7c458860cc6579dc12ca8b976a8670d0e56003317e11ec73a96c')
