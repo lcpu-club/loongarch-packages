@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5f763de..89911e5 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -42,6 +42,7 @@ build() {
+       -Bbuild \
+       -GNinja \
+       -DBUILD_TESTS=OFF \
++      -DENABLE_WERROR=OFF \
+       -DCMAKE_INSTALL_PREFIX=/usr
+   ninja -C build
+ 
+@@ -63,7 +64,7 @@ build() {
+     -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON \
+     -DLLVM_INCLUDE_EXAMPLES=OFF \
+     -DLLVM_INCLUDE_TESTS=OFF \
+-    -DLLVM_TARGETS_TO_BUILD="X86;WebAssembly" \
++    -DLLVM_TARGETS_TO_BUILD="host;WebAssembly" \
+     -DLLVM_ENABLE_PROJECTS="lld;clang" \
+     -DCLANG_INCLUDE_TESTS=OFF
+   ninja -C build
