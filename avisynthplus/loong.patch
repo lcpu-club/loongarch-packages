@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c8400fd..4f925d4 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,3 +38,10 @@ package() {
+             "${pkgdir}/usr/share/icons/hicolor/${_res}x${_res}/mimetypes/avisynthplus-script.png"
+     done < <(find "AviSynthPlus-${pkgver}/distrib/Icons/Rastered" -type f -name 'AvsPlusIcon*.png' -print0)
+ }
++
++prepare() {
++    patch -p1 -d "AviSynthPlus-${pkgver}" -i "${srcdir}/add-loong64-support.patch"
++}
++
++source+=("add-loong64-support.patch::https://github.com/AviSynth/AviSynthPlus/commit/e3fd5339412e8934d97609a9adac3db1f0d84bba.patch")
++sha256sums+=('c68db263cad3b04318ee984f8a2b93daabb2b262bd1b93f7adad643cfb97103d')
