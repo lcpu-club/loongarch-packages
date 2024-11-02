@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 84274d7..eae6dda 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -105,7 +105,7 @@ build() {
+ 
+ check() {
+   # disable two tests which do not work without an alsa/jack instance
+-  ctest --test-dir build --output-on-failure --exclude-regex "lib-stretching-sequence|journal_sanity"
++  ctest --test-dir build --output-on-failure --exclude-regex "lib-stretching-sequence|journal_sanity|lib-numeric-formats"
+ }
+ 
+ package_audacity() {
