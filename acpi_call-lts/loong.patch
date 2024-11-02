@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,7 +25,7 @@ package() {
+   _kernver=$(</usr/src/linux-lts/version)
+ 
+   install -Dt "$pkgdir/usr/lib/modules/$_kernver/extramodules" -m0644 \
+-    acpi_call/${pkgver}/$_kernver/$CARCH/module/*
++    acpi_call/${pkgver}/$_kernver/$(uname -m)/module/*
+ 
+   # compress each module individually
+   find "$pkgdir" -name '*.ko' -exec zstd --rm -19 {} +
