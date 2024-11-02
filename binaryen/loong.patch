@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5ac77af..fcd7b34 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,3 +34,7 @@ package() {
+     install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+     install -Dm755 "$srcdir"/binaryen.sh "$pkgdir"/etc/profile.d/binaryen.sh
+ }
++
++prepare() {
++    export CXXFLAGS="${CXXFLAGS} -Wno-maybe-uninitialized"
++}
