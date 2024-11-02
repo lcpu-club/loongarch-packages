@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -117,6 +117,7 @@ prepare() {
+   git config submodule."third_party/zlib".url "${srcdir}/${pkgname}"-zlib
+ 
+   git -c protocol.file.allow=always submodule update
++  sed -i 's/#error "Unknown target CPU"/#define OPENSSL_64_BIT/' third_party/boringssl-with-bazel/src/include/openssl/target.h
+ }
+ 
+ build() {
