@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 2651e98..52c4001 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -8,10 +8,9 @@ arch=('x86_64')
+ url="https://gitlab.com/nbdkit/libnbd"
+ license=('LGPL-2.1-or-later')
+ depends=('glibc' 'gnutls' 'libxml2')
+-makedepends=('perl' 'ocamlbuild' 'ocaml-findlib' 'rust' 'fuse3' 'python' 'go')
++makedepends=('perl' 'fuse3' 'python' 'go')
+ optdepends=(
+   'fuse3: For nbdfuse support'
+-  'ocaml: For OCaml bindings'
+   'python>=3: For Python bindings'
+ )
+ source=(
