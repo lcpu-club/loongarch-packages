@@ -1,0 +1,11 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index db7fd3e..e7a8386 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,4 +31,6 @@ package() {
+   install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+ }
+ 
++makedepends+=(cmake clang)
++
+ # vim:set ts=2 sw=2 et:
