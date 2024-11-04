@@ -1,0 +1,59 @@
+diff -urN chromium.orig/third_party/breakpad/breakpad/src/common/linux/breakpad_getcontext.S chromium/third_party/breakpad/breakpad/src/common/linux/breakpad_getcontext.S
+--- chromium.orig/third_party/breakpad/breakpad/src/common/linux/breakpad_getcontext.S	2024-11-04 09:19:42.957560244 +0800
++++ chromium/third_party/breakpad/breakpad/src/common/linux/breakpad_getcontext.S	2024-11-04 09:20:15.294427213 +0800
+@@ -480,7 +480,42 @@
+   ret
+   .cfi_endproc
+   .size breakpad_getcontext, . - breakpad_getcontext
++#elif defined(__loongarch__)
++	.text
+ 
++#define SREG(X) st.d $r##X, $r4, (MCONTEXT_GREGS_OFFSET + 8 * X)
++#define SPC st.d $r1, $r4, (MCONTEXT_PC_OFFSET)
++
++	.global breakpad_getcontext
++	.hidden breakpad_getcontext
++	.align 4
++	.type   breakpad_getcontext, %function
++
++breakpad_getcontext:
++        .cfi_startproc
++        SREG(0)
++        SREG(1)
++        SREG(3)
++        SREG(21)
++        SREG(22)
++        SREG(23)
++        SREG(24)
++        SREG(25)
++        SREG(26)
++        SREG(27)
++        SREG(28)
++        SREG(29)
++        SREG(30)
++        SREG(31)
++
++        SPC
++
++        ori $r4, $r0, 0
++        jirl $r0, $r1, 0
++
++        .cfi_endproc
++
++	.size   breakpad_getcontext, . - breakpad_getcontext
+ #else
+ #error "This file has not been ported for your CPU!"
+ #endif
+diff -urN chromium.orig/third_party/breakpad/breakpad/src/common/linux/ucontext_constants.h chromium/third_party/breakpad/breakpad/src/common/linux/ucontext_constants.h
+--- chromium.orig/third_party/breakpad/breakpad/src/common/linux/ucontext_constants.h	2024-11-04 09:20:00.394334454 +0800
++++ chromium/third_party/breakpad/breakpad/src/common/linux/ucontext_constants.h	2024-11-04 09:21:21.801516997 +0800
+@@ -146,6 +146,9 @@
+ #endif
+ #define FPREGS_OFFSET_MXCSR  24
+ 
++#elif defined(__loongarch__)
++# define MCONTEXT_PC_OFFSET	0xb0
++# define MCONTEXT_GREGS_OFFSET	0xb8
+ #else
+ #error "This header has not been ported for your CPU"
+ #endif

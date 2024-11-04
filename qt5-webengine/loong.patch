@@ -1,0 +1,29 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -51,15 +51,25 @@ prepare() {
+   patch -p1 -d src/3rdparty/chromium -i "$srcdir"/python3.12-six.patch # Fix build with python 3.12 - patch from Debian
+ # Fix build with ffmpeg 7 - Chromium patches
+   patch -p1 -d src/3rdparty/chromium -i "$srcdir"/qt5-webengine-ffmpeg7.patch
++  patch -p2 -i "$srcdir"/0019-qtwebengine-Port-for-loongarch64.patch
++  patch -p1 -d src/3rdparty/chromium -i "$srcdir"/breadpad-getcontext.patch
++  patch -p1 -d src/3rdparty/chromium -i "$srcdir"/regexp-checkstack.patch
+ }
+ 
++source+=(0019-qtwebengine-Port-for-loongarch64.patch
++         breadpad-getcontext.patch
++         regexp-checkstack.patch) # edited from https://github.com/v8/v8/commit/1ec3c714bf75f01e3f4f6519bebb953eab93df39.patch)
++sha256sums+=(b9b332b729a4ad2e6a17dc5f0040124c1ebc32556beff4e7b6cb4f79fc7f6c1e
++             5d2929436d1bc46b1f0dea36df6d0f776ef7265f9b2a0cc77f17a20dcac20e91
++             b9c2fd9acd9e6e81d82b90ccf254883d6000040a48f330d7d044cdb74e172483)
++
+ build() {
+   # this uses malloc_usable_size, which is incompatible with fortification level 3
+   export CFLAGS="${CFLAGS/_FORTIFY_SOURCE=3/_FORTIFY_SOURCE=2}"
+   export CXXFLAGS="${CXXFLAGS/_FORTIFY_SOURCE=3/_FORTIFY_SOURCE=2}"
+ 
+   cd build
+-  qmake ../kde-$_pkgfqn CONFIG+=force_debug_info -- \
++  qmake ../kde-$_pkgfqn CONFIG+=force_debug_info QT_ARCH=loongarch64 -- \
+     -proprietary-codecs \
+     -system-ffmpeg \
+     -webp \
