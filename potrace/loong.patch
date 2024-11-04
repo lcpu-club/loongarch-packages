@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e42bd22..92fcc48 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -28,3 +28,10 @@ package() {
+ 	cd "$_archive"
+ 	make DESTDIR="$pkgdir" install
+ }
++
++prepare() {
++	cd "$_archive"
++	autoreconf -fvi
++}
++
++options=(!lto)
