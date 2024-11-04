@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index cc2aabc..28acba8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -11,7 +11,7 @@ url='https://github.com/tqdm/tqdm'
+ depends=('python')
+ optdepends=('python-requests: telegram')
+ makedepends=('git' 'python-setuptools-scm' 'python-toml' 'python-build' 'python-installer' 'python-wheel')
+-checkdepends=('python-pytest' 'python-pytest-asyncio' 'python-pytest-timeout' 'python-numpy' 'python-pandas' 'python-rich' 'python-dask' 'tk' 'python-keras')
++checkdepends=('python-pytest' 'python-pytest-asyncio' 'python-pytest-timeout' 'python-numpy' 'python-pandas' 'python-rich' 'python-dask' 'tk')
+ source=("git+https://github.com/tqdm/tqdm.git#commit=v${pkgver}")
+ sha512sums=('27d6d13099dd6b3f91fce3d2117838967377f67e8234e7f0253be529ed1077997bb7adb1b5295d8cdf3b83133090cdc32537d15f7b5a7cb1a92399dc0150d424')
+ 
