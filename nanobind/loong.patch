@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c860d3f..8b80e60 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -11,7 +11,7 @@ url="https://${pkgname}.readthedocs.io"
+ license=(BSD-3-Clause)
+ depends=(python)
+ makedepends=(python-build python-installer python-scikit-build-core cmake eigen git)
+-checkdepends=(python-pytest python-scipy python-pytorch python-tensorflow)
++checkdepends=(python-pytest python-scipy)
+ source=(${pkgname}-${pkgver}::git+https://github.com/wjakob/${pkgname}.git#tag=v${pkgver}
+         git+https://github.com/Tessil/robin-map.git)
+ sha512sums=('5e1e627403399a38eb6e7545d32b0796475b77957ccd1f028f18772e93da2639a371c4e2cad2e612b0a320037d85ceb57889f336dd89ce8ea1904a5337ada5f9'
