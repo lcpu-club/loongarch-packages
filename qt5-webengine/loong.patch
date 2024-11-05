@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 39fa9df..6aa9a5d 100644
+index 39fa9df..e732a50 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -51,6 +51,19 @@ prepare() {
@@ -27,11 +27,11 @@ index 39fa9df..6aa9a5d 100644
  
    cd build
 -  qmake ../kde-$_pkgfqn CONFIG+=force_debug_info -- \
-+  qmake ../kde-$_pkgfqn CONFIG+=force_debug_info QT_ARCH=loongarch64 -- \
++  qmake ../kde-$_pkgfqn CONFIG+=force_debug_info QT_ARCH=$(uname -m) -- \
      -proprietary-codecs \
      -system-ffmpeg \
      -webp \
-@@ -88,3 +101,14 @@ package() {
+@@ -88,3 +101,13 @@ package() {
    # Fix cmake dependency versions
    sed -e "s|$pkgver\ |$_basever |" -i "$pkgdir"/usr/lib/cmake/*/*Config.cmake
  }
@@ -39,7 +39,6 @@ index 39fa9df..6aa9a5d 100644
 +# Temporarily switch to mold to workaround with binutils's bfd's bug
 +makedepends+=(mold)
 +options=(!lto)
-+
 +source+=("Port-for-loongarch64.patch::https://raw.githubusercontent.com/deepin-community/qtwebengine-opensource-src/cef7e6598ff8a83d28f443d39529a7afddc3d4ed/debian/patches/Port-for-loongarch64.patch"
 +         "breakpad-getcontext.patch"
 +         "regexp-checkstack.patch")
