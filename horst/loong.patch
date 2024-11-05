@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 9a50d85..63e8352 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -27,3 +27,11 @@ package() {
+   install -Dm644 horst.8 "$pkgdir/usr/share/man/man8/horst.8"
+   install -Dm644 horst.conf.5 "$pkgdir/usr/share/man/man5/horst.conf.5"
+ }
++
++prepare() {
++  cd "${pkgname}-${pkgver}"
++  patch -p1 -i "${srcdir}/fix-format-security.patch"
++}
++
++source+=("fix-format-security.patch")
++sha256sums+=('4d170e5df89c298edb1a6f71b9c1840e50bc0e777e35d52dcb78a08b292761ca')
