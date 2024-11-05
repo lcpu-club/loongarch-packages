@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index ff4c16f..4fe5040 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,7 +36,6 @@ depends=(gcc-libs
+          qt5-xmlpatterns
+          syntax-highlighting5)
+ makedepends=(extra-cmake-modules
+-             julia
+              kdoctools5
+              luajit
+              python
+@@ -46,8 +45,7 @@ optdepends=('maxima: Maxima backend'
+             'r: R backend'
+             'luajit: LUA backend'
+             'python: Python backend'
+-            'sagemath: SageMath backend'
+-            'julia: Julia backend')
++            'sagemath: SageMath backend')
+ groups=(kde-applications
+         kde-education)
+ source=(https://download.kde.org/stable/release-service/$pkgver/src/$pkgname-$pkgver.tar.xz{,.sig}
