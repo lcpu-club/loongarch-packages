@@ -1,0 +1,90 @@
+diff -urN chromium.orig/v8/src/regexp/loongarch64/regexp-macro-assembler-loongarch64.cc chromium/v8/src/regexp/loongarch64/regexp-macro-assembler-loongarch64.cc
+--- chromium.orig/v8/src/regexp/loongarch64/regexp-macro-assembler-loongarch64.cc	2024-11-04 09:40:14.667155030 +0800
++++ chromium/v8/src/regexp/loongarch64/regexp-macro-assembler-loongarch64.cc	2024-11-04 09:53:20.718968293 +0800
+@@ -669,6 +669,8 @@
+ 
+     ExternalReference stack_limit =
+         ExternalReference::address_of_jslimit(masm_->isolate());
++    Operand extra_space_for_variables(num_registers_ * kSystemPointerSize);
++
+     __ li(a0, Operand(stack_limit));
+     __ Ld_d(a0, MemOperand(a0, 0));
+     __ Sub_d(a0, sp, a0);
+@@ -676,14 +678,14 @@
+     __ Branch(&stack_limit_hit, le, a0, Operand(zero_reg));
+     // Check if there is room for the variable number of registers above
+     // the stack limit.
+-    __ Branch(&stack_ok, hs, a0, Operand(num_registers_ * kPointerSize));
++    __ Branch(&stack_ok, hs, a0, extra_space_for_variables);
+     // Exit with OutOfMemory exception. There is not enough space on the stack
+     // for our working registers.
+     __ li(a0, Operand(EXCEPTION));
+     __ jmp(&return_v0);
+ 
+     __ bind(&stack_limit_hit);
+-    CallCheckStackGuardState(a0);
++    CallCheckStackGuardState(a0, extra_space_for_variables);
+     // If returned value is non-zero, we exit with the returned value as result.
+     __ Branch(&return_v0, ne, a0, Operand(zero_reg));
+ 
+@@ -1068,7 +1070,8 @@
+ 
+ // Private methods:
+ 
+-void RegExpMacroAssemblerLA64::CallCheckStackGuardState(Register scratch) {
++void RegExpMacroAssemblerLA64::CallCheckStackGuardState(
++	Register scratch, Operand extra_space) {
+   DCHECK(!isolate()->IsGeneratingEmbeddedBuiltins());
+   DCHECK(!masm_->options().isolate_independent_code);
+ 
+@@ -1081,6 +1084,9 @@
+   __ And(sp, sp, Operand(-stack_alignment));
+   __ St_d(scratch, MemOperand(sp, 0));
+ 
++  // Extra space for variables.
++  __ li(a3, extra_space);
++  // RegExp code frame pointer.
+   __ mov(a2, frame_pointer());
+   // Code of self.
+   __ li(a1, Operand(masm_->CodeObject()), CONSTANT_SIZE);
+@@ -1141,7 +1147,8 @@
+ 
+ int64_t RegExpMacroAssemblerLA64::CheckStackGuardState(Address* return_address,
+                                                        Address raw_code,
+-                                                       Address re_frame) {
++                                                       Address re_frame,
++						       uintptr_t extra_space) {
+   Code re_code = Code::cast(Object(raw_code));
+   return NativeRegExpMacroAssembler::CheckStackGuardState(
+       frame_entry<Isolate*>(re_frame, kIsolate),
+@@ -1151,7 +1158,8 @@
+       return_address, re_code,
+       frame_entry_address<Address>(re_frame, kInputString),
+       frame_entry_address<const byte*>(re_frame, kInputStart),
+-      frame_entry_address<const byte*>(re_frame, kInputEnd));
++      frame_entry_address<const byte*>(re_frame, kInputEnd),
++      extra_space);
+ }
+ 
+ MemOperand RegExpMacroAssemblerLA64::register_location(int register_index) {
+diff -urN chromium.orig/v8/src/regexp/loongarch64/regexp-macro-assembler-loongarch64.h chromium/v8/src/regexp/loongarch64/regexp-macro-assembler-loongarch64.h
+--- chromium.orig/v8/src/regexp/loongarch64/regexp-macro-assembler-loongarch64.h	2024-11-04 09:40:27.758774540 +0800
++++ chromium/v8/src/regexp/loongarch64/regexp-macro-assembler-loongarch64.h	2024-11-04 09:42:27.365818984 +0800
+@@ -82,7 +82,7 @@
+   // returning.
+   // {raw_code} is an Address because this is called via ExternalReference.
+   static int64_t CheckStackGuardState(Address* return_address, Address raw_code,
+-                                      Address re_frame);
++                                      Address re_frame, uintptr_t extra_space);
+ 
+   void print_regexp_frame_constants();
+ 
+@@ -131,7 +131,7 @@
+   void CheckStackLimit();
+ 
+   // Generate a call to CheckStackGuardState.
+-  void CallCheckStackGuardState(Register scratch);
++  void CallCheckStackGuardState(Register scratch, Operand extra_space = Operand(static_cast<int64_t>(0)));
+ 
+   // The ebp-relative location of a regexp register.
+   MemOperand register_location(int register_index);
