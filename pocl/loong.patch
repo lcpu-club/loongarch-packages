@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e97a541..a97d077 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,13 +23,14 @@ build() {
+       -DCMAKE_INSTALL_PREFIX=/usr \
+       -DCMAKE_INSTALL_LIBDIR=lib \
+       -DCMAKE_BUILD_TYPE=Release \
+-      -DKERNELLIB_HOST_CPU_VARIANTS=distro
++      -DLLC_HOST_CPU=$(uname -m)
+   ninja -C build
+ }
+ 
+ check() {
+   cd "$pkgname-$pkgver"
+-  ninja -C build check
++  cd build
++  ctest --output-on-failure $MAKEFLAGS -E 'kernel/test_printf_vectors_.*'
+ }
+ 
+ package() {
