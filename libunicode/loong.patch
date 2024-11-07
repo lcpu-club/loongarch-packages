@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,7 +26,8 @@ build() {
+     -GNinja \
+     -DCMAKE_BUILD_TYPE=None \
+     -DLIBUNICODE_TESTING=OFF \
+-    -DCMAKE_INSTALL_PREFIX=/usr
++    -DCMAKE_INSTALL_PREFIX=/usr \
++    -DLIBUNICODE_SIMD_IMPLEMENTATION=std
+   cmake --build build
+ }
+ 
