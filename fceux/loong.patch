@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index fa3cd46..bb20a07 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,8 @@ b2sums=('df1b8706f3639c52ec5905a542052ee0eb7c5a727c9ee27af7c9f53b2b9f97b0445c6c6
+ 
+ prepare() {
+   cd $pkgname
++  git cherry-pick -n 396096223ec58ff7f437ec0de7275240946531c5
++  git cherry-pick -n d2ee6351c08518c866bb48d89f58a67bb36931fc
+   sed -i 's/-interim git//g' src/version.h
+   setconf scripts/genGitHdr.sh GIT_URL "'""${source:4:34}""'"
+   setconf scripts/genGitHdr.sh GIT_REV "${source#*=}"
