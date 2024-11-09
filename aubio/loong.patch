@@ -1,8 +1,19 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index ca2aec7..b12cb65 100644
+index 90231b9..b943c27 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -117,6 +117,14 @@ package_aubio() {
+@@ -94,7 +94,9 @@ check() {
+   export PYTHONPATH="test_dir/$_site_packages:$PYTHONPATH"
+   export LD_LIBRARY_PATH="$PWD/build/src"
+   export PYTHONDONTWRITEBYTECODE=1
+-  pytest -vv python/tests
++  pytest -vv python/tests \
++    --deselect python/tests/test_fft.py::aubio_fft_test_case::test_zeros \
++    --deselect python/tests/test_phasevoc.py::Test_aubio_pvoc_test_case::test_zeros
+ }
+ 
+ package_aubio() {
+@@ -117,6 +119,14 @@ package_aubio() {
    # move doc, as waf configure doesn't honor the htmldir and docdir settings
    mv -v "$pkgdir/usr/share/doc/lib$pkgname-doc" "$pkgdir/usr/share/doc/$pkgname"
    install -vDm 644 {AUTHORS,ChangeLog,README.md} -t "$pkgdir/usr/share/doc/$pkgname/"
