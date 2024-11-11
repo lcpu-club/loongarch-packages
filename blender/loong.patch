@@ -1,5 +1,3 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 3070b19..40353ba 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -30,7 +30,6 @@ depends=(
@@ -19,8 +17,8 @@ index 3070b19..40353ba 100644
    'jack'  # dlopen'ed
    'jemalloc'
    'level-zero-loader'  # dlopen'ed
-@@ -68,10 +65,8 @@ depends=(
-   'opencollada'
+@@ -67,10 +64,8 @@ depends=(
+   'openal'
    'opencolorio'
    'openexr'
 -  'openimagedenoise'
@@ -30,7 +28,7 @@ index 3070b19..40353ba 100644
    'openshadinglanguage'
    'opensubdiv'
    'openvdb'
-@@ -84,7 +79,6 @@ depends=(
+@@ -83,7 +78,6 @@ depends=(
    'python-requests'
    'sdl2'  # dlopen'ed
    'shared-mime-info'
@@ -38,7 +36,7 @@ index 3070b19..40353ba 100644
    'xdg-utils'
    'yaml-cpp'
    'zlib'
-@@ -93,13 +87,8 @@ depends=(
+@@ -92,13 +86,8 @@ depends=(
  makedepends=(
    'boost'
    'cmake'
@@ -52,7 +50,7 @@ index 3070b19..40353ba 100644
    'level-zero-headers'
    'libdecor'
    'mold'
-@@ -109,9 +98,6 @@ makedepends=(
+@@ -108,9 +97,6 @@ makedepends=(
    'subversion'
    'wayland-protocols'
  )
@@ -62,7 +60,7 @@ index 3070b19..40353ba 100644
  # We're using !lto here as otherwise we get stuff such as FS#77557
  options=('!lto')
  source=("git+https://projects.blender.org/blender/blender.git#tag=v$pkgver"
-@@ -168,14 +154,10 @@ build() {
+@@ -167,14 +153,10 @@ build() {
    local cmake_options=(
      -B build
      -C "$pkgname/build_files/cmake/config/blender_release.cmake"
@@ -78,13 +76,13 @@ index 3070b19..40353ba 100644
      -D OCLOC_INSTALL_DIR=/usr
      -D OPTIX_ROOT_DIR="$srcdir"
      -D PYTHON_VERSION="$(_get_pyver)"
-@@ -186,6 +168,13 @@ build() {
+@@ -185,6 +167,13 @@ build() {
      -D WITH_CYCLES_OSL=ON
      -D WITH_INSTALL_PORTABLE=OFF
      -D WITH_PYTHON_INSTALL=OFF
 +    -D WITH_CYCLES_EMBREE=OFF
-+    -D WITH_CUDA=OFF
 +    -D WITH_CYCLES_DEVICE_CUDA=OFF
++    -D WITH_CYCLES_DEVICE_OPTIX=OFF
 +    -D WITH_CYCLES_CUDA_BINARIES=OFF
 +    -D WITH_CUDA_DYNLOAD=OFF
 +    -D WITH_CYCLES_DEVICE_HIP=OFF
