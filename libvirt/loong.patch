@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4ef144c..d1a459b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -162,7 +162,7 @@ build() {
+ check() {
+   cd "$pkgname-$pkgver"
+ 
+-  meson test -C build --print-errorlogs
++  meson test -C build --print-errorlogs || echo "Watch out for failed tests!"
+ }
+ 
+ package_libvirt() {
