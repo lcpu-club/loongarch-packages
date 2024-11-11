@@ -90,3 +90,12 @@
      -G Ninja
      -S "$pkgname"
      -W no-dev
+@@ -214,7 +203,7 @@ package() {
+   rm -r "${pkgdir}"/usr/share/blender/4*/python
+ 
+   # Move OneAPI AOT lib to proper place
+-  mv "${pkgdir}"/usr/share/blender/lib/libcycles_kernel_oneapi_aot.so "${pkgdir}"/usr/lib/
++  # mv "${pkgdir}"/usr/share/blender/lib/libcycles_kernel_oneapi_aot.so "${pkgdir}"/usr/lib/
+ 
+   install -vDm 644 doc/license/{BSD-{2,3}-Clause,MIT,Zlib}-license.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
+ }
