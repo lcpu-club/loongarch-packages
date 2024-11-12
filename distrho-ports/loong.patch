@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4e9a995..9ad3340 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -40,6 +40,9 @@ _pick() {
+ }
+ 
+ build() {
++  patch -Np1 -d $pkgname -i ../use-simde.patch
++  export CXXFLAGS="${CXXFLAGS} -fpermissive -DSIMDE_NO_NATIVE"
++
+   arch-meson build $pkgname
+   ninja -C build
+ }
+@@ -222,3 +225,7 @@ package_distrho-ports-vst3() {
+ 
+   mv -v $pkgname/* "$pkgdir"
+ }
++
++makedepends+=(simde)
++source+=("use-simde.patch")
++b2sums+=('11bbfa467a0453e831eee1ecfe2b4e0f5a430db0059dd9ebcdc4863627807ad52275c3ba3437964956e7b372cef53e0332152ff27fdbe4e186c954f9314a7453')
