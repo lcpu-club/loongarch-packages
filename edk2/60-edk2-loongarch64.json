@@ -1,0 +1,32 @@
+{
+    "description": "LoongArch UEFI for loongarch64",
+    "interface-types": [
+        "uefi"
+    ],
+    "mapping": {
+        "device": "flash",
+        "mode": "split",
+        "executable": {
+            "filename": "/usr/share/edk2/loongarch64/QEMU_CODE.fd",
+            "format": "raw"
+        },
+        "nvram-template": {
+            "filename": "/usr/share/edk2/loongarch64/QEMU_VARS.fd",
+            "format": "raw"
+        }
+    },
+    "targets": [
+        {
+            "architecture": "loongarch64",
+            "machines": [
+                "virt"
+            ]
+        }
+    ],
+    "features": [
+        "acpi"
+    ],
+    "tags": [
+
+    ]
+}
