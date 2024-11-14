@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 17f91af..4c85139 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -14,6 +14,7 @@ source=("https://github.com/phase1geo/Minder/archive/$pkgver/Minder-$pkgver.tar.
+ sha256sums=('3a9c2831d36a7744f7df27412b2f75b2bec38f5974984a027d6fa7f634a37c7e')
+ 
+ build() {
++  export CFLAGS="${CFLAGS} -Wno-int-conversion"
+   arch-meson Minder-$pkgver build
+   meson compile -C build
+ }
