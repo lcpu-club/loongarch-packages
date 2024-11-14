@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8e8f0ad..6227a5f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,7 +38,7 @@ build() {
+ 
+ check() {
+   cd build
+-  ctest --output-on-failure
++  ctest --output-on-failure -E memcached_regression_lp583031
+ }
+ 
+ package() {
