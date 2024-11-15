@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 9329cdd..ea51e06 100644
+index 000f5fc..e5e9496 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -3,23 +3,21 @@
@@ -11,9 +11,9 @@ index 9329cdd..ea51e06 100644
 -         "python-${pkgbase}-rocm" "python-${pkgbase}-opt-rocm")
 +pkgname=("${pkgbase}"
 +         "python-${pkgbase}")
- pkgver=1.18.0
+ pkgver=1.19.2
  _pkgdesc='Cross-platform, high performance scoring engine for ML models'
- pkgrel=3
+ pkgrel=2
  arch=('x86_64')
  url='https://github.com/microsoft/onnxruntime'
  license=('MIT')
@@ -23,14 +23,23 @@ index 9329cdd..ea51e06 100644
  _pydepends=('python-onnx' 'python-numpy' 'python-coloredlogs' 'python-psutil'
              'python-py-cpuinfo' 'python-sympy' 'python-scipy' 'python-pillow'
              'python-flatbuffers' 'python-protobuf' 'python-packaging')
- makedepends=('git' 'cmake' 'ninja' 'pybind11' 'nlohmann-json' 'chrono-date' 'eigen' 'cxxopts' 'openmpi'
+ makedepends=('git' 'cmake' 'ninja' 'pybind11' 'nlohmann-json' 'chrono-date' 'cxxopts' 'openmpi'
 -             'python-setuptools' 'python-installer' 'python-wheel' 'python-build' 'gcc13'
 -             'cuda' 'cudnn' 'nccl' 'rocm-hip-sdk' 'hipify-clang' 'rocm-smi-lib' 'roctracer')
 +             'python-setuptools' 'python-installer' 'python-wheel' 'python-build')
  makedepends+=("${_pydepends[@]}")
  #TODO: Add migraphx for ROCm and tensorrt for CUDA.
  optdepends=('openmpi: Distributed memory parallelization')
-@@ -148,15 +146,17 @@ build() {
+@@ -106,7 +104,7 @@ build() {
+     -DBUILD_TESTING=OFF
+     -Donnxruntime_ENABLE_TRAINING=ON
+     -Donnxruntime_ENABLE_LAZY_TENSOR=OFF
+-    -Donnxruntime_USE_MPI=ON
++    -Donnxruntime_USE_MPI=OFF
+     -Donnxruntime_USE_DNNL=ON
+     # Stable release of eigen is too old for onnxruntime.
+     -Donnxruntime_USE_PREINSTALLED_EIGEN=OFF
+@@ -145,15 +143,17 @@ build() {
    export CXX="$NVCC_CCBIN"
    export CC="${NVCC_CCBIN/g++/gcc}"
  
@@ -50,7 +59,7 @@ index 9329cdd..ea51e06 100644
    echo "Build onnxruntime with CUDA with AVX optimizations"
    cd "${srcdir}/${pkgbase}-opt-cuda"
    echo 'string(APPEND CMAKE_C_FLAGS " -march=haswell")' \
-@@ -195,9 +195,6 @@ build() {
+@@ -192,9 +192,6 @@ build() {
  
  package_onnxruntime() {
    pkgdesc="$_pkgdesc"
@@ -60,7 +69,7 @@ index 9329cdd..ea51e06 100644
  
    cd "${pkgbase}-cuda"
    DESTDIR="${pkgdir}" cmake --install build
-@@ -247,9 +244,6 @@ package_onnxruntime-opt-rocm() {
+@@ -244,9 +241,6 @@ package_onnxruntime-opt-rocm() {
  package_python-onnxruntime() {
    pkgdesc="$_pkgdesc"
    depends+=("${pkgbase}" "${_pydepends[@]}")
