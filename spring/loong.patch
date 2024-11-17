@@ -1,0 +1,50 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c2b4e95..01b8365 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,6 +26,13 @@ prepare() {
+ 
+   patch -Np1 -i ../spring-gcc12.patch
+   patch -Np1 -i ../spring-gcc13.patch # missing includes
++  patch -Np1 -i ../disable-streflop-for-cutils.patch
++  patch -Np1 -i ../support-loong64-build.patch
++  patch -Np1 -i ../use-simde.patch
++  # Workaround for bug of simde
++  # error: conflicting types for ‘__m128i’; have ‘simde__m128i’
++  export CFLAGS="${CFLAGS} -DSIMDE_NO_NATIVE"
++  export CXXFLAGS="${CXXFLAGS} -DSIMDE_NO_NATIVE"
+   #remove bundled libraries
+   rm -r tools/pr-downloader/src/lib/jsoncpp
+   rm -r tools/pr-downloader/src/lib/minizip
+@@ -34,12 +41,18 @@ prepare() {
+ build() {
+   cd spring_$pkgver
+ 
++  # disable streflop, remove arch-specific flags
++  # https://springrts.com/mantis/view.php?id=1846
++  # https://springrts.com/mantis/view.php?id=1788
+   cmake \
+     -Bbuild \
+     -DCMAKE_INSTALL_PREFIX=/usr \
+     -DDATADIR=share/spring \
+     -DJAVA_HOME=/usr/lib/jvm/java-8-openjdk \
+     -DCMAKE_SKIP_RPATH=ON \
++    -DPRD_JSONCPP_INTERNAL=OFF \
++    -DENABLE_STREFLOP=OFF \
++    -DMARCH_FLAG=loongarch64 \
+     -DPRD_JSONCPP_INTERNAL=OFF
+   make -C build
+ }
+@@ -53,4 +66,12 @@ package() {
+   echo '$HOME/.spring' > "$pkgdir/etc/spring/datadir"
+ }
+ 
++makedepends+=('simde')
++source+=( "disable-streflop-for-cutils.patch"
++          "support-loong64-build.patch"
++          "use-simde.patch")
++sha512sums+=( '9fc1ecdcfba4df8135b02ea59d09873372ea0381e6e9c465cc2d5c7f822bc128108028359054367c9ebc4abffafc0016d7509d75755e65b179e7edef611584bd'
++              '02d2bb82335f1f0e03b597fc5b9bc434030000468e9f63ffacdc28e5603ed45ea1a916689e49fa6b38983a54dace3dd5fabe0d0a4321c84dc52c9da90f0cd480'
++              'dd885fbec0b6423c4c7667e05babeb2f6a48c878661fd502236b1f1743cb6f7a47f702f7e22030a684bfbd8d4190980999a0bf13e74cff3d2138782c884be8c6')
++
+ # vim sw=2:ts=2 et:
