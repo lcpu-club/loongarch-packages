@@ -1,0 +1,11 @@
+diff --git a/include/SimdDefs.h b/include/SimdDefs.h
+index be7e2e1..91d174c 100644
+--- a/include/SimdDefs.h
++++ b/include/SimdDefs.h
+@@ -20,5 +20,5 @@
+ #endif
+ 
+ #if !defined(FRAMEWORK_SIMD_USE_SSE) && !defined(FRAMEWORK_SIMD_USE_NEON)
+-#error No SIMD instrinsics available for this platform.
++	/* Use SIMDE for non-SIMD platforms */
+ #endif
