@@ -1,0 +1,26 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a10f4f1..d061673 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -70,6 +70,10 @@ prepare() {
+   git submodule init zstd
+   git config submodule.zstd.url ../../../zstd
+   git submodule update
++
++  cd "${srcdir}/libretro-play"
++  patch -p1 -i "${srcdir}/add-loong64-build.patch"
++  patch -p1 -d "deps/Framework" -i "${srcdir}/fix-simd-def-abort.patch"
+ }
+ 
+ build() {
+@@ -88,4 +92,10 @@ package() {
+   install -Dm 644 libretro-play/License.txt -t "${pkgdir}"/usr/share/licenses/libretro-play/
+ }
+ 
++makedepends+=(simde)
++source+=( "add-loong64-build.patch"
++          "fix-simd-def-abort.patch")
++b2sums+=( '61608ae02aaaaa6572d8d7e19d75f2ae070487afb1fdbd6f8cd5774692138e2c7b65ad612351cd803eef83822b37af6d787c39c63f88706578c01aa5cfb7071f'
++          '0227bd678be372890ae1d619e2743efd170c9362aaeac1e4753253c2b4abb21e7aa52a8c2930b975214d4a3fbcc3b06dcac27d86e4fa5c04a7a442ac3c27acac')
++
+ # vim: ts=2 sw=2 et:
