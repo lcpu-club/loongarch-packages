@@ -1,26 +1,19 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 5bfdefe..1375ab2 100644
+index 95e0ae7..f8c028f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -19,12 +19,16 @@ sha256sums=('859b723666eeac7df018209d66045c9853b50b4218cecadb794e2359619ebce7'
- prepare() {
-   cd motif-$pkgver
-   patch -p1 -i ../no-demos.patch # Don't build demos
+@@ -41,6 +41,9 @@ prepare() {
+   cd $_pkgname-$pkgver
+   patch -Np1 -i ../no-demos.patch # Don't build demos
+   patch -Np1 -i ../add-wmluiltok-main-function.patch # Doesn't build without it
 +  patch -Np1 -i ../fix_not_literal_format.patch
 +  patch -Np1 -i ../add_option_main.patch
 +  rm -f tools/wml/wmluiltok.c # force regenerating this file
    touch NEWS AUTHORS
    autoreconf -if
  }
- 
- build() {
-   cd motif-$pkgver
-+  CFLAGS+=" -Wno-implicit-function-declaration"
-   ./configure --prefix=/usr
-   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
-   make
-@@ -34,3 +38,8 @@ package() {
-   cd motif-$pkgver
+@@ -60,3 +63,8 @@ package() {
+   cd $_pkgname-$pkgver
    make DESTDIR="$pkgdir" install
  }
 +
