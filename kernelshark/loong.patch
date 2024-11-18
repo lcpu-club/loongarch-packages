@@ -1,0 +1,36 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 2cc3b9f..8f9f7ea 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,9 +36,18 @@ provides=(
+   libkshark-plot.so
+   libkshark-gui.so
+ )
+-source=($pkgname-$pkgver.tar.gz::https://git.kernel.org/pub/scm/utils/trace-cmd/kernel-shark.git/snapshot/kernel-shark-$pkgname-v$pkgver.tar.gz)
+-sha512sums=('ba5e7ebc713d296bef211174869445ccb3dffb8a96d0634776bd28c183487225e7c8082c8be5957795973833d6ac67851fb46f75cf68aae66eb3e5e06c081f5f')
+-b2sums=('818448c3d2e01412e12fc3406b13ffd4d6ab7d442aef7867048913996edbc7f64b2c2c9e88810d6c0bd9e8a6ee9726369ab097d2164ec9966660f098e123c702')
++source=(
++  $pkgname-$pkgver.tar.gz::https://git.kernel.org/pub/scm/utils/trace-cmd/kernel-shark.git/snapshot/kernel-shark-$pkgname-v$pkgver.tar.gz
++  'fix-foreach.patch'
++)
++sha512sums=(
++  'ba5e7ebc713d296bef211174869445ccb3dffb8a96d0634776bd28c183487225e7c8082c8be5957795973833d6ac67851fb46f75cf68aae66eb3e5e06c081f5f'
++  'af176f982d0545a39b483e47e4791472dbb7306e4ad388ea29d85bad5d6a4a30a41086c5864f297ad92acc769bb4ae8549d5345fb3e43739475a987fb0717dab'
++)
++b2sums=(
++  '818448c3d2e01412e12fc3406b13ffd4d6ab7d442aef7867048913996edbc7f64b2c2c9e88810d6c0bd9e8a6ee9726369ab097d2164ec9966660f098e123c702'
++  'ead20e727d67e0930fba4b35ffcee0818646271f96d7031c980ecb1833ecdf94655f2f55b4d076d955a327306f2965ac9ea378331884938077441f27c9862033'
++)
+ 
+ prepare() {
+   cd kernel-shark-$pkgname-v$pkgver
+@@ -46,6 +55,9 @@ prepare() {
+   # replace FreeSans with ttf-fira-sans
+   sed -e 's/FreeSans/FiraSans-Regular/g' \
+       -i CMakeLists.txt
++    
++  # fix for_each error
++  patch -p1 -i "$srcdir/fix-foreach.patch" 
+ }
+ 
+ build() {
