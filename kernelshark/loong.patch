@@ -1,12 +1,12 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 2cc3b9f..7180347 100644
+index 2cc3b9f..6c664b4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -40,12 +40,20 @@ source=($pkgname-$pkgver.tar.gz::https://git.kernel.org/pub/scm/utils/trace-cmd/
  sha512sums=('ba5e7ebc713d296bef211174869445ccb3dffb8a96d0634776bd28c183487225e7c8082c8be5957795973833d6ac67851fb46f75cf68aae66eb3e5e06c081f5f')
  b2sums=('818448c3d2e01412e12fc3406b13ffd4d6ab7d442aef7867048913996edbc7f64b2c2c9e88810d6c0bd9e8a6ee9726369ab097d2164ec9966660f098e123c702')
  
-+# fix for_each error
++# missing header
 +source+=(fix-for_each.patch::https://github.com/yordan-karadzhov/kernel-shark/commit/9e33324644fff49b7aa15d34f836e72af8b32c78.patch)
 +sha512sums+=('8df6b6c89278640364376ea65386a7897e2b317e776387fe908300ca4d4f5d40fb69bea7226f364bb431f532059936c137d047d0e43aacbfed0a800ed7726705')
 +b2sums+=('bdb01b4c921566e947be50b16e44a7f5d9d0bd82f7b1f00ae4ad7a3b0ceec1518cf8e18f7f050ee3224e7beec4ef4f1a2fdeaa4512b0ab7f0461d18db1139a45')
@@ -18,7 +18,7 @@ index 2cc3b9f..7180347 100644
    sed -e 's/FreeSans/FiraSans-Regular/g' \
        -i CMakeLists.txt
 +
-+  # fix for_each error
++  # missing header
 +  patch -p1 -i "$srcdir/fix-for_each.patch"
  }
  
