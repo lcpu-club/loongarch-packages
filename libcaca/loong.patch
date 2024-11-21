@@ -1,14 +1,15 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -41,3 +41,11 @@ package() {
+@@ -67,3 +67,12 @@ package() {
    make DESTDIR="$pkgdir" install
-   install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+   install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname/" COPYING
  }
 +
 +source+=("$pkgname-fix-instruction-detection.patch::https://github.com/cacalabs/libcaca/pull/76.patch")
-+sha256sums+=('2d40a2c2654369e0583f9c26653b56d6b4306d76ad12c78478de489a8f91160b')
++b2sums+=('1cfd28a3777cec6cb8f2bab8ae2f6d9496452e40dd7f0f7a7cf67ebef1a4ac48390e63ce464b1283207545fe8fe050f9789cf39202b513d3d22291dc84521f10')
++
 +prepare() {
-+  cd $pkgname-$pkgver
++  cd $pkgname
 +  patch -Np1 -i ../$pkgname-fix-instruction-detection.patch
 +  autoreconf -fi
 +}
