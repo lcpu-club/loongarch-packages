@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index fe00ace..ff21074 100644
+index fe00ace..e4ad2a0 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -16,19 +16,14 @@ arch=(x86_64)
+@@ -16,18 +16,14 @@ arch=(x86_64)
  url='https://www.open-mpi.org'
  license=('BSD-3-Clause AND LicenseRef-MPICH')
  makedepends=(
@@ -18,16 +18,15 @@ index fe00ace..ff21074 100644
    libnl
    openpmix
 -  openucc
--  openucx
+   openucx
    prrte
    valgrind
-   zlib
-@@ -70,13 +65,6 @@ build() {
+@@ -70,13 +66,7 @@ build() {
      --with-pmix=external
      --with-prrte=external
      --with-valgrind
 -    --with-ucc=/usr
--    --with-ucx=/usr
+     --with-ucx=/usr
 -    --with-cuda=/opt/cuda
 -    # this tricks the configure script to look for /usr/lib/pkgconfig/cuda.pc
 -    # instead of /opt/cuda/lib/pkgconfig/cuda.pc
@@ -36,12 +35,7 @@ index fe00ace..ff21074 100644
      # all components that link to libraries provided by optdepends must be run-time loadable
      --enable-mca-dso=accelerator_cuda,accelerator_rocm,btl_smcuda,rcache_gpusm,rcache_rgpusm,coll_ucc,scoll_ucc
      # mpirun should not warn on MCA component load failures by default - usually caused by missing optdepends, which is ok
-@@ -110,16 +98,12 @@ package_openmpi() {
-     libfabric
-     libnl
-     openpmix libpmix.so
--    openucx
-     prrte
+@@ -115,11 +105,8 @@ package_openmpi() {
      zlib
    )
    optdepends=(
