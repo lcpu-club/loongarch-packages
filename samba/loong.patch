@@ -1,13 +1,11 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index d16b7d0..5904fe0 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -186,7 +186,7 @@ _pkgsrc="${srcdir}"/samba-pkg
+@@ -187,7 +187,7 @@ _pkgsrc="${srcdir}"/samba-pkg
      mv "${_pkgsrc}"/usr/include/samba-4.0/${headers} "${pkgdir}"/usr/include/samba-4.0/
    done
-   install -d -m755 "${pkgdir}"/usr/lib/python3.12/site-packages/
--  mv "${_pkgsrc}"/usr/lib/python3.12/site-packages/{_ldb_text.py,ldb.cpython-312-$CARCH-linux-gnu.so} \
-+  mv "${_pkgsrc}"/usr/lib/python3.12/site-packages/{_ldb_text.py,ldb.cpython-312-$(uname -m)-linux-gnu.so} \
-     "${pkgdir}"/usr/lib/python3.12/site-packages/
+   install -d -m755 "${pkgdir}${site_packages}/"
+-  mv "${_pkgsrc}${site_packages}/"{_ldb_text.py,ldb.cpython-$(python -c 'import sys; print("".join(map(str, sys.version_info[:2])))')-$CARCH-linux-gnu.so} \
++  mv "${_pkgsrc}${site_packages}/"{_ldb_text.py,ldb.cpython-$(python -c 'import sys; print("".join(map(str, sys.version_info[:2])))')-$(uname -m)-linux-gnu.so} \
+     "${pkgdir}${site_packages}/"
  
    install -d -m755 "${pkgdir}"/usr/share/man/man1
