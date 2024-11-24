@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 8708582..e55144a 100644
+index 527e128..8792b25 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -76,6 +76,10 @@ prepare() {
@@ -13,7 +13,7 @@ index 8708582..e55144a 100644
    make olddefconfig
    diff -u ../config .config || :
  
-@@ -141,7 +145,11 @@ _package-headers() {
+@@ -142,7 +146,11 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -26,13 +26,12 @@ index 8708582..e55144a 100644
    cp -t "$builddir" -a scripts
    ln -srt "$builddir" "$builddir/scripts/gdb/vmlinux-gdb.py"
  
-@@ -153,9 +161,13 @@ _package-headers() {
+@@ -154,8 +162,13 @@ _package-headers() {
  
    echo "Installing headers..."
    cp -t "$builddir" -a include
 -  cp -t "$builddir/arch/x86" -a arch/x86/include
 -  install -Dt "$builddir/arch/x86/kernel" -m644 arch/x86/kernel/asm-offsets.s
--
 +  if [ $CARCH == x86_64 ]; then
 +    cp -t "$builddir/arch/x86" -a arch/x86/include
 +    install -Dt "$builddir/arch/x86/kernel" -m644 arch/x86/kernel/asm-offsets.s
@@ -40,10 +39,10 @@ index 8708582..e55144a 100644
 +    cp -t "$builddir/arch/loongarch" -a arch/loongarch/include
 +    install -Dt "$builddir/arch/loongarch/kernel" -m644 arch/loongarch/kernel/asm-offsets.s
 +  fi
+ 
    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
- 
-@@ -176,7 +188,11 @@ _package-headers() {
+@@ -177,7 +190,11 @@ _package-headers() {
    echo "Removing unneeded architectures..."
    local arch
    for arch in "$builddir"/arch/*/; do
@@ -56,18 +55,21 @@ index 8708582..e55144a 100644
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -244,4 +260,14 @@ for _p in "${pkgname[@]}"; do
+@@ -245,4 +262,17 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
 +source+=('loong-addition.config'
-+         '0001-LOONGARCH64-drm-xe-fix-build-on-non-4K-kernels.patch'
-+         '0002-LOONGARCH64-drm-radeon-Call-mmiowb-at-the-end-of-rad.patch')
-+sha256sums+=('d871f7bb9f204d144bb2c8996d79f3f951183763944539c1a66d3bb8058b3613'
-+             '83fa0ac8b4874311b8c590b1fd8d9036679f8bbd51c10da5509742167456b9ed'
-+             'b25bbb9d0afe724aa49cf96ffbd5e88e8b39414309d9b690b64c664d18b54834')
-+b2sums+=('383d8563c9a3117f560840f3880634b9e79892398bba5cf97372751eddbe7e129069b26ca3863fc8761f60e9c11d087ebfc799e883fcd6a03bb06cd0a68ac8f8'
-+         '264d58172c877b1cda3f2016c4f3e4a6fcf37b17e4a2de2713bc99570c597f9ef0f947df6cdff5a93cc96849fe10582fb2decf54baabcc803fde96e889c107d7'
-+         '3fca438a40be08dede4badcf973629070cb6c50567d215d6d42638dfcf3452d01aae9c253b783459d9cdf8ee1c08a394c47db2e2e2b1394898c0b03f3df8407f')
++         '0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch'
++         '0002-LOONGARCH-drm-xe-fix-build-on-non-4K-kernels.patch'
++         '0003-LOONGARCH-from-AOSCOS-more-fixes-for-Xe-on-LoongArch.patch')
++sha256sums+=('6f83b39a55b57e46149af253bba9670dc2e164f1721d70bd0b401dd6661a35d7'
++             '7fb7c79fcc055990a77e2aba686edacfbc1a3ee68098797a93c2db0ed3aff6e1'
++             '98b14e2f49d7c21c864776ab80227eb77bb4d16d3baf9be8df6cf29820b6f6f0'
++             '5c4ccb967efcd79f8ea5f63836cd424b2e22255ffd89deaeeac6b6fcd40ea88a')
++b2sums+=('c4b1a3dadb8fb5c07e870350c1bb462cd198ef3224f689af4e486b35da8d73e406669a8391f1291f16747ecaeff206dfc1d5220f5806a8990d2a265c3d9b980f'
++         '1fc07a8aa13618d9f24803adc84ef21b4427d97b860f16a7f9ce348c19f03d2bcfec4f7ee3e1cbd1f5015918b3e48be97a4d4a992be5d0b74127e392f9867dc6'
++         '9fac202566f2d0634e596a68afd5d06540c6dcc99cc03eec0159eaa8367527eec69ceac3b90cf1fc96ad4676c449c6025bfd3bb966b85002bc2d711833aeb4b7'
++         '5dca610d93e67f096b87d0679cdb4bcf439ede2d527630842784ca2c00c4e363ee9fcbfc72c2f92ae2469a3a46ddf449f350e48c5a8a6459d1adfb3881b48ebe')
 +
  # vim:set ts=8 sts=2 sw=2 et:
