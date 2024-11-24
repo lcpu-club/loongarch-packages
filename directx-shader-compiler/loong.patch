@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c4150bf..63692cd 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,6 +38,8 @@ prepare() {
+   git config submodule."external/re2".url "${srcdir}/${pkgname}"-re2
+ 
+   git -c protocol.file.allow=always submodule update
++  
++  patch -p1 -i "${srcdir}/add-loong64-support.patch"
+ }
+ 
+ build() {
+@@ -66,3 +68,6 @@ package() {
+   install LICENSE.TXT "${pkgdir}"/usr/share/licenses/${pkgname}/
+   install ThirdPartyNotices.txt "${pkgdir}"/usr/share/licenses/${pkgname}
+ }
++
++source+=("add-loong64-support.patch::https://github.com/microsoft/DirectXShaderCompiler/commit/8c6cc722918c4337e48167735aeb022cb141ac15.patch")
++sha256sums+=('804ec9fd3be5118abee90c9b0c25ca3fcf805c3221adb1cf26804aebc96f974e')
