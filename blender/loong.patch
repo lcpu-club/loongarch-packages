@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8450ca8..e8d0e49 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -30,7 +30,6 @@ depends=(
@@ -60,7 +62,17 @@
  # We're using !lto here as otherwise we get stuff such as FS#77557
  options=('!lto')
  source=("git+https://projects.blender.org/blender/blender.git#tag=v$pkgver"
-@@ -167,14 +153,10 @@ build() {
+@@ -154,6 +140,9 @@ prepare() {
+   # fix build with ffmpeg 7
+   patch -p1 -i "$srcdir"/ffmpeg-7-1.patch
+   patch -p1 -i "$srcdir"/ffmpeg-7-2.patch
++
++  # Support loong64
++  patch -p1 -i "$srcdir"/add-loong64-support.patch
+ }
+ 
+ _get_pyver() {
+@@ -167,14 +156,10 @@ build() {
    local cmake_options=(
      -B build
      -C "$pkgname/build_files/cmake/config/blender_release.cmake"
@@ -76,7 +88,7 @@
      -D OCLOC_INSTALL_DIR=/usr
      -D OPTIX_ROOT_DIR="$srcdir"
      -D PYTHON_VERSION="$(_get_pyver)"
-@@ -185,6 +167,13 @@ build() {
+@@ -185,6 +170,13 @@ build() {
      -D WITH_CYCLES_OSL=ON
      -D WITH_INSTALL_PORTABLE=OFF
      -D WITH_PYTHON_INSTALL=OFF
@@ -90,7 +102,7 @@
      -G Ninja
      -S "$pkgname"
      -W no-dev
-@@ -214,7 +203,7 @@ package() {
+@@ -214,7 +206,11 @@ package() {
    rm -r "${pkgdir}"/usr/share/blender/4*/python
  
    # Move OneAPI AOT lib to proper place
@@ -99,3 +111,7 @@
  
    install -vDm 644 doc/license/{BSD-{2,3}-Clause,MIT,Zlib}-license.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
++
++source+=("add-loong64-support.patch::https://projects.blender.org/blender/blender/commit/d18a0cf277e3d7403eb18718b9cb7a6ec036819f.patch")
++sha512sums+=('4bcbe578638dec0d7d3808835d7191f890c7060adbd6b4006e1e1fc4eee70ae403527419c6583913c43254d5ca8dbf6427ba9b445d45ac5f4af7e5a26b88c98b')
++makedepends+=(vulkan-headers)
