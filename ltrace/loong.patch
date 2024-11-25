@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a568f2f..3aab670 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -37,4 +37,16 @@ package(){
+   make DESTDIR="$pkgdir" install
+ }
+ 
++prepare(){
++  cd "$srcdir/$pkgname-$pkgver"
++  patch -p1 -i ../loongarch64-support.patch
++  patch -p1 -i ../fix-tests.patch
++  autoreconf -fiv
++}
++
++source+=("loongarch64-support.patch::https://github.com/YHStar/ltrace-0.7.3-5/commit/ad72dc9aa5e16f2e98f445aa79c847daea983df6.diff"
++         "fix-tests.patch::https://github.com/YHStar/ltrace-0.7.3-5/commit/50791c5ac1e9bedaa4b67d55538dddf5b5afa710.diff")
++sha256sums+=('9ddd55ae96cb3aaa8ba1cd8f9dc7002569b77ee38af515e3df39ae180ef78320'
++             '1e12a754a5d173114b4bc2f3a2c3e79415d1d6d997d3c06effa4da0186df262a')
++
+ # vim:set ts=2 sw=2 et:
