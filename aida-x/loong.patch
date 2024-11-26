@@ -1,23 +1,14 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index dd6a5b8..104de93 100644
+index dd6a5b8..36a1fd4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -4,7 +4,7 @@ pkgbase=aida-x
- _name="${pkgbase^^}"
- pkgname=(
-   aida-x
--  aida-x-{clap,lv2,standalone,vst,vst3}
-+  aida-x-{clap,lv2,standalone,vst}
- )
- pkgver=1.1.0
- pkgrel=1
 @@ -38,6 +38,11 @@ _pick() {
    done
  }
  
 +prepare() {
-+    cd AIDA-X-$pkgver
-+    patch -p1 -i ../disable-vst3.patch
++  cd AIDA-X-$pkgver
++  patch -p1 -d "modules/dpf" -i "${srcdir}/add-loongarch-support.patch"
 +}
 +
  build() {
@@ -28,7 +19,6 @@ index dd6a5b8..104de93 100644
    install -vDm 755 build/bin/$_name.vst3/Contents/$CARCH-linux/*.so -t "$pkgdir/usr/lib/vst3/$_name.vst3/Contents/$CARCH-linux/"
  }
 +
-+source+=("disable-vst3.patch")
-+sha512sums+=('3673abb1162be4425376da68f57d22a6d8db6cc77c64fc7f576b610864b49ccba8f3bc0c4421c8e0341d5508e2c8a72f7eab2cb7a2678658e634a464dae15acd')
-+b2sums+=('1d807b77a7f292cc92f7caa572808b4e9f2e84c4bd2d067beab6a90462b341c128dd90a73792f4d201f7f91ec681078fa4ba7ad2936b6497e6f7a651ff590d5b')
-
++source+=("add-loongarch-support.patch::https://github.com/DISTRHO/DPF/commit/9c11acb038e4c8494519a4e271e046b49bd2eaea.patch")
++sha512sums+=('d94c7a95c0602755e79624511b1862cdb4985986522990274f48373cb261210a2b558030692a290a755ee153799874bbb7cf83edd3754616cb72121d1d4e5ec8')
++b2sums+=('c214508c3d2b759a490cce4b8ce26b66a173425d52fd1ff7b9323f877cff2614acdd46a8be352a6f36c18db1f7bafee6e4466f15cc1134be2ee679379db7ce9c')
