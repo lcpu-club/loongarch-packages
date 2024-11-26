@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 18dcd7d..77b2310 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -14,6 +14,7 @@ sha256sums=('bfd2e1051d1240cd3a9e58ca7390cff593d093af682bd2257ed8a43a4cf1eec0')
+ 
+ build() {
+   cd ${pkgname}_${pkgver}
++  patch -p1 -i "${srcdir}/add-loong64-support.patch"
+ 
+   CFLAGS+=" -Wno-incompatible-pointer-types" \
+   cmake \
+@@ -32,3 +33,6 @@ package() {
+   DESTDIR=${pkgdir} ninja -C build install
+   install -Dm755 LICENSE ${pkgdir}/usr/share/licenses/${pkgname}/LICENSE
+ }
++
++source+=("add-loong64-support.patch::https://github.com/BrunoLevy/geogram/commit/a536b24c70a19080efe06882fbaf80afcdd7c770.patch")
++sha256sums+=('03504d5acbbeabc5e2c672939fa5fb90655b0d4f3a5b80d1ad442448c02bf759')
