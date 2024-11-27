@@ -1,0 +1,26 @@
+From 9f3ddbb605985e95e4936d08b28b2ec003a93ee6 Mon Sep 17 00:00:00 2001
+From: Zhou Qiankang <wszqkzqk@qq.com>
+Date: Wed, 27 Nov 2024 13:27:45 +0800
+Subject: [PATCH] loongarch,simde :use a portable version to avoid compilation
+ errors
+
+Signed-off-by: Zhou Qiankang <wszqkzqk@qq.com>
+---
+ Source/WTF/wtf/simde/arm/neon.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Source/WTF/wtf/simde/arm/neon.h b/Source/WTF/wtf/simde/arm/neon.h
+index 28dc5821..0a2e96d9 100644
+--- a/Source/WTF/wtf/simde/arm/neon.h
++++ b/Source/WTF/wtf/simde/arm/neon.h
+@@ -8788,6 +8788,7 @@ SIMDE_BEGIN_DECLS_
+     !(defined(HEDLEY_MSVC_VERSION) && defined(__clang__)) && \
+     !(defined(SIMDE_ARCH_MIPS) && defined(__clang__)) && \
+     !(defined(SIMDE_ARCH_ZARCH) && defined(__clang__)) && \
++    !(defined(SIMDE_ARCH_LOONGARCH) && defined(__clang__)) && \
+     !(defined(__clang__) && defined(SIMDE_ARCH_RISCV64)) && ( \
+       defined(SIMDE_X86_AVX512FP16_NATIVE) || \
+       (defined(SIMDE_ARCH_X86_SSE2) && HEDLEY_GCC_VERSION_CHECK(12,0,0)) || \
+-- 
+2.47.1
+
