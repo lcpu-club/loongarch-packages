@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index dd6a5b8..36a1fd4 100644
+index dd6a5b8..8be9afc 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -38,6 +38,11 @@ _pick() {
@@ -14,11 +14,14 @@ index dd6a5b8..36a1fd4 100644
  build() {
    local cmake_options=(
      -B build
-@@ -174,3 +179,7 @@ package_aida-x-vst3() {
+@@ -172,5 +177,9 @@ package_aida-x-vst3() {
+   )
+ 
    # mv -v $pkgname/* "$pkgdir"
-   install -vDm 755 build/bin/$_name.vst3/Contents/$CARCH-linux/*.so -t "$pkgdir/usr/lib/vst3/$_name.vst3/Contents/$CARCH-linux/"
+-  install -vDm 755 build/bin/$_name.vst3/Contents/$CARCH-linux/*.so -t "$pkgdir/usr/lib/vst3/$_name.vst3/Contents/$CARCH-linux/"
++  install -vDm 755 build/bin/$_name.vst3/Contents/$(uname -m)-linux/*.so -t "$pkgdir/usr/lib/vst3/$_name.vst3/Contents/$(uname -m)-linux/"
  }
 +
-+source+=("add-loongarch-support.patch::https://github.com/DISTRHO/DPF/commit/9c11acb038e4c8494519a4e271e046b49bd2eaea.patch")
-+sha512sums+=('d94c7a95c0602755e79624511b1862cdb4985986522990274f48373cb261210a2b558030692a290a755ee153799874bbb7cf83edd3754616cb72121d1d4e5ec8')
-+b2sums+=('c214508c3d2b759a490cce4b8ce26b66a173425d52fd1ff7b9323f877cff2614acdd46a8be352a6f36c18db1f7bafee6e4466f15cc1134be2ee679379db7ce9c')
++source+=("add-loongarch-support.patch::https://github.com/DISTRHO/DPF/commit/8ee7f96f4ebcccf28d4df7c6226aace5f966722e.diff")
++sha512sums+=('565289ef6d901b8430b53268b50da3731d754910bbd64684b10a99cc974996d531910fc6767c90821a21cd49964a2b95631d9928442c6308a0c8842467bc0485')
++b2sums+=('90523b645f0ec4f76ac3931ebc8e8344ebf3c6e12369a97033d41b0b4a1c8d553557c8ed7ae8c3c396b3e4a4849cb85609ec293a07d0a62308e5941b6b77b7fc')
