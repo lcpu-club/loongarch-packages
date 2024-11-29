@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b3e06dd..1e85bc2 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,9 @@ prepare() {
+   cd "$pkgname-$pkgver"
+ 
+   export GOPATH="${srcdir}"
++  go mod edit -replace go.etcd.io/bbolt=github.com/etcd-io/bbolt@v1.3.7
++  go mod edit -replace github.com/boltdb/bolt=go.etcd.io/bbolt@v1.3.7
++  go mod tidy
+   go mod download
+ }
+ 
