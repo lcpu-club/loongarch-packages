@@ -1,0 +1,11 @@
+--- a/modules/juce_audio_devices/native/oboe/include/oboe/StabilizedCallback.h	2024-04-15 17:46:51.000000000 +0800
++++ b/modules/juce_audio_devices/native/oboe/include/oboe/StabilizedCallback.h	2024-11-27 19:40:34.884000000 +0800
+@@ -60,7 +60,7 @@
+ #if defined(__i386__) || defined(__x86_64__)
+ #define cpu_relax() asm volatile("rep; nop" ::: "memory");
+ 
+-#elif defined(__arm__) || defined(__mips__) || defined(__riscv)
++#elif defined(__arm__) || defined(__mips__) || defined(__riscv) || defined(__loongarch__)
+     #define cpu_relax() asm volatile("":::"memory")
+ 
+ #elif defined(__aarch64__)
