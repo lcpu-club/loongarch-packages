@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index fd24ea7..6b0a18e 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -28,6 +28,7 @@ validpgpkeys=('B818B9CADF9089C2D5CEC66B75AD65802A0B4211') # Stefan Berger <stefa
+ 
+ prepare() {
+ 	cd "$pkgname"
++	git cherry-pick -n 048e207b8e526d5dad072d54bb1fd8218047e3dc
+ 	autoreconf --install --force
+ }
+ 
