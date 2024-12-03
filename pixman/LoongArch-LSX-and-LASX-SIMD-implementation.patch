@@ -1,5 +1,5 @@
 diff --git a/meson.build b/meson.build
-index 6932347..d101655 100644
+index fdea28f..78f3aa1 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -89,6 +89,60 @@ elif use_loongson_mmi.enabled()
@@ -63,10 +63,10 @@ index 6932347..d101655 100644
  use_mmx = get_option('mmx')
  have_mmx = false
  mmx_flags = []
-diff --git a/meson_options.txt b/meson_options.txt
+diff --git a/meson.options b/meson.options
 index 8c68c66..c60e923 100644
---- a/meson_options.txt
-+++ b/meson_options.txt
+--- a/meson.options
++++ b/meson.options
 @@ -23,6 +23,16 @@ option(
    type : 'feature',
    description : 'Use Loongson MMI intrinsic optimized paths',
@@ -2182,7 +2182,7 @@ index 0000000..b128e69
 +
 +#endif /* LOONGSON_INTRINSICS_H */
 diff --git a/pixman/meson.build b/pixman/meson.build
-index ffbce17..7e5f401 100644
+index fd41288..f16b000 100644
 --- a/pixman/meson.build
 +++ b/pixman/meson.build
 @@ -58,6 +58,8 @@ simds = [
