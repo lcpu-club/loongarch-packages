@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 97efc2f..4550d43 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -24,6 +24,9 @@ validpgpkeys=('9F377DDB6D3153A48EB3EB1E63CC496475267693') # Caleb Maclennan <cal
+ 
+ build() {
+ 	cd "$_archive"
++	cp "${srcdir}/bootstrap.sh" .
++	chmod +x ./bootstrap.sh
++	./bootstrap.sh
+ 	./configure --prefix /usr
+ 	make
+ }
+@@ -37,3 +40,6 @@ package() {
+ 	cd "$_archive"
+ 	make DESTDIR="$pkgdir" install
+ }
++
++source+=("bootstrap.sh::https://raw.githubusercontent.com/RichiH/vcsh/fdcb296e5a5579a98d19a086213714eab2fea7b3/bootstrap.sh")
++sha256sums+=('073ad93548a1f646fa51bd95228d9671418de57c3463c365b908bf0847f3e926')
