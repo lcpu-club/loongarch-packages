@@ -1,9 +1,9 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 271b2ec..5c935f5 100644
+index e651ca5..12ec09b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -16,6 +16,11 @@ source=(https://xorg.freedesktop.org/releases/individual/lib/${pkgname}-${pkgver
- sha512sums=('3ea293cd308a4faeb600939df2c98148154cf1faf8e435b9f33df46c33acfeb32572cb0c1e148ee9f6f39f9e8a49fbda627edcac03da2000d89e22941849a04d')
+ sha512sums=('b24907f9a0bf6a9aa3278d31986c562c5f2d68f8c178021497c8648aca9f91e4c6f1ecfacf93eb01ba4f03ce4cfc5970fc40bb0fe6724bac9210fc57da09cba4')
  #validpgpkeys=('') # Maarten Lankhorst <maarten.lankhorst@linux.intel.com>
  
 +prepare() {
@@ -33,4 +33,4 @@ index 271b2ec..5c935f5 100644
  }
 +
 +source+=('LoongArch-LSX-and-LASX-SIMD-implementation.patch')
-+sha512sums+=('41f127f43370d0cc3f2d6754845a871bacde7d2822c8422b15aeaf74df87eda7041c1e17e6f8271113ffa66166a5195abbaf4a73e14a438356e6ac20ff442f5e')
++sha512sums+=('1afd3cc6209f38f807d0e0167790e3c6e6f7f58d2b64753ed7a25d221cc7c880a44ba5c41bd3eb93ca0f6113cae17c2fb631fc51277632c6c72fe6503007ed36')
