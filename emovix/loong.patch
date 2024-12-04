@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 74b7345..d4d67e8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,12 +16,14 @@ sha256sums=('96b84843ed80d31df5c07f6ee972362f7a0629a9b181afeb4a99b2127c07ff57')
+ 
+ build() {
+   cd $pkgname-$pkgver
++  cp /usr/share/autoconf/build-aux/config.guess config.guess
++  cp /usr/share/autoconf/build-aux/config.sub config.sub
+   ./configure --prefix=/usr
+   make
+ }
+ 
+ package() {
+   cd $pkgname-$pkgver
+-  make DESTDIR="$pkgdir" install
++  make DESTDIR="$pkgdir" install -j1
+   find "$pkgdir"/usr/share/emovix -type d -exec chmod 755 {} \;
+ }
