@@ -1,11 +1,11 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 9f8ad50..3111546 100644
+index 7b5d584..bf90ac4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -86,6 +86,23 @@ prepare() {
- 
-   cd src/3rdparty
-   git cherry-pick -n 3b9f0ed808a23cf5849ea3b82a61ef7ab566ad68 # Fix mp3 playback
+   git submodule init
+   git submodule set-url src/3rdparty "$srcdir"/qtwebengine-chromium
+   git -c protocol.file.allow=always submodule update
 +
 +  cd "${srcdir}/${_pkgfn}"
 +  # Fix libyuv's lsx and lsax
