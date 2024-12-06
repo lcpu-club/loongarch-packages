@@ -1,0 +1,27 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5576f6e..4ebaa38 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,8 +34,8 @@ export CGO_CXXFLAGS="${CXXFLAGS}"
+ export GOFLAGS="-trimpath -mod=readonly -modcacherw"
+ 
+ export GOOS='linux'
+-export GOARCH='amd64'
+-export XC_OSARCH='linux/amd64'
++export GOARCH='loong64'
++export XC_OSARCH='linux/loong64'
+ 
+ prepare() {
+   cd "${srcdir}/${pkgname}"
+@@ -48,6 +48,11 @@ prepare() {
+   done
+ 
+   mkdir -p build
++
++  go mod edit -replace github.com/boltdb/bolt=go.etcd.io/bbolt@v1.3.7
++  go mod edit -replace go.etcd.io/bbolt=github.com/coreos/bbolt@v1.3.7
++  go mod edit -replace github.com/shirou/gopsutil/v3=github.com/shirou/gopsutil/v3@v3.24.5
++  go mod tidy
+ }
+ 
+ build() {
