@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 8450ca8..e8d0e49 100644
+index 8ca1dbd..3dd1356 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -30,7 +30,6 @@ depends=(
@@ -38,7 +38,7 @@ index 8450ca8..e8d0e49 100644
    'xdg-utils'
    'yaml-cpp'
    'zlib'
-@@ -92,13 +86,8 @@ depends=(
+@@ -92,14 +86,8 @@ depends=(
  makedepends=(
    'boost'
    'cmake'
@@ -46,49 +46,54 @@ index 8450ca8..e8d0e49 100644
    'git'
    'git-lfs'
 -  'hip-runtime-amd'
+-  'hiprt'
 -  'intel-oneapi-compiler-shared-runtime'
 -  'intel-oneapi-dpcpp-cpp'
 -  'intel-compute-runtime'
    'level-zero-headers'
    'libdecor'
    'mold'
-@@ -108,9 +97,6 @@ makedepends=(
+@@ -109,11 +97,6 @@ makedepends=(
    'subversion'
    'wayland-protocols'
  )
 -optdepends=('cuda: Cycles renderer CUDA support'
 -            'intel-compute-runtime: Cycles renderer Intel OneAPI support'
+-            'hip-runtime-amd: Cycles renderer AMD ROCm support'
+-            'hiprt: Ray tracing AMD ROCm support'
 -            'libdecor: wayland support')
  # We're using !lto here as otherwise we get stuff such as FS#77557
  options=('!lto')
  source=("git+https://projects.blender.org/blender/blender.git#tag=v$pkgver"
-@@ -154,6 +140,9 @@ prepare() {
-   # fix build with ffmpeg 7
-   patch -p1 -i "$srcdir"/ffmpeg-7-1.patch
+@@ -161,6 +144,9 @@ prepare() {
    patch -p1 -i "$srcdir"/ffmpeg-7-2.patch
+ 
+   patch -p1 -i "$srcdir"/hiprt-lib-path.patch
 +
 +  # Support loong64
 +  patch -p1 -i "$srcdir"/add-loong64-support.patch
  }
  
  _get_pyver() {
-@@ -167,14 +156,10 @@ build() {
+@@ -174,16 +160,10 @@ build() {
    local cmake_options=(
      -B build
      -C "$pkgname/build_files/cmake/config/blender_release.cmake"
 -    -C "$srcdir/precache"
-+    # -C "$srcdir/precache"
++    #-C "$srcdir/precache"
      -D CMAKE_BUILD_TYPE=Release
      -D CMAKE_INSTALL_PREFIX=/usr
      -D WITH_LINKER_MOLD=ON
 -    -D CUDA_HOST_COMPILER="$NVCC_CCBIN"
 -    -D HIP_ROOT_DIR=/opt/rocm
--    # Skip targets gfx115{0,1} as they not supported by ROCm 6.0.2
--    -D CYCLES_HIP_BINARIES_ARCH="gfx900;gfx90c;gfx902;gfx1010;gfx1011;gfx1012;gfx1030;gfx1031;gfx1032;gfx1034;gfx1035;gfx1036;gfx1100;gfx1101;gfx1102;gfx1103"
+-    -D WITH_CYCLES_HIP_BIANRIES=ON
+-    -D WITH_CYCLES_DEVICE_HIPRT=ON
+-    -D HIPRT_INCLUDE_DIR=/opt/rocm/include
+-    -D HIP_LINKER_EXECUTABLE=/opt/rocm/lib/llvm/bin/clang++
      -D OCLOC_INSTALL_DIR=/usr
      -D OPTIX_ROOT_DIR="$srcdir"
      -D PYTHON_VERSION="$(_get_pyver)"
-@@ -185,6 +170,13 @@ build() {
+@@ -194,6 +174,13 @@ build() {
      -D WITH_CYCLES_OSL=ON
      -D WITH_INSTALL_PORTABLE=OFF
      -D WITH_PYTHON_INSTALL=OFF
@@ -102,7 +107,7 @@ index 8450ca8..e8d0e49 100644
      -G Ninja
      -S "$pkgname"
      -W no-dev
-@@ -214,7 +206,11 @@ package() {
+@@ -223,7 +210,11 @@ package() {
    rm -r "${pkgdir}"/usr/share/blender/4*/python
  
    # Move OneAPI AOT lib to proper place
