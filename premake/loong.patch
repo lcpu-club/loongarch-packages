@@ -1,0 +1,34 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 01eb384..3d17698 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -13,6 +13,29 @@ license=('BSD')
+ depends=('glibc')
+ source=("https://github.com/premake/premake-core/releases/download/v${_pkgver}/premake-${_pkgver}-src.zip")
+ sha512sums=('a349dabe3db5b503c283e836da89a5239007696f87756fe34e011bee655c86cd8ccc1c0c00f72a46d0d10302c2f5d67e37d566313e68a16406924a8ba70c5d8f')
++makedepends=('dos2unix')
++
++# add loongarch64 support
++source+=(
++  "premake-rescv.patch::https://github.com/premake/premake-core/commit/610924f549c1f61233fe1f5ab930b8bbc4489755.patch"
++  "premake-rescv2.patch::https://github.com/premake/premake-core/commit/25cab6fbd596bf97c14d496f4f0ed61bcbb6e45e.patch"
++  "premake-loong.patch::https://github.com/premake/premake-core/commit/928397f72c00979d57ec4688cb1fb26ec7f2449b.patch"
++)
++sha512sums+=(
++  '8988d8be35c7804c75093da85d0c0ed57c191c7e0bd4f001575f2833a2803f4492529fab711357bd51d79c7b99326e97a0550053d8ee0440c9d102a541090d40'
++  '734d10bca50241a0c248c403efc49c87ec8a292c50ba17ecbc95b580d1733285f2a6bce451c5b3fcdabd9f77456b359d5c9fa9ca03dbf3b7d038fbaca28354a6'
++  'f4c89cf642747480073ab89d5787cc3e0500e6cc05d3e66c535dbe6f93341165415bf2a7da7ba7e897381d547dd458de9b5d2a0b23ccfe91f0d6e13801040b7a'
++)
++
++prepare() {
++  cd "premake-$_pkgver-src/"
++
++  # add support for loongarch64
++  unix2dos -O ../premake-rescv.patch | patch -Np1 --binary
++  unix2dos -O ../premake-rescv2.patch | patch -Np1 --binary
++  unix2dos -O ../premake-loong.patch | patch -Np1 --binary
++
++}
+ 
+ build() {
+   cd "premake-$_pkgver-src/build/gmake2.unix"
