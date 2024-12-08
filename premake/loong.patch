@@ -1,15 +1,14 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 01eb384..3b47c2b 100644
+index 01eb384..52873af 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -26,3 +26,24 @@ package() {
+@@ -26,3 +26,23 @@ package() {
    install -Dm755 "bin/release/premake5" "${pkgdir}/usr/bin/premake5"
    install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
 +
 +# add loongarch64 support
-+# since riscv support (added recently) is also waiting for new release and their code do impact loong patch, add riscv patch as well.
 +makedepends=('dos2unix')
 +source+=(
 +  "premake-riscv.patch::https://github.com/premake/premake-core/commit/82c9d90495940e2d0d574e1c7849e9698f23b090.patch"
