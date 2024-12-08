@@ -7,7 +7,7 @@
  
  # Pacman won't upgrade packages listed in IgnorePkg and members of IgnoreGroup
  #IgnorePkg   =
-@@ -71,16 +71,16 @@
+@@ -73,16 +73,16 @@
  # after the header, and they will be used before the default mirrors.
  
  [core-testing]
