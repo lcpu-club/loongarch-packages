@@ -1,7 +1,7 @@
 # Maintainer: wszqkzqk <wszqkzqk@qq.com>
 
-_pkgver=1.2.1
-_patchver=9
+_pkgver=1.3.0
+_patchver=1
 pkgname=devtools-loong64
 pkgver=${_pkgver}.patch${_patchver}
 pkgrel=1
@@ -16,10 +16,10 @@ source=(makepkg-loong64.patch
         pacman-extra-staging-loong64.patch
         sogrep-loong64.patch
         valid-repos-loong64.sh)
-sha256sums=('bd7509dc15a0c49a801d009733ec8c2df69ed5cb6e30aecdaa24c9f9920d5fc4'
-            '2356999e91739f9887057dbd1a9ee9cefda4971c85a91793a81f20922877e3b8'
-            '63ad51bbb598673fdae9bba2cb483f996894262996543964951fb87b610586cd'
-            '6b545a5579957cd4fef8303a7fa27e3f754d3bd1b7fe47c3a7bb049ebf917388'
+sha256sums=('d1089694f58f52f265fa0e1c56cc7c78a6702be80abd1c141282bb0a1c503a17'
+            '16bae6549b594284d1e08caa831f67f5aa251447449a40c846ad9ad4701ca252'
+            '0bb9058a722971752ec714707eecca6af32f212069bbd2d138bbd4414eaf00c0'
+            '4866d3086f6846c070d2aa2add4258baf7111b1fe3d249cdc6a0580fa7e8cc85'
             '3e048911fb330cd92d88c330c91232d8e271c892aa239c82d979ffedc20c215c'
             '820cb7964fd724b88b3a4df87f3ca86b53c3d3e5c314024599dfc50afdcbc7a0')
 
