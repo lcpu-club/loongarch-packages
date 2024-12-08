@@ -1,0 +1,28 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 01eb384..52873af 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,3 +26,23 @@ package() {
+   install -Dm755 "bin/release/premake5" "${pkgdir}/usr/bin/premake5"
+   install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++
++# add loongarch64 support
++makedepends=('dos2unix')
++source+=(
++  "premake-riscv.patch::https://github.com/premake/premake-core/commit/82c9d90495940e2d0d574e1c7849e9698f23b090.patch"
++  "premake-loong.patch::https://github.com/premake/premake-core/commit/928397f72c00979d57ec4688cb1fb26ec7f2449b.patch"
++)
++sha512sums+=(
++  'd5dbd55bc27ac909c700b56fbd66b12c13d0133a3bfc4b42f964c5e7e8da961ddc40ddb922c5860558245507d0195c8cfd7301c04ad33bb983ca5125dad13cf3'
++  'f4c89cf642747480073ab89d5787cc3e0500e6cc05d3e66c535dbe6f93341165415bf2a7da7ba7e897381d547dd458de9b5d2a0b23ccfe91f0d6e13801040b7a'
++)
++
++prepare() {
++  cd "premake-$_pkgver-src/"
++
++  unix2dos -O "../premake-riscv.patch" | patch -Np1 --binary
++  unix2dos -O "../premake-loong.patch" | patch -Np1 --binary
++
++}
