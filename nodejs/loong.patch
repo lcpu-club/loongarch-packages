@@ -1,11 +1,9 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 5015e3f..a1710b6 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -69,7 +69,7 @@ build() {
- 
- check() {
-   cd node
+@@ -87,7 +87,7 @@ check() {
+   # - https://github.com/nodejs/node/issues/56159
+   # - https://github.com/nodejs/node/pull/56160
+   # - test/parallel/test-tls-psk-circuit.js different error code produced
 -  make test
 +  make test || echo "Watch out for failed tests!"
  }
