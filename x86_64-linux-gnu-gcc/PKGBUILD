@@ -99,5 +99,5 @@ package() {
   find "$pkgdir"/usr/bin/ "$pkgdir"/usr/lib/gcc/$_target/ -type f -and \( -executable \) -exec strip '{}' \;
 
   # Remove files that conflict with host gcc package
-  rm -r "$pkgdir/usr/share/"{man/man7,info,"gcc-$_pkgver"}
+  rm -r "$pkgdir/usr/share/"{man/man7,info,locale,"gcc-$_pkgver"}
 }
