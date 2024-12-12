@@ -1,0 +1,24 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index df986ad..935bad2 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -84,6 +84,8 @@ prepare() {
+   sed -n '3,8p' $_name-$pkgver/modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h > pslextensions.LicenseRef-Public-Domain.txt
+   cp -v $_name-$pkgver/modules/juce_audio_processors/format_types/LV2_SDK/lv2/COPYING lv2.ISC.txt
+ 
++  dos2unix -o $_name-$pkgver/modules/juce_audio_devices/native/oboe/include/oboe/StabilizedCallback.h
++  dos2unix -o $_name-$pkgver/extras/Build/CMake/juce_runtime_arch_detection.cpp
+   cd $_name-$pkgver
+   for _patch in ../*.patch; do
+     printf "Applying patch %s\n" "${_patch}"
+@@ -155,3 +157,9 @@ package_juce-docs() {
+   install -vDm 644 $_name-$pkgver/LICENSE.md -t "$pkgdir/usr/share/licenses/$pkgname/"
+   install -vDm 644 ./*.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
+ }
++source+=('juce_platform.patch'
++         'loong_fix_relax.patch')
++sha512sums+=('778946bb89b07a2eee52fd381c4f3aaf418b970469fab75b5b2c633616c2e3f4783a9d85d3674a815d3e0886c9a85b43a8623b544d4e92a2b531f37f6acfdac6'
++             'fb4f357dbcb94d61ed915e003aedcdbd1af8968b67008b787df974bdf6a190f93fcb0275cd0a33161ed7c5efc87ee041f0e53563f4aec9a155134872572d30d9')
++b2sums+=('5b6883e88720f908c1f6f0f40f8175fe65aaa56c51259fbc5d7254605f91fc6dd5e4249465c3f07b8b745e6e802434431b7976e4eb171d23c0563fe9684214b5'
++         '68474aa4a258dd6f4fec844213ba1999828a0414cc19858bcb57ed0fcb4f8476ec33bec0f9a20bea28a0e27a52148b3e2fe14ddbf514e759da3a467c9bed977f')
+\ No newline at end of file

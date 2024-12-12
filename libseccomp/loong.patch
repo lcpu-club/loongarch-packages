@@ -1,21 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -6,13 +6,12 @@
- pkgbase=libseccomp
- pkgname=(libseccomp python-libseccomp)
- pkgver=2.5.5
--pkgrel=3
-+pkgrel=3.1
- pkgdesc='Enhanced seccomp library'
- arch=('x86_64')
- license=('LGPL2.1')
- url="https://github.com/seccomp/libseccomp"
- depends=('glibc')
--checkdepends=('valgrind')
- makedepends=('gperf' 'cython' 'python-setuptools')
- source=(https://github.com/seccomp/${pkgname}/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.gz{,.asc})
- sha256sums=('248a2c8a4d9b9858aa6baf52712c34afefcf9c9e94b76dce02c1c9aa25fb3375'
-@@ -26,6 +25,7 @@ validpgpkeys=(
+@@ -26,6 +26,7 @@ validpgpkeys=(
  
  prepare() {
    cd ${pkgbase}-${pkgver}
@@ -23,7 +8,7 @@
    autoreconf -fiv
  }
  
-@@ -56,3 +56,6 @@ package_python-libseccomp() {
+@@ -56,3 +57,6 @@ package_python-libseccomp() {
  }
  
  # vim: ts=2 sw=2 et:

@@ -1,20 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -30,10 +30,12 @@ _commit=b6e04e2d47b4ca093632b9efde6303a137ea0634  # tags/pkgconf-2.1.1
- source=(
-   "git+$url#commit=$_commit"
-   {x86_64,i686}-pc-linux-gnu.personality
-+  loongarch64-unknown-linux-gnu.personality
- )
- b2sums=('SKIP'
-         'c04583e19149c1035cb7777a59f0fbc4988b672d8e45105e33def3d0f9054464e33a400a3e7c7e8b99b334e4fe06aaa9d7e34662e806096d4374bd6b12d803db'
--        '94c8fd12b5f33611fd6dbeae03b20e72bcf2937e764766e2633b2fd4c14925860d57eee234016c81b0563a47b112ac9ef4a8b3bb9fa3fc0dd266f355bc156c58')
-+        '94c8fd12b5f33611fd6dbeae03b20e72bcf2937e764766e2633b2fd4c14925860d57eee234016c81b0563a47b112ac9ef4a8b3bb9fa3fc0dd266f355bc156c58'
-+        '335aac01ee674f3d0d4d895145fa0fba29f053338ab6d5f9225a16d6f25de841ec812a77dc9bdd6fa7f0fe7a1f4e47cd6762540700741874a6190b3e41c5222e')
- 
- pkgver() {
-   cd pkgconf
-@@ -61,10 +63,16 @@ package() {
+@@ -55,10 +55,16 @@ package() {
    meson install -C build --destdir "$pkgdir"
  
    local p
@@ -35,3 +21,11 @@
  
    ln -s pkgconf "$pkgdir/usr/bin/pkg-config"
    ln -s pkgconf.1 "$pkgdir/usr/share/man/man1/pkg-config.1"
+@@ -66,4 +72,7 @@ package() {
+   install -Dt "$pkgdir/usr/share/licenses/$pkgname" -m644 pkgconf/COPYING
+ }
+ 
++source+=(loongarch64-unknown-linux-gnu.personality)
++b2sums+=('335aac01ee674f3d0d4d895145fa0fba29f053338ab6d5f9225a16d6f25de841ec812a77dc9bdd6fa7f0fe7a1f4e47cd6762540700741874a6190b3e41c5222e')
++
+ # vim:set sw=2 sts=-1 et:

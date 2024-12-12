@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 381e1b3..98920f6 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,6 +20,7 @@ pkgver() {
+ 
+ build() {
+   cd $pkgname
++  patch -p1 -i "${srcdir}/fix-build-with-btrfs-progs-6.10.1.patch"
+   make
+ }
+ 
+@@ -28,3 +29,6 @@ package() {
+   install -d "$pkgdir/usr/share/man/man8"
+   make install PREFIX="$pkgdir/usr"
+ }
++
++source+=("fix-build-with-btrfs-progs-6.10.1.patch::https://github.com/kilobyte/compsize/commit/a471982c82d1917637cce81a084fcd4b02d6e33b.patch")
++sha256sums+=('fddcaabf2fb9b61db37df415d5e8003e0ed567c1589c4eb2520b1a35f39b3d73')

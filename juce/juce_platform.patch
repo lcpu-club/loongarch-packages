@@ -1,0 +1,13 @@
+--- a/extras/Build/CMake/juce_runtime_arch_detection.cpp	2024-11-27 09:57:08.302000000 +0800
++++ b/extras/Build/CMake/juce_runtime_arch_detection.cpp	2024-11-27 10:33:03.264000000 +0800
+@@ -75,6 +75,10 @@
+     #error JUCE_ARCH riscv
+   #endif
+ 
++#elif defined(__loongarch64_lp64)
++
++  #error JUCE_ARCH loongarch64
++
+ #else
+ 
+   #error JUCE_ARCH unknown
