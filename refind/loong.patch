@@ -1,0 +1,31 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5ba99cb..78ab145 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,7 +16,7 @@ makedepends=(
+ source=(https://sourceforge.net/projects/refind/files/$pkgver/$pkgname-src-$pkgver.tar.gz)
+ sha512sums=('76a52ed422ab3d431e6530fae4d13a51e8ed100568d4290207aaee87a84700b077bb79c4f4917027f5286de422954e1872fca288252ec756072d6c075b102e1e')
+ b2sums=('987acb29d4d81c01db245cd8e1c9761072e34cf3dfaa3e4fa77e549ee2c1dc4c3f8cbd9218f42e4eb77478df3453095dba8b36324c289c6a10b81f1ecb202743')
+-_arch='x64'
++_arch='loongarch64'
+ 
+ prepare() {
+   cd $pkgbase-$pkgver
+@@ -27,6 +27,9 @@ prepare() {
+   sed -e 's|RefindDir=\"\$ThisDir/refind\"|RefindDir="/usr/share/refind/"|g' -i refind-install
+   # add vendor line to the sbat file
+   printf 'refind.%s,%s,%s,refind,%s,%s\n' 'arch' '1' 'Arch Linux' "${epoch:+${epoch}:}${pkgver}-${pkgrel}" 'https://archlinux.org/packages/?q=refind' >> refind-sbat.csv
++  cp ../loongarch64-support.patch ../loongarch64-support-archlinux.patch
++  sed -i '345,367d' ../loongarch64-support-archlinux.patch
++  patch -Np1 -i ../loongarch64-support-archlinux.patch
+ }
+ 
+ build() {
+@@ -103,3 +106,7 @@ package_refind-docs() {
+   install -vDm 644 docs/Styles/*.css -t "$pkgdir/usr/share/doc/$pkgbase/html/"
+   install -vDm 644 images/$pkgbase-banner.{png,svg} -t "$pkgdir/usr/share/doc/$pkgbase/html/"
+ }
++
++source+=(loongarch64-support.patch::https://github.com/loongarch64/RefindPkg/commit/62a1c7429fc51d6496cd59ebf88399b7520a7fd4.diff)
++sha512sums+=('00345d91efb6f79e3764fcd4b9bf7d6ced7fa14fe669c0a9edc8e58fdea6dd7d297ff52847e5563a9a0908b6231eee4a46f652e9f5b8365a7d189e6b6dcfa155')
++b2sums+=('b9d5c95a8f3eb263278f8225728b1f6d1ea04fe6890eaf8e571acfab318d5684efb246db45f2971ca6f4a74047fef2ccedeaa42742c20b84d95303a3dba4370d')
