@@ -4,8 +4,8 @@
    _kernver=$(</usr/src/linux/version)
  
    install -Dt "$pkgdir/usr/lib/modules/$_kernver/extramodules" -m0644 \
--    acpi_call/${pkgver}/$_kernver/$CARCH/module/*
-+    acpi_call/${pkgver}/$_kernver/$(uname -m)/module/*
+-    acpi_call/${pkgver}/$_kernver/$CARCH/module/*.ko
++    acpi_call/${pkgver}/$_kernver/$(uname -m)/module/*.ko
  
    # compress each module individually
    find "${pkgdir}" -name '*.ko' -exec zstd --rm -19 {} +
