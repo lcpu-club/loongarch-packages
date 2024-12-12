@@ -1,79 +1,54 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 1986071..5e4310f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -2,7 +2,7 @@
- # Contributor: Alexander Epaneshnikov <alex19ep@archlinux.org>
- 
- pkgbase=edk2
--pkgname=(edk2-arm edk2-aarch64 edk2-shell edk2-ovmf)
-+pkgname=(edk2-arm edk2-aarch64 edk2-shell edk2-loongarch64)
- pkgver=202408.01
- pkgrel=1
- pkgdesc="Modern, feature-rich firmware development environment for the UEFI specifications"
-@@ -112,10 +112,17 @@ b2sums=('2214e629c2ad261618cb2d036e7a3c74cab0eb191022c4f78049a3fbd3b9d72ffa87719
-         '04a7eb373d6ea1415d7cd6e8dea0d16b75cbb1fb88572a30b8ce9960dd0404adc7f25fce2ccfb103eb09405411dc4d4e0084236e4c814916d81e957dc6aedfd4'
-         'b53bbe532f9a7583bfbcc9436f2172f2dcaa75177c1480753a2a60d97a2fbd5bfb86b97b3f7c27d82e88eb2035c6607abb7e35d39a42e6a2d40c0b54d7c430ef'
-         '0c1e145109de9a25339633b563e47f6c09ea314f636023d09a58559a499dd0bd283a45e050fc99fe34c4d712bd00a035064fa8406734d57029c67b9adb4b11ce')
--_arch_list=(ARM AARCH64 IA32 X64)
-+_arch_list=(ARM AARCH64 LOONGARCH64)
- _build_type=RELEASE
- _build_plugin=GCC5
- 
-+source+=('edk2-platforms::git+https://github.com/tianocore/edk2-platforms.git#tag=76eb7fee0c421a01407b70f9bac67e2b5b58b5f2'
-+         '60-edk2-loongarch64.json')
-+sha512sums+=('SKIP'
-+             '66a0d97f0cc8b4c2184f235ace4fd372efa2cfa175178a05b40053c5e4ef887487e11813d3ff7193c4554c8841166c73dc4f930cb6ae04cd28125e51631d0a69')
-+b2sums+=('SKIP'
-+         'e273fb4d50a98e8dcbc6e439579508d03f38e64fc69e5671e9a01a0e6591b0241cedfe07f9fe9eaedca07c96a118c1ba7bf5556e51888826874c7e0386446cc2')
-+
- prepare() {
-   local submodule
- 
-@@ -169,6 +176,10 @@ prepare() {
- 
-   # -Werror, not even once
-   sed -e 's/ -Werror//g' -i BaseTools/Conf/*.template BaseTools/Source/C/Makefiles/*.makefile
-+  ln -sf $srcdir/edk2-platforms/Drivers .
-+  ln -sf $srcdir/edk2-platforms/Features .
-+  ln -sf $srcdir/edk2-platforms/Platform .
-+  ln -sf $srcdir/edk2-platforms/Silicon .
- }
- 
- # TODO: check TPM_ENABLE/TPM2_ENABLE
-@@ -202,6 +213,8 @@ build() {
+@@ -199,14 +199,22 @@ build() {
+   cd $pkgbase
+   export GCC5_IA32_PREFIX="x86_64-linux-gnu-"
+   export GCC5_X64_PREFIX="x86_64-linux-gnu-"
++  # Export the GCC5_BIN variable for x86
++  # x86 uses the GCC5_BIN variable to define the prefix for the compiler
++  # See: https://github.com/tianocore/edk2/blob/95972f966ebf4b61de8faf214809ef881f4ac129/BaseTools/Conf/tools_def.template#L98
++  export GCC5_BIN="x86_64-linux-gnu-"
+   export GCC5_AARCH64_PREFIX="aarch64-linux-gnu-"
+   export GCC5_ARM_PREFIX="arm-none-eabi-"
+   echo "Building base tools (AARCH64)"
    ARCH=AARCH64 make -C BaseTools
    echo "Building base tools (ARM)"
    ARCH=ARM make -C BaseTools
+-  echo "Building base tools"
+-  make -C BaseTools
++  echo "Building base tools (IA32)"
++  ARCH=IA32 make -C BaseTools
++  echo "Building base tools (X64)"
++  ARCH=X64 make -C BaseTools
 +  echo "Building base tools (LOONGARCH64)"
 +  ARCH=LOONGARCH64 make -C BaseTools
-   echo "Building base tools"
-   make -C BaseTools
    # expose build tooling in PATH
-@@ -307,6 +320,24 @@ build() {
+   . edksetup.sh
+ 
+@@ -316,6 +324,20 @@ build() {
        dd if=Build/ArmVirtQemu-$_arch/${_build_type}_$_build_plugin/FV/QEMU_EFI.fd of=Build/ArmVirtQemu-$_arch/${_build_type}_$_build_plugin/FV/QEMU_CODE.fd conv=notrunc
        dd if=/dev/zero of=Build/ArmVirtQemu-$_arch/${_build_type}_$_build_plugin/FV/QEMU_VARS.fd bs=1M count=64
        ;;
 +      LOONGARCH64)
 +      echo "Building ovmf ($_arch) with secure boot"
 +      local _build_options=(
-+        -p Platform/Loongson/LoongArchQemuPkg/Loongson.dsc
++        -p OvmfPkg/LoongArchVirt/LoongArchVirtQemu.dsc
 +        -a "${_arch}"
 +        "${_common_args[@]}"
 +        "${_efi_args[@]}"
-+        -D NETWORK_HTTP_BOOT_ENABLE
-+        -D NETWORK_TLS_ENABLE
 +        -D SECURE_BOOT_ENABLE
-+        -D TPM_ENABLE
-+        -D TPM_CONFIG_ENABLE
 +      )
 +      BaseTools/BinWrappers/PosixLike/build "${_build_options[@]}"
-+      dd if=/dev/zero of=Build/LoongArchQemu/${_build_type}_${_build_plugin}/FV/QEMU_CODE.fd bs=1M count=4
-+      dd if=Build/LoongArchQemu/${_build_type}_${_build_plugin}/FV/QEMU_EFI.fd of=Build/LoongArchQemu/${_build_type}_${_build_plugin}/FV/QEMU_CODE.fd conv=notrunc
-+      dd if=/dev/zero of=Build/LoongArchQemu/${_build_type}_${_build_plugin}/FV/QEMU_VARS.fd bs=1M count=16
++      dd if=/dev/zero of=Build/LoongArchVirtQemu/${_build_type}_${_build_plugin}/FV/QEMU_CODE.fd bs=1M count=4
++      dd if=Build/LoongArchVirtQemu/${_build_type}_${_build_plugin}/FV/QEMU_EFI.fd of=Build/LoongArchVirtQemu/${_build_type}_${_build_plugin}/FV/QEMU_CODE.fd conv=notrunc
++      dd if=/dev/zero of=Build/LoongArchVirtQemu/${_build_type}_${_build_plugin}/FV/QEMU_VARS.fd bs=1M count=16
 +      ;;
      esac
    done
  }
-@@ -356,6 +387,21 @@ package_edk2-arm() {
+@@ -365,6 +387,21 @@ package_edk2-arm() {
    install -vDm 644 License.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
  
@@ -81,10 +56,10 @@
 +  local _arch=LOONGARCH64
 +
 +  pkgdesc="Firmware for Virtual Machines (loongarch64)"
-+  url="https://github.com/tianocore/tianocore.github.io/wiki/LoongArchQemuPkg"
++  url="https://github.com/tianocore/edk2/tree/master/OvmfPkg/LoongArchVirt"
 +
 +  cd $pkgbase
-+  install -vDm 644 Build/LoongArchQemu/${_build_type}_${_build_plugin}/FV/*.fd -t "$pkgdir/usr/share/$pkgbase/${_arch,,}/"
++  install -vDm 644 Build/LoongArchVirtQemu/${_build_type}_${_build_plugin}/FV/*.fd -t "$pkgdir/usr/share/$pkgbase/${_arch,,}/"
 +  # install qemu descriptors in accordance with qemu:
 +  # https://git.qemu.org/?p=qemu.git;a=tree;f=pc-bios/descriptors
 +  install -vDm 644 ../*$pkgname*.json -t "$pkgdir/usr/share/qemu/firmware/"
@@ -95,17 +70,15 @@
  package_edk2-shell() {
    local _arch
    # minimal UEFI shell, as defined in ShellPkg/Application/Shell/ShellPkg.inf
-@@ -377,6 +423,8 @@ package_edk2-shell() {
-   install -vDm 644 {ReadMe.rst,Maintainers.txt} -t "$pkgdir/usr/share/doc/$pkgname/"
- }
- 
-+# Use a "multi-line comment" to keep patch from rotting
-+: <<COMMENT_SEPARATOR
- package_edk2-ovmf() {
-   local _arch
- 
-@@ -418,3 +466,4 @@ package_edk2-ovmf() {
+@@ -427,3 +464,11 @@ package_edk2-ovmf() {
    # docs
    install -vDm 644 {OvmfPkg/README,ReadMe.rst,Maintainers.txt} -t "$pkgdir/usr/share/doc/$pkgname/"
  }
-+COMMENT_SEPARATOR
++
++pkgname+=(edk2-loongarch64)
++_arch_list+=(LOONGARCH64)
++makedepends+=(x86_64-linux-gnu-gcc)
++
++source+=('60-edk2-loongarch64.json')
++sha512sums+=('66a0d97f0cc8b4c2184f235ace4fd372efa2cfa175178a05b40053c5e4ef887487e11813d3ff7193c4554c8841166c73dc4f930cb6ae04cd28125e51631d0a69')
++b2sums+=('e273fb4d50a98e8dcbc6e439579508d03f38e64fc69e5671e9a01a0e6591b0241cedfe07f9fe9eaedca07c96a118c1ba7bf5556e51888826874c7e0386446cc2')
