@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8de8306..29c03f1 100755
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,7 @@ sha512sums=('3a0776ac175beb82b2aea0d384b60896cd1ee1055b414765965edd621839c8292fa
+ 
+ build() {
+   cd numpy-$pkgver
++  patch -p1 -d numpy/_core/src/highway -i "${srcdir}/fix-build-in-case-building-for-loongarch-already-not-yet-supported.patch"
+   CFLAGS+=" -ffat-lto-objects" \
+   CXXFLAGS+=" -ffat-lto-objects" \
+   python -m build --wheel --no-isolation \
+@@ -45,3 +46,6 @@ package() {
+   ln -s "$site_packages"/numpy-$pkgver.dist-info/LICENSE.txt \
+     "$pkgdir"/usr/share/licenses/$pkgname/LICENSE.txt
+ }
++
++source+=("fix-build-in-case-building-for-loongarch-already-not-yet-supported.patch::https://github.com/google/highway/commit/3da38ea275ef23a08e6ac9098637038ab135081f.patch")
++sha512sums+=('e8ff75e420153afaf4a4ddf682132381a3c06c8bf5a16c2ad24bc0c0cafe5149035d5d0647c478fbaf0e0a67bfb185fdb706d470290b7f59ca0fc7384ea8a71b')
