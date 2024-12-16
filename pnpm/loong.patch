@@ -1,19 +1,13 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index bb6a4e3..3aacca3 100644
+index 3dccb96..79c571c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -20,6 +20,7 @@ validpgpkeys=(7B74D1299568B586BA9962B5649E4D4AF74E7DEC) # Zoltan Kochan <z@kocha
+@@ -20,6 +20,8 @@ validpgpkeys=(7B74D1299568B586BA9962B5649E4D4AF74E7DEC) # Zoltan Kochan <z@kocha
  
  prepare() {
    cd $pkgname/$pkgname
-+  patch -Np1 -d .. -i "${srcdir}/add-pnpm-linux-loong64.patch"
++  rm -r artifacts
++  sed -i '/@yao-pkg\/pkg/d' ../package.json
    pnpm install # --frozen-lockfile currently requires pre-release pnpm 10
  }
  
-@@ -41,3 +42,6 @@ package() {
-   cd dist
-   cp -r $pkgname.cjs pnpmrc templates worker.js "$pkgdir"/$mod_dir/dist
- }
-+
-+source+=("add-pnpm-linux-loong64.patch")
-+b2sums+=('532a1bac856c25baa0aa1a9ed0e5b4084027d54c03edf084e42c79b171627d6f373ef1a94aa2b328a64e54c20f60ddabf99a33918666ff76b37b99bf11c0335b')
