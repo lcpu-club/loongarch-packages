@@ -1,0 +1,49 @@
+#!/bin/bash
+
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+  echo "Usage: export-loong64-patches [package-path] [destination-directory]"
+  exit 0
+fi
+
+if [[ $# -gt 2 ]]; then
+  echo "Error: Too many arguments."
+  exit 1
+fi
+
+PATCH_DIR="loong64-patches"
+if [[ $# -eq 2 ]]; then
+  cd "$1" || exit
+  PATCH_DIR="$2"
+elif [[ $# -eq 1 ]]; then
+  PATCH_DIR="$1"
+fi
+
+mkdir -p "$PATCH_DIR"
+
+original_pkgrel=$(grep '^pkgrel=' "PKGBUILD")
+if [[ $original_pkgrel =~ pkgrel=([0-9]+)\.([0-9]+) ]]; then
+    echo "Ignore to export change of pkgrel to patch."
+    num1=${BASH_REMATCH[1]}
+    sed -i "s/pkgrel=[0-9]\+\.[0-9]\+/pkgrel=$num1/" "PKGBUILD"
+fi
+
+echo "Exporting: loong.patch..."
+git diff > "$PATCH_DIR/loong.patch"
+
+sed -i "s/pkgrel=[0-9]\+/$original_pkgrel/" "PKGBUILD"
+
+sources=$(. PKGBUILD && echo "${source[@]}")
+
+untracked_files=$(git ls-files --others --exclude-standard)
+
+for file in $sources; do
+  if [ -f "$file" ]; then
+    for untracked_file in $untracked_files; do
+      if [ "$file" == "$untracked_file" ]; then
+        echo "Copying: $file..."
+        cp "$file" "$PATCH_DIR"
+        break
+      fi
+    done
+  fi
+done
