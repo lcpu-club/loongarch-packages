@@ -1,7 +1,7 @@
 # Maintainer: wszqkzqk <wszqkzqk@qq.com>
 
 _pkgver=1.3.0
-_patchver=2
+_patchver=3
 pkgname=devtools-loong64
 pkgver=${_pkgver}.patch${_patchver}
 pkgrel=1
@@ -9,28 +9,43 @@ pkgdesc='Tools for Arch Linux LoongArch package maintainers'
 arch=('loong64' 'x86_64' 'riscv64' 'aarch64')
 license=('GPL-3.0-or-later')
 url='https://gitlab.archlinux.org/archlinux/devtools'
-depends=("devtools>=1:${_pkgver}")
+depends=("bash"
+         "coreutils"
+         "devtools>=1:${_pkgver}"
+         "grep"
+         "git"
+         "patch"
+         "pyalpm"
+         "python"
+         "python-gobject"
+         "sed")
 source=(makepkg-loong64.patch
         pacman-extra-loong64.patch
         pacman-extra-testing-loong64.patch
         pacman-extra-staging-loong64.patch
         sogrep-loong64.patch
-        valid-repos-loong64.sh)
+        valid-repos-loong64.sh
+        # Extra tools for loong64 maintainers
+        export-loong64-patches
+        get-loong64-pkg
+        # Following items are unused in loong64
+        mirrorlist-loong64
+        z-qemu-loong64-static-for-archpkg.conf)
 sha256sums=('7d596664948b82aaef8f0c6149f00ebbce830433216b504e58fbe6fa0ea4cf63'
             '16bae6549b594284d1e08caa831f67f5aa251447449a40c846ad9ad4701ca252'
             '0bb9058a722971752ec714707eecca6af32f212069bbd2d138bbd4414eaf00c0'
             '4866d3086f6846c070d2aa2add4258baf7111b1fe3d249cdc6a0580fa7e8cc85'
             '3e048911fb330cd92d88c330c91232d8e271c892aa239c82d979ffedc20c215c'
-            '820cb7964fd724b88b3a4df87f3ca86b53c3d3e5c314024599dfc50afdcbc7a0')
+            '820cb7964fd724b88b3a4df87f3ca86b53c3d3e5c314024599dfc50afdcbc7a0'
+            'a33135cf0adf39bc93076928eade0a9b2efb24d8bdc692d61bd1a00552c74d7a'
+            '8cd4e6d19d51b984c579cabc4f701767b49ed295d72215abc630c7c67173081a'
+            'b0d95a78ea22f28dc9d0c450e7c7f376a8772e15b7140be034d4c0538a95f63c'
+            '0fa4957e6a2097a288036d18953969ff765912518f5b6a01f983a3d2f7f6a8e1')
 
 if [[ ! "$CARCH" =~ loong ]]; then
   depends+=(qemu-user-static)
   provides+=(pacman-mirrorlist-loong64)
   backup+=(etc/pacman.d/mirrorlist-loong64)
-  source+=(mirrorlist-loong64
-           z-qemu-loong64-static-for-archpkg.conf)
-  sha256sums+=('b0d95a78ea22f28dc9d0c450e7c7f376a8772e15b7140be034d4c0538a95f63c'
-               '0fa4957e6a2097a288036d18953969ff765912518f5b6a01f983a3d2f7f6a8e1')
 fi
 
 package() {
@@ -56,4 +71,7 @@ package() {
   else # loongarch64 <--> loong64
     echo "$(uname -m)" > "$pkgdir"/usr/share/devtools/setarch-aliases.d/loong64
   fi
+
+  install -Dm755 "${srcdir}/get-loong64-pkg" -t "$pkgdir"/usr/bin/
+  install -Dm755 "${srcdir}/export-loong64-patches" -t "$pkgdir"/usr/bin/
 }

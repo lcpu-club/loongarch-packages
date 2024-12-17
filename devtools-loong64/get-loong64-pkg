@@ -1,0 +1,301 @@
+#!/usr/bin/env python3
+
+"""
+A tool for managing and patching packages for the loong64 architecture.
+
+This script handles the following tasks:
+- Downloads and updates package repositories
+- Applies loong64-specific patches to packages
+- Manages package version control
+- Updates build configurations for loong64 architecture
+"""
+
+import os
+import sys
+import subprocess
+import argparse
+import pyalpm
+import urllib.request
+import shutil
+import re
+from typing import Optional, List
+import gi
+gi.require_version('GLib', '2.0')
+from gi.repository import GLib
+
+CACHE_DIR: str = os.path.join(GLib.get_user_cache_dir(), "devtools-loong64")
+PATCH_GIT: str = "https://github.com/lcpu-club/loongarch-packages.git"
+PATCH_FILE: str = "loong.patch"
+PATCH_REPO_PATH: str = os.path.join(CACHE_DIR, "loongarch-packages")
+X86_REPOS: tuple[str] = (
+    "core-staging",
+    "core-testing",
+    "core",
+    "extra-staging",
+    "extra-testing",
+    "extra")
+X86_DB_PATH: str = os.path.join(CACHE_DIR, "repo-db", "x86")
+CARGO_FETCH_REGEX = re.compile(r'(cargo\s+fetch.*?)(x86_64|\$CARCH)')
+UPDATE_CONFIG_REGEX = re.compile(
+    r'(build\s*\(\s*\)\s*{.*?^\s*cd\s+[^\n]*$)',
+    re.MULTILINE | re.DOTALL)
+
+def download_file(source: str, dest: str) -> None:
+    """
+    Download a file from a given URL to a local destination.
+
+    Args:
+        source (str): The URL of the file to download
+        dest (str): The local path where the file should be saved
+
+    Raises:
+        Exception: If the download fails for any reason
+    """
+    headers = {"User-Agent": "Mozilla/5.0"}
+    repo_path = os.path.dirname(dest)
+    if not os.path.exists(repo_path):
+        os.makedirs(repo_path)
+
+    try:
+        req = urllib.request.Request(source, headers=headers)
+        with urllib.request.urlopen(req) as response, open(dest, 'wb') as out_file:
+            out_file.write(response.read())
+    except Exception as e:
+        print(f"Error downloading file: {e}")
+
+def update_repo(mirror_x86: str) -> None:
+    """
+    Update the local repository database from a specified mirror.
+
+    Args:
+        mirror_x86 (str): The base URL of the x86_64 package mirror
+    """
+    for repo in X86_REPOS:
+        download_file(f"{mirror_x86}/{repo}/os/x86_64/{repo}.db",
+                     os.path.join(X86_DB_PATH, "sync", f"{repo}.db"))
+
+def load_repo(dir_path: str, repo: str) -> Optional[pyalpm.DB]:
+    """
+    Load a package repository database.
+
+    Args:
+        dir_path (str): The directory path where the repository database is located
+        repo (str): The name of the repository to load
+
+    Returns:
+        Optional[pyalpm.DB]: The loaded repository database, or None if loading fails
+    """
+    handle = pyalpm.Handle("/", dir_path)
+    try:
+        db = handle.register_syncdb(repo, 0)
+        return db
+    except pyalpm.error as e:
+        print(f"Failed to load repo {dir_path}: {e}")
+        return None
+
+def update_status(mirror_x86: str) -> None:
+    """
+    Update both the patch repository and package database.
+
+    This function ensures that both the local patch repository and package database
+    are up to date with their respective remote sources.
+
+    Args:
+        mirror_x86 (str): The base URL of the x86_64 package mirror
+    """
+    if os.path.isdir(PATCH_REPO_PATH):
+        print(f"Updating existing {PATCH_REPO_PATH}...")
+        subprocess.run(["git", "-C", PATCH_REPO_PATH, "fetch", "--all"])
+        subprocess.run(["git", "-C", PATCH_REPO_PATH, "reset", "--hard", "origin/master"])
+    else:
+        print(f"Cloning PATCH_REPO_PATH to {PATCH_REPO_PATH}...")
+        os.makedirs(os.path.dirname(PATCH_REPO_PATH), exist_ok=True)
+        subprocess.run(["git", "clone", PATCH_GIT, PATCH_REPO_PATH])
+
+    update_repo(mirror_x86)
+
+def modify_pkgbuild_config(pkgbuild_path: str) -> None:
+    """
+    Add config.sub and config.guess update commands after cd command in build().
+
+    This function injects necessary commands into the PKGBUILD's build() function
+    to ensure the build system correctly recognizes the loong64 architecture.
+    It adds commands to copy the latest config.sub and config.guess files from
+    the system's automake package.
+
+    Args:
+        pkgbuild_path (str): Path to the PKGBUILD file to be modified
+    """
+    with open(pkgbuild_path, 'r') as f:
+        content = f.read()
+    
+    update_commands = """
+  for c_s in $(find -type f -name config.sub -o -name configure.sub); do cp -f /usr/share/automake-1.1?/config.sub "$c_s"; done
+  for c_g in $(find -type f -name config.guess -o -name configure.guess); do cp -f /usr/share/automake-1.1?/config.guess "$c_g"; done"""
+    
+    new_content = UPDATE_CONFIG_REGEX.sub(r'\1' + update_commands, content)
+    
+    if new_content != content:
+        with open(pkgbuild_path, 'w') as f:
+            f.write(new_content)
+        print("Added config.sub and config.guess update to PKGBUILD.")
+
+def modify_pkgbuild_cargo_fetch(pkgbuild_path: str) -> None:
+    """
+    Modify cargo fetch commands in PKGBUILD
+    
+    This function replaces x86_64 or $CARCH in cargo fetch commands with $(uname -m).
+
+    Args:
+        pkgbuild_path (str): Path to the PKGBUILD file to be modified
+    """
+    with open(pkgbuild_path, 'r') as f:
+        content = f.read()
+
+    new_content = CARGO_FETCH_REGEX.sub(r'\1$(uname -m)', content)
+
+    if new_content != content:
+        with open(pkgbuild_path, 'w') as f:
+            f.write(new_content)
+        print("Automatically changed 'cargo fetch' to use 'uname -m'.")
+
+def process_target_version(version: Optional[str]) -> Optional[str]:
+    """
+    Process the target version of the package to be checked out.
+
+    Args:
+        version (str): The target version to be checked out
+
+    Returns:
+        str: The processed target version
+    """
+    # Keep the order of the repos
+    core_repos = []
+    extra_repos = []
+    processed_version: Optional[str] = version
+    if processed_version == "staging":
+        core_repos.append(load_repo(X86_DB_PATH, "core-staging"))
+        core_repos.append(load_repo(X86_DB_PATH, "core-testing"))
+        extra_repos.append(load_repo(X86_DB_PATH, "extra-staging"))
+        extra_repos.append(load_repo(X86_DB_PATH, "extra-testing"))
+        processed_version = None # not a specific version
+    elif processed_version == "testing":
+        core_repos.append(load_repo(X86_DB_PATH, "core-testing"))
+        extra_repos.append(load_repo(X86_DB_PATH, "extra-testing"))
+        processed_version = None # not a specific version
+
+    if (not processed_version) or (processed_version == "stable"):
+        core_repos.append(load_repo(X86_DB_PATH, "core"))
+        extra_repos.append(load_repo(X86_DB_PATH, "extra"))
+        repos = core_repos + extra_repos # core repos first
+        processed_version = None # not a specific version
+
+        pkgnames = subprocess.check_output(['bash', '-c', r'source PKGBUILD; echo "${pkgname[@]}"']).decode().strip().split()
+        for pkgname in pkgnames:
+            for repo in repos:
+                if repo:
+                    pkg = repo.get_pkg(pkgname)
+                    if pkg:
+                        processed_version = pkg.version
+                        break
+            if processed_version:
+                break
+
+    return processed_version
+
+def main() -> None:
+    """
+    Main function that orchestrates the package patching process.
+    """
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(
+        description='A tool for managing and patching Arch Linux build scripts for loong64 architecture. '
+                   'This utility downloads package sources, applies loong64-specific patches, '
+                   'and handles updates.',
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    parser.add_argument('pkgbase',
+        help='Name of the pkgbase to be processed')
+    parser.add_argument('-m', '--mirror',
+        help='Mirror URL for Arch Linux official package database to get version info (default: %(default)s)',
+        default="https://geo.mirror.pkgbuild.com",
+        metavar='URL')
+    parser.add_argument('-c', '--checkout',
+        help='Checkout a specific version of the package may be "stable", "testing", "staging", '
+        '"main" , commit hash or a specific version pkgver-pkgrel, default is the current stable version',
+        metavar='VERSION')
+
+    args: argparse.Namespace = parser.parse_args()
+
+    mirror_x86: str = args.mirror
+    pkgbase: str = args.pkgbase
+    version: Optional[str] = args.checkout
+
+    update_status(mirror_x86)
+
+    patch_dir: str = os.path.join(PATCH_REPO_PATH, pkgbase)
+
+    print("Cloning official package repository...")
+
+    if os.path.isdir(patch_dir) and not os.path.exists(os.path.join(patch_dir, PATCH_FILE)):
+        print(f"{patch_dir} exists, but {os.path.exists(os.path.join(patch_dir, PATCH_FILE))} does not exist.")
+        print("It's a full package repository, not a patch repository.")
+        print("Copying the full package files...")
+        shutil.copytree(patch_dir, pkgbase, dirs_exist_ok=True)
+        print("Done.")
+        sys.exit(0)
+    else:
+        subprocess.run(["pkgctl", "repo", "clone", "--protocol=https", pkgbase])
+        os.chdir(pkgbase)
+        git_status = subprocess.check_output(
+            ["git", "status"], env={"LC_ALL": "C"}
+        ).decode()
+        if "modified:" in git_status:
+            subprocess.run(["git", "stash"])
+        subprocess.run(["git", "checkout", "main"])
+        subprocess.run(["git", "pull"])
+
+        processed_version = process_target_version(version)
+
+        if processed_version:
+            if (not version) or (processed_version == version):
+                print(f"Checking out: {processed_version}")
+            else:
+                print(f"Checking out: {processed_version} (requested: {version})")
+            subprocess.run(["git", "checkout", processed_version])
+        else:
+            print("Warning: Failed to find a version in Arch Linux's stable repo!")
+        os.chdir("..")
+
+    if os.path.isdir(patch_dir):
+        print("Copying patches...")
+        for filename in os.listdir(patch_dir):
+            if os.path.isfile(os.path.join(patch_dir, filename)):
+                shutil.copy2(os.path.join(patch_dir, filename), os.path.join(pkgbase, filename))
+            else:
+                shutil.copytree(os.path.join(patch_dir, filename), os.path.join(pkgbase, filename), dirs_exist_ok=True)
+        os.chdir(pkgbase)
+        if os.path.isfile(PATCH_FILE):
+            print(f"Applying patch {PATCH_FILE}...")
+            subprocess.run(["patch", "-p1", "-i", PATCH_FILE])
+        else:
+            print("No 'loong.patch' found.")
+            sys.exit(1)
+    else:
+        print(f"No patch of {pkgbase} found.")
+        pkgbuild_path = os.path.join(pkgbase, "PKGBUILD")
+        update_config_path = os.path.join(PATCH_REPO_PATH, "update_config")
+
+        if os.path.isfile(pkgbuild_path):
+            modify_pkgbuild_cargo_fetch(pkgbuild_path)
+
+            if os.path.isfile(update_config_path):
+                with open(update_config_path, "r") as f:
+                    if pkgbase in f.read().splitlines():
+                        modify_pkgbuild_config(pkgbuild_path)
+        else:
+            print(f"No PKGBUILD found in {pkgbase}.")
+            sys.exit(1)
+    print("Done.")
+
+if __name__ == "__main__":
+    main()
