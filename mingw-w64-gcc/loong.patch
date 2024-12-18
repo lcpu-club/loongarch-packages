@@ -1,14 +1,14 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -10,7 +10,6 @@ license=('GPL' 'LGPL' 'FDL' 'custom')
- groups=('mingw-w64-toolchain' 'mingw-w64')
- depends=('zlib' 'libisl' 'libmpc' 'mingw-w64-crt' 'mingw-w64-binutils' 'mingw-w64-winpthreads' 'mingw-w64-headers')
+@@ -26,7 +26,6 @@ depends=(
+   zstd
+ )
  # gcc-d doesn't build as of 13.1.0
--makedepends=("gcc-ada")
- options=('!strip' 'staticlibs' '!emptydirs' '!buildflags')
+-makedepends=('gcc-ada')
+ options=('staticlibs' '!emptydirs' '!buildflags')
  source=(https://ftp.gnu.org/gnu/gcc/gcc-$pkgver/gcc-$pkgver.tar.xz{,.sig})
  validpgpkeys=(D3A93CAD751C2AF4F8C7AD516C35B99309B5FA62  # Jakub Jelinek <jakub@redhat.com>
-@@ -34,7 +33,7 @@ build() {
+@@ -52,7 +51,7 @@ build() {
      "$srcdir"/gcc/configure --prefix=/usr --libexecdir=/usr/lib \
          --target=${_arch} \
          --with-bugurl=https://bugs.archlinux.org/ \
@@ -17,7 +17,7 @@
          --enable-shared --enable-static \
          --enable-threads=posix --enable-fully-dynamic-string \
          --enable-libstdcxx-time=yes --enable-libstdcxx-filesystem-ts=yes \
-@@ -52,7 +51,7 @@ package() {
+@@ -70,7 +69,7 @@ package() {
      make DESTDIR="$pkgdir" install
      ${_arch}-strip "$pkgdir"/usr/${_arch}/lib/*.dll
      strip "$pkgdir"/usr/bin/${_arch}-*
