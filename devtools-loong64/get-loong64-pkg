@@ -257,11 +257,13 @@ def main() -> None:
         processed_version = process_target_version(version)
 
         if processed_version:
+            # Arch Linux's git tags for versions replace ":" with "-"
+            tag = processed_version.replace(":", "-")
             if (not version) or (processed_version == version):
                 print(f"Checking out: {processed_version}")
             else:
                 print(f"Checking out: {processed_version} (requested: {version})")
-            subprocess.run(["git", "checkout", processed_version])
+            subprocess.run(["git", "checkout", tag])
         else:
             print("Warning: Failed to find a version in Arch Linux's stable repo!")
         os.chdir("..")
