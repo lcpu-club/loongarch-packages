@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 8ca1dbd..3dd1356 100644
+index 18e81b7..19f6acf 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -30,7 +30,6 @@ depends=(
@@ -19,18 +19,15 @@ index 8ca1dbd..3dd1356 100644
    'jack'  # dlopen'ed
    'jemalloc'
    'level-zero-loader'  # dlopen'ed
-@@ -67,10 +64,8 @@ depends=(
+@@ -67,7 +64,6 @@ depends=(
    'openal'
    'opencolorio'
    'openexr'
 -  'openimagedenoise'
    'openimageio'
    'openjpeg2'
--  'openpgl'
-   'openshadinglanguage'
-   'opensubdiv'
-   'openvdb'
-@@ -83,7 +78,6 @@ depends=(
+   'openpgl'
+@@ -83,7 +79,6 @@ depends=(
    'python-requests'
    'sdl2'  # dlopen'ed
    'shared-mime-info'
@@ -38,7 +35,7 @@ index 8ca1dbd..3dd1356 100644
    'xdg-utils'
    'yaml-cpp'
    'zlib'
-@@ -92,14 +86,8 @@ depends=(
+@@ -92,14 +87,8 @@ depends=(
  makedepends=(
    'boost'
    'cmake'
@@ -53,7 +50,7 @@ index 8ca1dbd..3dd1356 100644
    'level-zero-headers'
    'libdecor'
    'mold'
-@@ -109,11 +97,6 @@ makedepends=(
+@@ -109,11 +98,6 @@ makedepends=(
    'subversion'
    'wayland-protocols'
  )
@@ -65,17 +62,17 @@ index 8ca1dbd..3dd1356 100644
  # We're using !lto here as otherwise we get stuff such as FS#77557
  options=('!lto')
  source=("git+https://projects.blender.org/blender/blender.git#tag=v$pkgver"
-@@ -161,6 +144,9 @@ prepare() {
-   patch -p1 -i "$srcdir"/ffmpeg-7-2.patch
+@@ -166,6 +150,9 @@ prepare() {
  
-   patch -p1 -i "$srcdir"/hiprt-lib-path.patch
+   # Python 3.13 support
+   patch -p1 -i "$srcdir"/d9f38fca5ffe29136cd6f390e318ad8455864582.patch
 +
 +  # Support loong64
 +  patch -p1 -i "$srcdir"/add-loong64-support.patch
  }
  
  _get_pyver() {
-@@ -174,16 +160,10 @@ build() {
+@@ -179,16 +166,10 @@ build() {
    local cmake_options=(
      -B build
      -C "$pkgname/build_files/cmake/config/blender_release.cmake"
@@ -93,7 +90,7 @@ index 8ca1dbd..3dd1356 100644
      -D OCLOC_INSTALL_DIR=/usr
      -D OPTIX_ROOT_DIR="$srcdir"
      -D PYTHON_VERSION="$(_get_pyver)"
-@@ -194,6 +174,13 @@ build() {
+@@ -199,6 +180,13 @@ build() {
      -D WITH_CYCLES_OSL=ON
      -D WITH_INSTALL_PORTABLE=OFF
      -D WITH_PYTHON_INSTALL=OFF
@@ -107,7 +104,7 @@ index 8ca1dbd..3dd1356 100644
      -G Ninja
      -S "$pkgname"
      -W no-dev
-@@ -223,7 +210,11 @@ package() {
+@@ -228,7 +216,11 @@ package() {
    rm -r "${pkgdir}"/usr/share/blender/4*/python
  
    # Move OneAPI AOT lib to proper place
