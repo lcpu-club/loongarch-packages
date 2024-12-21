@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 678ab2f..50f8aa5 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,3 +36,16 @@ package() {
+ 	install -Dm0755 -t "$pkgdir/usr/bin/" "$pkgname"
+ 	install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname/" LICENSE
+ }
++
++prepare() {
++	cd "$_archive"
++	go mod download
++
++	goselect_path="$(go env GOMODCACHE)/github.com/creack/goselect@v0.1.2"
++	chmod -R u+w "$goselect_path" # Make writable to apply patch
++	patch -d "$goselect_path" -p1 < ../goselect-add-loong64-support.patch
++	chmod -R a-w "$goselect_path" # Restore read-only
++}
++
++source+=('goselect-add-loong64-support.patch::https://github.com/creack/goselect/commit/8eac7f782437d0705be21241336aedf16d44dc8e.patch')
++sha256sums+=('2f80f35e8ddd42e12183dd5c9bfe1f25d98c866496102181ef55041ba8459462')
