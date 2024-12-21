@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5d7d939..562df14 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,6 +20,8 @@ build() {
+   export CGO_CXXFLAGS="${CXXFLAGS}"
+   export CGO_LDFLAGS="${LDFLAGS}"
+   export GOFLAGS="-buildmode=pie -trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw"
++  go mod edit -replace github.com/tklauser/go-sysconf=github.com/tklauser/go-sysconf@v0.3.14
++  go mod tidy
+   mage build
+ }
+ 
