@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b863837..c5f5214 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -33,3 +33,11 @@ package() {
+ 	./cilium-cli completion zsh | install -Dm644 /dev/stdin "$pkgdir/usr/share/zsh/site-functions/_cilium-cli"
+ 	./cilium-cli completion fish | install -Dm644 /dev/stdin "$pkgdir/usr/share/fish/vendor_completions.d/cilium-cli.fish"
+ }
++
++prepare() {
++	cd "$pkgname-$pkgver"
++	patch -p1 -d vendor/github.com/cilium/cilium -i "${srcdir}/add-loong64-support.patch"
++}
++
++source+=("add-loong64-support.patch::https://github.com/wszqkzqk/cilium/commit/de0e1d70b4437d81f1dc9c34152ad8f542ad54bf.patch")
++sha256sums+=('2584bdb910206ba88d4b982f6cca590c1adf51bebef2082cfb99ab7b136c1a5e')
