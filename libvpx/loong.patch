@@ -1,13 +1,18 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 50af858..ed86326 100644
+index 9e98e1e..9fd7cbe 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -34,6 +34,8 @@ build() {
-     --prefix=/usr \
-     --disable-install-docs \
-     --disable-install-srcs \
-+    --disable-lsx \
-+    --disable-lasx \
-     --disable-unit-tests \
-     --enable-pic \
-     --enable-postproc \
+@@ -27,6 +27,13 @@ pkgver() {
+   git describe --tags | sed 's/^v//'
+ }
+ 
++prepare() {
++  cd libvpx
++  # Back port fix for LSX/LASX
++  git cherry-pick -n a7863b9a2f01e5d22919a51c95cbc4a9c10fbb2c
++  git cherry-pick -n a604e10afbb2e711e62d8d9ca9c64b368e30b0e2
++}
++
+ build() {
+   cd libvpx
+   ./configure \
