@@ -1,14 +1,5 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -3,7 +3,7 @@
- 
- pkgname=python-blosc2
- pkgver=2.7.1
--pkgrel=2
-+pkgrel=2.1
- pkgdesc='Wrapper for the blosc2 compressor'
- arch=('x86_64')
- url='https://github.com/Blosc/python-blosc2'
 @@ -31,7 +31,7 @@ makedepends=(
  checkdepends=(
    'python-psutil'
