@@ -17,25 +17,15 @@
    'perl'
    'perl-ipc-run'
    'python'
-@@ -92,11 +89,17 @@ prepare() {
+@@ -88,6 +85,7 @@ prepare() {
    cd postgresql-${pkgver}
    patch -p1 < ../0001-Set-DEFAULT_PGSOCKET_DIR-to-run-postgresql.patch
    patch -p1 < ../0002-Force-RPATH-to-be-used-for-the-PL-Perl-plugin.patch
 +  patch -p1 < ../add-loongarch-support.patch
- 
-   # Adjust test/regress/expected/xml.out for libxml2 2.13 (bit of a HACK!)
-   patch src/test/regress/expected/xml.out <../libxml2-2.13-test-output.patch
  }
  
-+source+=('add-loongarch-support.patch')
-+md5sums+=('49336e9f0512a980cbb661be0bb4a509')
-+sha256sums+=('da98a27c64c2d41c48ab039fe134076fe70fe6e2316dff487e405463f8007121')
-+b2sums+=('0173ab0f556ce569bd5d93e055b07eebb17d784460d14023ebecf4d6da1c0f8df9be10519a097dcabfd9a1a1582360e75f3b9daa7ac9f8bbb0862e682408a2f9')
-+
  build() {
-   cd postgresql-${pkgver}
-   local configure_options=(
-@@ -113,7 +116,6 @@ build() {
+@@ -106,7 +104,6 @@ build() {
      --with-ldap
      --with-libxml
      --with-libxslt
@@ -43,7 +33,7 @@
      --with-lz4
      --with-openssl
      --with-pam
-@@ -144,6 +146,7 @@ _postgres_check() {
+@@ -137,6 +134,7 @@ _postgres_check() {
  
  check() {
    export LANG=C LC_ALL=C
@@ -51,3 +41,12 @@
    cd postgresql-${pkgver}
    _postgres_check check
    _postgres_check check-world
+@@ -273,4 +271,8 @@ package_postgresql-docs() {
+   install -Dm 644 COPYRIGHT -t "${pkgdir}/usr/share/licenses/${pkgname}"
+ }
+ 
++source+=('add-loongarch-support.patch')
++md5sums+=('49336e9f0512a980cbb661be0bb4a509')
++sha256sums+=('da98a27c64c2d41c48ab039fe134076fe70fe6e2316dff487e405463f8007121')
++b2sums+=('0173ab0f556ce569bd5d93e055b07eebb17d784460d14023ebecf4d6da1c0f8df9be10519a097dcabfd9a1a1582360e75f3b9daa7ac9f8bbb0862e682408a2f9')
+ # vim:set sw=2 sts=-1 et:
