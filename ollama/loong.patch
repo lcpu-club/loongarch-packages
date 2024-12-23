@@ -1,0 +1,26 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 9957019..83a141a 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,6 +34,11 @@ build() {
+   export GOFLAGS="-buildmode=pie -mod=readonly -modcacherw '-ldflags=-linkmode=external -compressdwarf=false -X=github.com/ollama/ollama/version.Version=$pkgver -X=github.com/ollama/ollama/server.mode=release'"
+ 
+   cd ollama
++  # See: https://github.com/ollama/ollama/blob/8c9fb8eb73afc220e8bf99772572096b6498b748/make/Makefile.ollama#L13
++  # Avoid automatically using `loongarch64` as GOARCH
++  export ARCH="loong64"
++  go mod edit -replace=github.com/chewxy/math32=github.com/chewxy/math32@v1.11.1
++  go mod tidy
+ 
+   # Unset these otherwise somehow nvcc will try to use them.
+   unset CFLAGS CXXFLAGS
+@@ -85,3 +90,9 @@ package_ollama-docs() {
+   cp -r $pkgbase/docs "$pkgdir/usr/share/doc/$pkgbase"
+   install -Dm644 $pkgbase/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++# Remove cuda and rocm
++pkgname=(${pkgname[@]/ollama-cuda})
++pkgname=(${pkgname[@]/ollama-rocm})
++makedepends=(${makedepends[@]/hipblas})
++makedepends=(${makedepends[@]/cuda})
