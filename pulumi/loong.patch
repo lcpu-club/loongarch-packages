@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f51c310..49726a8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,6 +21,12 @@ _plugin_dirs=(
+   "go/pulumi-language-go"
+ )
+ 
++prepare() {
++  cd "${srcdir}/${pkgname}-${pkgver}/pkg"
++  go mod edit -replace github.com/shirou/gopsutil/v3=github.com/shirou/gopsutil/v3@v3.24.5
++  go mod tidy
++}
++
+ build() {
+   cd "${srcdir}/${pkgname}-${pkgver}"
+ 
