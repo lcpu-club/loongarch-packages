@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 0e7c498..a171d5c 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -43,3 +43,10 @@ package() {
+   install -Dm644 "${srcdir}/tempo.sysusers" "${pkgdir}/usr/lib/sysusers.d/tempo.conf"
+   install -Dm644 "${srcdir}/tempo.tmpfiles" "${pkgdir}/usr/lib/tmpfiles.d/tempo.conf"
+ }
++
++prepare() {
++  cd tempo
++  go mod edit -replace=github.com/grafana/pyroscope-go/godeltaprof=github.com/grafana/pyroscope-go/godeltaprof@v0.1.8
++  go mod tidy
++  go mod vendor
++}
