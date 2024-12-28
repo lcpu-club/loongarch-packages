@@ -1,0 +1,25 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e1098d6..083ff2c 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -48,6 +48,10 @@ case "$CARCH" in
+     _vscode_arch=riscv64
+     _electron_arch=riscv64
+     ;;
++  loong64)
++    _vscode_arch=loong64
++    _electron_arch=loong64
++    ;;
+   *)
+     # Needed for mksrcinfo
+     _vscode_arch=DUMMY
+@@ -115,6 +119,9 @@ prepare() {
+   local _electron_zip="electron-v$_electronver-linux-$_electron_arch.zip"
+   cd "/usr/lib/$_electron" && zip -r "$_cache_dir/$_electron_zip" . && cd -
+   echo "$(sha256sum "$_cache_dir/$_electron_zip" | cut -d " " -f 1) *$_electron_zip" > build/checksums/electron.txt
++
++  # Add missing loong64 definition
++  sed -i "/BUILD_TARGETS = \[/a { platform: 'linux', arch: 'loong64' }," build/gulpfile.vscode.js
+ }
+ 
+ build() {
