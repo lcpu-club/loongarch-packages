@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 755595a..96d7dac 100644
+index 755595a..a1508f4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -456,6 +456,17 @@ prepare() {
@@ -30,30 +30,27 @@ index 755595a..96d7dac 100644
    mv electron src/electron
  
    echo "Running hooks..."
-@@ -509,7 +523,10 @@ prepare() {
+@@ -509,7 +523,9 @@ prepare() {
    patch -Np1 -i ../allow-ANGLEImplementation-kVulkan.patch
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
 -  patch -Np1 -i ../compiler-rt-adjust-paths.patch
 +  #patch -Np1 -i ../compiler-rt-adjust-paths.patch
-+  # Loong64 has another patch applied that has conflicts
-+  # So we need to adjust the patch
++  # Use modified version for loong64 support
 +  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
  
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
-@@ -662,3 +679,14 @@ package() {
+@@ -662,3 +678,12 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
 +
-+# The fix patch uses system's libyuv
-+depends+=(libyuv)
 +source+=("depot_tools-loong64-support.patch"
 +         "makepkg-source-roller.py.diff"
 +         "electron-add-loong64-support.patch"
 +         "compiler-rt-adjust-paths-loong64.patch")
 +sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
 +             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
-+             '9173a753aa6a0965eb9828942c610c83c683a3fefb601cc91a855efc5711b254'
-+             '636fe51fa5f36d76d2c3d24bf786fadba163b2a777440f2e70ad8ab1798ddbec')
++             '66ae6ddc797f3d1b89158ca4b9128784d7c222b1725130d6ecc29a2bafa3d09d'
++             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690')
