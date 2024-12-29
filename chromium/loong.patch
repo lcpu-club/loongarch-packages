@@ -1,0 +1,31 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 57893e6..57d29be 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -123,6 +123,16 @@ prepare() {
+   # Increase _FORTIFY_SOURCE level to match Arch's default flags
+   patch -Np1 -i ../increase-fortify-level.patch
+ 
++  # Patches for loong64
++  patch -Np1 -i "${srcdir}/loong64-fix-clang-builtins-path.diff"
++  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
++
++  # Add ` -mcmodel=medium` to CFLAGS etc.
++  # to avoid `relocation R_LARCH_B26 overflow`
++  export CFLAGS="${CFLAGS} -mcmodel=medium"
++  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
++  export RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
++
+   # Fixes for building with libstdc++ instead of libc++
+ 
+   # Link to system tools required by the build
+@@ -330,4 +340,9 @@ package() {
+   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
+ }
+ 
++source+=("chromium-loong64-support.patch"
++         "loong64-fix-clang-builtins-path.diff")
++sha256sums+=('355f657028a8afad1707792dd6a52cc1cadd8e71be0569f28f67b58b492ab82e'
++             'f3da3e04b19163a329510a64e169035dc4915cad3a254919c55ec26751ee3c23')
++
+ # vim:set ts=2 sw=2 et:
