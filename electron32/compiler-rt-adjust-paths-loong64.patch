@@ -1,14 +1,27 @@
+diff --git a/build/config/clang/BUILD.gn b/build/config/clang/BUILD.gn
+index 890bf91c43e40..888804b675c7d 100644
 --- a/build/config/clang/BUILD.gn
 +++ b/build/config/clang/BUILD.gn
-@@ -166,6 +169,11 @@ template("clang_lib") {
-         assert(false)  # Unhandled target platform
-       }
- 
-+      # Bit of a hack to make this find builtins from compiler-rt >= 16
-+      if (is_linux || is_chromeos) {
+@@ -164,16 +164,17 @@ template("clang_lib") {
+         _dir = "darwin"
+       } else if (is_linux || is_chromeos) {
+         if (current_cpu == "x64") {
+-          _dir = "x86_64-unknown-linux-gnu"
++          _suffix = "-x86_64"
+         } else if (current_cpu == "x86") {
+-          _dir = "i386-unknown-linux-gnu"
+-        } else if (current_cpu == "arm") {
+-          _dir = "armv7-unknown-linux-gnueabihf"
++          _suffix = "-i386"
+         } else if (current_cpu == "arm64") {
+-          _dir = "aarch64-unknown-linux-gnu"
++          _suffix = "-aarch64"
++        } else if (current_cpu == "loong64") {
++          _suffix = "-loongarch64"
+         } else {
+           assert(false)  # Unhandled cpu type
+         }
 +        _dir = "linux"
-+      }
-+
-       _clang_lib_dir = "$clang_base_path/lib/clang/$clang_version/lib"
-       _lib_file = "${_prefix}clang_rt.${_libname}${_suffix}.${_ext}"
-       libs = [ "$_clang_lib_dir/$_dir/$_lib_file" ]
+       } else if (is_fuchsia) {
+         if (current_cpu == "x64") {
+           _dir = "x86_64-unknown-fuchsia"

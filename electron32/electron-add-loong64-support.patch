@@ -101,17 +101,10 @@ index 42badd0707..202e3e6972 100644
 \ No newline at end of file
 diff --git a/patches/chromium/loong64_support.patch b/patches/chromium/loong64_support.patch
 new file mode 100644
-index 0000000000..a7df560fba
+index 0000000000..77534d67e8
 --- /dev/null
 +++ b/patches/chromium/loong64_support.patch
-@@ -0,0 +1,3656 @@
-+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-+From: darkyzhou <me@zqy.io>
-+Date: Tue, 19 Nov 2024 01:44:44 +0000
-+Subject: loong64 support
-+
-+Co-authored-by: Jiajie Chen <c@jia.je>
-+
+@@ -0,0 +1,3558 @@
 +diff --git a/base/allocator/partition_allocator/partition_alloc.gni b/base/allocator/partition_allocator/partition_alloc.gni
 +index 46cf090f852929d776b217dc973e1e8e792dcb9e..c87f455c4a36338b0f0dda98fd7d38ea03965f06 100644
 +--- a/base/allocator/partition_allocator/partition_alloc.gni
@@ -207,31 +200,6 @@ index 0000000000..a7df560fba
 + #else
 +   return std::string();
 + #endif
-+diff --git a/build/config/clang/BUILD.gn b/build/config/clang/BUILD.gn
-+index e6d80a8d485f18c7882a484d325613fa36b1f9b7..335a19a654553c7ad90768bae6cc14a7c635efbd 100644
-+--- a/build/config/clang/BUILD.gn
-++++ b/build/config/clang/BUILD.gn
-+@@ -190,14 +190,15 @@ template("clang_lib") {
-+       } else if (is_apple) {
-+         _dir = "darwin"
-+       } else if (is_linux || is_chromeos) {
-++        _dir = "linux"
-+         if (current_cpu == "x64") {
-+-          _dir = "x86_64-unknown-linux-gnu"
-++          _suffix = "-x86_64"
-+         } else if (current_cpu == "x86") {
-+-          _dir = "i386-unknown-linux-gnu"
-+-        } else if (current_cpu == "arm") {
-+-          _dir = "armv7-unknown-linux-gnueabihf"
-++          _suffix = "-i386"
-+         } else if (current_cpu == "arm64") {
-+-          _dir = "aarch64-unknown-linux-gnu"
-++          _suffix = "-aarch64"
-++        } else if (current_cpu == "loong64") {
-++          _suffix = "-loongarch64"
-+         } else {
-+           assert(false)  # Unhandled cpu type
-+         }
 +diff --git a/build/config/rust.gni b/build/config/rust.gni
 +index fd4c6834429b9677defb93a7e51231e4776ccb04..983a18d15f5405c40f125d680eafe95e1dc55d85 100644
 +--- a/build/config/rust.gni
@@ -254,72 +222,6 @@ index 0000000000..a7df560fba
 + }
 + 
 + assert(!toolchain_has_rust || rust_target_arch != "")
-+diff --git a/build/nocompile.gni b/build/nocompile.gni
-+index 242e9104fc10ab17468e208bea0e72a6eb606018..8d152bd8adb4313f0b1f7d7d38dbb822d3c6ff3f 100644
-+--- a/build/nocompile.gni
-++++ b/build/nocompile.gni
-+@@ -119,10 +119,10 @@ if (enable_nocompile_tests) {
-+         rebased_obj_path,
-+         rebased_depfile_path,
-+         "--",
-+-        "{{cflags}}",
-+-        "{{cflags_cc}}",
-+-        "{{defines}}",
-+-        "{{include_dirs}}",
-++        # "{{cflags}}",
-++        # "{{cflags_cc}}",
-++        # "{{defines}}",
-++        # "{{include_dirs}}",
-+ 
-+         # No need to generate an object file for nocompile tests.
-+         "-Xclang",
-+diff --git a/build/rust/rust_bindgen.gni b/build/rust/rust_bindgen.gni
-+index bf110ca93cbb5e0216058675c57a6830ea0cfd15..3f37e15cda2da3be6b519d3251bad9484dca1ea8 100644
-+--- a/build/rust/rust_bindgen.gni
-++++ b/build/rust/rust_bindgen.gni
-+@@ -75,11 +75,11 @@ template("rust_bindgen") {
-+     sources = [ invoker.header ]
-+ 
-+     if (!defined(configs)) {
-+-      configs = []
-++      # configs = []
-+     }
-+ 
-+     # Several important compiler flags come from default_compiler_configs
-+-    configs += default_compiler_configs
-++    # configs += default_compiler_configs
-+ 
-+     output_dir = "$target_gen_dir"
-+     out_gen_rs = "$output_dir/${target_name}.rs"
-+@@ -130,10 +130,10 @@ template("rust_bindgen") {
-+ 
-+     args += [
-+       "--",
-+-      "{{defines}}",
-+-      "{{include_dirs}}",
-+-      "{{cflags}}",
-+-      "{{cflags_c}}",
-++      # "{{defines}}",
-++      # "{{include_dirs}}",
-++      # "{{cflags}}",
-++      # "{{cflags_c}}",
-+     ]
-+ 
-+     # libclang will run the system `clang` to find the "resource dir" which it
-+diff --git a/build/rust/rust_target.gni b/build/rust/rust_target.gni
-+index 10371f12c0a836d3e99f8fea4c1185198d4b7f0d..add7eb8a98dc50b2d959b5bb2670acf3bb9a747d 100644
-+--- a/build/rust/rust_target.gni
-++++ b/build/rust/rust_target.gni
-+@@ -399,6 +399,9 @@ template("rust_target") {
-+       if (_rustc_metadata != "") {
-+         rustflags += [ "-Cmetadata=${_rustc_metadata}" ]
-+       }
-++      if (current_cpu == "loong64") {
-++        rustflags += [ "-Ccode-model=medium" ]
-++      }
-+       rustenv = _rustenv
-+ 
-+       if (_generate_crate_root) {
 +diff --git a/content/common/user_agent.cc b/content/common/user_agent.cc
 +index 070658460eb74513b83e746f20d80af5b79a2df3..39bff2d78b1379dd1a26fa30106ef35243d2d8ef 100644
 +--- a/content/common/user_agent.cc
