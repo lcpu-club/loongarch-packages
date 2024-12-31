@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index ac8386d..3a5cd13 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,7 +23,8 @@ b2sums=('8960e5a2455a507f2f3f18bc1a71a14fda4a53aceacaab0ee6a9be3b3b95eb56f9f2c68
+ 
+ prepare() {
+   cd $pkgbase
+-  pnpm install --frozen-lockfile
++  sed -i '/@vscode\/vsce/d' extensions/vscode/package.json
++  pnpm install --no-frozen-lockfile
+ }
+ 
+ build() {
