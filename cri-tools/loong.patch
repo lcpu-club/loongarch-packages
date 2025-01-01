@@ -1,0 +1,33 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -39,15 +39,17 @@ build() {
+   make VERSION=$pkgver GO_LDFLAGS="${common_ldflags[*]}" -C $pkgbase-$pkgver
+ 
+   mkdir -vp completions
+-  $pkgbase-$pkgver/build/bin/linux/amd64/crictl completion bash > completions/crictl
+-  $pkgbase-$pkgver/build/bin/linux/amd64/crictl completion zsh > completions/_crictl
+-  $pkgbase-$pkgver/build/bin/linux/amd64/crictl completion fish > completions/crictl.fish
++  $pkgbase-$pkgver/build/bin/linux/$GOARCH/crictl completion bash > completions/crictl
++  $pkgbase-$pkgver/build/bin/linux/$GOARCH/crictl completion zsh > completions/_crictl
++  $pkgbase-$pkgver/build/bin/linux/$GOARCH/crictl completion fish > completions/crictl.fish
+ }
+ 
++export GOARCH='loong64'
++
+ package_crictl() {
+   pkgdesc="A CLI for CRI-compatible container runtimes"
+ 
+-  install -vDm 755 $pkgbase-$pkgver/build/bin/linux/amd64/$pkgname -t "$pkgdir/usr/bin/"
++  install -vDm 755 $pkgbase-$pkgver/build/bin/linux/$GOARCH/$pkgname -t "$pkgdir/usr/bin/"
+   # shell completion
+   install -vDm 644 completions/$pkgname -t "$pkgdir/usr/share/bash-completion/completions/"
+   install -vDm 644 completions/_$pkgname -t "$pkgdir/usr/share/zsh/site-functions/"
+@@ -63,7 +65,7 @@ package_crictl() {
+ package_critest() {
+   pkgdesc="A benchmarking CLI for CRI-compatible container runtimes"
+ 
+-  install -vDm 755 $pkgbase-$pkgver/build/bin/linux/amd64/$pkgname -t "$pkgdir/usr/bin/"
++  install -vDm 755 $pkgbase-$pkgver/build/bin/linux/$GOARCH/$pkgname -t "$pkgdir/usr/bin/"
+   # docs
+   install -vDm 644 -t "$pkgdir/usr/share/doc/$pkgname/" \
+     $pkgbase-$pkgver/docs/{benchmark,validation}.md
