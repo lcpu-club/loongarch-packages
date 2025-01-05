@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 7b503dd..c73a329 100644
+index c6c27af..95e31b6 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -7,7 +7,6 @@
@@ -8,10 +8,10 @@ index 7b503dd..c73a329 100644
    rust
 -  lib32-rust-libs
    rust-musl
-   rust-wasm
-   rust-src
-@@ -37,8 +36,6 @@ depends=(
- makedepends=(
+   rust-aarch64-gnu
+   rust-aarch64-musl
+@@ -41,8 +40,6 @@ makedepends=(
+   aarch64-linux-gnu-glibc
    clang
    cmake
 -  lib32-gcc-libs
@@ -19,18 +19,19 @@ index 7b503dd..c73a329 100644
    libffi
    lld
    llvm
-@@ -76,6 +73,10 @@ validpgpkeys=(
+@@ -81,6 +78,11 @@ validpgpkeys=(
  prepare() {
    cd rustc-$pkgver-src
  
-+  export CFLAGS="${CFLAGS} -mcmodel=medium"
-+  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
-+  export RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
++  # DO NOT directly append `-C code-model=medium` to RUSTFLAGS
++  # as it will break the build for targets other than loongarch64
++  export CARGO_TARGET_LOONGARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
++  export CARGO_TARGET_LOONGARCH64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
 +
    # Patch bootstrap so that rust-analyzer-proc-macro-srv
    # is in /usr/lib instead of /usr/libexec
    patch -Np1 -i ../0001-bootstrap-Change-libexec-dir.patch
-@@ -105,9 +106,8 @@ link-shared = true
+@@ -110,9 +112,8 @@ link-shared = true
  
  [build]
  target = [
@@ -39,10 +40,10 @@ index 7b503dd..c73a329 100644
 -  "x86_64-unknown-linux-musl",
 +  "$(uname -m)-unknown-linux-gnu",
 +  "$(uname -m)-unknown-linux-musl",
+   "aarch64-unknown-linux-gnu",
+   "aarch64-unknown-linux-musl",
    "wasm32-unknown-unknown",
-   "wasm32-wasi",
-   "wasm32-wasip1",
-@@ -157,24 +157,20 @@ jemalloc = true
+@@ -164,24 +165,20 @@ jemalloc = true
  compression-formats = ["gz"]
  compression-profile = "fast"
  
@@ -55,9 +56,9 @@ index 7b503dd..c73a329 100644
  llvm-config = "/usr/bin/llvm-config"
  
 -[target.i686-unknown-linux-gnu]
-+[target.$(uname -m)-unknown-linux-musl]
 +# Failed with musl-gcc: ld.lld: error: unable to find library -lgcc_s
-+# Temporarily switch from musl-gcc to gcc
++# Switch from musl-gcc to gcc
++[target.$(uname -m)-unknown-linux-musl]
  cc = "/usr/bin/gcc"
  cxx = "/usr/bin/g++"
  ar = "/usr/bin/gcc-ar"
@@ -71,7 +72,7 @@ index 7b503dd..c73a329 100644
  sanitizers = false
  musl-root = "/usr/lib/musl"
  
-@@ -267,12 +263,9 @@ build() {
+@@ -297,12 +294,9 @@ build() {
  
    # rustbuild always installs copies of the shared libraries to /usr/lib,
    # overwrite them with symlinks to the per-architecture versions
@@ -83,6 +84,6 @@ index 7b503dd..c73a329 100644
 -  _pick dest-i686 usr/lib/rustlib/i686-unknown-linux-gnu usr/lib32
 -  _pick dest-musl usr/lib/rustlib/x86_64-unknown-linux-musl
 +  _pick dest-musl usr/lib/rustlib/$(uname -m)-unknown-linux-musl
+   _pick dest-aarch64-gnu usr/lib/rustlib/aarch64-unknown-linux-gnu
+   _pick dest-aarch64-musl usr/lib/rustlib/aarch64-unknown-linux-musl
    _pick dest-wasm usr/lib/rustlib/wasm32-*
-   _pick dest-src  usr/lib/rustlib/src
- }
