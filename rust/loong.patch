@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c6c27af..95e31b6 100644
+index c6c27af..444a3cf 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -7,7 +7,6 @@
@@ -19,19 +19,7 @@ index c6c27af..95e31b6 100644
    libffi
    lld
    llvm
-@@ -81,6 +78,11 @@ validpgpkeys=(
- prepare() {
-   cd rustc-$pkgver-src
- 
-+  # DO NOT directly append `-C code-model=medium` to RUSTFLAGS
-+  # as it will break the build for targets other than loongarch64
-+  export CARGO_TARGET_LOONGARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
-+  export CARGO_TARGET_LOONGARCH64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
-+
-   # Patch bootstrap so that rust-analyzer-proc-macro-srv
-   # is in /usr/lib instead of /usr/libexec
-   patch -Np1 -i ../0001-bootstrap-Change-libexec-dir.patch
-@@ -110,9 +112,8 @@ link-shared = true
+@@ -110,9 +107,8 @@ link-shared = true
  
  [build]
  target = [
@@ -43,7 +31,7 @@ index c6c27af..95e31b6 100644
    "aarch64-unknown-linux-gnu",
    "aarch64-unknown-linux-musl",
    "wasm32-unknown-unknown",
-@@ -164,24 +165,20 @@ jemalloc = true
+@@ -164,24 +160,20 @@ jemalloc = true
  compression-formats = ["gz"]
  compression-profile = "fast"
  
@@ -72,7 +60,7 @@ index c6c27af..95e31b6 100644
  sanitizers = false
  musl-root = "/usr/lib/musl"
  
-@@ -297,12 +294,9 @@ build() {
+@@ -297,12 +289,9 @@ build() {
  
    # rustbuild always installs copies of the shared libraries to /usr/lib,
    # overwrite them with symlinks to the per-architecture versions
