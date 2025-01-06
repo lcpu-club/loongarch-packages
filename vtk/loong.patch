@@ -1,31 +1,29 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -25,7 +25,7 @@ depends=(
- makedepends=(
-   adios2
-   alembic
--  anari-sdk
-+#  anari-sdk
-   boost
-   cgns
-   cli11
-@@ -58,13 +58,13 @@ makedepends=(
-   netcdf
-   nlohmann-json
-   opencascade
--  openimagedenoise
-+#  openimagedenoise
-   openmp
-   openmpi
-   openvdb
-   openvr
-   openxr
--  ospray
-+#  ospray
-   pdal
-   postgresql-libs
-   proj
-@@ -169,7 +169,8 @@ build() {
+@@ -63,7 +63,7 @@ makedepends=(
+   gl2ps                   # libvtkRenderingGL2PSOpenGL2.so, libvtkIOExportGL2PS.so (2 direct libs, 4 total libs)
+   proj                    # libvtkGeovisCore.so, libvtkIOCesium3DTiles.so (2 direct libs, 4 total libs)
+   alembic                 # libvtkIOAlembic.so (1 direct lib, 2 total libs)
+-  anari-sdk               # libvtkRenderingAnari.so (1 direct lib, 2 total libs)
++#  anari-sdk               # libvtkRenderingAnari.so (1 direct lib, 2 total libs)
+   ffmpeg                  # libvtkIOFFMPEG.so (1 direct lib, 2 total libs)
+   imath                   # libvtkIOOpenVDB.so (1 direct lib, 2 total libs)
+   libharu                 # libvtkIOExportPDF.so (1 direct lib, 2 total libs)
+@@ -72,11 +72,11 @@ makedepends=(
+   libtheora               # libvtkIOOggTheora.so (1 direct lib, 2 total libs)
+   mariadb-libs            # libvtkIOMySQL.so (1 direct lib, 2 total libs)
+   opencascade             # libvtkIOOCCT.so (1 direct lib, 2 total libs)
+-  openimagedenoise        # libvtkRenderingRayTracing.so (1 direct lib, 2 total libs)
++#  openimagedenoise        # libvtkRenderingRayTracing.so (1 direct lib, 2 total libs)
+   openvdb                 # libvtkIOOpenVDB.so (1 direct lib, 2 total libs)
+   openvr                  # libvtkRenderingOpenVR.so (1 direct lib, 2 total libs)
+   openxr                  # libvtkRenderingOpenXR.so (1 direct lib, 2 total libs)
+-  ospray                  # libvtkRenderingRayTracing.so (1 direct lib, 2 total libs)
++#  ospray                  # libvtkRenderingRayTracing.so (1 direct lib, 2 total libs)
+   pdal                    # libvtkIOPDAL.so (1 direct lib, 2 total libs)
+   postgresql-libs         # libvtkIOPostgreSQL.so (1 direct lib, 2 total libs)
+   unixodbc                # libvtkIOODBC.so (1 direct lib, 2 total libs)
+@@ -184,7 +184,8 @@ build() {
      -DVTK_VERSIONED_INSTALL=OFF \
      -DVTK_WRAP_JAVA=ON \
      -DVTK_WRAP_PYTHON=ON \
@@ -35,7 +33,7 @@
      -DVTKm_ENABLE_HDF5_IO=ON \
      -DVTKm_ENABLE_MPI=ON \
      -DVTKm_ENABLE_OPENMP=ON \
-@@ -181,6 +182,7 @@ build() {
+@@ -196,6 +197,7 @@ build() {
      -DVTK_MODULE_ENABLE_VTK_DomainsMicroscopy=NO \
      -DVTK_MODULE_ENABLE_VTK_FiltersOpenTURNS=NO \
      -DVTK_MODULE_ENABLE_VTK_RenderingZSpace=NO \
@@ -43,7 +41,7 @@
      -DOpenGL_GL_PREFERENCE=LEGACY \
      -DVTK_IGNORE_CMAKE_CXX11_CHECKS=ON \
      -Wno-dev
-@@ -195,8 +197,8 @@ package() {
+@@ -210,8 +212,8 @@ package() {
    install -dv "${pkgdir}"/usr/share/java/vtk
    mv -v "${pkgdir}"/usr/lib/java/vtk.jar "${pkgdir}"/usr/share/java/vtk
    # …and the libs to the proper place
