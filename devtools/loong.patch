@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4b06398..ff946d0 100644
+index 2802383..d68b0f8 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -38,7 +38,7 @@ depends=(
@@ -7,24 +7,7 @@ index 4b06398..ff946d0 100644
  makedepends=(
    asciidoctor
 -  shellcheck
-+  # shellcheck # FIXME: shellcheck depends on ghc, which is missing
++  #shellcheck
  )
  checkdepends=(
    bats
-@@ -61,6 +61,7 @@ b2sums=('40c2f8fb81a939a027b772f215b31c73d7f8003415335e5c2667589f0e5ddd786e627f4
- 
- build() {
-   cd ${pkgname}-${pkgver}
-+  patch -Np1 -i "${srcdir}/add-a-default-value-for-terminal-width.patch"
-   make BUILDTOOLVER="${epoch}:${pkgver}-${pkgrel}-${arch}" PREFIX=/usr
- }
- 
-@@ -74,4 +75,8 @@ package() {
-   make PREFIX=/usr DESTDIR="${pkgdir}" install
- }
- 
-+source+=("add-a-default-value-for-terminal-width.patch::https://gitlab.archlinux.org/archlinux/devtools/-/commit/e8ab01d66230bc7375ee8ecb0a34c65d4ef466f7.patch")
-+sha256sums+=('a68eed521866c2599b8e0d73d20feeee9df243ae2248c36e452a6d3d99b47a7d')
-+b2sums+=('d488b4061adebc6cae157817fca3001b2465eff44a7be4d370d705520830e984a6e6afc95546171c7df65656e8fca57dc14da6e8bdb5f40d99011c4a2e894934')
-+
- # vim: ts=2 sw=2 et:
