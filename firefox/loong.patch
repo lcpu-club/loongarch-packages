@@ -1,14 +1,15 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 06fe08c..6c68da0 100644
+index ec252c6..0d14e0a 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -107,6 +107,20 @@ prepare() {
-   cd firefox-$pkgver
+@@ -113,6 +113,20 @@ prepare() {
+   patch -Np1 -i ../0001-Install-under-remoting-name.patch
  
    echo -n "$_google_api_key" >google-api-key
 +  
 +  # Patches for loong64
 +  patch -Np1 -i ../0001-Add-support-for-LoongArch64.patch
++  patch -Np1 -i ../0002-update-skia-generate_mozbuild.py-to-fix-lasx.patch
 +  patch -Np1 -i ../0003-update-gn_processor.py-to-support-linux-on-loong64.patch
 +  patch -Np1 -i ../0004-Re-generate-libwebrtc-moz.build-files.patch
 +  patch -Np1 -i ../0005-enable-webrtc-for-loongarch64-in-toolkit-moz.configu.patch
@@ -19,11 +20,10 @@ index 06fe08c..6c68da0 100644
 +  # to avoid `relocation R_LARCH_B26 overflow`
 +  export CFLAGS="${CFLAGS} -mcmodel=medium"
 +  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
-+  export RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
  
    cat >../mozconfig <<END
  ac_add_options --enable-application=browser
-@@ -119,7 +133,6 @@ ac_add_options --enable-optimize
+@@ -125,7 +139,6 @@ ac_add_options --enable-optimize
  ac_add_options --enable-rust-simd
  ac_add_options --enable-linker=lld
  ac_add_options --disable-install-strip
@@ -31,7 +31,7 @@ index 06fe08c..6c68da0 100644
  ac_add_options --disable-bootstrap
  ac_add_options --with-wasi-sysroot=/usr/share/wasi-sysroot
  
-@@ -143,7 +156,7 @@ ac_add_options --with-system-nss
+@@ -149,7 +162,7 @@ ac_add_options --with-system-nss
  # Features
  ac_add_options --enable-alsa
  ac_add_options --enable-jack
@@ -40,23 +40,26 @@ index 06fe08c..6c68da0 100644
  ac_add_options --disable-updater
  ac_add_options --disable-tests
  END
-@@ -278,4 +291,23 @@ Version=2
+@@ -284,4 +297,26 @@ Version=2
  END
  }
  
 +source+=('0001-Add-support-for-LoongArch64.patch'
++         '0002-update-skia-generate_mozbuild.py-to-fix-lasx.patch'
 +         '0003-update-gn_processor.py-to-support-linux-on-loong64.patch'
 +         '0004-Re-generate-libwebrtc-moz.build-files.patch'
 +         '0005-enable-webrtc-for-loongarch64-in-toolkit-moz.configu.patch'
 +         '0006-Fix-libyuv-unified-source-and-LoongArch-SIMD-build.patch'
 +         '0011-Add-missing-loongarch-lsx-code-for-libpng.patch')
 +sha256sums+=('5e02e377cd857844ef06ab83acb93261a7198349a9ebf57324b03088fe0a264b'
++             'cb107d68f2ea8e01bb1597f83739963dbba5dd8889ae90b9f18c7321a91178f5'
 +             '5c29035ab562b0f722b1975f02def279f3cccf3fd3d153c6e54126289b095c99'
 +             'd205c7d8252fb15b750d1f950fb4b4fe52049d16538570e61b0f1f2ee3a6e535'
 +             '9bd75fce6d86d5d755e6ab047e7eaa39f87a19e596ee20e3f6c03cd4c4a7d348'
 +             '62574c6426173eebd80d4676ede30214050e2b6be87e293f906aaba85214b277'
 +             'da6733b8ca23d9de4f4c2ee1ff2bdc111128da4ec403e385bb576f2e229d1f6e')
 +b2sums+=('53df7ac4d378e2d666cf36f4f8dccce1591d0f76f1fe37d3a542968fdb73b501a44163b663f8a3a7f59a20ec10369af78f9a84d454cbd3b544f6f1a4d4d23967'
++         'b9d3c120a9427d8b5bb1534f81cc54f40f20f75893ed2f7ac54a291ab05f73591a068c3ba1be720276ef13921e4f3542e7cdc82a0a953e42f72df1703125b6b1'
 +         '178bb4227daadd9c6872cc3ed0c795257023fadd8e5572e28a1c6f0825066be4e6fbb23bd3b67f7883645ac6dd567aeacdff20e383ba3482860852d256d7a75e'
 +         '99cd33c62fb900d46519f658834ecbf8a6237f6ad82c3a64e6bb6706a7d20ac8662518114f3f966ef4666d24c2f3906409da52af3875b357c402b5722b945b20'
 +         '8fead507b6662bb2c0bdc85a55c9ce0d7780376235adff616f0aa0fa7c9121d57bebbbbd996a75e129f92478fe41fae17948a887ca5f45d24284a243ee3048a5'
