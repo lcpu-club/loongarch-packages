@@ -104,11 +104,11 @@ def update_status(mirror_x86: str) -> None:
         mirror_x86 (str): The base URL of the x86_64 package mirror
     """
     if os.path.isdir(PATCH_REPO_PATH):
-        print(f"Updating existing {PATCH_REPO_PATH}...")
+        print(f"Updating cached patch set repository...")
         subprocess.run(["git", "-C", PATCH_REPO_PATH, "fetch", "--all"])
         subprocess.run(["git", "-C", PATCH_REPO_PATH, "reset", "--hard", "origin/master"])
     else:
-        print(f"Cloning PATCH_REPO_PATH to {PATCH_REPO_PATH}...")
+        print(f"Cloning patch set repository...")
         os.makedirs(os.path.dirname(PATCH_REPO_PATH), exist_ok=True)
         subprocess.run(["git", "clone", PATCH_GIT, PATCH_REPO_PATH])
 
@@ -223,14 +223,19 @@ def main() -> None:
         help='Checkout a specific version of the package may be "stable", "testing", "staging", '
         '"main" , commit hash or a specific version pkgver-pkgrel, default is the current stable version',
         metavar='VERSION')
+    parser.add_argument('--skip-update',
+        help='Skip updating patch repository and package database cache',
+        action='store_true')
 
     args: argparse.Namespace = parser.parse_args()
 
     mirror_x86: str = args.mirror
     pkgbase: str = args.pkgbase
     version: Optional[str] = args.checkout
+    skip_update: bool = args.skip_update
 
-    update_status(mirror_x86)
+    if not skip_update:
+        update_status(mirror_x86)
 
     patch_dir: str = os.path.join(PATCH_REPO_PATH, pkgbase)
 
