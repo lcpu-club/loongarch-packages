@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d30e9bc..9abeaf4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -23,7 +23,6 @@ depends=(
@@ -8,16 +10,18 @@
    'lz4'
    'openssl'
    'pam'
-@@ -34,8 +33,6 @@ depends=(
+@@ -34,10 +33,8 @@ depends=(
    'zstd'
  )
  makedepends=(
 -  'clang'
+   'docbook-xml'
+   'docbook-xsl'
 -  'llvm'
    'perl'
    'perl-ipc-run'
    'python'
-@@ -88,6 +85,7 @@ prepare() {
+@@ -90,6 +87,7 @@ prepare() {
    cd postgresql-${pkgver}
    patch -p1 < ../0001-Set-DEFAULT_PGSOCKET_DIR-to-run-postgresql.patch
    patch -p1 < ../0002-Force-RPATH-to-be-used-for-the-PL-Perl-plugin.patch
@@ -25,7 +29,7 @@
  }
  
  build() {
-@@ -106,7 +104,6 @@ build() {
+@@ -107,7 +105,6 @@ build() {
      --with-ldap
      --with-libxml
      --with-libxslt
@@ -33,7 +37,7 @@
      --with-lz4
      --with-openssl
      --with-pam
-@@ -137,6 +134,7 @@ _postgres_check() {
+@@ -138,6 +135,7 @@ _postgres_check() {
  
  check() {
    export LANG=C LC_ALL=C
@@ -41,7 +45,7 @@
    cd postgresql-${pkgver}
    _postgres_check check
    _postgres_check check-world
-@@ -273,4 +271,8 @@ package_postgresql-docs() {
+@@ -274,4 +272,8 @@ package_postgresql-docs() {
    install -Dm 644 COPYRIGHT -t "${pkgdir}/usr/share/licenses/${pkgname}"
  }
  
