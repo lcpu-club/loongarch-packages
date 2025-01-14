@@ -1,0 +1,61 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 13567b0..7b8931f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -456,6 +456,22 @@ prepare() {
+   sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
+   sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
+ 
++  # Patching makepkg-source-roller-orig.py
++  cp "${srcdir}/makepkg-source-roller.py" "makepkg-source-roller-new.py"
++  patch "makepkg-source-roller-new.py" -i "${srcdir}/makepkg-source-roller.py.diff"
++  mv -f "makepkg-source-roller-new.py" "makepkg-source-roller.py"
++
++  # Apply in advance to so that makepkg-source-roller.py will not throw error
++  patch -p1 -d chromium-mirror_third_party_depot_tools -i "${srcdir}/depot_tools-loong64-support.patch"
++  patch -p1 -d electron -i "${srcdir}/electron-add-loong64-support.patch"
++  # Get the binary from the npm package
++  npm install @esbuild/linux-loong64@0.14.54
++
++  # Add ` -mcmodel=medium` to CFLAGS etc.
++  # to avoid `relocation R_LARCH_B26 overflow`
++  export CFLAGS="${CFLAGS} -mcmodel=medium"
++  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
++
+   cp -r chromium-mirror_third_party_depot_tools depot_tools
+   export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
+   #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
+@@ -464,6 +480,9 @@ prepare() {
+   # Generate gclient gn args file and prepare-electron-source-tree.sh
+   python makepkg-source-roller.py generate electron/DEPS $pkgname
+   rbash prepare-electron-source-tree.sh "$CARCH"
++  # Add esbuild binary manually
++  mkdir -p src/third_party/devtools-frontend/src/third_party/esbuild
++  cp node_modules/@esbuild/linux-loong64/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+   mv electron src/electron
+ 
+   echo "Running hooks..."
+@@ -508,7 +527,9 @@ prepare() {
+   ## Upstream fixes
+ 
+   # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
+-  patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  #patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  # Use modified version for loong64 support
++  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
+ 
+   # Fixes for building with libstdc++ instead of libc++
+   patch -Np1 -i ../chromium-patches-*/chromium-128-compiler.patch
+@@ -660,3 +681,12 @@ package() {
+   install -Dm644 src/electron/default_app/icon.png \
+           "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
+ }
++
++source+=("depot_tools-loong64-support.patch"
++         "makepkg-source-roller.py.diff"
++         "electron-add-loong64-support.patch"
++         "compiler-rt-adjust-paths-loong64.patch")
++sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
++             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
++             '2cf2d8a645c01f8d5521303fd4c64bfc00a6b0f2ec06f8cbf2e9d0676135581e'
++             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690')
