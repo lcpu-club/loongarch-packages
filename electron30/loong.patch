@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index f2bde91..d62983f 100644
+index f2bde91..f0f8fc3 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -442,6 +442,21 @@ prepare() {
@@ -84,5 +84,5 @@ index f2bde91..d62983f 100644
 +sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
 +             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
 +             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
-+             'f669853c68b79c1f61f18c676795f8ac69a5e121785b703ba02e42c713245ab8'
++             '790b76318e47681469c9f4cce9932e0c31e3d5b9d5b6894609319e62edb63d8c'
 +             '19119a94c1f80bbfd81e15087a693720396ac1bbb2b85f49120fc00e4fdf781b')
