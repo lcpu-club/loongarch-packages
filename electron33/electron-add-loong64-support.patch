@@ -101,12 +101,12 @@ index 61fa76913e..54ff2332d3 100644
 +loong64_support_for_runtime_json.patch
 diff --git a/patches/chromium/loong64_support.patch b/patches/chromium/loong64_support.patch
 new file mode 100644
-index 0000000000..c7694120d4
+index 0000000000..39efc30d62
 --- /dev/null
 +++ b/patches/chromium/loong64_support.patch
-@@ -0,0 +1,3514 @@
+@@ -0,0 +1,3541 @@
 +diff --git a/base/allocator/partition_allocator/partition_alloc.gni b/base/allocator/partition_allocator/partition_alloc.gni
-+index 2b589ddd153214e237c1028f6be736351754a6f0..9f45a24dcd85736626e118dac464adedcc4928cc 100644
++index 2b589ddd15321..9f45a24dcd857 100644
 +--- a/base/allocator/partition_allocator/partition_alloc.gni
 ++++ b/base/allocator/partition_allocator/partition_alloc.gni
 +@@ -272,7 +272,7 @@ declare_args() {
@@ -119,7 +119,7 @@ index 0000000000..c7694120d4
 + # We want to provide assertions that guard against inconsistent build
 + # args, but there is no point in having them fire if we're not building
 +diff --git a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-+index 4451c4e2419323c98b58d41078290b157a998ff2..3dd6c37ba8b630d383f8773e017174266eeeded9 100644
++index 4451c4e241932..3dd6c37ba8b63 100644
 +--- a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
 ++++ b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
 +@@ -499,6 +499,9 @@ if (is_clang_or_gcc) {
@@ -134,7 +134,7 @@ index 0000000000..c7694120d4
 +       assert(!stack_scan_supported)
 +diff --git a/base/allocator/partition_allocator/src/partition_alloc/stack/asm/loong64/push_registers_asm.cc b/base/allocator/partition_allocator/src/partition_alloc/stack/asm/loong64/push_registers_asm.cc
 +new file mode 100644
-+index 0000000000000000000000000000000000000000..574c9ea846e0707f634600bb4de358b7ba65f674
++index 0000000000000..574c9ea846e07
 +--- /dev/null
 ++++ b/base/allocator/partition_allocator/src/partition_alloc/stack/asm/loong64/push_registers_asm.cc
 +@@ -0,0 +1,49 @@
@@ -188,7 +188,7 @@ index 0000000000..c7694120d4
 ++    "  addi.d $sp, $sp, 96                               \n"
 ++    "  jr $ra                                            \n");
 +diff --git a/base/system/sys_info.cc b/base/system/sys_info.cc
-+index b74d6550715dec595a3ac630b759ef36f7461c59..1ebbbd70cefc14144e57042acaf2f251dcefe80d 100644
++index b74d6550715de..1ebbbd70cefc1 100644
 +--- a/base/system/sys_info.cc
 ++++ b/base/system/sys_info.cc
 +@@ -255,6 +255,8 @@ std::string SysInfo::ProcessCPUArchitecture() {
@@ -201,7 +201,7 @@ index 0000000000..c7694120d4
 +   return std::string();
 + #endif
 +diff --git a/build/config/rust.gni b/build/config/rust.gni
-+index b7e3c8881b589472bd33c7256bd3d9234e6e7a34..e1ec82c04553a069d25349ee2fa4e37fbcd7cc22 100644
++index b7e3c8881b589..e1ec82c04553a 100644
 +--- a/build/config/rust.gni
 ++++ b/build/config/rust.gni
 +@@ -211,6 +211,8 @@ if (is_linux || is_chromeos) {
@@ -222,8 +222,35 @@ index 0000000000..c7694120d4
 + }
 + 
 + assert(!toolchain_has_rust || rust_target_arch != "")
++diff --git a/components/variations/proto/study.proto b/components/variations/proto/study.proto
++index 7ef5eb238e1a2..f2d1708e6c1cf 100644
++--- a/components/variations/proto/study.proto
+++++ b/components/variations/proto/study.proto
++@@ -262,6 +262,8 @@ message Study {
++     // A Mac-only value, indicating an x86-64 binary running on an arm64 host
++     // via "Rosetta 2" binary translation.
++     TRANSLATED_X86_64 = 4;
+++
+++    LOONGARCH64 = 5;
++   }
++ 
++   // Enum to pass as optional bool.
++diff --git a/components/variations/service/variations_field_trial_creator_base.cc b/components/variations/service/variations_field_trial_creator_base.cc
++index d97f5f584a8a3..fbf330bca11ed 100644
++--- a/components/variations/service/variations_field_trial_creator_base.cc
+++++ b/components/variations/service/variations_field_trial_creator_base.cc
++@@ -120,6 +120,9 @@ Study::CpuArchitecture GetCurrentCpuArchitecture() {
++     }
++     return Study::X86_64;
++   }
+++  if (process_arch == "LOONGARCH_64") {
+++    return Study::LOONGARCH64;
+++  }
++   NOTREACHED_IN_MIGRATION();
++   return Study::X86_64;
++ }
 +diff --git a/content/common/user_agent.cc b/content/common/user_agent.cc
-+index 070658460eb74513b83e746f20d80af5b79a2df3..39bff2d78b1379dd1a26fa30106ef35243d2d8ef 100644
++index 070658460eb74..39bff2d78b137 100644
 +--- a/content/common/user_agent.cc
 ++++ b/content/common/user_agent.cc
 +@@ -174,6 +174,8 @@ std::string GetCpuArchitecture() {
@@ -236,7 +263,7 @@ index 0000000000..c7694120d4
 + #elif BUILDFLAG(IS_FUCHSIA)
 +   std::string cpu_arch = base::SysInfo::ProcessCPUArchitecture();
 +diff --git a/sandbox/features.gni b/sandbox/features.gni
-+index 8434144118b49c33a60fa455153a0e2d498a08a7..189bb35f8e4dadb6565f38a1a2fb70007f3ea680 100644
++index 8434144118b49..189bb35f8e4da 100644
 +--- a/sandbox/features.gni
 ++++ b/sandbox/features.gni
 +@@ -9,7 +9,7 @@
@@ -249,7 +276,7 @@ index 0000000000..c7694120d4
 + # SSBD (Speculative Store Bypass Disable) is a mitigation of Spectre Variant 4.
 + # As Spectre Variant 4 can be mitigated by site isolation, opt-out SSBD on site
 +diff --git a/sandbox/linux/bpf_dsl/linux_syscall_ranges.h b/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
-+index 1d0590b7dd6ce003c20d45b3b108261182bb841a..92f0a6245ff9640894fb8515de34792b5fccfd35 100644
++index 1d0590b7dd6ce..92f0a6245ff96 100644
 +--- a/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
 ++++ b/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
 +@@ -56,6 +56,13 @@
@@ -267,7 +294,7 @@ index 0000000000..c7694120d4
 + #error "Unsupported architecture"
 + #endif
 +diff --git a/sandbox/linux/bpf_dsl/seccomp_macros.h b/sandbox/linux/bpf_dsl/seccomp_macros.h
-+index 87d5825aa3ddb43e666e8e70deb6f4c429468023..2f1ba99e7a18593f647694dc156fb3df45d27a1d 100644
++index 87d5825aa3ddb..2f1ba99e7a185 100644
 +--- a/sandbox/linux/bpf_dsl/seccomp_macros.h
 ++++ b/sandbox/linux/bpf_dsl/seccomp_macros.h
 +@@ -343,6 +343,47 @@ struct regs_struct {
@@ -319,7 +346,7 @@ index 0000000000..c7694120d4
 + #error Unsupported target platform
 + 
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc b/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
-+index 7bde501115bdf9ad91c8c907a128a6c9e183f7a0..5745a8da7e50538484b489fec35332d1c8ab6872 100644
++index 7bde501115bdf..5745a8da7e505 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
 ++++ b/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
 +@@ -193,7 +193,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
@@ -375,7 +402,7 @@ index 0000000000..c7694120d4
 +     return Allow();
 +   }
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc b/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
-+index 420c9c80b7b0501a701b43c691a2d0183d214c65..725de63ad07d22feb4af160f90cb186210c72182 100644
++index 420c9c80b7b05..725de63ad07d2 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
 ++++ b/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
 +@@ -359,6 +359,7 @@ intptr_t SIGSYSSchedHandler(const struct arch_seccomp_data& args,
@@ -395,7 +422,7 @@ index 0000000000..c7694120d4
 +   CrashSIGSYS_Handler(args, fs_denied_errno);
 + 
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
-+index bb0e13f4d2d9c85267ca790144f3898eb3cd3829..38beceaa6afe2df71766f742e6e4f7a6e8fe65be 100644
++index bb0e13f4d2d9c..38beceaa6afe2 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
 ++++ b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
 +@@ -37,7 +37,7 @@
@@ -430,7 +457,7 @@ index 0000000000..c7694120d4
 + #if defined(__arm__)
 +                  PTRACE_GETVFPREGS,
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
-+index 4f56b6e0d10db3f1822abb0d2b0df89fdaad53de..b8f7cabf7e32e5255187b0a3b935e4fe7974c928 100644
++index 4f56b6e0d10db..b8f7cabf7e32e 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
 ++++ b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
 +@@ -103,7 +103,7 @@ bool SyscallSets::IsUmask(int sysno) {
@@ -696,7 +723,7 @@ index 0000000000..c7694120d4
 + #endif
 +       return true;
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
-+index 9be7b03ec4377efa7ead49d190a91a194c45494e..39522700467a64527e06e2c3afcb755e384e9db3 100644
++index 9be7b03ec4377..39522700467a6 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
 ++++ b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
 +@@ -79,18 +79,18 @@ class SANDBOX_EXPORT SyscallSets {
@@ -722,7 +749,7 @@ index 0000000000..c7694120d4
 + #endif
 + 
 +diff --git a/sandbox/linux/seccomp-bpf/syscall.cc b/sandbox/linux/seccomp-bpf/syscall.cc
-+index 6b772c563c7fd4401ba1b0dd549205c2116f2df4..7e1a2277b319d049c4b289ee6872b3cb1f100e20 100644
++index 6b772c563c7fd..7e1a2277b319d 100644
 +--- a/sandbox/linux/seccomp-bpf/syscall.cc
 ++++ b/sandbox/linux/seccomp-bpf/syscall.cc
 +@@ -23,7 +23,7 @@ namespace sandbox {
@@ -782,7 +809,7 @@ index 0000000000..c7694120d4
 + #error "Unimplemented architecture"
 + #endif
 +diff --git a/sandbox/linux/services/credentials.cc b/sandbox/linux/services/credentials.cc
-+index 7f925cce83654d451f44696080b92d1f650e3086..ca189d72dc1c10abd57584d72ec658934958a877 100644
++index 7f925cce83654..ca189d72dc1c1 100644
 +--- a/sandbox/linux/services/credentials.cc
 ++++ b/sandbox/linux/services/credentials.cc
 +@@ -87,7 +87,7 @@ bool ChrootToSafeEmptyDir() {
@@ -795,7 +822,7 @@ index 0000000000..c7694120d4
 +   void* stack = stack_buf + sizeof(stack_buf);
 + #else
 +diff --git a/sandbox/linux/services/syscall_wrappers.cc b/sandbox/linux/services/syscall_wrappers.cc
-+index 74d48f1f91490620b4ce6a693eea78bd75acef59..e2c8a0a2dbeb0187a88cc529b671d9a98a20ee84 100644
++index 74d48f1f91490..e2c8a0a2dbeb0 100644
 +--- a/sandbox/linux/services/syscall_wrappers.cc
 ++++ b/sandbox/linux/services/syscall_wrappers.cc
 +@@ -5,6 +5,7 @@
@@ -885,7 +912,7 @@ index 0000000000..c7694120d4
 + #else
 +   res = syscall(__NR_lstat, path, stat_buf);
 +diff --git a/sandbox/linux/services/syscall_wrappers.h b/sandbox/linux/services/syscall_wrappers.h
-+index a6b22eb5387eb56b7cd524daa1c985483a6f061a..824be9def67e3941f8736b14eb4b133994d462c3 100644
++index a6b22eb5387eb..824be9def67e3 100644
 +--- a/sandbox/linux/services/syscall_wrappers.h
 ++++ b/sandbox/linux/services/syscall_wrappers.h
 +@@ -19,6 +19,7 @@ struct cap_hdr;
@@ -905,7 +932,7 @@ index 0000000000..c7694120d4
 + // Takes care of unpoisoning |stat_buf| for MSAN. Check-fails if fstatat64() is
 + // not a supported syscall on the current platform.
 +diff --git a/sandbox/linux/syscall_broker/broker_client.cc b/sandbox/linux/syscall_broker/broker_client.cc
-+index 848af1020ded70327a9927ab8723af9be985f593..7e9f214183024f11aaa5b4b09bcc8f1f6d6eb38e 100644
++index 848af1020ded7..7e9f214183024 100644
 +--- a/sandbox/linux/syscall_broker/broker_client.cc
 ++++ b/sandbox/linux/syscall_broker/broker_client.cc
 +@@ -198,6 +198,21 @@ int BrokerClient::Stat64(const char* pathname,
@@ -931,7 +958,7 @@ index 0000000000..c7694120d4
 +   if (!path)
 +     return -EFAULT;
 +diff --git a/sandbox/linux/syscall_broker/broker_client.h b/sandbox/linux/syscall_broker/broker_client.h
-+index 9d0fdee5f3a2cad6bf89bd200f81517547314d5c..1c7f951436973b38a3bb75c8ad5615cbbe0bec4a 100644
++index 9d0fdee5f3a2c..1c7f951436973 100644
 +--- a/sandbox/linux/syscall_broker/broker_client.h
 ++++ b/sandbox/linux/syscall_broker/broker_client.h
 +@@ -67,6 +67,9 @@ class SANDBOX_EXPORT BrokerClient : public SyscallDispatcher {
@@ -945,7 +972,7 @@ index 0000000000..c7694120d4
 +   int InotifyAddWatch(int fd,
 +                       const char* pathname,
 +diff --git a/sandbox/linux/syscall_broker/broker_command.h b/sandbox/linux/syscall_broker/broker_command.h
-+index d44c42fe2b23274b485a9f58f8edcd7fbd4e5faf..5fd22d8186f1a1d6fed861e622d6d207605e0f54 100644
++index d44c42fe2b232..5fd22d8186f1a 100644
 +--- a/sandbox/linux/syscall_broker/broker_command.h
 ++++ b/sandbox/linux/syscall_broker/broker_command.h
 +@@ -42,6 +42,7 @@ enum BrokerCommand {
@@ -957,7 +984,7 @@ index 0000000000..c7694120d4
 +   COMMAND_INOTIFY_ADD_WATCH,
 + 
 +diff --git a/sandbox/linux/syscall_broker/broker_file_permission.h b/sandbox/linux/syscall_broker/broker_file_permission.h
-+index 7771ae1521d017db68ef6c75c87ad1c45921538d..a4c0089dbe0acc46529567bc2051b49b2a97c949 100644
++index 7771ae1521d01..a4c0089dbe0ac 100644
 +--- a/sandbox/linux/syscall_broker/broker_file_permission.h
 ++++ b/sandbox/linux/syscall_broker/broker_file_permission.h
 +@@ -5,6 +5,7 @@
@@ -969,7 +996,7 @@ index 0000000000..c7694120d4
 + #include <cstdint>
 + #include <string>
 +diff --git a/sandbox/linux/syscall_broker/broker_host.cc b/sandbox/linux/syscall_broker/broker_host.cc
-+index 7afa8b2395c15a2cfc5cad7c9ee718cd6679665e..21a10f20e74c87f86aabc419fe944fe012966699 100644
++index 7afa8b2395c15..21a10f20e74c8 100644
 +--- a/sandbox/linux/syscall_broker/broker_host.cc
 ++++ b/sandbox/linux/syscall_broker/broker_host.cc
 +@@ -302,6 +302,21 @@ void BrokerHost::StatFileForIPC(BrokerCommand command_type,
@@ -1005,7 +1032,7 @@ index 0000000000..c7694120d4
 +       if (!message->ReadString(&requested_filename)) {
 +         return false;
 +diff --git a/sandbox/linux/syscall_broker/broker_process.cc b/sandbox/linux/syscall_broker/broker_process.cc
-+index a452430a906e59d830f121270412e1cf40d900ca..3144c80a2e00e2dc0561f7bf0d5713a9e121f8e7 100644
++index a452430a906e5..3144c80a2e00e 100644
 +--- a/sandbox/linux/syscall_broker/broker_process.cc
 ++++ b/sandbox/linux/syscall_broker/broker_process.cc
 +@@ -122,44 +122,46 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
@@ -1082,7 +1109,7 @@ index 0000000000..c7694120d4
 +       return !fast_check || policy_->allowed_command_set.test(COMMAND_UNLINK);
 + #endif
 +diff --git a/sandbox/linux/syscall_broker/syscall_dispatcher.cc b/sandbox/linux/syscall_broker/syscall_dispatcher.cc
-+index a0de94badee68269516ab3800dd238611f9db47d..1c5c354a3390d3592eae80befea20b2274f4d1dc 100644
++index a0de94badee68..1c5c354a3390d 100644
 +--- a/sandbox/linux/syscall_broker/syscall_dispatcher.cc
 ++++ b/sandbox/linux/syscall_broker/syscall_dispatcher.cc
 +@@ -174,6 +174,19 @@ int SyscallDispatcher::DispatchSyscall(const arch_seccomp_data& args) {
@@ -1106,7 +1133,7 @@ index 0000000000..c7694120d4
 +     case __NR_lstat:
 +       // See https://crbug.com/847096
 +diff --git a/sandbox/linux/syscall_broker/syscall_dispatcher.h b/sandbox/linux/syscall_broker/syscall_dispatcher.h
-+index 906c37d922f46122bfe07503ee4afee156e4e0c2..1804f4883791975ea0db93cd24f0ac33bb9dff73 100644
++index 906c37d922f46..1804f48837919 100644
 +--- a/sandbox/linux/syscall_broker/syscall_dispatcher.h
 ++++ b/sandbox/linux/syscall_broker/syscall_dispatcher.h
 +@@ -49,6 +49,9 @@ class SANDBOX_EXPORT SyscallDispatcher {
@@ -1120,7 +1147,7 @@ index 0000000000..c7694120d4
 +   // Emulates unlink()/unlinkat().
 +   virtual int Unlink(const char* unlink) const = 0;
 +diff --git a/sandbox/linux/system_headers/linux_seccomp.h b/sandbox/linux/system_headers/linux_seccomp.h
-+index 8690a96eb01b1b4f7b5df8f91f5c7c2476088c5d..45d7a1781958b27bbc0369a08f8c239df7ce65f8 100644
++index 8690a96eb01b1..45d7a1781958b 100644
 +--- a/sandbox/linux/system_headers/linux_seccomp.h
 ++++ b/sandbox/linux/system_headers/linux_seccomp.h
 +@@ -39,6 +39,10 @@
@@ -1146,7 +1173,7 @@ index 0000000000..c7694120d4
 + #ifndef PR_SET_SECCOMP
 + #define PR_SET_SECCOMP               22
 +diff --git a/sandbox/linux/system_headers/linux_signal.h b/sandbox/linux/system_headers/linux_signal.h
-+index 69ccaf108157863ecfa326f8c8e01fd698c882be..0d29396a6c31a80d6c5850a9f9b4a420d63df335 100644
++index 69ccaf1081578..0d29396a6c31a 100644
 +--- a/sandbox/linux/system_headers/linux_signal.h
 ++++ b/sandbox/linux/system_headers/linux_signal.h
 +@@ -13,7 +13,7 @@
@@ -1159,7 +1186,7 @@ index 0000000000..c7694120d4
 + #define LINUX_SIGHUP 1
 + #define LINUX_SIGINT 2
 +diff --git a/sandbox/linux/system_headers/linux_stat.h b/sandbox/linux/system_headers/linux_stat.h
-+index 3aae8cbced775eed6ffa0eb4c5e18776b5554bf3..7b4ca05e6b67e27ba2c168b08c1762761a6f4431 100644
++index 3aae8cbced775..7b4ca05e6b67e 100644
 +--- a/sandbox/linux/system_headers/linux_stat.h
 ++++ b/sandbox/linux/system_headers/linux_stat.h
 +@@ -150,7 +150,7 @@ struct kernel_stat {
@@ -1229,7 +1256,7 @@ index 0000000000..c7694120d4
 + 
 + #endif  // SANDBOX_LINUX_SYSTEM_HEADERS_LINUX_STAT_H_
 +diff --git a/sandbox/linux/system_headers/linux_syscalls.h b/sandbox/linux/system_headers/linux_syscalls.h
-+index 438147b4018b6b6a8ba051b143316efc7ba54115..46a6f91b7774eca48d4428f0185dd04a918500b4 100644
++index 438147b4018b6..46a6f91b7774e 100644
 +--- a/sandbox/linux/system_headers/linux_syscalls.h
 ++++ b/sandbox/linux/system_headers/linux_syscalls.h
 +@@ -35,5 +35,9 @@
@@ -1244,7 +1271,7 @@ index 0000000000..c7694120d4
 + 
 +diff --git a/sandbox/linux/system_headers/loong64_linux_syscalls.h b/sandbox/linux/system_headers/loong64_linux_syscalls.h
 +new file mode 100644
-+index 0000000000000000000000000000000000000000..808d6de7403e01657a8a787f62a96d1ecbcea054
++index 0000000000000..808d6de7403e0
 +--- /dev/null
 ++++ b/sandbox/linux/system_headers/loong64_linux_syscalls.h
 +@@ -0,0 +1,1194 @@
@@ -2443,7 +2470,7 @@ index 0000000000..c7694120d4
 ++
 ++#endif  // SANDBOX_LINUX_SYSTEM_HEADERS_LOONG64_LINUX_SYSCALLS_H_
 +diff --git a/sandbox/policy/linux/bpf_audio_policy_linux.cc b/sandbox/policy/linux/bpf_audio_policy_linux.cc
-+index e1716b97e8f2148837dfee0badbc52ef5714fe5a..3ed6fc9b4d2fe52304eea8102f8dd3d35f0d5090 100644
++index e1716b97e8f21..3ed6fc9b4d2fe 100644
 +--- a/sandbox/policy/linux/bpf_audio_policy_linux.cc
 ++++ b/sandbox/policy/linux/bpf_audio_policy_linux.cc
 +@@ -85,6 +85,7 @@ ResultExpr AudioProcessPolicy::EvaluateSyscall(int system_call_number) const {
@@ -2455,7 +2482,7 @@ index 0000000000..c7694120d4
 +                   FUTEX_WAIT,
 +                   FUTEX_WAIT_BITSET,
 +diff --git a/sandbox/policy/linux/bpf_broker_policy_linux.cc b/sandbox/policy/linux/bpf_broker_policy_linux.cc
-+index 87a0cc1faf2c9c88fde470aa5538e9b18cd36bdc..3702bf91babffc6a94112a7cf7eee6caf84aea7e 100644
++index 87a0cc1faf2c9..3702bf91babff 100644
 +--- a/sandbox/policy/linux/bpf_broker_policy_linux.cc
 ++++ b/sandbox/policy/linux/bpf_broker_policy_linux.cc
 +@@ -87,6 +87,12 @@ ResultExpr BrokerProcessPolicy::EvaluateSyscall(int sysno) const {
@@ -2472,7 +2499,7 @@ index 0000000000..c7694120d4
 +     case __NR_lstat:
 +       if (allowed_command_set_.test(syscall_broker::COMMAND_STAT))
 +diff --git a/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc b/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc
-+index df2567f74981f947543b068e87385b52311a8634..8cabc0d20eb4b70ca75a8cd25f313f64f5ba9b77 100644
++index df2567f74981f..8cabc0d20eb4b 100644
 +--- a/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc
 ++++ b/sandbox/policy/linux/bpf_cros_amd_gpu_policy_linux.cc
 +@@ -38,7 +38,7 @@ ResultExpr CrosAmdGpuProcessPolicy::EvaluateSyscall(int sysno) const {
@@ -2485,7 +2512,7 @@ index 0000000000..c7694120d4
 +     case __NR_stat:
 + #endif
 +diff --git a/sandbox/policy/linux/bpf_gpu_policy_linux.cc b/sandbox/policy/linux/bpf_gpu_policy_linux.cc
-+index 35ccbb7a7f82b13164a2e30a04a35a5c0ed76138..94023dc1376e84e071179c503e06efcb64cd5ab1 100644
++index 35ccbb7a7f82b..94023dc1376e8 100644
 +--- a/sandbox/policy/linux/bpf_gpu_policy_linux.cc
 ++++ b/sandbox/policy/linux/bpf_gpu_policy_linux.cc
 +@@ -73,7 +73,7 @@ ResultExpr GpuProcessPolicy::EvaluateSyscall(int sysno) const {
@@ -2498,7 +2525,7 @@ index 0000000000..c7694120d4
 + #endif
 +     case __NR_getdents64:
 +diff --git a/sandbox/policy/linux/bpf_network_policy_linux.cc b/sandbox/policy/linux/bpf_network_policy_linux.cc
-+index c2ee245dd208d4628ae4bf3e0dda8287421c8803..04584d4243019ec02b4bb1b7523f3c93cb3eb1c7 100644
++index c2ee245dd208d..04584d4243019 100644
 +--- a/sandbox/policy/linux/bpf_network_policy_linux.cc
 ++++ b/sandbox/policy/linux/bpf_network_policy_linux.cc
 +@@ -260,7 +260,7 @@ ResultExpr NetworkProcessPolicy::EvaluateSyscall(int sysno) const {
@@ -2511,7 +2538,7 @@ index 0000000000..c7694120d4
 + #endif
 +     case __NR_getdents64:
 +diff --git a/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc b/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
-+index 2d00b768530aa481d21b059d26bcd6072a0d3079..1fce6c800e7f42d48b691e09f1e9ea6d57587a45 100644
++index 2d00b768530aa..1fce6c800e7f4 100644
 +--- a/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
 ++++ b/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
 +@@ -37,7 +37,7 @@ ResultExpr ScreenAIProcessPolicy::EvaluateSyscall(
@@ -2524,7 +2551,7 @@ index 0000000000..c7694120d4
 +               Allow())
 +           // Sending ENOSYS tells the Futex backend to use another approach if
 +diff --git a/sandbox/policy/linux/sandbox_linux.cc b/sandbox/policy/linux/sandbox_linux.cc
-+index c7313416e6183130bbbe4b89d0b4192664d01351..2ca106c1e3e077173d204dcef4b73b6999309efc 100644
++index c7313416e6183..2ca106c1e3e07 100644
 +--- a/sandbox/policy/linux/sandbox_linux.cc
 ++++ b/sandbox/policy/linux/sandbox_linux.cc
 +@@ -595,6 +595,7 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
@@ -2555,7 +2582,7 @@ index 0000000000..c7694120d4
 +     return handle_via_broker;
 +   }
 +diff --git a/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h b/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
-+index 114f3c112e8d597ce1a026172e80c1dcc2e3e1bd..1e2096f65104c32ae60b282749053143075e60b6 100644
++index 114f3c112e8d5..1e2096f65104c 100644
 +--- a/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
 ++++ b/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
 +@@ -91,19 +91,19 @@ ALWAYS_INLINE void PackOneRowOfRGBA8LittleToRA8(const uint8_t*& source,
@@ -2685,7 +2712,7 @@ index 0000000000..c7694120d4
 +     bgra_01 = __lsx_vpickev_b(bgra_1, bgra_0);
 +     bgra_23 = __lsx_vpickev_b(bgra_3, bgra_2);
 +diff --git a/third_party/crashpad/crashpad/minidump/minidump_context.h b/third_party/crashpad/crashpad/minidump/minidump_context.h
-+index 12413de02b6624873668f5806618ee53e7f10e01..54bf2627089dbe60a8143b0b1f3b759bf0191849 100644
++index 12413de02b662..54bf2627089db 100644
 +--- a/third_party/crashpad/crashpad/minidump/minidump_context.h
 ++++ b/third_party/crashpad/crashpad/minidump/minidump_context.h
 +@@ -687,6 +687,56 @@ struct MinidumpContextRISCV64 {
@@ -2746,7 +2773,7 @@ index 0000000000..c7694120d4
 + 
 + #endif  // CRASHPAD_MINIDUMP_MINIDUMP_CONTEXT_H_
 +diff --git a/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc b/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc
-+index 4a6130b63e954d11d6778a6d1320380c7098cf60..eefd3dba5f0f6fc1fe58841563345d2968ed9b68 100644
++index 4a6130b63e954..eefd3dba5f0f6 100644
 +--- a/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc
 ++++ b/third_party/crashpad/crashpad/minidump/minidump_context_writer.cc
 +@@ -110,6 +110,13 @@ MinidumpContextWriter::CreateFromSnapshot(const CPUContext* context_snapshot) {
@@ -2808,7 +2835,7 @@ index 0000000000..c7694120d4
 ++
 + }  // namespace crashpad
 +diff --git a/third_party/crashpad/crashpad/minidump/minidump_context_writer.h b/third_party/crashpad/crashpad/minidump/minidump_context_writer.h
-+index 8e39c6692f2949560140f85e57f1cf482fb5f880..640d1baed84cf738403b33a76950869eff06c072 100644
++index 8e39c6692f294..640d1baed84cf 100644
 +--- a/third_party/crashpad/crashpad/minidump/minidump_context_writer.h
 ++++ b/third_party/crashpad/crashpad/minidump/minidump_context_writer.h
 +@@ -413,6 +413,44 @@ class MinidumpContextRISCV64Writer final : public MinidumpContextWriter {
@@ -2857,7 +2884,7 @@ index 0000000000..c7694120d4
 + 
 + #endif  // CRASHPAD_MINIDUMP_MINIDUMP_CONTEXT_WRITER_H_
 +diff --git a/third_party/crashpad/crashpad/minidump/minidump_extensions.h b/third_party/crashpad/crashpad/minidump/minidump_extensions.h
-+index 55af5fa25b68e47ccabf0aa3fdc3162e8b5e7228..f8f9033880e728191e3aac90c8c94fe3f7dcc54d 100644
++index 55af5fa25b68e..f8f9033880e72 100644
 +--- a/third_party/crashpad/crashpad/minidump/minidump_extensions.h
 ++++ b/third_party/crashpad/crashpad/minidump/minidump_extensions.h
 +@@ -213,6 +213,9 @@ enum MinidumpCPUArchitecture : uint16_t {
@@ -2871,7 +2898,7 @@ index 0000000000..c7694120d4
 +   kMinidumpCPUArchitectureUnknown = PROCESSOR_ARCHITECTURE_UNKNOWN,
 + };
 +diff --git a/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc b/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc
-+index 1abb46c318142d6bce7209d76b221b57864a035a..d69fcd7e07bc17db3f870a887222f2f54b8a7db6 100644
++index 1abb46c318142..d69fcd7e07bc1 100644
 +--- a/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc
 ++++ b/third_party/crashpad/crashpad/minidump/minidump_misc_info_writer.cc
 +@@ -177,6 +177,8 @@ std::string MinidumpMiscInfoDebugBuildString() {
@@ -2884,7 +2911,7 @@ index 0000000000..c7694120d4
 + #error define kCPU for this CPU
 + #endif
 +diff --git a/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc b/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc
-+index e9e05124aa111fb044571a33833bc25aaade0157..7473663e768a4388e8a02fa34203de371e434ace 100644
++index e9e05124aa111..7473663e768a4 100644
 +--- a/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc
 ++++ b/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc
 +@@ -135,6 +135,9 @@ void MinidumpSystemInfoWriter::InitializeFromSnapshot(
@@ -2898,7 +2925,7 @@ index 0000000000..c7694120d4
 +       NOTREACHED();
 +   }
 +diff --git a/third_party/crashpad/crashpad/snapshot/capture_memory.cc b/third_party/crashpad/crashpad/snapshot/capture_memory.cc
-+index f2ff5d74bb96a9e65437d5d95c7e58dd62716f33..453fe37e1c806d803375cc8a61b14c8ecf61b605 100644
++index f2ff5d74bb96a..453fe37e1c806 100644
 +--- a/third_party/crashpad/crashpad/snapshot/capture_memory.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/capture_memory.cc
 +@@ -123,6 +123,11 @@ void CaptureMemory::PointedToByContext(const CPUContext& context,
@@ -2914,7 +2941,7 @@ index 0000000000..c7694120d4
 + #error Port.
 + #endif
 +diff --git a/third_party/crashpad/crashpad/snapshot/cpu_architecture.h b/third_party/crashpad/crashpad/snapshot/cpu_architecture.h
-+index 26d45f841229a72c0b927b2c49a2eee99713c84f..29f1398b8b0819ca97319cf4102b79993df707dd 100644
++index 26d45f841229a..29f1398b8b081 100644
 +--- a/third_party/crashpad/crashpad/snapshot/cpu_architecture.h
 ++++ b/third_party/crashpad/crashpad/snapshot/cpu_architecture.h
 +@@ -47,6 +47,9 @@ enum CPUArchitecture {
@@ -2928,7 +2955,7 @@ index 0000000000..c7694120d4
 + 
 + }  // namespace crashpad
 +diff --git a/third_party/crashpad/crashpad/snapshot/cpu_context.cc b/third_party/crashpad/crashpad/snapshot/cpu_context.cc
-+index 6b69edefd532630ac5d2d9fc3dc1d43dab16eec8..86a374cecfcddd3bfef8d667675a13467653d26a 100644
++index 6b69edefd5326..86a374cecfcdd 100644
 +--- a/third_party/crashpad/crashpad/snapshot/cpu_context.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/cpu_context.cc
 +@@ -173,6 +173,8 @@ uint64_t CPUContext::InstructionPointer() const {
@@ -2958,7 +2985,7 @@ index 0000000000..c7694120d4
 +     case kCPUArchitectureX86:
 +     case kCPUArchitectureARM:
 +diff --git a/third_party/crashpad/crashpad/snapshot/cpu_context.h b/third_party/crashpad/crashpad/snapshot/cpu_context.h
-+index c3640c328c64530828d242ac1b8429c1b1649f99..54ac3716b7b35a907d4578a4816c474bbf9c2219 100644
++index c3640c328c645..54ac3716b7b35 100644
 +--- a/third_party/crashpad/crashpad/snapshot/cpu_context.h
 ++++ b/third_party/crashpad/crashpad/snapshot/cpu_context.h
 +@@ -371,6 +371,22 @@ struct CPUContextRISCV64 {
@@ -2993,7 +3020,7 @@ index 0000000000..c7694120d4
 + };
 + 
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc b/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc
-+index 6c4cb3ebce6c53c6231b4c1ce2cac562ad36cbc3..b780e65f0f897a156b0f615f2bf324373aaf6373 100644
++index 6c4cb3ebce6c5..b780e65f0f897 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.cc
 +@@ -281,6 +281,40 @@ void InitializeCPUContextRISCV64(const ThreadContext::t64_t& thread_context,
@@ -3038,7 +3065,7 @@ index 0000000000..c7694120d4
 + 
 + }  // namespace internal
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h b/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h
-+index 507d1b44dd0e5521872392a95aab6004242a5644..a2b72b522c66f6b983bf97122f7f5bd052a3a111 100644
++index 507d1b44dd0e5..a2b72b522c66f 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/cpu_context_linux.h
 +@@ -188,6 +188,45 @@ void InitializeCPUContextRISCV64(const ThreadContext::t64_t& thread_context,
@@ -3088,7 +3115,7 @@ index 0000000000..c7694120d4
 + }  // namespace crashpad
 + 
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc b/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc
-+index 677afdaa77362bb0ea83ad5c4fa82dd5dc27da46..0fedcc39cb1a23eee8d4f9b3b51151cb59b8ec82 100644
++index 677afdaa77362..0fedcc39cb1a2 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.cc
 +@@ -15,6 +15,7 @@
@@ -3188,7 +3215,7 @@ index 0000000000..c7694120d4
 +         !ReadSiginfo<Traits32>(process_reader, siginfo_address)) {
 +       return false;
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h b/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
-+index f931d33002a7b55bcd6e2aa29c280fa2e3393bb8..c5acf661f829bb1371951194ba2e70fa67c88cbb 100644
++index f931d33002a7b..c5acf661f829b 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
 +@@ -91,6 +91,8 @@ class ExceptionSnapshotLinux final : public ExceptionSnapshot {
@@ -3201,7 +3228,7 @@ index 0000000000..c7694120d4
 +   } context_union_;
 +   CPUContext context_;
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc b/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc
-+index 45713386d953e4bbf67599fd2727c602f9a5b127..3afcd51478922129731037f6d5bec720e78f6c0a 100644
++index 45713386d953e..3afcd51478922 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/process_reader_linux.cc
 +@@ -129,6 +129,8 @@ void ProcessReaderLinux::Thread::InitializeStack(ProcessReaderLinux* reader) {
@@ -3214,7 +3241,7 @@ index 0000000000..c7694120d4
 + #error Port.
 + #endif
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/signal_context.h b/third_party/crashpad/crashpad/snapshot/linux/signal_context.h
-+index 89e697a08bad013a0d91e036310b9f91b1ad3f48..ab04f3a40db2e21b401ca9002892372635e4413a 100644
++index 89e697a08bad0..ab04f3a40db2e 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/signal_context.h
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/signal_context.h
 +@@ -456,6 +456,46 @@ static_assert(offsetof(UContext<ContextTraits64>, mcontext.fpregs) ==
@@ -3265,7 +3292,7 @@ index 0000000000..c7694120d4
 + #error Port.
 + #endif  // ARCH_CPU_X86_FAMILY
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc b/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc
-+index 67cd2b3af9e32112fe7d7c57b870b9fa79770544..fbfc97d916c490f174d1f13bf96d9cc337633ed5 100644
++index 67cd2b3af9e32..fbfc97d916c49 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc
 +@@ -208,6 +208,8 @@ CPUArchitecture SystemSnapshotLinux::GetCPUArchitecture() const {
@@ -3308,7 +3335,7 @@ index 0000000000..c7694120d4
 + #error Port.
 + #endif  // ARCH_CPU_X86_FAMILY
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc b/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc
-+index 85882e8ee464f77fe398371c15919940407724a6..2f0ad4f3cbc3d426f6ad9b2905fd657ac25e2fa8 100644
++index 85882e8ee464f..2f0ad4f3cbc3d 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc
 +@@ -196,6 +196,12 @@ bool ThreadSnapshotLinux::Initialize(
@@ -3325,7 +3352,7 @@ index 0000000000..c7694120d4
 + #error Port.
 + #endif
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h b/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
-+index 5795bfb985a2512310e1785c06d7ae3567f9aef8..78f14e1208481889261cfdbd1f71b144bb5b9d32 100644
++index 5795bfb985a25..78f14e1208481 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
 +@@ -76,6 +76,8 @@ class ThreadSnapshotLinux final : public ThreadSnapshot {
@@ -3338,7 +3365,7 @@ index 0000000000..c7694120d4
 + #error Port.
 + #endif  // ARCH_CPU_X86_FAMILY
 +diff --git a/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc b/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc
-+index ec02dff1266785d98dc119a9cfa9e3980a02d84f..92d9c6f78a915427ee993b35f33a4b00b8f6f020 100644
++index ec02dff126678..92d9c6f78a915 100644
 +--- a/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/minidump/minidump_context_converter.cc
 +@@ -293,6 +293,30 @@ bool MinidumpContextConverter::Initialize(
@@ -3373,7 +3400,7 @@ index 0000000000..c7694120d4
 +     // Architecture is listed as "unknown".
 +     DLOG(ERROR) << "Unknown architecture";
 +diff --git a/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc b/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc
-+index b7c7bfd0a86642aa7f4fefe24734cd7442a2a933..07334e1b6d9388e1c9b93396797a78ef25145b67 100644
++index b7c7bfd0a8664..07334e1b6d938 100644
 +--- a/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc
 +@@ -70,6 +70,8 @@ CPUArchitecture SystemSnapshotMinidump::GetCPUArchitecture() const {
@@ -3386,7 +3413,7 @@ index 0000000000..c7694120d4
 +     default:
 +       return CPUArchitecture::kCPUArchitectureUnknown;
 +diff --git a/third_party/crashpad/crashpad/util/linux/ptracer.cc b/third_party/crashpad/crashpad/util/linux/ptracer.cc
-+index a985cb1d1ff976ccf68840957f968677efe44a4b..f4375a88928a185c62c0eefa16a2ca2f6f574d41 100644
++index a985cb1d1ff97..f4375a88928a1 100644
 +--- a/third_party/crashpad/crashpad/util/linux/ptracer.cc
 ++++ b/third_party/crashpad/crashpad/util/linux/ptracer.cc
 +@@ -430,6 +430,37 @@ bool GetThreadArea64(pid_t tid,
@@ -3437,7 +3464,7 @@ index 0000000000..c7694120d4
 +          GetFloatingPointRegisters32(tid, &info->float_context, can_log_) &&
 +          GetThreadArea32(tid,
 +diff --git a/third_party/crashpad/crashpad/util/linux/thread_info.h b/third_party/crashpad/crashpad/util/linux/thread_info.h
-+index 808b35a3affa2a0c1b1c96e436841c6e828837ff..e3ad411981c19814034f82481a107b49260df615 100644
++index 808b35a3affa2..e3ad411981c19 100644
 +--- a/third_party/crashpad/crashpad/util/linux/thread_info.h
 ++++ b/third_party/crashpad/crashpad/util/linux/thread_info.h
 +@@ -87,6 +87,8 @@ union ThreadContext {
@@ -3502,7 +3529,7 @@ index 0000000000..c7694120d4
 + #error Port.
 + #endif  // ARCH_CPU_X86
 +diff --git a/third_party/crashpad/crashpad/util/misc/capture_context_linux.S b/third_party/crashpad/crashpad/util/misc/capture_context_linux.S
-+index cfad85738e572d9cb99221b22d0e9b6d877f5e17..715c86205662cab17b6efcd8af5800dfc6b4c546 100644
++index cfad85738e572..715c86205662c 100644
 +--- a/third_party/crashpad/crashpad/util/misc/capture_context_linux.S
 ++++ b/third_party/crashpad/crashpad/util/misc/capture_context_linux.S
 +@@ -510,4 +510,49 @@ CAPTURECONTEXT_SYMBOL2:
@@ -3556,7 +3583,7 @@ index 0000000000..c7694120d4
 ++
 + #endif  // __i386__
 +diff --git a/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc b/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc
-+index df63a77296d045975884c132a9657e9c1d57d4d2..1f7d652441ea7821ee1bb68f35469f06d8b15730 100644
++index df63a77296d04..1f7d652441ea7 100644
 +--- a/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc
 ++++ b/third_party/crashpad/crashpad/util/net/http_transport_libcurl.cc
 +@@ -239,6 +239,8 @@ std::string UserAgent() {
@@ -3570,7 +3597,7 @@ index 0000000000..c7694120d4
 + #endif
 +diff --git a/third_party/dav1d/config/linux/loong64/config.h b/third_party/dav1d/config/linux/loong64/config.h
 +new file mode 100644
-+index 0000000000000000000000000000000000000000..44c60eb528119aafb00871cb15218f70797e2efe
++index 0000000000000..44c60eb528119
 +--- /dev/null
 ++++ b/third_party/dav1d/config/linux/loong64/config.h
 +@@ -0,0 +1,45 @@

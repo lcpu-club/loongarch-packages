@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 13567b0..7b8931f 100644
+index 13567b0..7659177 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -456,6 +456,22 @@ prepare() {
@@ -57,5 +57,5 @@ index 13567b0..7b8931f 100644
 +         "compiler-rt-adjust-paths-loong64.patch")
 +sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
 +             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
-+             '2cf2d8a645c01f8d5521303fd4c64bfc00a6b0f2ec06f8cbf2e9d0676135581e'
++             '68a88b6380cead03e000881049b07772d1c09d7d3d3bf19a3b2472a108cabc52'
 +             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690')
