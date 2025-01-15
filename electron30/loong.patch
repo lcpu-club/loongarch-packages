@@ -1,0 +1,88 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f2bde91..d62983f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -442,6 +442,21 @@ prepare() {
+   sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
+   sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
+ 
++  # Patching makepkg-source-roller-orig.py
++  cp "${srcdir}/makepkg-source-roller.py" "makepkg-source-roller-new.py"
++  patch "makepkg-source-roller-new.py" -i "${srcdir}/makepkg-source-roller.py.diff"
++  mv -f "makepkg-source-roller-new.py" "makepkg-source-roller.py"
++
++  # Apply in advance to so that makepkg-source-roller.py will not throw error
++  patch -Np1 -d chromium-mirror_third_party_depot_tools -i "${srcdir}/depot_tools-loong64-support.patch"
++  # Get the binary from the npm package
++  npm install @esbuild/linux-loong64@0.14.54
++
++  # Add ` -mcmodel=medium` to CFLAGS etc.
++  # to avoid `relocation R_LARCH_B26 overflow`
++  export CFLAGS="${CFLAGS} -mcmodel=medium"
++  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
++
+   cp -r chromium-mirror_third_party_depot_tools depot_tools
+   export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
+   #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
+@@ -450,6 +465,9 @@ prepare() {
+   # Generate gclient gn args file and prepare-electron-source-tree.sh
+   python makepkg-source-roller.py generate electron/DEPS $pkgname
+   rbash prepare-electron-source-tree.sh "$CARCH"
++  # Add esbuild binary manually
++  mkdir -p src/third_party/devtools-frontend/src/third_party/esbuild
++  cp node_modules/@esbuild/linux-loong64/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+   mv electron src/electron
+ 
+   echo "Running hooks..."
+@@ -465,8 +483,10 @@ prepare() {
+   # needs newer clang to read the bundled PGO profile
+   # src/tools/update_pgo_profiles.py --target=linux update \
+   #   --gs-url-base=chromium-optimization-profiles/pgo_profiles
+-  depot_tools/download_from_google_storage.py --no_resume --extract --no_auth \
+-    --bucket chromium-nodejs -s src/third_party/node/node_modules.tar.gz.sha1
++  #depot_tools/download_from_google_storage.py --no_resume --extract --no_auth \
++  #  --bucket chromium-nodejs -s src/third_party/node/node_modules.tar.gz.sha1
++  # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
++  src/third_party/node/update_npm_deps
+ 
+   src/electron/script/apply_all_patches.py \
+       src/electron/patches/config.json
+@@ -494,7 +514,9 @@ prepare() {
+   patch -Np1 -i ../drop-flag-unsupported-by-clang17.patch
+ 
+   # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
+-  patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  #patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  # Use modified version for loong64 support
++  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
+ 
+   # Fixes for building with libstdc++ instead of libc++
+   patch -Np1 -i ../chromium-patches-*/chromium-117-material-color-include.patch
+@@ -511,6 +533,11 @@ prepare() {
+   patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
+   # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
+ 
++  # Add loong64 support for chromium
++  patch -Np1 -i "${srcdir}/chromium-loong64-fix.patch"
++  # Add loong64 support for electron
++  patch -Np1 -d electron -i "${srcdir}/electron_runtime_api_dalagate-add-loong64-support.patch"
++
+   # Allow building against system libraries in official builds
+   echo "Patching Chromium for using system libraries..."
+   sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
+@@ -639,3 +666,15 @@ package() {
+   install -Dm644 src/electron/default_app/icon.png \
+           "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
+ }
++
++makedepends+=(rsync) # for src/third_party/node/update_npm_deps
++source+=("depot_tools-loong64-support.patch"
++         "makepkg-source-roller.py.diff"
++         "compiler-rt-adjust-paths-loong64.patch"
++         "chromium-loong64-fix.patch"
++         "electron_runtime_api_dalagate-add-loong64-support.patch")
++sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
++             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
++             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
++             'f669853c68b79c1f61f18c676795f8ac69a5e121785b703ba02e42c713245ab8'
++             '19119a94c1f80bbfd81e15087a693720396ac1bbb2b85f49120fc00e4fdf781b')
