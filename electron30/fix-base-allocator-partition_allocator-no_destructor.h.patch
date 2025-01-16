@@ -1,0 +1,16 @@
+diff --git a/base/allocator/partition_allocator/src/partition_alloc/partition_alloc_base/no_destructor.h b/base/a
+llocator/partition_allocator/src/partition_alloc/partition_alloc_base/no_destructor.h
+index d267101510388..60402c586c3b6 100644
+--- a/base/allocator/partition_allocator/src/partition_alloc/partition_alloc_base/no_destructor.h
++++ b/base/allocator/partition_allocator/src/partition_alloc/partition_alloc_base/no_destructor.h
+@@ -122,9 +122,7 @@ class NoDestructor {
+       new (storage_) T(std::forward<Args>(args)...);
+     }
+ 
+-    const T* get() const {
+-      return const_cast<PlacementStorage*>(this)->storage();
+-    }
++    const T* get() const { return const_cast<PlacementStorage*>(this)->get(); }
+     T* get() { return reinterpret_cast<T*>(storage_); }
+ 
+    private:
