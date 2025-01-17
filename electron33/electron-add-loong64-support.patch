@@ -101,10 +101,10 @@ index 61fa76913e..54ff2332d3 100644
 +loong64_support_for_runtime_json.patch
 diff --git a/patches/chromium/loong64_support.patch b/patches/chromium/loong64_support.patch
 new file mode 100644
-index 0000000000..39efc30d62
+index 0000000000..42a7a636c8
 --- /dev/null
 +++ b/patches/chromium/loong64_support.patch
-@@ -0,0 +1,3541 @@
+@@ -0,0 +1,3554 @@
 +diff --git a/base/allocator/partition_allocator/partition_alloc.gni b/base/allocator/partition_allocator/partition_alloc.gni
 +index 2b589ddd15321..9f45a24dcd857 100644
 +--- a/base/allocator/partition_allocator/partition_alloc.gni
@@ -187,6 +187,19 @@ index 0000000000..39efc30d62
 ++    "  ld.d $fp, $sp, 72                                 \n"
 ++    "  addi.d $sp, $sp, 96                               \n"
 ++    "  jr $ra                                            \n");
++diff --git a/base/process/launch.h b/base/process/launch.h
++index edd2bd6fadf4a..b80df6b150c51 100644
++--- a/base/process/launch.h
+++++ b/base/process/launch.h
++@@ -51,7 +51,7 @@ namespace base {
++ // defined as a constant.
++ 
++ // These constants are borrowed from glibc’s (arch)/bits/pthread_stack_min.h.
++-#if defined(ARCH_CPU_ARM64)
+++#if defined(ARCH_CPU_ARM64) || defined(ARCH_CPU_LOONGARCH64)
++ #define PTHREAD_STACK_MIN_CONST \
++   (__builtin_constant_p(PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : 131072)
++ #else
 +diff --git a/base/system/sys_info.cc b/base/system/sys_info.cc
 +index b74d6550715de..1ebbbd70cefc1 100644
 +--- a/base/system/sys_info.cc
