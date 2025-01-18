@@ -3719,21 +3719,23 @@ index 3cf8d9fc4a..13c1c128d6 100644
 +patch_esbuild_version_for_loong64.patch
 diff --git a/patches/devtools_frontend/loong64_support.patch b/patches/devtools_frontend/loong64_support.patch
 new file mode 100644
-index 0000000000..2e7f3fafb1
+index 0000000000..1e33aa0bf0
 --- /dev/null
 +++ b/patches/devtools_frontend/loong64_support.patch
-@@ -0,0 +1,20 @@
-+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-+From: darkyzhou <me@zqy.io>
-+Date: Mon, 18 Nov 2024 16:34:13 +0000
-+Subject: loong64 support
-+
-+Co-authored-by: Jiajie Chen <c@jia.je>
-+
+@@ -0,0 +1,22 @@
 +diff --git a/scripts/build/rollup.config.js b/scripts/build/rollup.config.js
-+index fd01fabf108341d086a2529d5b1d43613683bb86..f6bc03cc61bdf87e0c6da017d9a6235750e52a18 100644
++index fd01fabf108..18d3bef6e13 100644
 +--- a/scripts/build/rollup.config.js
 ++++ b/scripts/build/rollup.config.js
++@@ -5,7 +5,7 @@
++ // @ts-check
++ 
++ import sourcemaps from 'rollup-plugin-sourcemaps';
++-import {terser} from 'rollup-plugin-terser';
+++//import {terser} from 'rollup-plugin-terser';
++ 
++ const devtools_plugin = require('./devtools_plugin.js');
++ 
 +@@ -19,7 +19,7 @@ export default commandLineArgs => ({
 +     sourcemap: Boolean(commandLineArgs.configSourcemaps),
 +   }],
@@ -10112,19 +10114,12 @@ index 0000000000..ea62e0c740
 +loong64_support.patch
 diff --git a/patches/swiftshader/loong64_support.patch b/patches/swiftshader/loong64_support.patch
 new file mode 100644
-index 0000000000..fb204b355e
+index 0000000000..8ce25be747
 --- /dev/null
 +++ b/patches/swiftshader/loong64_support.patch
-@@ -0,0 +1,165 @@
-+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-+From: darkyzhou <me@zqy.io>
-+Date: Mon, 18 Nov 2024 15:49:06 +0000
-+Subject: loong64 support
-+
-+Co-authored-by: Jiajie Chen <c@jia.je>
-+
+@@ -0,0 +1,170 @@
 +diff --git a/src/Reactor/BUILD.gn b/src/Reactor/BUILD.gn
-+index 67dfeb0ec..c9683912e 100644
++index 67dfeb0ec8..c9683912e7 100644
 +--- a/src/Reactor/BUILD.gn
 ++++ b/src/Reactor/BUILD.gn
 +@@ -307,7 +307,11 @@ if (supports_subzero) {
@@ -10140,8 +10135,20 @@ index 0000000000..fb204b355e
 + 
 +     deps = [
 +       ":swiftshader_reactor_base",
++diff --git a/src/Vulkan/BUILD.gn b/src/Vulkan/BUILD.gn
++index 852068cade..fb6618f9d3 100644
++--- a/src/Vulkan/BUILD.gn
+++++ b/src/Vulkan/BUILD.gn
++@@ -229,6 +229,7 @@ swiftshader_shared_library("swiftshader_libvulkan") {
++   }
++ 
++   deps = [ ":_swiftshader_libvulkan" ]
+++  libs = [ "m" ]
++ }
++ 
++ swiftshader_static_library("swiftshader_libvulkan_static") {
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def b/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def
-+index 2af3e28e8..521454bdf 100644
++index 2af3e28e82..521454bdff 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def
 ++++ b/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def
 +@@ -45,6 +45,9 @@ LLVM_ASM_PARSER(PowerPC)
@@ -10155,7 +10162,7 @@ index 0000000000..fb204b355e
 + 
 + #undef LLVM_ASM_PARSER
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmPrinters.def b/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmPrinters.def
-+index 2f675be26..28eb68ec4 100644
++index 2f675be26f..28eb68ec49 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmPrinters.def
 ++++ b/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmPrinters.def
 +@@ -45,6 +45,9 @@ LLVM_ASM_PRINTER(PowerPC)
@@ -10169,7 +10176,7 @@ index 0000000000..fb204b355e
 + 
 + #undef LLVM_ASM_PRINTER
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/Disassemblers.def b/third_party/llvm-16.0/configs/linux/include/llvm/Config/Disassemblers.def
-+index 80e3a1374..26ff566ff 100644
++index 80e3a1374d..26ff566ff6 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/Disassemblers.def
 ++++ b/third_party/llvm-16.0/configs/linux/include/llvm/Config/Disassemblers.def
 +@@ -45,6 +45,9 @@ LLVM_DISASSEMBLER(PowerPC)
@@ -10183,7 +10190,7 @@ index 0000000000..fb204b355e
 + 
 + #undef LLVM_DISASSEMBLER
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/Targets.def b/third_party/llvm-16.0/configs/linux/include/llvm/Config/Targets.def
-+index d34b0eaee..91e9c2778 100644
++index d34b0eaee7..91e9c27781 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/Targets.def
 ++++ b/third_party/llvm-16.0/configs/linux/include/llvm/Config/Targets.def
 +@@ -44,6 +44,9 @@ LLVM_TARGET(PowerPC)
@@ -10197,7 +10204,7 @@ index 0000000000..fb204b355e
 + 
 + #undef LLVM_TARGET
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/llvm-config.h b/third_party/llvm-16.0/configs/linux/include/llvm/Config/llvm-config.h
-+index d9cce40e4..1be6ba950 100644
++index d9cce40e4e..1be6ba9507 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/llvm-config.h
 ++++ b/third_party/llvm-16.0/configs/linux/include/llvm/Config/llvm-config.h
 +@@ -47,6 +47,8 @@
