@@ -3719,10 +3719,21 @@ index 3cf8d9fc4a..13c1c128d6 100644
 +patch_esbuild_version_for_loong64.patch
 diff --git a/patches/devtools_frontend/loong64_support.patch b/patches/devtools_frontend/loong64_support.patch
 new file mode 100644
-index 0000000000..1e33aa0bf0
+index 0000000000..c0a37241ce
 --- /dev/null
 +++ b/patches/devtools_frontend/loong64_support.patch
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,36 @@
++From 65bf8248bc3dd4c9778dd5597511bb27ad47093e Mon Sep 17 00:00:00 2001
++From: Zhou Qiankang <wszqkzqk@qq.com>
++Date: Sat, 18 Jan 2025 09:24:53 +0800
++Subject: [PATCH] Add loong64 support
++
++Co-authored-by: Jiajie Chen <c@jia.je>
++Signed-off-by: Zhou Qiankang <wszqkzqk@qq.com>
++---
++ scripts/build/rollup.config.js | 4 ++--
++ 1 file changed, 2 insertions(+), 2 deletions(-)
++
 +diff --git a/scripts/build/rollup.config.js b/scripts/build/rollup.config.js
 +index fd01fabf108..18d3bef6e13 100644
 +--- a/scripts/build/rollup.config.js
@@ -3745,6 +3756,9 @@ index 0000000000..1e33aa0bf0
 +     {
 +       name: 'devtools-plugin',
 +       resolveId(source, importer) {
++-- 
++2.48.1
++
 diff --git a/patches/devtools_frontend/patch_esbuild_version_for_loong64.patch b/patches/devtools_frontend/patch_esbuild_version_for_loong64.patch
 new file mode 100644
 index 0000000000..cd0282d95a
@@ -10114,10 +10128,27 @@ index 0000000000..ea62e0c740
 +loong64_support.patch
 diff --git a/patches/swiftshader/loong64_support.patch b/patches/swiftshader/loong64_support.patch
 new file mode 100644
-index 0000000000..8ce25be747
+index 0000000000..d56b3c7ef2
 --- /dev/null
 +++ b/patches/swiftshader/loong64_support.patch
-@@ -0,0 +1,170 @@
+@@ -0,0 +1,190 @@
++From 7aa8d50a1464c72dfde45b38908760097d94ab4f Mon Sep 17 00:00:00 2001
++From: Zhou Qiankang <wszqkzqk@qq.com>
++Date: Sat, 18 Jan 2025 09:27:48 +0800
++Subject: [PATCH] Add loong64 support
++
++Co-authored-by: Jiajie Chen <c@jia.je>
++Signed-off-by: Zhou Qiankang <wszqkzqk@qq.com>
++---
++ src/Reactor/BUILD.gn                           |  6 +++++-
++ src/Vulkan/BUILD.gn                            |  1 +
++ .../linux/include/llvm/Config/AsmParsers.def   |  3 +++
++ .../linux/include/llvm/Config/AsmPrinters.def  |  3 +++
++ .../include/llvm/Config/Disassemblers.def      |  3 +++
++ .../linux/include/llvm/Config/Targets.def      |  3 +++
++ .../linux/include/llvm/Config/llvm-config.h    | 18 ++++++++++++++++++
++ 7 files changed, 36 insertions(+), 1 deletion(-)
++
 +diff --git a/src/Reactor/BUILD.gn b/src/Reactor/BUILD.gn
 +index 67dfeb0ec8..c9683912e7 100644
 +--- a/src/Reactor/BUILD.gn
@@ -10288,6 +10319,9 @@ index 0000000000..8ce25be747
 + #else
 + #error "unknown architecture"
 + #endif
++-- 
++2.48.1
++
 diff --git a/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc b/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
 index d41b2acc27..6be2324770 100644
 --- a/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
