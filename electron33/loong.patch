@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 13567b0..2c7e501 100644
+index 7070d6b..5980c03 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -456,6 +456,22 @@ prepare() {
@@ -35,7 +35,19 @@ index 13567b0..2c7e501 100644
    mv electron src/electron
  
    echo "Running hooks..."
-@@ -508,7 +527,9 @@ prepare() {
+@@ -476,8 +495,9 @@ prepare() {
+     -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
+   src/build/util/lastchange.py \
+     -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
+-  src/tools/update_pgo_profiles.py --target=linux update \
+-    --gs-url-base=chromium-optimization-profiles/pgo_profiles
++  # Google doesn't provide PGO files for loong64
++  #src/tools/update_pgo_profiles.py --target=linux update \
++  #  --gs-url-base=chromium-optimization-profiles/pgo_profiles
+ 
+   # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
+   src/third_party/node/update_npm_deps
+@@ -507,7 +527,9 @@ prepare() {
    ## Upstream fixes
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
@@ -46,7 +58,7 @@ index 13567b0..2c7e501 100644
  
    # Fixes for building with libstdc++ instead of libc++
    patch -Np1 -i ../chromium-patches-*/chromium-128-compiler.patch
-@@ -660,3 +681,12 @@ package() {
+@@ -659,3 +681,12 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
