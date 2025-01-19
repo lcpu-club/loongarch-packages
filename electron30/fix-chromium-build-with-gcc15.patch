@@ -1,0 +1,52 @@
+Patch status: fixed in >=chromium-126.0.6465.0
+
+Fails to build with upcoming gcc15's due to its improved
+diagnosis picking up new issues[1][2] with the code.
+
+Already fixed for chromium in [3] (since chromium-126.0.6458.0),
+[4] (>=126.0.6459.0) and the quiche submodule in [5][6] (updated
+in >=126.0.6465.0).
+
+[1] https://bugs.gentoo.org/936415
+[2] https://bugs.gentoo.org/936416
+[3] https://crrev.com/23646607e16c63231ae9f49ce5355c270145cf30
+[4] https://crrev.com/37ef38092ab783d0126922e8d463024341c481b9
+[5] https://quiche.googlesource.com/quiche/+/c1af894e0f5c4f732a983e7c93227854e203570e
+[6] https://crrev.com/8685207145d3662fdb8c5ec6bc3f27c394defad6
+--- a/base/allocator/partition_allocator/src/partition_alloc/partition_alloc_base/no_destructor.h
++++ b/base/allocator/partition_allocator/src/partition_alloc/partition_alloc_base/no_destructor.h
+@@ -123,7 +123,5 @@
+     }
+ 
+-    const T* get() const {
+-      return const_cast<PlacementStorage*>(this)->storage();
+-    }
++    const T* get() const { return const_cast<PlacementStorage*>(this)->get(); }
+     T* get() { return reinterpret_cast<T*>(storage_); }
+ 
+--- a/base/containers/id_map.h
++++ b/base/containers/id_map.h
+@@ -179,6 +179,6 @@
+ 
+     const Iterator& operator=(const Iterator& iter) {
+-      map_ = iter.map;
+-      iter_ = iter.iter;
++      map_ = iter.map_;
++      iter_ = iter.iter_;
+       Init();
+       return *this;
+--- a/net/third_party/quiche/src/quiche/quic/core/quic_interval_deque.h
++++ b/net/third_party/quiche/src/quiche/quic/core/quic_interval_deque.h
+@@ -199,10 +199,10 @@
+       Iterator copy = *this;
+       copy.index_ += amount;
+-      QUICHE_DCHECK(copy.index_ < copy.deque_->size());
++      QUICHE_DCHECK(copy.index_ < copy.deque_->Size());
+       return copy;
+     }
+     Iterator& operator+=(difference_type amount) {
+       index_ += amount;
+-      QUICHE_DCHECK(index_ < deque_->size());
++      QUICHE_DCHECK(index_ < deque_->Size());
+       return *this;
+     }
