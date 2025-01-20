@@ -100,18 +100,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ba
  #else
    return std::string();
  #endif
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
---- a/build/config/compiler/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/build/config/compiler/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -621,7 +621,7 @@ config("compiler") {
-     # TODO(crbug.com/376278218): This causes segfault on Linux ARM builds.
-     if (is_linux && !llvm_android_mainline && current_cpu != "arm" &&
-         default_toolchain != "//build/toolchain/cros:target") {
--      cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
-+      # cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
-     }
-   }
- 
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/build/config/loongarch64.gni b/build/config/loongarch64.gni
 --- a/build/config/loongarch64.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/build/config/loongarch64.gni	2000-01-01 00:00:00.000000000 +0800
@@ -162,27 +150,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ch
  #if !BUILDFLAG(IS_CAST_AUDIO_ONLY)
      {switches::kEnableHardwareOverlays, "cast"},
  #endif
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/media_router/common/providers/cast/channel/enum_table.h b/components/media_router/common/providers/cast/channel/enum_table.h
---- a/components/media_router/common/providers/cast/channel/enum_table.h	2000-01-01 00:00:00.000000000 +0800
-+++ b/components/media_router/common/providers/cast/channel/enum_table.h	2000-01-01 00:00:00.000000000 +0800
-@@ -12,7 +12,6 @@
- 
- #include <cstdint>
- #include <cstring>
--#include <new>
- #include <optional>
- #include <ostream>
- #include <string_view>
-@@ -366,7 +365,8 @@ class EnumTable {
- 
-  private:
- #ifdef ARCH_CPU_64_BITS
--  alignas(std::hardware_destructive_interference_size)
-+  // Align the data on a cache line boundary.
-+  alignas(64)
- #endif
-       std::initializer_list<Entry> data_;
-   bool is_sorted_;
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/metrics/debug/metrics_internals_utils.cc b/components/metrics/debug/metrics_internals_utils.cc
 --- a/components/metrics/debug/metrics_internals_utils.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/components/metrics/debug/metrics_internals_utils.cc	2000-01-01 00:00:00.000000000 +0800
