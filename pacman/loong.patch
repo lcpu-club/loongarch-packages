@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index db1fa23..82406ea 100644
+index 6bf51ca..df2509c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -22,7 +22,7 @@ depends=(
@@ -34,7 +34,7 @@ index db1fa23..82406ea 100644
 +source+=(makepkg.loong64.diff
 +         pacman-use-loong64.patch
 +         pacman.loong64.diff)
-+sha256sums+=('944c57e9abbbd9a550a6d1b5a234fd11a6cba29dc136f72c9d3ce33c5ef581cc'
++sha256sums+=('7b9efdecfe9b770cedf9f8a7039aad31842454167caddb63315ec58949edaf24'
 +             '5ab2a0ae2747184e7a3b0d4f6f45f0a66b6ad85e853b78fb77102e4b32667cdc'
 +             'fadd0c5453aadfcb89cebb0bfc64674f68c7d988e512d8a4fca14718afa2cc62')
 +
