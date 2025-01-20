@@ -285,7 +285,7 @@ def main() -> None:
             print(f"Applying patch {PATCH_FILE}...")
             subprocess.run(["patch", "-p1", "-i", PATCH_FILE])
         else:
-            print("No 'loong.patch' found.")
+            print(f"No '{PATCH_FILE}' found.")
             sys.exit(1)
     else:
         print(f"No patch of {pkgbase} found.")
