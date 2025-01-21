@@ -1,13 +1,11 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 08c81d0..29684c2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -61,7 +61,7 @@ build() {
+@@ -64,7 +64,7 @@ build() {
  
  check() {
-   cd ${pkgname}
--  make test
-+  make test -k || echo "Some tests failed."
+ 	cd "${pkgname}"
+-	make test
++	make test -k || echo "Some tests failed."
  }
  
  package() {
