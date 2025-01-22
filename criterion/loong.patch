@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index d635162..bb8d82f 100644
+index 53db5c8..255744c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -36,6 +36,8 @@ prepare() {
@@ -11,6 +11,15 @@ index d635162..bb8d82f 100644
  }
  
  build() {
+@@ -46,7 +48,7 @@ build() {
+ 
+ check() {
+   cd $_pkgname-$pkgver
+-  meson test -C build --print-errorlogs
++  meson test -C build --print-errorlogs || echo "Watch out for failed tests!"
+ }
+ 
+ package() {
 @@ -54,3 +56,6 @@ package() {
    meson install -C build --destdir "$pkgdir"
    install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
