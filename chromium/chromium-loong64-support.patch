@@ -1,15 +1,3 @@
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/base/BUILD.gn b/base/BUILD.gn
---- a/base/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/base/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -1015,7 +1015,7 @@ component("base") {
-   defines = [ "BASE_IMPLEMENTATION" ]
-   data = []
-   data_deps = []
--  libs = []
-+  libs = [ "m" ]
-   frameworks = []
- 
-   configs += [
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/base/allocator/partition_allocator/partition_alloc.gni b/base/allocator/partition_allocator/partition_alloc.gni
 --- a/base/allocator/partition_allocator/partition_alloc.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/base/allocator/partition_allocator/partition_alloc.gni	2000-01-01 00:00:00.000000000 +0800
@@ -112,21 +100,34 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ba
  #else
    return std::string();
  #endif
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/build/config/c++/BUILD.gn b/build/config/c++/BUILD.gn
---- a/build/config/c++/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/build/config/c++/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -89,6 +89,7 @@ config("runtime_library") {
-     # Make sure we don't link against the system libstdc++ or libc++.
-     if (is_clang) {
-       ldflags += [ "-nostdlib++" ]
-+      libs += [ "m" ]
-     } else {
-       # Gcc has a built-in abs() definition with default visibility.
-       # If it was not disabled, it would conflict with libc++'s abs()
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
+--- a/build/config/compiler/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
++++ b/build/config/compiler/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
+@@ -621,7 +621,7 @@ config("compiler") {
+     # TODO(crbug.com/376278218): This causes segfault on Linux ARM builds.
+     if (is_linux && !llvm_android_mainline && current_cpu != "arm" &&
+         default_toolchain != "//build/toolchain/cros:target") {
+-      cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
++      # cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
+     }
+   }
+ 
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/build/config/loongarch64.gni b/build/config/loongarch64.gni
+--- a/build/config/loongarch64.gni	2000-01-01 00:00:00.000000000 +0800
++++ b/build/config/loongarch64.gni	2000-01-01 00:00:00.000000000 +0800
+@@ -7,7 +7,7 @@ import("//build/config/v8_target_cpu.gni
+ if (current_cpu == "loong64") {
+   declare_args() {
+     # LOONGARCH64 SIMD Arch compilation flag.
+-    loongarch64_use_lsx = false
++    loongarch64_use_lsx = true
+     loongarch64_use_lasx = false
+   }
+ }
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/build/config/rust.gni b/build/config/rust.gni
 --- a/build/config/rust.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/build/config/rust.gni	2000-01-01 00:00:00.000000000 +0800
-@@ -223,6 +223,9 @@ if (is_linux || is_chromeos) {
+@@ -200,6 +200,9 @@ if (is_linux || is_chromeos) {
    } else if (current_cpu == "riscv64") {
      rust_abi_target = "riscv64gc-unknown-linux-gnu"
      cargo_target_abi = ""
@@ -136,7 +137,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
    } else {
      # Best guess for other future platforms.
      rust_abi_target = current_cpu + "-unknown-linux-gnu"
-@@ -343,6 +346,8 @@ if (current_cpu == "x86") {
+@@ -320,6 +323,8 @@ if (current_cpu == "x86") {
    rust_target_arch = "powerpc64"
  } else if (current_cpu == "riscv64") {
    rust_target_arch = "riscv64"
@@ -145,6 +146,22 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
  }
  
  assert(!toolchain_has_rust || rust_target_arch != "")
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/chromecast/browser/cast_browser_main_parts.cc b/chromecast/browser/cast_browser_main_parts.cc
+--- a/chromecast/browser/cast_browser_main_parts.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/chromecast/browser/cast_browser_main_parts.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -315,11 +315,10 @@ const DefaultCommandLineSwitch kDefaultS
+ #endif  // BUILDFLAG(IS_ANDROID)
+ #endif  // BUILDFLAG(IS_CAST_AUDIO_ONLY)
+ #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
+-#if defined(ARCH_CPU_X86_FAMILY)
+     // This is needed for now to enable the x11 Ozone platform to work with
+     // current Linux/NVidia OpenGL drivers.
+     {switches::kIgnoreGpuBlocklist, ""},
+-#elif defined(ARCH_CPU_ARM_FAMILY)
++#if defined(ARCH_CPU_ARM_FAMILY)
+ #if !BUILDFLAG(IS_CAST_AUDIO_ONLY)
+     {switches::kEnableHardwareOverlays, "cast"},
+ #endif
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/media_router/common/providers/cast/channel/enum_table.h b/components/media_router/common/providers/cast/channel/enum_table.h
 --- a/components/media_router/common/providers/cast/channel/enum_table.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/components/media_router/common/providers/cast/channel/enum_table.h	2000-01-01 00:00:00.000000000 +0800
@@ -156,7 +173,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/co
  #include <optional>
  #include <ostream>
  #include <string_view>
-@@ -368,7 +367,8 @@ class EnumTable {
+@@ -366,7 +365,8 @@ class EnumTable {
  
   private:
  #ifdef ARCH_CPU_64_BITS
@@ -166,6 +183,18 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/co
  #endif
        std::initializer_list<Entry> data_;
    bool is_sorted_;
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/metrics/debug/metrics_internals_utils.cc b/components/metrics/debug/metrics_internals_utils.cc
+--- a/components/metrics/debug/metrics_internals_utils.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/components/metrics/debug/metrics_internals_utils.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -69,6 +69,8 @@ std::string CpuArchitectureToString(
+       return "arm32";
+     case variations::Study::TRANSLATED_X86_64:
+       return "translated_x86_64";
++    case variations::Study::LOONGARCH64:
++      return "loongarch64";
+   }
+   NOTREACHED();
+ }
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/variations/proto/study.proto b/components/variations/proto/study.proto
 --- a/components/variations/proto/study.proto	2000-01-01 00:00:00.000000000 +0800
 +++ b/components/variations/proto/study.proto	2000-01-01 00:00:00.000000000 +0800
@@ -2450,7 +2479,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc b/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
 --- a/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -37,7 +37,7 @@ ResultExpr ScreenAIProcessPolicy::Evalua
+@@ -47,7 +47,7 @@ ResultExpr ScreenAIProcessPolicy::Evalua
        const Arg<int> op(1);
        return Switch(op & FUTEX_CMD_MASK)
            .Cases(
@@ -2489,17 +2518,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    } else {
      return handle_via_broker;
    }
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/angle/BUILD.gn b/third_party/angle/BUILD.gn
---- a/third_party/angle/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/angle/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -1443,6 +1443,7 @@ template("angle_libGLESv2") {
-       sources += [ "src/libGLESv2/libGLESv2.rc" ]
-       deps += [ ":angle_version" ]
-     }
-+    libs = [ "m" ]
-   }
- }
- 
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h b/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
 --- a/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
@@ -3550,18 +3568,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 +
 +#define TRIM_DSP_FUNCTIONS 1
 +
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/devtools-frontend/src/scripts/build/rollup.config.js b/third_party/devtools-frontend/src/scripts/build/rollup.config.js
---- a/third_party/devtools-frontend/src/scripts/build/rollup.config.js	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/devtools-frontend/src/scripts/build/rollup.config.js	2000-01-01 00:00:00.000000000 +0800
-@@ -19,7 +19,7 @@ export default commandLineArgs => ({
-     sourcemap: Boolean(commandLineArgs.configSourcemaps),
-   }],
-   plugins: [
--    terser(),
-+    // terser(),
-     {
-       name: 'devtools-plugin',
-       resolveId(source, importer) {
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h b/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h
 --- a/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h	2000-01-01 00:00:00.000000000 +0800
@@ -9724,7 +9730,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/ffmpeg/ffmpeg_generated.gni b/third_party/ffmpeg/ffmpeg_generated.gni
 --- a/third_party/ffmpeg/ffmpeg_generated.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/ffmpeg/ffmpeg_generated.gni	2000-01-01 00:00:00.000000000 +0800
-@@ -251,6 +251,7 @@ if ((current_cpu == "arm64" && ffmpeg_br
+@@ -253,6 +253,7 @@ if ((current_cpu == "arm64" && ffmpeg_br
  
  if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
      (current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
@@ -9732,7 +9738,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
      (is_android && current_cpu == "arm" && arm_use_neon &&
       ffmpeg_branding == "Chrome") ||
      (is_android && current_cpu == "x86" && ffmpeg_branding == "Chrome") ||
-@@ -363,6 +364,19 @@ if (current_cpu == "x64" || (is_android
+@@ -382,6 +383,19 @@ if (current_cpu == "x64" || (is_android
    ]
  }
  
@@ -9752,38 +9758,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
  if ((is_android && current_cpu == "arm" && arm_use_neon) ||
      (use_linux_config && current_cpu == "arm" && arm_use_neon) ||
      (use_linux_config && current_cpu == "arm")) {
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/perfetto/src/base/BUILD.gn b/third_party/perfetto/src/base/BUILD.gn
---- a/third_party/perfetto/src/base/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/perfetto/src/base/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -80,6 +80,7 @@ perfetto_component("base") {
-   if (enable_perfetto_stderr_crash_dump) {
-     deps += [ ":debug_crash_stack_trace" ]
-   }
-+  libs = [ "m" ]
- }
- 
- perfetto_component("clock_snapshots") {
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/protobuf-javascript/BUILD.gn b/third_party/protobuf-javascript/BUILD.gn
---- a/third_party/protobuf-javascript/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/protobuf-javascript/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -28,5 +28,6 @@ if (current_toolchain == host_toolchain)
-       "//third_party/protobuf:protobuf_warnings",
-       "//third_party/protobuf:protoc_warnings",
-     ]
-+    libs = [ "m" ]
-   }
- }
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/protobuf/BUILD.gn b/third_party/protobuf/BUILD.gn
---- a/third_party/protobuf/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/protobuf/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -312,6 +312,7 @@ if (current_toolchain == host_toolchain)
-     if (enable_js_protobuf) {
-       deps += [ "//third_party/protobuf-javascript:protoc-gen-js" ]
-     }
-+    libs = [ "m" ]
-   }
- }
- 
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/skia/src/opts/SkOpts_SetTarget.h b/third_party/skia/src/opts/SkOpts_SetTarget.h
 --- a/third_party/skia/src/opts/SkOpts_SetTarget.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/skia/src/opts/SkOpts_SetTarget.h	2000-01-01 00:00:00.000000000 +0800
@@ -9962,36 +9936,3 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
  #else
  #error "unknown architecture"
  #endif
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/vulkan-loader/src/BUILD.gn b/third_party/vulkan-loader/src/BUILD.gn
---- a/third_party/vulkan-loader/src/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/vulkan-loader/src/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -272,6 +272,7 @@ if (!is_android) {
-       deps += [ ":gen_defines" ]
-       include_dirs = [ "$target_gen_dir" ]
-     }
-+    libs = [ "m" ]
-   }
- }
- 
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/vulkan-tools/src/BUILD.gn b/third_party/vulkan-tools/src/BUILD.gn
---- a/third_party/vulkan-tools/src/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/vulkan-tools/src/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -51,6 +51,7 @@ if (!is_android) {
-       configs -= [ "//build/config/compiler:chromium_code" ]
-       configs += [ "//build/config/compiler:no_chromium_code" ]
-     }
-+    libs = [ "m" ]
-   }
- 
-   action("vulkan_gen_icd_json_file") {
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ui/qt/BUILD.gn b/ui/qt/BUILD.gn
---- a/ui/qt/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/ui/qt/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -99,6 +99,7 @@ template("qt_shim") {
-       sources += get_target_outputs(":generate_moc" + invoker.qt_version)
-       deps += [ ":generate_moc" + invoker.qt_version ]
-     }
-+    libs = [ "m" ]
-   }
- }
- qt_shim("qt5_shim") {

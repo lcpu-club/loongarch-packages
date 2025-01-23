@@ -1,38 +1,41 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 57893e6..4356ac4 100644
+index c4ffa27..619bc2f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -118,11 +118,22 @@ prepare() {
-   patch -Np1 -i ../const-atomicstring-conversion.patch
+@@ -106,11 +106,16 @@ prepare() {
+   # Upstream fixes
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
 -  patch -Np1 -i ../compiler-rt-adjust-paths.patch
 +  # Use another version to support loong64
 +  #patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  patch -Np1 -i "${srcdir}/compiler-rt-adjust-paths-loong64.patch"
  
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
  
 +  # Patches for loong64
-+  patch -Np1 -i "${srcdir}/compiler-rt-adjust-paths-loong64.patch"
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
-+
-+  # Add ` -mcmodel=medium` to CFLAGS etc.
-+  # to avoid `relocation R_LARCH_B26 overflow`
-+  export CFLAGS="${CFLAGS} -mcmodel=medium"
-+  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
-+  export RUSTFLAGS="${RUSTFLAGS} -C code-model=medium"
 +
    # Fixes for building with libstdc++ instead of libc++
  
    # Link to system tools required by the build
-@@ -330,4 +341,9 @@ package() {
+@@ -197,7 +202,7 @@ build() {
+       'clang_base_path="/usr"'
+       'clang_use_chrome_plugins=false'
+       "clang_version=\"$_clang_version\""
+-      #'chrome_pgo_phase=0' # needs newer clang to read the bundled PGO profile
++      'chrome_pgo_phase=0' # Disable PGO since the data is not for loong64
+     )
+ 
+     # Allow the use of nightly features with stable Rust compiler
+@@ -313,4 +318,9 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
 +         "compiler-rt-adjust-paths-loong64.patch")
-+sha256sums+=('355f657028a8afad1707792dd6a52cc1cadd8e71be0569f28f67b58b492ab82e'
++sha256sums+=('643554bf6af1e709cbeef3064d24c657e123054c3ccbaeed2434269f5c8c2171'
 +             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690')
 +
  # vim:set ts=2 sw=2 et:
