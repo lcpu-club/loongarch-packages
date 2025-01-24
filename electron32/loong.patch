@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 755595a..a1508f4 100644
+index f4b0b2e..b514d70 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -456,6 +456,17 @@ prepare() {
+@@ -456,6 +456,16 @@ prepare() {
    sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
    sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
  
@@ -13,14 +13,13 @@ index 755595a..a1508f4 100644
 +
 +  # Apply in advance to so that makepkg-source-roller.py will not throw error
 +  patch -p1 -d chromium-mirror_third_party_depot_tools -i "${srcdir}/depot_tools-loong64-support.patch"
-+  patch -p1 -d electron -i "${srcdir}/electron-add-loong64-support.patch"
 +  # Get the binary from the npm package
 +  npm install @esbuild/linux-loong64@0.14.54
 +
    cp -r chromium-mirror_third_party_depot_tools depot_tools
    export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
    #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
-@@ -464,6 +475,9 @@ prepare() {
+@@ -464,6 +474,9 @@ prepare() {
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
    rbash prepare-electron-source-tree.sh "$CARCH"
@@ -30,7 +29,18 @@ index 755595a..a1508f4 100644
    mv electron src/electron
  
    echo "Running hooks..."
-@@ -509,7 +523,9 @@ prepare() {
+@@ -476,8 +489,8 @@ prepare() {
+     -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
+   src/build/util/lastchange.py \
+     -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
+-  src/tools/update_pgo_profiles.py --target=linux update \
+-    --gs-url-base=chromium-optimization-profiles/pgo_profiles
++  #src/tools/update_pgo_profiles.py --target=linux update \
++    #--gs-url-base=chromium-optimization-profiles/pgo_profiles
+ 
+   # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
+   src/third_party/node/update_npm_deps
+@@ -508,7 +521,9 @@ prepare() {
    patch -Np1 -i ../allow-ANGLEImplementation-kVulkan.patch
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
@@ -41,16 +51,42 @@ index 755595a..a1508f4 100644
  
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
-@@ -662,3 +678,12 @@ package() {
+@@ -532,6 +547,12 @@ prepare() {
+   patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
+   # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
+ 
++  # Add loong64 support for chromium
++  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
++  patch -Np1 -i "${srcdir}/extensions-common-api-runtime.json-add-loong64.patch"
++  # Add loong64 support for electron
++  patch -Np1 -d electron -i "${srcdir}/electron_runtime_api_dalagate-add-loong64-support.patch"
++
+   # Allow building against system libraries in official builds
+   echo "Patching Chromium for using system libraries..."
+   sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
+@@ -592,7 +613,7 @@ build() {
+     'clang_base_path="/usr"'
+     'clang_use_chrome_plugins=false'
+     "clang_version=\"$_clang_version\""
+-    'chrome_pgo_phase=2'
++    'chrome_pgo_phase=0'
+   )
+ 
+   # Allow the use of nightly features with stable Rust compiler
+@@ -661,3 +682,16 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
 +
 +source+=("depot_tools-loong64-support.patch"
 +         "makepkg-source-roller.py.diff"
-+         "electron-add-loong64-support.patch"
-+         "compiler-rt-adjust-paths-loong64.patch")
++         "compiler-rt-adjust-paths-loong64.patch"
++         "chromium-loong64-support.patch"
++         "extensions-common-api-runtime.json-add-loong64.patch"
++         "electron_runtime_api_dalagate-add-loong64-support.patch")
 +sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
 +             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
-+             '66ae6ddc797f3d1b89158ca4b9128784d7c222b1725130d6ecc29a2bafa3d09d'
-+             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690')
++             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
++             'db6addaa7c4248856f70351ecff0950f75af3030810f8a4364041c24039d0ac2'
++             '2f3662096c15de8797113a60afda4cd746ca64bfb7f901fe976eb3d29389c659'
++             '0e9152849d7ff20e54eea3e71f6cecedbfd923579557e81158369577e047c5d9')
