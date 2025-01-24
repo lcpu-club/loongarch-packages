@@ -1,0 +1,22 @@
+diff --git a/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc b/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
+index d41b2acc27..6be2324770 100644
+--- a/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
++++ b/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
+@@ -67,6 +67,8 @@ bool ElectronRuntimeAPIDelegate::GetPlatformInfo(PlatformInfo* info) {
+     info->arch = extensions::api::runtime::PlatformArch::kX86_32;
+   } else if (strcmp(arch, "x64") == 0) {
+     info->arch = extensions::api::runtime::PlatformArch::kX86_64;
++  } else if (strcmp(arch, "loong64") == 0) {
++    info->arch = extensions::api::runtime::PlatformArch::kLoong64;
+   } else {
+     NOTREACHED();
+   }
+@@ -78,6 +80,8 @@ bool ElectronRuntimeAPIDelegate::GetPlatformInfo(PlatformInfo* info) {
+     info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kX86_32;
+   } else if (strcmp(nacl_arch, "x86-64") == 0) {
+     info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kX86_64;
++  } else if (strcmp(nacl_arch, "loong64") == 0) {
++    info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kLoong64;
+   } else {
+     NOTREACHED();
+   }
