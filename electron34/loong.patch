@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0e3983e..95455cc 100644
+index 21386c9..9f87118 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -457,6 +457,21 @@ prepare() {
+@@ -457,6 +457,16 @@ prepare() {
    sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
    sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
  
@@ -16,15 +16,10 @@ index 0e3983e..95455cc 100644
 +  # Get the binary from the npm package
 +  npm install @esbuild/linux-loong64@0.14.54
 +
-+  # Add ` -mcmodel=medium` to CFLAGS etc.
-+  # to avoid `relocation R_LARCH_B26 overflow`
-+  export CFLAGS="${CFLAGS} -mcmodel=medium"
-+  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
-+
    cp -r chromium-mirror_third_party_depot_tools depot_tools
    export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
    #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
-@@ -465,6 +480,9 @@ prepare() {
+@@ -465,6 +475,9 @@ prepare() {
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
    rbash prepare-electron-source-tree.sh "$CARCH"
@@ -34,7 +29,7 @@ index 0e3983e..95455cc 100644
    mv electron src/electron
  
    echo "Running hooks..."
-@@ -477,8 +495,8 @@ prepare() {
+@@ -477,12 +490,48 @@ prepare() {
      -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
    src/build/util/lastchange.py \
      -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
@@ -42,10 +37,50 @@ index 0e3983e..95455cc 100644
 -    --gs-url-base=chromium-optimization-profiles/pgo_profiles
 +  #src/tools/update_pgo_profiles.py --target=linux update \
 +  #  --gs-url-base=chromium-optimization-profiles/pgo_profiles
++
++  # Link to system tools required by the build in advance
++  pushd src
++  mkdir -p third_party/node/linux/node-linux-x64/bin
++  ln -sfn /usr/bin/node third_party/node/linux/node-linux-x64/bin/
++  mkdir -p third_party/jdk/current/bin
++  ln -sfn /usr/bin/java third_party/jdk/current/bin/
++  ln -sfn /usr/bin/clang-format buildtools/linux64
++  popd
++
++  pushd src/third_party/node/
++  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
++  #local _rollup_ver="$(jq -r .dependencies.\"@rollup/wasm-node\" package.json)"
++  local _rollup_ver="4.32.0" # Known version that supports loong64
++  jq ".dependencies.rollup=\"$_rollup_ver\"" package.json > package.json.new
++  mv package.json{.new,}
++  popd
  
    # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
    src/third_party/node/update_npm_deps
-@@ -508,7 +526,9 @@ prepare() {
+ 
++  pushd src/third_party/devtools-frontend/src
++  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" scripts/devtools_paths.py
++  #local _rollup_ver="$(jq -r .devDependencies.\"@rollup/wasm-node\" package.json)"
++  jq ".devDependencies.rollup=\"$_rollup_ver\" | .devDependencies.\"@rollup/rollup-linux-loongarch64-gnu\"=\"$_rollup_ver\""  package.json > package.json.new
++  mv package.json{.new,}
++  # Chromium hosts a custom registry at https://npm.skia.org/chrome-devtools/
++  # and rejects some packages:
++  # Package fs-extra with version 11.3.0 was created 108h0m0s time ago. This is less than 1 week and so failed the audit.
++  sed -i /registry/d .npmrc
++  # Replace direct invocation of wasm rollup
++  sed -i 's\@rollup/wasm-node\rollup\' \
++    inspector_overlay/BUILD.gn \
++    front_end/models/live-metrics/web-vitals-injected/BUILD.gn \
++    front_end/Images/BUILD.gn \
++    front_end/panels/recorder/injected/BUILD.gn \
++    scripts/build/ninja/bundle.gni
++  popd
++  python src/third_party/devtools-frontend/src/scripts/deps/manage_node_deps.py
++
+   src/electron/script/apply_all_patches.py \
+       src/electron/patches/config.json
+ 
+@@ -508,7 +557,9 @@ prepare() {
    ## Upstream fixes
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
@@ -56,7 +91,7 @@ index 0e3983e..95455cc 100644
  
    # Fixes for building with libstdc++ instead of libc++
    patch -Np1 -i ../chromium-patches-*/chromium-130-interference-size.patch
-@@ -526,6 +546,12 @@ prepare() {
+@@ -526,6 +577,12 @@ prepare() {
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
    # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
  
@@ -69,7 +104,7 @@ index 0e3983e..95455cc 100644
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -586,7 +612,7 @@ build() {
+@@ -586,7 +643,7 @@ build() {
      'clang_base_path="/usr"'
      'clang_use_chrome_plugins=false'
      "clang_version=\"$_clang_version\""
@@ -78,11 +113,12 @@ index 0e3983e..95455cc 100644
    )
  
    # Allow the use of nightly features with stable Rust compiler
-@@ -655,3 +681,16 @@ package() {
+@@ -655,3 +712,17 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
 +
++makedepends+=(jq)
 +source+=("depot_tools-loong64-support.patch"
 +         "makepkg-source-roller.py.diff"
 +         "compiler-rt-adjust-paths-loong64.patch"
