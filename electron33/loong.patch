@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 13567b0..2c7e501 100644
+index c8e17e8..b01d1d5 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -456,6 +456,22 @@ prepare() {
+@@ -456,6 +456,16 @@ prepare() {
    sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
    sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
  
@@ -13,19 +13,13 @@ index 13567b0..2c7e501 100644
 +
 +  # Apply in advance to so that makepkg-source-roller.py will not throw error
 +  patch -Np1 -d chromium-mirror_third_party_depot_tools -i "${srcdir}/depot_tools-loong64-support.patch"
-+  patch -Np1 -d electron -i "${srcdir}/electron-add-loong64-support.patch"
 +  # Get the binary from the npm package
 +  npm install @esbuild/linux-loong64@0.14.54
-+
-+  # Add ` -mcmodel=medium` to CFLAGS etc.
-+  # to avoid `relocation R_LARCH_B26 overflow`
-+  export CFLAGS="${CFLAGS} -mcmodel=medium"
-+  export CXXFLAGS="${CXXFLAGS} -mcmodel=medium"
 +
    cp -r chromium-mirror_third_party_depot_tools depot_tools
    export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
    #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
-@@ -464,6 +480,9 @@ prepare() {
+@@ -464,6 +474,9 @@ prepare() {
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
    rbash prepare-electron-source-tree.sh "$CARCH"
@@ -35,7 +29,18 @@ index 13567b0..2c7e501 100644
    mv electron src/electron
  
    echo "Running hooks..."
-@@ -508,7 +527,9 @@ prepare() {
+@@ -476,8 +489,8 @@ prepare() {
+     -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
+   src/build/util/lastchange.py \
+     -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
+-  src/tools/update_pgo_profiles.py --target=linux update \
+-    --gs-url-base=chromium-optimization-profiles/pgo_profiles
++  #src/tools/update_pgo_profiles.py --target=linux update \
++    #--gs-url-base=chromium-optimization-profiles/pgo_profiles
+ 
+   # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
+   src/third_party/node/update_npm_deps
+@@ -507,7 +520,9 @@ prepare() {
    ## Upstream fixes
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
@@ -46,16 +51,51 @@ index 13567b0..2c7e501 100644
  
    # Fixes for building with libstdc++ instead of libc++
    patch -Np1 -i ../chromium-patches-*/chromium-128-compiler.patch
-@@ -660,3 +681,12 @@ package() {
+@@ -530,6 +545,15 @@ prepare() {
+   patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
+   # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
+ 
++  # Add loong64 support for chromium
++  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
++  patch -Np1 -i "${srcdir}/extensions-common-api-runtime.json-add-loong64.patch"
++  patch -Np1 -i "${srcdir}/devtools-frontend-disable-terser.patch"
++  patch -Np1 -i "${srcdir}/components-variations-add-loong64.patch"
++  patch -Np1 -i "${srcdir}/fix-base-process-launch.h.patch"
++  # Add loong64 support for electron
++  patch -Np1 -d electron -i "${srcdir}/electron_runtime_api_dalagate-add-loong64-support.patch"
++
+   # Allow building against system libraries in official builds
+   echo "Patching Chromium for using system libraries..."
+   sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
+@@ -590,7 +614,7 @@ build() {
+     'clang_base_path="/usr"'
+     'clang_use_chrome_plugins=false'
+     "clang_version=\"$_clang_version\""
+-    'chrome_pgo_phase=2'
++    'chrome_pgo_phase=0'
+   )
+ 
+   # Allow the use of nightly features with stable Rust compiler
+@@ -659,3 +683,22 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
 +
 +source+=("depot_tools-loong64-support.patch"
 +         "makepkg-source-roller.py.diff"
-+         "electron-add-loong64-support.patch"
-+         "compiler-rt-adjust-paths-loong64.patch")
++         "compiler-rt-adjust-paths-loong64.patch"
++         "extensions-common-api-runtime.json-add-loong64.patch"
++         "electron_runtime_api_dalagate-add-loong64-support.patch"
++         "chromium-loong64-support.patch"
++         "devtools-frontend-disable-terser.patch"
++         "components-variations-add-loong64.patch"
++         "fix-base-process-launch.h.patch")
 +sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
 +             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
-+             '0a4c29286c575d0726d289cb4ea72cbd2c2ef57ae0c82978412d699466d00119'
-+             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690')
++             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
++             '2f3662096c15de8797113a60afda4cd746ca64bfb7f901fe976eb3d29389c659'
++             '0e9152849d7ff20e54eea3e71f6cecedbfd923579557e81158369577e047c5d9'
++             '1d54c67518372511fb23658b14008e154dbf7dba54453ab7d0bf48a35fdcf4c4'
++             '731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
++             'a131da5af26ab680bf282bdd25c04e1ee7cf14e210f3f6d897c5f5707b468838'
++             '8473db8c1a63cb280aebedba0958cdfa0d63d7b4b0a7f7b262f171cbd8e0b1f6')
