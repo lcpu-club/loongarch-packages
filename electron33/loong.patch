@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c8e17e8..b01d1d5 100644
+index c8e17e8..78491b6 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -456,6 +456,16 @@ prepare() {
@@ -51,7 +51,7 @@ index c8e17e8..b01d1d5 100644
  
    # Fixes for building with libstdc++ instead of libc++
    patch -Np1 -i ../chromium-patches-*/chromium-128-compiler.patch
-@@ -530,6 +545,15 @@ prepare() {
+@@ -530,6 +545,16 @@ prepare() {
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
    # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
  
@@ -61,13 +61,14 @@ index c8e17e8..b01d1d5 100644
 +  patch -Np1 -i "${srcdir}/devtools-frontend-disable-terser.patch"
 +  patch -Np1 -i "${srcdir}/components-variations-add-loong64.patch"
 +  patch -Np1 -i "${srcdir}/fix-base-process-launch.h.patch"
++  patch -Np1 -d "third_party/breakpad/breakpad" -i "${srcdir}/breakpad-loong64-support.patch"
 +  # Add loong64 support for electron
 +  patch -Np1 -d electron -i "${srcdir}/electron_runtime_api_dalagate-add-loong64-support.patch"
 +
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -590,7 +614,7 @@ build() {
+@@ -590,7 +615,7 @@ build() {
      'clang_base_path="/usr"'
      'clang_use_chrome_plugins=false'
      "clang_version=\"$_clang_version\""
@@ -76,7 +77,7 @@ index c8e17e8..b01d1d5 100644
    )
  
    # Allow the use of nightly features with stable Rust compiler
-@@ -659,3 +683,22 @@ package() {
+@@ -659,3 +684,24 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
@@ -89,13 +90,15 @@ index c8e17e8..b01d1d5 100644
 +         "chromium-loong64-support.patch"
 +         "devtools-frontend-disable-terser.patch"
 +         "components-variations-add-loong64.patch"
-+         "fix-base-process-launch.h.patch")
++         "fix-base-process-launch.h.patch"
++         "breakpad-loong64-support.patch")
 +sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
 +             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
 +             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
 +             '2f3662096c15de8797113a60afda4cd746ca64bfb7f901fe976eb3d29389c659'
 +             '0e9152849d7ff20e54eea3e71f6cecedbfd923579557e81158369577e047c5d9'
 +             '1d54c67518372511fb23658b14008e154dbf7dba54453ab7d0bf48a35fdcf4c4'
-+             '731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
++             'a5c18b38b6969f63c4216b630ecd84e6e0a72a2eddbbf5d2d0a4a40103f7f0c0'
 +             'a131da5af26ab680bf282bdd25c04e1ee7cf14e210f3f6d897c5f5707b468838'
-+             '8473db8c1a63cb280aebedba0958cdfa0d63d7b4b0a7f7b262f171cbd8e0b1f6')
++             '8473db8c1a63cb280aebedba0958cdfa0d63d7b4b0a7f7b262f171cbd8e0b1f6'
++             'bb7fa2d12f10925218cee99e67433064b51ef23ef32ae477db58e1d32fa828c4')
