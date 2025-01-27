@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,6 +22,8 @@ prepare() {
+   sed -i 's|#include <ukuisdk/kylin-com4cxx.h>|#include <kylin-com4cxx.h>|' common/usd_base_class.h
+   sed -i 's|udev.path = /lib/udev/rules.d/|udev.path = /usr/lib/udev/rules.d/|' plugins/mouse/mouse.pro
+ 
++  sed -i '320s/return 0/return/' common/clib-syslog.c
++
+   # Fix build with libkscreen 5.27
+   sed -e 's|c++11||' -i plugins/xrandr/xrandr.pro -i common/common.pri
+   patch -p1 -i ../libkscreen-5.27.patch
