@@ -1,0 +1,14 @@
+Index: webrtc-audio-processing/webrtc/typedefs.h
+===================================================================
+--- webrtc-audio-processing.orig/webrtc/typedefs.h
++++ webrtc-audio-processing/webrtc/typedefs.h
+@@ -41,6 +41,9 @@
+ //#define WEBRTC_ARCH_ARMEL
+ #define WEBRTC_ARCH_32_BITS
+ #define WEBRTC_ARCH_LITTLE_ENDIAN
++#elif defined(__loongarch64)
++#define WEBRTC_ARCH_64_BITS
++#define WEBRTC_ARCH_LITTLE_ENDIAN
+ #elif defined(__MIPSEL__)
+ #define WEBRTC_ARCH_32_BITS
+ #define WEBRTC_ARCH_LITTLE_ENDIAN
