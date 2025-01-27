@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index f2bde91..75c22c9 100644
+index f2bde91..433f124 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -442,6 +442,21 @@ prepare() {
@@ -58,12 +58,13 @@ index f2bde91..75c22c9 100644
  
    # Fixes for building with libstdc++ instead of libc++
    patch -Np1 -i ../chromium-patches-*/chromium-117-material-color-include.patch
-@@ -511,6 +533,19 @@ prepare() {
+@@ -511,6 +533,20 @@ prepare() {
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
    # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
  
 +  # Add loong64 support for chromium
 +  patch -Np1 -i "${srcdir}/chromium-loong64-fix.patch"
++  patch -Np1 -d "third_party/breakpad/breakpad" -i "${srcdir}/breakpad-loong64-support.patch"
 +  # Apply gentoo's fix to build with clang19
 +  patch -Np1 -i "${srcdir}/gentoo-qtwebengine-6.7.2-clang19.patch"
 +  # https://bugs.gentoo.org/936415
@@ -78,7 +79,7 @@ index f2bde91..75c22c9 100644
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -639,3 +674,23 @@ package() {
+@@ -639,3 +675,25 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
@@ -92,7 +93,8 @@ index f2bde91..75c22c9 100644
 +         "gentoo-qtwebengine-6.7.2-clang19.patch"
 +         "fix-chromium-build-with-gcc15.patch"
 +         "fix-constexpr-electron-shell-common-keyboard_util.cc.patch"
-+         "extensions-common-api-runtime.json-add-loong64.patch")
++         "extensions-common-api-runtime.json-add-loong64.patch"
++         "breakpad-loong64-support.patch")
 +sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
 +             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
 +             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
@@ -101,4 +103,5 @@ index f2bde91..75c22c9 100644
 +             '4a04d5219a158d7cba49d688463f37a542c8290ceeb45fa5e73628ff5e9be642'
 +             '0ef41a770d16be4c10b098795306c2216b80749e8b7c19c289965eb31f057d6f'
 +             'd16e867e27d627dd39fb51524080160879ed1357e0a0ac39b1587a5a0305a764'
-+             'b12d6425f762346aab7f12cc13921e10a81b4c3fc76e6b3155036ef8387abde5')
++             'b12d6425f762346aab7f12cc13921e10a81b4c3fc76e6b3155036ef8387abde5'
++             'bb7fa2d12f10925218cee99e67433064b51ef23ef32ae477db58e1d32fa828c4')
