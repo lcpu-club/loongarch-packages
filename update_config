@@ -81,6 +81,7 @@ gtkspellmm
 gts
 guichan
 guile2.2
+gwenhywfar
 haveged
 hddtemp
 htmlcxx
@@ -275,6 +276,7 @@ smartmontools
 smpeg
 source-highlight
 spike
+sqlcipher
 sqlite
 synapse
 synfig
@@ -313,6 +315,7 @@ xboard
 xcb-util-xrm
 xcftools
 xdialog
+xf86-input-synaptics
 xf86-video-fbdev
 xf86-video-nouveau
 xf86-video-sisusb
