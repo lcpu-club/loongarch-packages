@@ -1,16 +1,15 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -21,9 +21,13 @@ pkgver() {
+@@ -27,8 +27,12 @@ validpgpkeys=(
  
  prepare() {
-   cd $pkgname
-+  patch -Np1 -i ../webrtc-audio-processing-la64.patch
-   NOCONFIGURE=1 ./autogen.sh
+   cd webrtc-audio-processing
++  patch -Np1 -i ../webrtc-audio-processing-loong64.patch
  }
  
-+source+=('webrtc-audio-processing-la64.patch')
-+b2sums+=('954416ea52ed2d0f3e1cf2354956010f159bcf543a9a504df7e4269f6677191e84c33b4202d2fb19883cc0298a97a65a2a8a7d2466dd16d92668a62f080b775a')
++source+=('webrtc-audio-processing-loong64.patch')
++b2sums+=('82645a6da3e482209975fd04eec41bf4b94781e2fd0ed9df433c959738cba26c41e6d7833fadc5427a37feaa8a12a71ee5600b9531de6a6651f1b60ccd4983ed')
 +
  build() {
-   local configure_options=(
-     --prefix /usr
+   local meson_options=(
+     # must match abseil
