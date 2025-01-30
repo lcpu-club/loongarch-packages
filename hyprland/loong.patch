@@ -1,0 +1,8 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -92,3 +92,5 @@ package() {
+ 	rm -frv "$pkgdir/usr/share/xdg-desktop-portal"
+ 	install -Dm0644 -t "$pkgdir/usr/share/licenses/$pkgname/" LICENSE
+ }
++
++makedepends+=(git)
