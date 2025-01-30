@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,6 +36,8 @@ validpgpkeys=('A865A9FB6F0387624468543A3EFB7C4BE8303927') # Albert Chu <chu11@ll
+ 
+ prepare() {
+   cd "$pkgname-$pkgver"
++  for c_s in $(find -type f -name config.sub -o -name configure.sub); do cp -f /usr/share/automake-1.1?/config.sub "$c_s"; done
++  for c_g in $(find -type f -name config.guess -o -name configure.guess); do cp -f /usr/share/automake-1.1?/config.guess "$c_g"; done
+ 
+   autoreconf -vi
+ 
