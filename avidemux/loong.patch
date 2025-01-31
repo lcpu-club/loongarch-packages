@@ -1,19 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 08ff1ef..bfc5043 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -26,6 +26,10 @@ sha512sums=('c8df5c0d7f20fd9003560dee7cc0964ba810fc2786cefd525c09fd9f740339dd92a
-             'bbae5b4a549113b12e728c4c0ac8c1c92a0b7500be8dcecc791c16c9a913406feaa9f7bc477985970a920d2df391cc9392457512d84b9c4b829981cc072f2b2e'
-             '243553763c688f7d7c3d662061659fc650e2460c98128426a8e279c78dad412279a45340042b6db9a230564fe5c8e18915331077f9792fada936564835ca7d8f'
-             '9c52f38ff12b41d25c986ec47acdbaeb1792f935ba7ee7f190295dd24b33020a566dcbfa2011092807ea682fbc55ff9ba274e21ae6858e2c6e5ab6061a45fae1')
-+makedepends+=('libmp4v2' 'dos2unix')
-+source+=(LoongArchSupport.patch::https://github.com/mean00/avidemux2/commit/43e378a9191bf40311f1986dd1569482a550c072.diff)
-+sha256sums+=('a9894420704e27849be45ff74bcc66e151517a3cdf608290bb6549a2ba083efc')
-+sha512sums+=('6afe91eef2c3ab24ceca0b30369d1eaa70e94e9886e89fd13e30b1584df01ee8bf78328d4b9b15b0531302e33d67ced425f6dbf4f8ea6481a11d0d9eaa2cf48e')
- 
- prepare() {
-   cd ${pkgbase}_${pkgver}
-@@ -34,6 +38,12 @@ prepare() {
+@@ -34,6 +34,12 @@ prepare() {
    sed -e 's|0.19|1.0|' -i avidemux_plugins/ADM_videoFilters6/ass/CMakeLists.txt
    mv "$srcdir"/effadce6.patch avidemux_core/ffmpeg_package/patches/upstream # Fix build with binutils 2.41
    patch -p1 -i ../x265-4.0.patch # Fix build with x265 4.0
@@ -26,3 +13,12 @@ index 08ff1ef..bfc5043 100644
  }
  
  build() {
+@@ -81,4 +87,8 @@ package_avidemux-qt() {
+   make -C buildPluginsQt5 DESTDIR="${pkgdir}" install
+ }
+ 
++makedepends+=('libmp4v2' 'dos2unix')
++source+=(LoongArchSupport.patch::https://github.com/mean00/avidemux2/commit/43e378a9191bf40311f1986dd1569482a550c072.diff)
++sha256sums+=('a9894420704e27849be45ff74bcc66e151517a3cdf608290bb6549a2ba083efc')
++sha512sums+=('6afe91eef2c3ab24ceca0b30369d1eaa70e94e9886e89fd13e30b1584df01ee8bf78328d4b9b15b0531302e33d67ced425f6dbf4f8ea6481a11d0d9eaa2cf48e')
+ # vim: ts=2 sw=2 et:
