@@ -1,12 +1,9 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 7b5d584..bf90ac4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -86,6 +86,23 @@ prepare() {
-   git submodule init
-   git submodule set-url src/3rdparty "$srcdir"/qtwebengine-chromium
-   git -c protocol.file.allow=always submodule update
-+
+@@ -91,6 +91,22 @@ prepare() {
+ 
+ # Disable FFmpeg allow lists https://bugreports.qt.io/browse/QTBUG-132762
+   patch -d src/3rdparty -p1 < ../disable-ffmpeg-allow-lists.patch
 +  cd "${srcdir}/${_pkgfn}"
 +  # Fix libyuv's lsx and lsax
 +  patch -d src/3rdparty -p1 -i "$srcdir/0001-fix-libyuv-unified-source-and-LoongArch-SIMD-build.patch"
@@ -26,7 +23,7 @@ index 7b5d584..bf90ac4 100644
  }
  
  build() {
-@@ -108,3 +125,12 @@ package() {
+@@ -112,3 +128,12 @@ package() {
  
    install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
  }
