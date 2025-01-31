@@ -6,17 +6,17 @@
  makedepends=(
 -  pandoc-cli
 +  #pandoc-cli
-+  ruby-ronn-ng
++  asciidoctor
    python-build
    python-installer
    python-setuptools
-@@ -64,7 +65,8 @@ b2sums=('98685e19b7891f409ccffe4223e588c3777649b817228e0590d6603f96fb779cd1c0d09
- build() {
+@@ -65,7 +66,8 @@ build() {
    cd $pkgname-$pkgver
    python -m build --wheel --no-isolation
--  pandoc -t man -s -o $pkgname/resources/$pkgname.1 $pkgname/resources/$pkgname.md
-+  #pandoc -t man -s -o $pkgname/resources/$pkgname.1 $pkgname/resources/$pkgname.md
-+  ronn -r --section=1 $pkgname/resources/$pkgname.md
+   for manpage in mkosi-addon.1.md  mkosi-initrd.1.md  mkosi-sandbox.1.md  mkosi.1.md  mkosi.news.7.md; do
+-    pandoc -t man -s -o "$pkgname/resources/man/${manpage%.md}" "$pkgname/resources/man/${manpage}"
++   # pandoc -t man -s -o "$pkgname/resources/man/${manpage%.md}" "$pkgname/resources/man/${manpage}"
++   asciidoctor "$pkgname/resources/man/${manpage}" -o "$pkgname/resources/man/${manpage%.md}"
+   done
  }
  
- check() {
