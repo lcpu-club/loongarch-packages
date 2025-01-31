@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c8e17e8..78491b6 100644
+index c8e17e8..969c8b1 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -456,6 +456,16 @@ prepare() {
@@ -29,7 +29,7 @@ index c8e17e8..78491b6 100644
    mv electron src/electron
  
    echo "Running hooks..."
-@@ -476,8 +489,8 @@ prepare() {
+@@ -476,8 +489,16 @@ prepare() {
      -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
    src/build/util/lastchange.py \
      -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
@@ -37,10 +37,18 @@ index c8e17e8..78491b6 100644
 -    --gs-url-base=chromium-optimization-profiles/pgo_profiles
 +  #src/tools/update_pgo_profiles.py --target=linux update \
 +    #--gs-url-base=chromium-optimization-profiles/pgo_profiles
++
++  pushd src/third_party/node/
++  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
++  #local _rollup_ver="$(jq -r .dependencies.\"@rollup/wasm-node\" package.json)"
++  local _rollup_ver="4.32.0" # Known version that supports loong64
++  jq ".dependencies.rollup=\"$_rollup_ver\"" package.json > package.json.new
++  mv package.json{.new,}
++  popd
  
    # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
    src/third_party/node/update_npm_deps
-@@ -507,7 +520,9 @@ prepare() {
+@@ -507,7 +528,9 @@ prepare() {
    ## Upstream fixes
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
@@ -51,14 +59,13 @@ index c8e17e8..78491b6 100644
  
    # Fixes for building with libstdc++ instead of libc++
    patch -Np1 -i ../chromium-patches-*/chromium-128-compiler.patch
-@@ -530,6 +545,16 @@ prepare() {
+@@ -530,6 +553,15 @@ prepare() {
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
    # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
  
 +  # Add loong64 support for chromium
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/extensions-common-api-runtime.json-add-loong64.patch"
-+  patch -Np1 -i "${srcdir}/devtools-frontend-disable-terser.patch"
 +  patch -Np1 -i "${srcdir}/components-variations-add-loong64.patch"
 +  patch -Np1 -i "${srcdir}/fix-base-process-launch.h.patch"
 +  patch -Np1 -d "third_party/breakpad/breakpad" -i "${srcdir}/breakpad-loong64-support.patch"
@@ -68,7 +75,7 @@ index c8e17e8..78491b6 100644
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -590,7 +615,7 @@ build() {
+@@ -590,7 +622,7 @@ build() {
      'clang_base_path="/usr"'
      'clang_use_chrome_plugins=false'
      "clang_version=\"$_clang_version\""
@@ -77,18 +84,18 @@ index c8e17e8..78491b6 100644
    )
  
    # Allow the use of nightly features with stable Rust compiler
-@@ -659,3 +684,24 @@ package() {
+@@ -659,3 +691,23 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
 +
++makedepends+=(jq)
 +source+=("depot_tools-loong64-support.patch"
 +         "makepkg-source-roller.py.diff"
 +         "compiler-rt-adjust-paths-loong64.patch"
 +         "extensions-common-api-runtime.json-add-loong64.patch"
 +         "electron_runtime_api_dalagate-add-loong64-support.patch"
 +         "chromium-loong64-support.patch"
-+         "devtools-frontend-disable-terser.patch"
 +         "components-variations-add-loong64.patch"
 +         "fix-base-process-launch.h.patch"
 +         "breakpad-loong64-support.patch")
@@ -98,7 +105,6 @@ index c8e17e8..78491b6 100644
 +             '2f3662096c15de8797113a60afda4cd746ca64bfb7f901fe976eb3d29389c659'
 +             '0e9152849d7ff20e54eea3e71f6cecedbfd923579557e81158369577e047c5d9'
 +             '1d54c67518372511fb23658b14008e154dbf7dba54453ab7d0bf48a35fdcf4c4'
-+             'a5c18b38b6969f63c4216b630ecd84e6e0a72a2eddbbf5d2d0a4a40103f7f0c0'
 +             'a131da5af26ab680bf282bdd25c04e1ee7cf14e210f3f6d897c5f5707b468838'
 +             '8473db8c1a63cb280aebedba0958cdfa0d63d7b4b0a7f7b262f171cbd8e0b1f6'
 +             'bb7fa2d12f10925218cee99e67433064b51ef23ef32ae477db58e1d32fa828c4')
