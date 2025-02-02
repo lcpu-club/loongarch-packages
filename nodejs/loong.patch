@@ -1,11 +1,11 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -87,7 +87,7 @@ check() {
-   # - https://github.com/nodejs/node/issues/56159
-   # - https://github.com/nodejs/node/pull/56160
-   # - test/parallel/test-tls-psk-circuit.js different error code produced
--  make test
-+  make test || echo "Watch out for failed tests!"
+@@ -68,7 +68,7 @@ build() {
+ 
+ check() {
+   cd node
+-  make test-only
++  make test-only || echo "Watch out for failed tests!"
  }
  
  package() {
