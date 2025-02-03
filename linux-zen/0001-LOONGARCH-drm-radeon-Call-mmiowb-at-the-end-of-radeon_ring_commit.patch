@@ -1,17 +1,8 @@
+From ba176401da8d82a0e13486b214c9107f79cf5705 Mon Sep 17 00:00:00 2001
 From: Huacai Chen <chenhuacai@loongson.cn>
-To: "David Airlie" <airlied@gmail.com>,
-	"Daniel Vetter" <daniel@ffwll.ch>,
-	"Alex Deucher" <alexander.deucher@amd.com>,
-	"Christian König" <christian.koenig@amd.com>,
-	Xinhui <Xinhui.Pan@amd.com>,
-	"Huacai Chen" <chenhuacai@kernel.org>
-Cc: amd-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
-	Huacai Chen <chenhuacai@loongson.cn>,
-	stable@vger.kernel.org,
-	Tianyang Zhang <zhangtianyang@loongson.cn>
-Subject: [PATCH] drm/radeon: Call mmiowb() at the end of radeon_ring_commit()
-Date: Tue, 20 Feb 2024 15:49:58 +0800	[thread overview]
-Message-ID: <20240220074958.3288170-1-chenhuacai@loongson.cn> (raw)
+Date: Tue, 20 Feb 2024 15:49:58 +0800
+Subject: [PATCH] LOONGARCH64: FROMLIST: drm/radeon: Call mmiowb() at the end
+ of radeon_ring_commit()
 
 Commit fb24ea52f78e0d595852e ("drivers: Remove explicit invocations of
 mmiowb()") remove all mmiowb() in drivers, but it says:
@@ -52,15 +43,18 @@ radeon 0000:04:00.0: scheduling IB failed (-35).
 Cc: stable@vger.kernel.org
 Signed-off-by: Tianyang Zhang <zhangtianyang@loongson.cn>
 Signed-off-by: Huacai Chen <chenhuacai@loongson.cn>
+
+Link: https://lore.kernel.org/all/20240220074958.3288170-1-chenhuacai@loongson.cn/
+Signed-off-by: Kexy Biscuit <kexybiscuit@aosc.io>
 ---
  drivers/gpu/drm/radeon/radeon_ring.c | 1 +
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/gpu/drm/radeon/radeon_ring.c b/drivers/gpu/drm/radeon/radeon_ring.c
-index 38048593bb4a..d461dc85d820 100644
+index 581ae20c46e4b5..346f0e49bb2eaa 100644
 --- a/drivers/gpu/drm/radeon/radeon_ring.c
 +++ b/drivers/gpu/drm/radeon/radeon_ring.c
-@@ -183,6 +183,7 @@ void radeon_ring_commit(struct radeon_device *rdev, struct radeon_ring *ring,
+@@ -185,6 +185,7 @@ void radeon_ring_commit(struct radeon_device *rdev, struct radeon_ring *ring,
  	if (hdp_flush && rdev->asic->mmio_hdp_flush)
  		rdev->asic->mmio_hdp_flush(rdev);
  	radeon_ring_set_wptr(rdev, ring);
@@ -68,6 +62,3 @@ index 38048593bb4a..d461dc85d820 100644
  }
  
  /**
--- 
-2.43.0
-
