@@ -1,0 +1,35 @@
+From d7133b638ec02a27f9d80496df81e861d233264b Mon Sep 17 00:00:00 2001
+From: Zhou Qiankang <wszqkzqk@qq.com>
+Date: Thu, 6 Feb 2025 12:11:08 +0800
+Subject: [PATCH] fix(installer): skip waiting for mirror selection on
+ loongarch64 platform
+
+Signed-off-by: Zhou Qiankang <wszqkzqk@qq.com>
+---
+ archinstall/lib/installer.py | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/archinstall/lib/installer.py b/archinstall/lib/installer.py
+index f2f27e82..bd405278 100644
+--- a/archinstall/lib/installer.py
++++ b/archinstall/lib/installer.py
+@@ -163,9 +163,13 @@ class Installer:
+ 			info(
+ 				_('Skipping waiting for automatic time sync (this can cause issues if time is out of sync during installation)'))
+ 
+-		info('Waiting for automatic mirror selection (reflector) to complete.')
+-		while self._service_state('reflector') not in ('dead', 'failed', 'exited'):
+-			time.sleep(1)
++		import platform
++		if platform.machine() != 'loongarch64':
++			info('Waiting for automatic mirror selection (reflector) to complete.')
++			while self._service_state('reflector') not in ('dead', 'failed', 'exited'):
++				time.sleep(1)
++		else:
++			info('This platform does not support reflector, skipping waiting for automatic mirror selection.')
+ 
+ 		# info('Waiting for pacman-init.service to complete.')
+ 		# while self._service_state('pacman-init') not in ('dead', 'failed', 'exited'):
+-- 
+2.48.1
+
