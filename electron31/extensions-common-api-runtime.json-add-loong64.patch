@@ -1,0 +1,24 @@
+diff --git a/extensions/common/api/runtime.json b/extensions/common/api/runtime.json
+index 0c606766bcc3a..9871f55ab0cdd 100644
+--- a/extensions/common/api/runtime.json
++++ b/extensions/common/api/runtime.json
+@@ -98,7 +98,8 @@
+             {"name": "x86-32", "description": "Specifies the processer architecture as x86-32."},
+             {"name": "x86-64", "description": "Specifies the processer architecture as x86-64."},
+             {"name": "mips", "description": "Specifies the processer architecture as mips."},
+-            {"name": "mips64", "description": "Specifies the processer architecture as mips64."}
++            {"name": "mips64", "description": "Specifies the processer architecture as mips64."},
++            {"name": "loong64", "description": "Specifies the processer architecture as loong64."}
+          ],
+         "description": "The machine's processor architecture."
+       },
+@@ -111,7 +112,8 @@
+           {"name": "x86-32", "description": "Specifies the native client architecture as x86-32."},
+           {"name": "x86-64", "description": "Specifies the native client architecture as x86-64."},
+           {"name": "mips", "description": "Specifies the native client architecture as mips."},
+-          {"name": "mips64", "description": "Specifies the native client architecture as mips64."}
++          {"name": "mips64", "description": "Specifies the native client architecture as mips64."},
++          {"name": "loong64", "description": "Specifies the native client architecture as loong64."}
+         ]
+       },
+       {

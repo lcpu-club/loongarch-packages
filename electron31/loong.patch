@@ -1,0 +1,95 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f8f04f4..cd8767f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -456,6 +456,16 @@ prepare() {
+   sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
+   sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
+ 
++  # Patching makepkg-source-roller-orig.py
++  cp "${srcdir}/makepkg-source-roller.py" "makepkg-source-roller-new.py"
++  patch "makepkg-source-roller-new.py" -i "${srcdir}/makepkg-source-roller.py.diff"
++  mv -f "makepkg-source-roller-new.py" "makepkg-source-roller.py"
++
++  # Apply in advance to so that makepkg-source-roller.py will not throw error
++  patch -Np1 -d chromium-mirror_third_party_depot_tools -i "${srcdir}/depot_tools-loong64-support.patch"
++  # Get the binary from the npm package
++  npm install @esbuild/linux-loong64@0.14.54
++
+   cp -r chromium-mirror_third_party_depot_tools depot_tools
+   export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
+   #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
+@@ -464,6 +474,9 @@ prepare() {
+   # Generate gclient gn args file and prepare-electron-source-tree.sh
+   python makepkg-source-roller.py generate electron/DEPS $pkgname
+   rbash prepare-electron-source-tree.sh "$CARCH"
++  # Add esbuild binary manually
++  mkdir -p src/third_party/devtools-frontend/src/third_party/esbuild
++  cp node_modules/@esbuild/linux-loong64/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+   mv electron src/electron
+ 
+   echo "Running hooks..."
+@@ -479,8 +492,10 @@ prepare() {
+   # needs newer clang to read the bundled PGO profile
+   # src/tools/update_pgo_profiles.py --target=linux update \
+   #   --gs-url-base=chromium-optimization-profiles/pgo_profiles
+-  depot_tools/download_from_google_storage.py --no_resume --extract --no_auth \
+-    --bucket chromium-nodejs -s src/third_party/node/node_modules.tar.gz.sha1
++  #depot_tools/download_from_google_storage.py --no_resume --extract --no_auth \
++  #  --bucket chromium-nodejs -s src/third_party/node/node_modules.tar.gz.sha1
++  # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
++  src/third_party/node/update_npm_deps
+ 
+   src/electron/script/apply_all_patches.py \
+       src/electron/patches/config.json
+@@ -511,7 +526,9 @@ prepare() {
+   patch -Np0 -i ../drop-flag-unsupported-by-clang17.patch
+ 
+   # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
+-  patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  #patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  # Use modified version for loong64 support
++  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
+ 
+   # Increase _FORTIFY_SOURCE level to match Arch's default flags
+   patch -Np1 -i ../increase-fortify-level.patch
+@@ -531,6 +548,17 @@ prepare() {
+   patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
+   # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
+ 
++  # Add loong64 support for chromium
++  patch -Np1 -i "${srcdir}/chromium-loong64-fix.patch"
++  # Apply gentoo's fix to build with clang19
++  patch -Np1 -i "${srcdir}/gentoo-qtwebengine-6.7.2-clang19.patch"
++  # Add loong64 support to extensions/common/api/runtime.json
++  patch -Np1 -i "${srcdir}/extensions-common-api-runtime.json-add-loong64.patch"
++  # Add loong64 support for electron
++  patch -Np1 -d electron -i "${srcdir}/electron_runtime_api_dalagate-add-loong64-support.patch"
++  # Fix constexpr in electron/shell/common/keyboard_util.cc
++  patch -Np1 -d electron -i "${srcdir}/fix-constexpr-electron-shell-common-keyboard_util.cc.patch"
++
+   # Allow building against system libraries in official builds
+   echo "Patching Chromium for using system libraries..."
+   sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
+@@ -663,3 +691,21 @@ package() {
+   install -Dm644 src/electron/default_app/icon.png \
+           "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
+ }
++
++makedepends+=(rsync) # for src/third_party/node/update_npm_deps
++source+=("depot_tools-loong64-support.patch"
++         "makepkg-source-roller.py.diff"
++         "compiler-rt-adjust-paths-loong64.patch"
++         "chromium-loong64-fix.patch"
++         "electron_runtime_api_dalagate-add-loong64-support.patch"
++         "gentoo-qtwebengine-6.7.2-clang19.patch"
++         "fix-constexpr-electron-shell-common-keyboard_util.cc.patch"
++         "extensions-common-api-runtime.json-add-loong64.patch")
++sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
++             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
++             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
++             'b0103e07e53bed56c8ea164995c5b1c606b8ae387a95b6e7781b56eb64ab14c2'
++             '19119a94c1f80bbfd81e15087a693720396ac1bbb2b85f49120fc00e4fdf781b'
++             '4a04d5219a158d7cba49d688463f37a542c8290ceeb45fa5e73628ff5e9be642'
++             'd16e867e27d627dd39fb51524080160879ed1357e0a0ac39b1587a5a0305a764'
++             'b12d6425f762346aab7f12cc13921e10a81b4c3fc76e6b3155036ef8387abde5')
