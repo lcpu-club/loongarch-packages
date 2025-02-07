@@ -1,0 +1,11 @@
+@@ -400,7 +400,9 @@ if __name__ == "__main__":
+                     True,
+                 ),  # only for new electron versions (probably >= 29)
+                 # The esbuild version 0.14.13 is not compatible with the system one
+-                ("src/third_party/devtools-frontend/src/third_party/esbuild", False),
++                # Not suitable for loong64 since the package is missing
++                # Need another workaround
++                #("src/third_party/devtools-frontend/src/third_party/esbuild", False),
+             ],
+         )
+         # gcs dependencies are usually binary blobs. They are not handled yet.
