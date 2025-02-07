@@ -1,7 +1,7 @@
-@@ -51,6 +51,7 @@
-     external/firebird/0001-extern-cloop-Missing-dependencies-of-compilations-on.patch.1 \
-     external/firebird/configure-c99.patch \
+@@ -53,6 +53,7 @@
      external/firebird/Wincompatible-function-pointer-types.patch \
+     external/firebird/c++26.patch \
+     external/firebird/c++20.patch \
 +    external/firebird/0001-firebird-la64-support.patch \
  ))
  

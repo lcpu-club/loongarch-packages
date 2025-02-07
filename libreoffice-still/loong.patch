@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 6768464..62dc6b6 100644
+index ac6a9fc..83ec581 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -133,6 +133,13 @@ prepare() {
+@@ -125,6 +125,13 @@ prepare() {
      done
      popd
  
@@ -13,10 +13,10 @@ index 6768464..62dc6b6 100644
 +    # use `0001-firebird-la64-support.patch`
 +    patch external/firebird/UnpackedTarball_firebird.mk < "${srcdir}/0002-UnpackedTarball_firebird.mk-apply-la64-support.diff"
 +
-     # fix build - https://gerrit.libreoffice.org/c/core/+/145421
-     patch -Np1 -i "${srcdir}"/623ea5c.diff
+     # fix build with Poppler 24.12 (LFS patch)
+     patch -Np1 -i "${srcdir}"/poppler24.12-buildfix.patch
  
-@@ -432,3 +439,8 @@ package_libreoffice-still() {
+@@ -408,3 +415,8 @@ package_libreoffice-still() {
      'sid','sk','sl','sq','sv','ta','tg','tr','ug','uk','vi','zh-CN','zh-TW'])" \
          > "${pkgdir}"/usr/lib/libreoffice/help/languages.js
  }
@@ -24,4 +24,4 @@ index 6768464..62dc6b6 100644
 +source+=("0001-firebird-la64-support.patch"
 +         "0002-UnpackedTarball_firebird.mk-apply-la64-support.diff")
 +sha256sums+=('7e160a4e30f66aefbb60c0ed877d196d04840221724e6473c8571fda70ab7922'
-+             'fb2f789f20e447f4bb68f931843a27637e8b5d2e496b65be256ab7ee3a62fc7a')
++             '468959231bbac297e3a3903e40df9ec42ee882ccb98c1fbc3e060506ddfafce5')
