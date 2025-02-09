@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,7 +32,6 @@ makedepends=(
+ )
+ checkdepends=(
+   'git'
+-  'pandoc-cli'
+   'python-beautifulsoup4'
+   'python-feedparser'
+   'python-lxml'
