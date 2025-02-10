@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4cfdc61..a3d8019 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,7 +34,7 @@ pkgver() {
+ 
+ prepare() {
+   cd bitwarden-clients
+-
++  export ELECTRON_SKIP_BINARY_DOWNLOAD=1
+   # Copy Vaultwarden images
+   cp -vr ../bw_web_builds/resources/src/images/{logo-{dark,white}@2x,icon-white}.png \
+     apps/web/src/images
