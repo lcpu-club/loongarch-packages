@@ -1,0 +1,26 @@
+on: pull_request
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: archlinux/archlinux:latest
+    steps:
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm devtools patch binutils sudo expac
+      - name: Fix git unsafe repository
+        run: git config --global --add safe.directory /__w/loongarch-packages/loongarch-packages
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Add remote
+        run: |
+          git remote add upstream https://github.com/lcpu-club/loongarch-packages.git
+          git fetch upstream master
+      - name: Test patch
+        run: bash patch-check.sh
+      - name: Upload patch.rej
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: patch.rej
+          path: '**/*.rej'
+          if-no-files-found: ignore
