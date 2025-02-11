@@ -55,7 +55,7 @@ for _dir in $(git diff --merge-base --name-only upstream/master | cut -d / -f 1 
 
   cp $ORIGDIR/$PKGBASE/* ./
 
-  sudo -u nobody patch -p0 -i ./loong.patch || exit 1
+  sudo -u nobody patch -p1 -i ./loong.patch || exit 1
 
   sudo -u nobody makepkg --verifysource --skippgpcheck || exit 1
 
