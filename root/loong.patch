@@ -6,8 +6,8 @@
  pkgbase=root
 -pkgname=(root root-cuda)
 +pkgname=(root)
- pkgver=6.34.02
- pkgrel=3
+ pkgver=6.34.04
+ pkgrel=1
  pkgdesc='C++ data analysis framework and interpreter from CERN'
 @@ -60,8 +60,6 @@ makedepends=(
    cfitsio
