@@ -1,0 +1,77 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index df9ac7c..bfc91d2 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,18 +31,26 @@ prepare() {
+ }
+ 
+ build() {
+-  export CGO_CPPFLAGS="${CPPFLAGS}"
+-  export CGO_CFLAGS="${CFLAGS}"
+-  export CGO_CXXFLAGS="${CXXFLAGS}"
+-  export CGO_LDFLAGS="${LDFLAGS}"
++  # To avoid compiler errors in ggml-cpu-quants.c (require LASX)
++  export CGO_CPPFLAGS="${CPPFLAGS} -march=la464"
++  export CGO_CFLAGS="${CFLAGS} -march=la464"
++  export CGO_CXXFLAGS="${CXXFLAGS} -march=la464"
++  export CGO_LDFLAGS="${LDFLAGS} -march=la464"
+   export GOPATH="${srcdir}"
+   export GOFLAGS="-buildmode=pie -mod=readonly -modcacherw '-ldflags=-linkmode=external -compressdwarf=false -X=github.com/ollama/ollama/version.Version=$pkgver -X=github.com/ollama/ollama/server.mode=release'"
+ 
+   cd ollama
++  # See: https://github.com/ollama/ollama/blob/8c9fb8eb73afc220e8bf99772572096b6498b748/make/Makefile.ollama#L13
++  # Avoid automatically using `loongarch64` as GOARCH
++  export ARCH="loong64"
++
++  # 128 bit SIMD fix
++  patch -Np4 -i "${srcdir}/Fix-LoongArch-compile-error-with-128-bit-SIMD.patch" -d llama
++  patch -Np1 -i "${srcdir}/cpu-non-avx.patch"
+ 
+   # Unset these otherwise somehow nvcc will try to use them.
+   unset CFLAGS CXXFLAGS
+-  make dist CUDA_12_PATH=/opt/cuda CUDA_ARCHITECTURES='50;52;53;60;61;62;70;72;75;80;86;87;89;90;90a'
++  make dist RUNNER_TARGETS='cpu' CUDA_ARCHITECTURES='50;52;53;60;61;62;70;72;75;80;86;87;89;90;90a'
+   go build .
+ }
+ 
+@@ -55,7 +63,7 @@ check() {
+ package_ollama() {
+   install -Dm755 ollama/ollama "$pkgdir/usr/bin/ollama"
+   mkdir -p "$pkgdir"/usr/lib/ollama/runners
+-  cp -r ollama/dist/linux-amd64/lib/ollama/runners/cpu* "$pkgdir"/usr/lib/ollama/runners/
++  cp -r ollama/dist/linux-loong64/lib/ollama/runners/cpu* "$pkgdir"/usr/lib/ollama/runners/
+ 
+   install -Dm755 $pkgname/$pkgbase "$pkgdir/usr/bin/$pkgbase"
+   install -dm755 "$pkgdir/var/lib/ollama"
+@@ -72,7 +80,7 @@ package_ollama-rocm() {
+   depends+=(ollama hipblas)
+ 
+   mkdir -p "$pkgdir"/usr/lib/ollama/runners
+-  cp -r ollama/dist/linux-amd64/lib/ollama/runners/rocm* "$pkgdir"/usr/lib/ollama/runners
++  cp -r ollama/dist/linux-loong64/lib/ollama/runners/rocm* "$pkgdir"/usr/lib/ollama/runners
+ }
+ 
+ package_ollama-cuda() {
+@@ -80,7 +88,7 @@ package_ollama-cuda() {
+   depends+=(ollama cuda)
+ 
+   mkdir -p "$pkgdir"/usr/lib/ollama/runners
+-  cp -r ollama/dist/linux-amd64/lib/ollama/runners/cuda* "$pkgdir"/usr/lib/ollama/runners
++  cp -r ollama/dist/linux-loong64/lib/ollama/runners/cuda* "$pkgdir"/usr/lib/ollama/runners
+ }
+ 
+ package_ollama-docs() {
+@@ -90,3 +98,13 @@ package_ollama-docs() {
+   cp -r $pkgbase/docs "$pkgdir/usr/share/doc/$pkgbase"
+   install -Dm644 $pkgbase/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++# Remove cuda and rocm
++pkgname=(${pkgname[@]/ollama-cuda})
++pkgname=(${pkgname[@]/ollama-rocm})
++makedepends=(${makedepends[@]/hipblas})
++makedepends=(${makedepends[@]/cuda})
++source+=("Fix-LoongArch-compile-error-with-128-bit-SIMD.patch::https://github.com/ggerganov/llama.cpp/commit/452be2637f9164c75253020c15224b381fee8a62.patch"
++         "cpu-non-avx.patch")
++b2sums+=('9e1fc47f1b1788da45a1da3cbf87520cbbede47e638684c7a662716572c1fb6307aded189d86f8974fa1ba1fa37af231803525c801cf63a7307e9ab97f7ff2b2'
++         'f87f77e957c07122164e2aa791dfdbb6bb20c3b55bee485fe30e9c212789fec4ec84012542878b9404f50d3fd41c51667d1bf7ed6614fd089efcc145fe124c84')
