@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 846269f..30bbcbd 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -75,6 +75,7 @@ prepare() {
+   patch -p1 -i ../boost-1.85.patch
+   patch -p1 -i ../boost-1.87-1.patch
+   patch -p1 -i ../boost-1.87-2.patch
++  patch -p1 -i ../only-enable-sse-x86.patch
+ }
+ 
+ build() {
+@@ -118,3 +119,7 @@ package() {
+   DESTDIR="$pkgdir" cmake --install build
+   install -vDm 644 $_name-$pkgver-Source/{AUTHORS,{CHANGELOG,README,README_LINUX}.md} -t "$pkgdir/usr/share/doc/$pkgname/"
+ }
++
++source+=("only-enable-sse-x86.patch::https://github.com/supercollider/supercollider/commit/637d2c744b62402fc54433349f16cdbddbae8272.patch")
++sha512sums+=('8d3806305698458167ec37e74fc127cf7fa04b41aae0fe589eb753ce9359c046c8e68e978bb9bb0f5d54b7bde42e2b806d1ad7478210926c7f28034a526bf70c')
++b2sums+=('b9aeb98e8e42830e825e66aea4e6cf9d4a7ae68dd909108acc5e23251be790ec5b56416b685351506a754b2e5041338ac354c049ab55c4574606c0bb13ed624b')
