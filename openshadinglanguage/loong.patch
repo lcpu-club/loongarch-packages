@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -8,7 +8,7 @@ url="https://github.com/imageworks/OpenShadingLanguage"
+ license=('custom')
+ depends=('boost-libs' 'openimageio' 'imath' 'freetype2' 'libpng'
+          'libtiff' 'zlib' 'ncurses' 'clang')
+-makedepends=('boost' 'cmake' 'python' 'llvm' 'ninja')
++makedepends=('boost' 'cmake' 'python' 'llvm' 'ninja' 'fmt')
+ optdepends=('python: the Python module')
+ source=($pkgname-$pkgver.tar.gz::https://github.com/AcademySoftwareFoundation/OpenShadingLanguage/archive/refs/tags/v${pkgver}.tar.gz)
+ sha512sums=('152a1b085c4ea88c86bc0ccbd694b848b9f50bd91f1a165899c2c3999042e413e54cdfb83dd90ea23daeeb2a3b65f794b8b2c19e9629bbda266971dcd6e3b5e7')
