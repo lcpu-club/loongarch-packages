@@ -241,6 +241,9 @@ def main() -> None:
 
     print("Cloning official package repository...")
 
+    git_env = os.environ.copy()
+    git_env.update({"GIT_TERMINAL_PROMPT": "0", "LC_ALL": "C"})
+
     if os.path.isdir(patch_dir) and not os.path.exists(os.path.join(patch_dir, PATCH_FILE)):
         print(f"{patch_dir} exists, but {os.path.exists(os.path.join(patch_dir, PATCH_FILE))} does not exist.")
         print("It's a full package repository, not a patch repository.")
@@ -249,10 +252,15 @@ def main() -> None:
         print("Done.")
         sys.exit(0)
     else:
-        subprocess.run(["pkgctl", "repo", "clone", "--protocol=https", pkgbase])
+        pkgctl_clone = subprocess.run(
+            ["pkgctl", "repo", "clone", "--protocol=https", pkgbase],
+            env=git_env)
+        if pkgctl_clone.returncode != 0:
+            print(f"Failed to clone '{pkgbase}' from official package repository. Please check the pkgbase name!")
+            sys.exit(1)
         os.chdir(pkgbase)
         git_status = subprocess.check_output(
-            ["git", "status"], env={"LC_ALL": "C"}
+            ["git", "status"], env=git_env, stderr=subprocess.STDOUT
         ).decode()
         if "modified:" in git_status:
             subprocess.run(["git", "stash"])
