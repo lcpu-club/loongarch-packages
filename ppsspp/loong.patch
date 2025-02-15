@@ -1,13 +1,13 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 97aa2f5..1ac760f 100644
+index 9d5dc84..fe97bfd 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -94,8 +94,6 @@ prepare() {
- }
+@@ -75,6 +75,8 @@ pkgver() {
  
- build() {
--  export CC=clang
--  export CXX=clang++
-   cmake -S ppsspp -B build-sdl -G Ninja \
-     -DCMAKE_BUILD_TYPE=None \
-     -DCMAKE_SKIP_RPATH=ON \
+ prepare() {
+   cd ppsspp
++  # Force LoongArchCPUInfoParser::TotalLogicalCount() to return int on all code paths
++  git cherry-pick -n a04bb579dc2e4dcdbf89af21f176ed29fad47e24
+   sed 's|miniupnpc/include/|miniupnpc/|g' -i Core/Util/PortManager.h
+   for submodule in assets/lang ffmpeg; do
+     git submodule init ${submodule}
