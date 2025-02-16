@@ -1,0 +1,54 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d811e23..7dac7b8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -28,16 +28,6 @@ makedepends=(
+   graphviz
+   texlive-bin
+   texlive-latexextra
+-  # -cuda
+-  cuda
+-  # -hip
+-  hip-runtime-amd
+-  hipblas
+-  hipfft
+-  hiprand
+-  hipsparse
+-  rocthrust
+-  roctracer
+ )
+ source=(
+   "$_pkgname-$pkgver.tar.gz::https://github.com/ginkgo-project/ginkgo/archive/refs/tags/v$pkgver.tar.gz"
+@@ -64,7 +54,7 @@ build() {
+     -DGINKGO_BUILD_BENCHMARKS=ON
+     -DGINKGO_BUILD_EXAMPLES=ON
+     -DGINKGO_BUILD_DOC=ON
+-    -DGINKGO_BUILD_TESTS=ON
++    -DGINKGO_BUILD_TESTS=OFF # Workaround for CMake error with misssing test name
+   )
+   # In general, we want to list all real archs (sm_XX) and the latest virtual arch (compute_XX) for future PTX compatibility.
+   # Valid values can be discovered from nvcc --help
+@@ -79,6 +69,7 @@ build() {
+     -DGINKGO_BUILD_SYCL=OFF
+   cmake --build build
+ 
++  : <<COMMENT_SEPARATOR
+   # -cuda package
+   # Compile source code for supported GPU archs in parallel
+   export CUDAFLAGS="--threads $(nproc)"
+@@ -106,6 +97,7 @@ build() {
+     -DGINKGO_BUILD_HIP=ON \
+     -DGINKGO_BUILD_SYCL=OFF
+   cmake --build build-hip
++COMMENT_SEPARATOR
+ }
+ 
+ check() {
+@@ -186,4 +178,7 @@ package_ginkgo-hpc-hip() {
+   _package -hip
+ }
+ 
++pkgname=(${pkgname[@]/ginkgo-hpc-cuda})
++pkgname=(${pkgname[@]/ginkgo-hpc-hip})
++
+ # vim:set ts=2 sw=2 et:
