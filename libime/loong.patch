@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -41,6 +41,8 @@ prepare() {
+   grep lm_sc.arpa-$_lmver.tar.zst data/CMakeLists.txt
+   grep dict-$_dictver.tar.zst data/CMakeLists.txt
+   grep table-$_tablever.tar.zst data/CMakeLists.txt
++  sed -i '10a#include <iostream>' test/testmodel.cpp
++  sed -i '10a#include <iostream>' test/testusermodel.cpp
+ }
+ 
+ build() {
