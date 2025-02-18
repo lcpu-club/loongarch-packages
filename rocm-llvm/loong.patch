@@ -1,0 +1,25 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3523ba3..e591452 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -27,10 +27,7 @@ build() {
+         -DLLVM_HOST_TRIPLE=$CHOST
+         -DLLVM_ENABLE_PROJECTS='llvm;clang;lld;compiler-rt;clang-tools-extra'
+         -DCLANG_ENABLE_AMDCLANG=ON
+-        -DLLVM_ENABLE_RUNTIMES='libcxx;libcxxabi;libunwind'
+-        -DLIBCXX_ENABLE_STATIC=ON
+-        -DLIBCXXABI_ENABLE_STATIC=ON
+-        -DLLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;X86'
++        -DLLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;LoongArch'
+         -DCLANG_DEFAULT_LINKER=lld
+         -DLLVM_INSTALL_UTILS=ON
+         -DLLVM_ENABLE_BINDINGS=OFF
+@@ -85,7 +82,7 @@ package_rocm-llvm() {
+ 
+     # Fix rpath to avoid error when running amdclang and friends
+     # (error while loading shared libraries: libunwind.so.1: cannot open shared object file: No such file or directory)
+-    patchelf --set-rpath '$ORIGIN' "$pkgdir/opt/rocm/lib/llvm/lib/libc++abi.so"
++    #patchelf --set-rpath '$ORIGIN' "$pkgdir/opt/rocm/lib/llvm/lib/libc++abi.so"
+ 
+     # https://bugs.archlinux.org/task/28479
+     install -d "$pkgdir/opt/rocm/lib/llvm/lib/bfd-plugins"
