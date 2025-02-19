@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index bd9054c..153e16b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,6 +22,8 @@ prepare() {
+ }
+ 
+ build() {
++	# Overwrite x86_64 `easy-encryption` prebuilt
++	g++ $CXXFLAGS $LDFLAGS $LTOFLAGS "$pkgname-$pkgver/contrib/easy-encryption/cl.cpp" -o "$pkgname-$pkgver/contrib/easy-encryption/bin/linux/ee64"
+ 	local cmake_args=(
+ 		-Wno-dev
+ 		-S "$pkgname-$pkgver"
