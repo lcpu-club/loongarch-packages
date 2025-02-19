@@ -1,0 +1,45 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5bdaf24..709f801 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -10,7 +10,6 @@ url='https://rocm.docs.amd.com/projects/HIP/en/latest/'
+ license=('MIT')
+ _amd_depends=('rocm-core' 'bash' 'perl' 'glibc' 'gcc-libs' 'numactl'
+          'mesa' 'comgr' 'rocminfo' 'rocm-llvm' 'libelf' 'rocprofiler-register')
+-_nvidia_depends=('cuda')
+ makedepends=('cmake' 'python' 'python-cppheaderparser'
+              "${_amd_depends[@]}" "${_nvidia_depends[@]}")
+ # Common HIP dir (AMD or nVidia)
+@@ -39,6 +38,7 @@ _dirhipother="$(basename "$_hipother")-$(basename "${source[3]}" ".tar.gz")"
+ prepare() {
+   cd "$_dirhipcc"
+   patch -Np1 -i "$srcdir/hipcc-amd-fix-include.patch"
++  patch -Np1 -d "$srcdir/$_dirclr" -i "$srcdir/clr-loong64.patch"
+ }
+ 
+ build() {
+@@ -73,6 +73,8 @@ build() {
+   cmake "${hip_amd_args[@]}"
+   cmake --build build-amd
+ 
++  # Use a "multi-line comment" to keep patch from rotting
++  : <<COMMENT_SEPARATOR
+   local hipcc_nvidia_args=(
+     "${hipcc_common_args[@]}"
+     -B build-nvidia-hipcc
+@@ -97,6 +99,7 @@ build() {
+   )
+   cmake "${hip_nvidia_args[@]}"
+   cmake --build build-nvidia
++COMMENT_SEPARATOR
+ }
+ 
+ package_hip-runtime-amd() {
+@@ -116,3 +119,7 @@ package_hip-runtime-nvidia() {
+   DESTDIR="$pkgdir" cmake --install build-nvidia
+   install -Dm644 "$srcdir/$_dirhip/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++pkgname=(${pkgname[@]/hip-runtime-nvidia})
++source+=("clr-loong64.patch::https://raw.githubusercontent.com/loongarch-moe/rocm-loongarch/refs/heads/rocm-6.2.x/stage2/7.rocm-clr/clr.patch")
++sha256sums+=('ba79185ba985f41ff8079d17c54dc5b615f631adac4066f129235928fa24adf2')
