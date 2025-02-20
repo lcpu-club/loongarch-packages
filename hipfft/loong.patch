@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 1ad75e6..a9d4c5f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,6 +26,8 @@ build() {
+     -D CMAKE_CXX_COMPILER=/opt/rocm/bin/hipcc
+     -D CMAKE_CXX_FLAGS="${CXXFLAGS} -fcf-protection=none"
+     -D CMAKE_INSTALL_PREFIX=/opt/rocm
++    -D CMAKE_EXE_LINKER_FLAGS=-fuse-ld=bfd
++    -D CMAKE_SHARED_LINKER_FLAGS=-fuse-ld=bfd
+   )
+   ROCM_PATH=/opt/rocm cmake "${cmake_args[@]}"
+   cmake --build build
+@@ -36,3 +38,5 @@ package() {
+ 
+   install -Dm644 "$srcdir/$_dirname/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++makedepends+=(mold)
