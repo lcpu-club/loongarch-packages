@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index ddc742a..8b5b990 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,6 +38,8 @@ build() {
+     -D SUPPORT_OMP=ON
+     -D SUPPORT_MPI=ON
+     -D BUILD_SHARED_LIBS=ON
++    -D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold"
++    -D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
+   )
+   cmake "${cmake_args[@]}"
+   cmake --build build
+@@ -48,3 +50,5 @@ package() {
+ 
+   install -Dm644 "$_dirname/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++makedepends+=(mold)
