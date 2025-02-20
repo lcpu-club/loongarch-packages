@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7157504..b41ccf7 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,8 @@ build() {
+     -D CMAKE_BUILD_TYPE=None
+     -D CMAKE_INSTALL_PREFIX=/opt/rocm
+     -D HIP_ROOT_DIR=/opt/rocm
++    -D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold"
++    -D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
+   )
+   cmake "${cmake_args[@]}"
+   cmake --build build
+@@ -33,3 +35,5 @@ package() {
+ 
+   install -Dm644 "$_dirname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++makedepends+=(mold)
