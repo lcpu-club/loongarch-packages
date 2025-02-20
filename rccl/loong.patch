@@ -1,0 +1,25 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 67d439a..d71c9d2 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,6 +31,8 @@ build() {
+     -D CMAKE_CXX_COMPILER=/opt/rocm/bin/hipcc
+     -D CMAKE_CXX_FLAGS="${CXXFLAGS} -fcf-protection=none"
+     -D CMAKE_INSTALL_PREFIX=/opt/rocm
++    -D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold"
++    -D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
+   )
+   cmake "${cmake_args[@]}"
+   cmake --build build
+@@ -41,3 +43,11 @@ package() {
+ 
+   install -Dm644 "$srcdir/$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++prepare() {
++  patch -p1 -d "$_dirname" -i "${srcdir}/rccl-loongarch64.patch"
++}
++
++makedepends+=(mold)
++source+=("rccl-loongarch64.patch::https://raw.githubusercontent.com/loongarch-moe/rocm-loongarch/refs/heads/rocm-6.2.x/stage3/8.rocm-rccl/rccl-loongarch64.patch")
++sha256sums+=('df003299d666894b6c2223707440d26b8dd7df1935cb713d87dea306810b0a8f')
