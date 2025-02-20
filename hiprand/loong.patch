@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index ac307b2..c95c687 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -35,6 +35,8 @@ build() {
+     -D CMAKE_CXX_FLAGS="${CXXFLAGS} -fcf-protection=none"
+     -D CMAKE_INSTALL_PREFIX=/opt/rocm
+     -D BUILD_FORTRAN_WRAPPER=ON
++    -D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold"
++    -D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
+   )
+   cmake "${cmake_args[@]}"
+   cmake --build build
+@@ -45,3 +47,5 @@ package() {
+ 
+   install -Dm644 "$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++makedepends+=(mold)
