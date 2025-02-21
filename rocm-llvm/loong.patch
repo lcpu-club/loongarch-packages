@@ -1,20 +1,21 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 3523ba3..d82d2e3 100644
+index 3523ba3..773c3f5 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -13,6 +13,11 @@ source=("$pkgbase::git+https://github.com/ROCm/llvm-project#tag=rocm-$pkgver")
+@@ -13,6 +13,12 @@ source=("$pkgbase::git+https://github.com/ROCm/llvm-project#tag=rocm-$pkgver")
  sha256sums=('09cb1afda4d2585b35e12142d4a4a4cab42be6ade7f41be59fd13df86d77ae10')
  options=(staticlibs !lto)
  
 +prepare() {
 +    cd "$pkgbase"
 +    patch -p1 -i "${srcdir}/LoongArch-Allow-f16-codegen-with-expansion-to-libcalls.patch"
++    patch -p1 -i "${srcdir}/LoongArch-Supports-FP_TO_SINT-operation-for-fp16.patch"
 +}
 +
  build() {
      # Build only minimal debug info to reduce size
      CFLAGS+=' -g1'
-@@ -27,10 +32,7 @@ build() {
+@@ -27,10 +33,7 @@ build() {
          -DLLVM_HOST_TRIPLE=$CHOST
          -DLLVM_ENABLE_PROJECTS='llvm;clang;lld;compiler-rt;clang-tools-extra'
          -DCLANG_ENABLE_AMDCLANG=ON
@@ -26,7 +27,7 @@ index 3523ba3..d82d2e3 100644
          -DCLANG_DEFAULT_LINKER=lld
          -DLLVM_INSTALL_UTILS=ON
          -DLLVM_ENABLE_BINDINGS=OFF
-@@ -85,7 +87,7 @@ package_rocm-llvm() {
+@@ -85,7 +88,7 @@ package_rocm-llvm() {
  
      # Fix rpath to avoid error when running amdclang and friends
      # (error while loading shared libraries: libunwind.so.1: cannot open shared object file: No such file or directory)
@@ -35,10 +36,12 @@ index 3523ba3..d82d2e3 100644
  
      # https://bugs.archlinux.org/task/28479
      install -d "$pkgdir/opt/rocm/lib/llvm/lib/bfd-plugins"
-@@ -119,3 +121,6 @@ package_comgr() {
+@@ -119,3 +122,8 @@ package_comgr() {
      cd "$pkgbase/amd/comgr"
      install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
-+source+=("LoongArch-Allow-f16-codegen-with-expansion-to-libcalls.patch::https://github.com/llvm/llvm-project/pull/94456/commits/bbb1854a5a76a8199c50d60a2ae5809163f9d1c5.patch")
-+sha256sums+=('c485df407ab98dd299c80aa2b26f59c18c728b326a8ae32348bec57418515dcb')
++source+=("LoongArch-Allow-f16-codegen-with-expansion-to-libcalls.patch::https://github.com/llvm/llvm-project/pull/94456/commits/bbb1854a5a76a8199c50d60a2ae5809163f9d1c5.patch"
++        "LoongArch-Supports-FP_TO_SINT-operation-for-fp16.patch::https://github.com/llvm/llvm-project/commit/00d8ea3a4c8eba9aa0f14c352192e94cc40f8e2d.patch")
++sha256sums+=('c485df407ab98dd299c80aa2b26f59c18c728b326a8ae32348bec57418515dcb'
++             'f596ceccb1e8a2a222f4261d00f57b81d19ee3da6b3c64b75088ed2f46f12a67')
