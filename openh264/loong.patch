@@ -1,0 +1,10 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3aa50f1..c4d9139 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -37,3 +37,5 @@ package() {
+     install -D -m755 "${pkgname}-${pkgver}"/h264{dec,enc} -t "${pkgdir}/usr/bin"
+     install -D -m644 "${pkgname}-${pkgver}/LICENSE" -t "${pkgdir}/usr/share/licenses/${pkgname}"
+ }
++
++options+=(!lto)
