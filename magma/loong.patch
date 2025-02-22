@@ -1,0 +1,56 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 2ef55de..83ad7de 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -42,14 +42,15 @@ prepare() {
+ 
+   cd "${srcdir}"
+ 
+-  cp -r "${_pkgname}" "${_pkgname}-${pkgver}-cuda"
+   cp -r "${_pkgname}" "${_pkgname}-${pkgver}-hip"
+ 
++  : <<COMMENT_SEPERATOR
+   cd "${_pkgname}-${pkgver}-cuda"
+   echo -e "BACKEND = cuda\nFORT = true\nGPU_TARGET=$(_valid_sm)" > make.inc
+   make generate
+ 
+   cd "${srcdir}"
++COMMENT_SEPERATOR
+ 
+   cd "${_pkgname}-${pkgver}-hip"
+   echo -e "BACKEND = hip\nFORT = true\nGPU_TARGET=$(_valid_gfx)" > make.inc
+@@ -57,6 +58,7 @@ prepare() {
+ }
+ 
+ build() {
++  : <<COMMENT_SEPERATOR
+   echo "Build with cuda backend"
+   cd "${srcdir}/${_pkgname}-${pkgver}-cuda"
+   cmake \
+@@ -68,6 +70,7 @@ build() {
+     -DGPU_TARGET="$(_valid_sm)"
+   ninja -C build
+ 
++COMMENT_SEPERATOR
+ 
+   echo "Build with rocm/hip backend"
+   cd "${srcdir}/${_pkgname}-${pkgver}-hip"
+@@ -90,7 +93,9 @@ build() {
+     -DBUILD_SHARED_LIBS=ON \
+     -DMAGMA_ENABLE_HIP=ON \
+     -DGPU_TARGET="$(_valid_gfx)" \
+-    -DAMDGPU_TARGETS="$(_valid_gfx | tr ' ' ';')"
++    -DAMDGPU_TARGETS="$(_valid_gfx | tr ' ' ';')" \
++    -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold" \
++    -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
+   ninja -C build
+ }
+ 
+@@ -127,4 +132,7 @@ package_magma-hip() {
+   _package "/opt/rocm"
+ }
+ 
++pkgname=(${pkgname[@]/magma-cuda})
++makedepends=(${makedepends[@]/cuda})
++makedepends+=(mold)
+ # vim:set ts=2 sw=2 et:
