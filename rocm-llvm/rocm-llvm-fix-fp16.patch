@@ -51,19 +51,6 @@ index f0e4df4bc9e1..65e4d4f85617 100644
      ${ARGN} "${CMAKE_CURRENT_SOURCE_DIR}/${input}"
      -o "${output}"
      VERBATIM
-diff --git a/amd/hipcc/src/hipBin_amd.h b/amd/hipcc/src/hipBin_amd.h
-index 57d009804cfe..f53ee4a4be9e 100644
---- a/amd/hipcc/src/hipBin_amd.h
-+++ b/amd/hipcc/src/hipBin_amd.h
-@@ -209,7 +209,7 @@ void HipBinAmd::constructCompilerPath() {
-     } else {
-       compilerPath = getRoccmPath();
-       hipClangPath = compilerPath;
--      hipClangPath /= "lib/llvm/bin";
-+      hipClangPath /= "bin";
-     }
- 
-     compilerPath = hipClangPath.string();
 diff --git a/clang/include/clang/Basic/Builtins.def b/clang/include/clang/Basic/Builtins.def
 index 4dcbaf8a7bea..4fbbd52a92b3 100644
 --- a/clang/include/clang/Basic/Builtins.def

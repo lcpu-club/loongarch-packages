@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 3523ba3..10ce853 100644
+index 3523ba3..265d43e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -13,6 +13,11 @@ source=("$pkgbase::git+https://github.com/ROCm/llvm-project#tag=rocm-$pkgver")
@@ -14,31 +14,24 @@ index 3523ba3..10ce853 100644
  build() {
      # Build only minimal debug info to reduce size
      CFLAGS+=' -g1'
-@@ -27,10 +32,7 @@ build() {
+@@ -27,10 +32,11 @@ build() {
          -DLLVM_HOST_TRIPLE=$CHOST
          -DLLVM_ENABLE_PROJECTS='llvm;clang;lld;compiler-rt;clang-tools-extra'
          -DCLANG_ENABLE_AMDCLANG=ON
 -        -DLLVM_ENABLE_RUNTIMES='libcxx;libcxxabi;libunwind'
--        -DLIBCXX_ENABLE_STATIC=ON
--        -DLIBCXXABI_ENABLE_STATIC=ON
++        -DLLVM_ENABLE_RUNTIMES='libcxx;libcxxabi'
++        -DLIBCXXABI_USE_LLVM_UNWINDER=OFF
+         -DLIBCXX_ENABLE_STATIC=ON
+         -DLIBCXXABI_ENABLE_STATIC=ON
 -        -DLLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;X86'
 +        -DLLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;LoongArch'
          -DCLANG_DEFAULT_LINKER=lld
          -DLLVM_INSTALL_UTILS=ON
          -DLLVM_ENABLE_BINDINGS=OFF
-@@ -85,7 +87,7 @@ package_rocm-llvm() {
- 
-     # Fix rpath to avoid error when running amdclang and friends
-     # (error while loading shared libraries: libunwind.so.1: cannot open shared object file: No such file or directory)
--    patchelf --set-rpath '$ORIGIN' "$pkgdir/opt/rocm/lib/llvm/lib/libc++abi.so"
-+    #patchelf --set-rpath '$ORIGIN' "$pkgdir/opt/rocm/lib/llvm/lib/libc++abi.so"
- 
-     # https://bugs.archlinux.org/task/28479
-     install -d "$pkgdir/opt/rocm/lib/llvm/lib/bfd-plugins"
-@@ -119,3 +121,6 @@ package_comgr() {
+@@ -119,3 +125,6 @@ package_comgr() {
      cd "$pkgbase/amd/comgr"
      install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
 +source+=("rocm-llvm-fix-fp16.patch")
-+sha256sums+=('b390b7268843e2e7812baa1e13aeaf62712647596b608476b2cec32bdd05afb6')
++sha256sums+=('a0ed008fcc206ce252e0c5ca9898b768429e8fa8de13d2eb4709d1f6a98d08f5')
