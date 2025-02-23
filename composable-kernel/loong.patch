@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4dbf746..6d26607 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,6 +34,8 @@ build() {
+     -D CMAKE_HIP_ARCHITECTURES="gfx900;gfx906:xnack-;gfx908:xnack-;gfx90a:xnack+;gfx90a:xnack-;gfx940;gfx941;gfx942;gfx1010;gfx1012;gfx1030;gfx1100;gfx1101;gfx1102"
+     -D BUILD_DEV=OFF
+     -D INSTANCES_ONLY=ON
++    -D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold"
++    -D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
+   )
+   cmake "${_cmake_args[@]}"
+   cmake --build build
+@@ -44,3 +46,5 @@ package() {
+ 
+   install -Dm644 "$_dirname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++makedepends+=(mold)
