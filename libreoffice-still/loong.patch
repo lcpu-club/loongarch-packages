@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index ac6a9fc..83ec581 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -125,6 +125,13 @@ prepare() {
+@@ -127,6 +127,13 @@ prepare() {
      done
      popd
  
@@ -13,10 +11,10 @@ index ac6a9fc..83ec581 100644
 +    # use `0001-firebird-la64-support.patch`
 +    patch external/firebird/UnpackedTarball_firebird.mk < "${srcdir}/0002-UnpackedTarball_firebird.mk-apply-la64-support.diff"
 +
-     # fix build with Poppler 24.12 (LFS patch)
-     patch -Np1 -i "${srcdir}"/poppler24.12-buildfix.patch
- 
-@@ -408,3 +415,8 @@ package_libreoffice-still() {
+     # fix build with icu 76
+     patch -Np1 -i "${srcdir}"/libreoffice-24.8.4.2-icu76_fixes-1.patch
+     # update to mdds-3.0.0 / libixion-0.20 /liborcus-0.20
+@@ -412,3 +419,8 @@ package_libreoffice-still() {
      'sid','sk','sl','sq','sv','ta','tg','tr','ug','uk','vi','zh-CN','zh-TW'])" \
          > "${pkgdir}"/usr/lib/libreoffice/help/languages.js
  }
