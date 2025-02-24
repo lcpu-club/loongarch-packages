@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index aa432d9..8ca1eff 100644
+index 252bd0c..cd18ded 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -33,14 +33,12 @@ makedepends=(
+@@ -33,7 +33,6 @@ makedepends=(
  )
  # NOTE: we install all available OpenCL drivers so that tests don't fail on PLATFORM_NOT_FOUND_KHR
  checkdepends=(
@@ -10,10 +10,3 @@ index aa432d9..8ca1eff 100644
      'opencl-clover-mesa'
      'opencl-nvidia'
      'opencl-rusticl-mesa'
-     'python-pytest'
-     'python-pytools'
-     'python-six'
--    'rocm-opencl-runtime'
- )
- source=(
-     "git+https://github.com/inducer/pyopencl.git?signed#tag=v${pkgver}"
