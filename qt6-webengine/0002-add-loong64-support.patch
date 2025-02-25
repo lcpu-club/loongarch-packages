@@ -844,7 +844,16 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc
 --- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -169,6 +169,19 @@ int SyscallDispatcher::DispatchSyscall(c
+@@ -24,6 +24,8 @@ int SyscallDispatcher::DefaultStatForTes
+                                              default_stat_struct* sb) {
+ #if defined(__NR_fstatat64)
+   return Stat64(pathname, follow_links, sb);
++#elif defined(__NR_statx)
++  return Statx(pathname, follow_links ? 0 : AT_SYMLINK_NOFOLLOW, sb);
+ #elif defined(__NR_newfstatat)
+   return Stat(pathname, follow_links, sb);
+ #endif
+@@ -169,6 +171,19 @@ int SyscallDispatcher::DispatchSyscall(c
        return Stat64(reinterpret_cast<const char*>(args.args[0]), true,
                      reinterpret_cast<struct kernel_stat64*>(args.args[1]));
  #endif
@@ -2310,6 +2319,18 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
    } else {
      assert(false, "Unknown cpu target")
    }
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/BUILD.gn b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/BUILD.gn
+--- a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
+@@ -1596,7 +1596,7 @@ jumbo_component("platform") {
+   if (current_cpu == "loong64") {
+     cflags = [
+       "-mlsx",
+-      "-flax-vector-conversions=all",
++      "-flax-vector-conversions",
+     ]
+   }
+ 
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
 --- a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
