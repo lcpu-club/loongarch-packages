@@ -1,0 +1,49 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 883be02..ba59174 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -37,6 +37,8 @@ sha256sums=('519a2dd48f4804e37d89dd68c820152b5bb809b6d194f10f9e4b001280cc1056'
+             'b58e459509e190bed737f3592bc1950485322846cf10e78ded1d065153012d70')
+ 
+ prepare() {
++  # Use a "multi-line comment" to keep patch from rotting
++  : <<COMMENT_SEPARATOR
+   cd intellij-community
+ 
+   # build system doesn't like symlinks
+@@ -52,17 +54,21 @@ prepare() {
+     -DgeneratePom=true
+ 
+   patch -Np1 < "${srcdir}/enable-no-jdr.patch"
++COMMENT_SEPARATOR
++  cd JetBrains-IDE-Multiarch
++  # Disable fetch prebuild natives
++  sed -i 's/^jdk\.linux.*$//g' config/jdk.properties
+ }
+ 
+ build() {
+-  cd intellij-community
++  cd JetBrains-IDE-Multiarch
+   
+   export JAVA_HOME="/usr/lib/jvm/java-${_jdkver}-openjdk"
+   export PATH="/usr/lib/jvm/java-${_jdkver}-openjdk/bin:$PATH"
+-  export MAVEN_REPOSITORY=${srcdir}/.m2/repository
+ 
+-  ./installers.cmd -Dintellij.build.use.compiled.classes=false -Dintellij.build.target.os=linux -Dbuild.number="${_build}"
+-  tar -xf out/idea-ce/artifacts/ideaIC-${_build}-no-jbr.tar.gz -C "${srcdir}"
++  ./gradlew transformIC-loongarch64
++
++  tar -xf build/target/ideaIC-${_tag}-loongarch64.tar.gz -C "${srcdir}"
+ }
+ 
+ package() {
+@@ -79,4 +85,9 @@ package() {
+   install -Dm 644 product-info.json -t "${pkgdir}"/usr/share/idea
+ }
+ 
++_tag=${pkgver}+0
++makedepends+=('cargo' 'go')
++source+=("git+https://github.com/Glavo/JetBrains-IDE-Multiarch.git#tag=idea/${_tag}")
++sha256sums+=('SKIP')
++
+ # vim: ts=2 sw=2 et:
