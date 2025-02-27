@@ -1,0 +1,19 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -12,7 +12,6 @@ license=('GPL' 'MIT')
+ makedepends=(
+   'git'
+   'cmake'
+-  'pandoc'
+   'pybind11'
+   'python-boost-histogram'
+   'python-build'
+@@ -70,7 +69,7 @@ build() {
+   # python -m venv --system-site-packages test-env
+   # test-env/bin/python -m pip install numba-stats resample
+   # echo 'nbsphinx_allow_errors = True' >> doc/conf.py
+-  # PYTHONPATH="${PWD}/test-env/lib/python$(_get_pyver)/site-packages:${PWD}/build/lib.linux-${CARCH}-cpython-$(_get_cpyver)" make build/html/done
++  # PYTHONPATH="${PWD}/test-env/lib/python$(_get_pyver)/site-packages:${PWD}/build/lib.linux-`uname -m`-cpython-$(_get_cpyver)" make build/html/done
+ 
+   # NOTE: this is an attempt at building it with system dependencies, unfortunately there are issues with importing nbconvert.RSTExporter() for some reason...
+   # local site_packages=$(python -c "import site; print(site.getsitepackages()[0])")
