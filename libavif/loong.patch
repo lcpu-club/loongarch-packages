@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index b1123ea..258ffe9 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -12,8 +12,7 @@ depends=(glibc aom dav1d librav1e.so svt-av1 libpng libjpeg libyuv libwebp)
+@@ -21,8 +21,7 @@ depends=(aom
  makedepends=(cmake
               gdk-pixbuf2
               git
@@ -10,14 +8,14 @@ index b1123ea..258ffe9 100644
 -             pandoc-cli)
 +             nasm)
  source=(git+https://github.com/AOMediaCodec/libavif#tag=v$pkgver)
- sha256sums=('2868a336117886bd3b4094e8c48589e67152ae8f39b06c067f8c51ec2709f577')
+ sha256sums=('c017ff5f47eca5f43259ca169db7a54ac2a2a4664c785911f9add257355849f6')
  
-@@ -21,7 +20,7 @@ build() {
+@@ -30,7 +29,7 @@ build() {
    cmake -B build -S $pkgname \
      -DCMAKE_INSTALL_PREFIX=/usr \
      -DAVIF_BUILD_APPS=ON \
 -    -DAVIF_BUILD_MAN_PAGES=ON \
 +    -DAVIF_BUILD_MAN_PAGES=OFF \
-     -DAVIF_CODEC_AOM=ON \
-     -DAVIF_CODEC_DAV1D=ON \
-     -DAVIF_CODEC_RAV1E=ON \
+     -DAVIF_CODEC_AOM=SYSTEM \
+     -DAVIF_CODEC_DAV1D=SYSTEM \
+     -DAVIF_CODEC_RAV1E=SYSTEM \
