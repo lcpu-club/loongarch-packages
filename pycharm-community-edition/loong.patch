@@ -1,0 +1,68 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 89f95b4..b3f666a 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,6 +15,9 @@ arch=(x86_64)
+ options=(!debug)
+ url=https://www.jetbrains.com/pycharm/
+ license=(Apache-2.0)
++# Change it here instead of in place to avoid patch conflict (avoid to modify the line near pkgver that frequently changes)
++_jrever=21
++_jdkver=21
+ depends=(
+   giflib
+   glib2
+@@ -46,6 +49,8 @@ sha256sums=('e7d762cae300a4849b39f0f770922d93280280752cdaa17df4747df90d059870'
+             '447714bf41a215b38f8c31418e09bf65145bb3d9427d6966772c9b2b8ae16f1d')
+ 
+ prepare() {
++  # Use a "multi-line comment" to keep patch from rotting
++  : <<COMMENT_SEPARATOR
+   cd intellij-community
+ 
+   sed -e "s/buildNumber = null/buildNumber = \"${_build}\"/" \
+@@ -56,18 +61,21 @@ prepare() {
+       -i "platform/build-scripts/src/org/jetbrains/intellij/build/BuildOptions.kt"
+   # Disabled until we package JBR outselves
+   #patch -Np1 < "${srcdir}/enable-no-jdr.patch"
++COMMENT_SEPARATOR
++  cd JetBrains-IDE-Multiarch
++  # Disable fetch prebuild natives
++  sed -i 's/^jdk\.linux.*$//g' config/jdk.properties
+ }
+ 
+ build() {
+-  cd intellij-community
++  cd JetBrains-IDE-Multiarch
+ 
+   export JAVA_HOME="/usr/lib/jvm/java-${_jdkver}-openjdk"
+   export PATH="/usr/lib/jvm/java-${_jdkver}-openjdk/bin:$PATH"
+-  export MAVEN_REPOSITORY=/build/.m2/repository
+ 
+-  ./python/installers.cmd -Dintellij.build.use.compiled.classes=false -Dintellij.build.target.os=linux -Dbuild.number="${_build}"
++  ./gradlew transformPC-$(uname -m)
+ 
+-  tar -xf out/pycharm-ce/artifacts/pycharmPC-${_build}.tar.gz -C "${srcdir}"
++  tar -xf build/target/pycharm-community-${_tag}-$(uname -m).tar.gz -C "${srcdir}"
+ }
+ 
+ package() {
+@@ -77,7 +85,7 @@ package() {
+   sed -i 's/lcd/on/' bin/*.vmoptions
+ 
+   install -dm 755 "${pkgdir}"/usr/share/{licenses,pixmaps,pycharm}
+-  cp -dr --no-preserve='ownership' bin lib plugins jbr "${pkgdir}"/usr/share/pycharm/
++  cp -dr --no-preserve='ownership' bin lib plugins "${pkgdir}"/usr/share/pycharm/
+   cp -dr --no-preserve='ownership' license "${pkgdir}"/usr/share/licenses/pycharm/
+   ln -s /usr/share/pycharm/bin/pycharm.png "${pkgdir}"/usr/share/pixmaps/
+   install -Dm 644 ../pycharm.desktop -t "${pkgdir}"/usr/share/applications/
+@@ -85,4 +93,9 @@ package() {
+   install -Dm 644 product-info.json -t "${pkgdir}"/usr/share/pycharm
+ }
+ 
++_tag=${pkgver}+0
++source+=("git+https://github.com/Glavo/JetBrains-IDE-Multiarch.git#tag=idea/${_tag}")
++sha256sums+=('SKIP')
++makedepends+=(cargo go)
++
+ # vim: ts=2 sw=2 et:
