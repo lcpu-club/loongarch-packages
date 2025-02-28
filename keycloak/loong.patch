@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6eb2f7f..94207ae 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,6 +34,7 @@ prepare() {
+   cd $pkgname-$pkgver
+ 
+   patch -Np1 -i "$srcdir"/pin-java-version.patch
++  patch -Np1 -i "$srcdir"/use-system-node.patch
+ }
+ 
+ build() {
+@@ -83,4 +84,8 @@ package() {
+   install -Dm 644 LICENSE.txt "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.txt"
+ }
+ 
++makedepends+=('nodejs' 'npm' 'pnpm')
++source+=(use-system-node.patch)
++sha512sums+=('444c7b4b729abbfb11d18a3b12de51afdc67c2fb405be55d4de8e99fe33a8dab93b2c02773ecd4bef9a392696fd1a5169712faffae75d09095452844f70db757')
++
+ # vim: ts=2 sw=2 et:
