@@ -1,21 +1,19 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 3aa50f1..721ce97 100644
+index 3aa50f1..2e0dac2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -19,6 +19,8 @@ sha256sums=('558544ad358283a7ab2930d69a9ceddf913f4a51ee9bf1bfb9e377322af81a69'
+@@ -19,6 +19,7 @@ sha256sums=('558544ad358283a7ab2930d69a9ceddf913f4a51ee9bf1bfb9e377322af81a69'
              '9bf1fe5182a604b4135edc1a425ae356c9ad15e9b23f9f12a02e80184c3a249c')
  
  prepare() {
-+    export CC=clang CXX=clang++
 +    patch -Np1 -i "${srcdir}/fix-loong64-lto-SVC_ME_FunTest.patch" -d "${pkgname}-${pkgver}"
      ln -sf "../googletest-release-${_gtestver}" "${pkgname}-${pkgver}/gtest"
  }
  
-@@ -37,3 +39,7 @@ package() {
+@@ -37,3 +38,6 @@ package() {
      install -D -m755 "${pkgname}-${pkgver}"/h264{dec,enc} -t "${pkgdir}/usr/bin"
      install -D -m644 "${pkgname}-${pkgver}/LICENSE" -t "${pkgdir}/usr/share/licenses/${pkgname}"
  }
 +
-+makedepends+=(clang)
 +source+=("fix-loong64-lto-SVC_ME_FunTest.patch::https://github.com/cisco/openh264/commit/f285349933e434b69d5acdda0712762b75ac4a06.patch")
 +sha256sums+=('ceba02a23faee81dc929e870f6a674d3b36a58d69089cd481da680bbba6e0291')
