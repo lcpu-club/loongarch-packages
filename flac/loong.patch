@@ -1,0 +1,20 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,7 +26,8 @@ makedepends=(
+   'git'
+   'nasm'
+   'ninja'
+-  'pandoc-cli'
++  'graphviz'
++#  'pandoc-cli'
+ )
+ source=("git+https://github.com/xiph/flac#tag=${pkgver}")
+ b2sums=('2df577ac40233cdbea3389b076b239b266cdb3cf04a7a57982ae16b9c6f99af245b15590c19954d34cd3c8617ed2ddec3346c13c3f4b6e495df127104a978d19')
+@@ -43,6 +44,7 @@ build() {
+     -D BUILD_SHARED_LIBS=ON
+     -D CMAKE_BUILD_TYPE=None
+     -D CMAKE_INSTALL_PREFIX=/usr
++    -D INSTALL_MANPAGES=OFF
+     -D NDEBUG=ON
+ 
+     # Handled by our CFLAGS
