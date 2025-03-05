@@ -1,26 +1,26 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index f3d711f..929372f 100644
+index 197ebfc..de2757a 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -20,6 +20,12 @@ sha256sums=('dbe477b323df636f5e3221471780da156c938ec00dda4b50639aa8d7fb9248f4')
+@@ -23,6 +23,12 @@ sha256sums=('aaecaa7206b6fa1d5d7b8f7c1f7c5057a944327ba4779448980d7e7c7122b074')
  _dirname="$(basename "$url")-$(basename "${source[0]}" .tar.gz)"
  options=(!lto)
  
 +prepare() {
 +  cd "$_dirname"
-+  patch -Np1 -i ../rocr-unsupport.patch
++  patch -Np1 -i "${srcdir}/rocr-loong64-support.patch"
 +  export CC=clang CXX=clang++
 +}
 +
  build() {
    # Silence warnings on optional libraries with -DNDEBUG,
    # https://github.com/RadeonOpenCompute/ROCR-Runtime/issues/89#issuecomment-613788944
-@@ -39,3 +45,8 @@ package() {
+@@ -43,3 +49,8 @@ package() {
    DESTDIR="$pkgdir" cmake --install build
    install -Dm644 "$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
-+source+=("rocr-unsupport.patch::https://raw.githubusercontent.com/loongarch-moe/rocm-loongarch/refs/heads/rocm-6.2.x/stage2/3.rocm-rocr-runtime/rocr-unsupport.patch")
-+sha256sums+=('523d7f93daca6e7272578ff0fced94a79421fef0ccd7f202425881543d4bcb56')
++source+=("rocr-loong64-support.patch::https://raw.githubusercontent.com/loongarch-moe/rocm-loongarch/refs/tags/6.3.1a3/stage2/2.rocm-rocr-runtime/rocr-unsupport.patch")
++sha256sums+=('1cc3f733e8f2a8bc2669d75019aebfa5c50923562a83b2b86065506c9720321f')
 +# gcc doesn't support `mm_malloc.h` on loong64
 +makedepends+=(clang)
