@@ -1,43 +1,34 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 3523ba3..451f2dd 100644
+index b84308d..762f214 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -13,11 +13,19 @@ source=("$pkgbase::git+https://github.com/ROCm/llvm-project#tag=rocm-$pkgver")
- sha256sums=('09cb1afda4d2585b35e12142d4a4a4cab42be6ade7f41be59fd13df86d77ae10')
- options=(staticlibs !lto)
- 
-+prepare() {
-+    cd "$pkgbase"
-+    patch -p1 -i "${srcdir}/rocm-llvm-fix-fp16.patch"
-+}
-+
- build() {
-     # Build only minimal debug info to reduce size
+@@ -18,6 +18,10 @@ build() {
      CFLAGS+=' -g1'
      CXXFLAGS+=' -g1'
  
 +    export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
 +    export LD=mold
++    patch -Np1 -d "$pkgbase" -i "${srcdir}/rocm-llvm-fix-fp16.patch"
 +
-     local cmake_args=(
-         -G Ninja
-         -B build
-@@ -30,8 +38,12 @@ build() {
-         -DLLVM_ENABLE_RUNTIMES='libcxx;libcxxabi;libunwind'
-         -DLIBCXX_ENABLE_STATIC=ON
-         -DLIBCXXABI_ENABLE_STATIC=ON
--        -DLLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;X86'
--        -DCLANG_DEFAULT_LINKER=lld
-+        -DLLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;LoongArch'
+     local _rocm_exe_rpath='\$ORIGIN/../lib:\$ORIGIN/../../../lib'
+     local _rocm_lib_rpath='\$ORIGIN'
+     # Flags according to
+@@ -34,8 +38,12 @@ build() {
+         -D LLVM_ENABLE_RUNTIMES='compiler-rt;libunwind;libcxx;libcxxabi'
+         -D LIBCXX_ENABLE_STATIC=ON
+         -D LIBCXXABI_ENABLE_STATIC=ON
+-        -D LLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;X86'
+-        -D CLANG_DEFAULT_LINKER=lld
++        -D LLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;LoongArch'
 +        # lld is broken here so we need to switch to another linker
-+        -DCLANG_DEFAULT_LINKER=mold
-+        -DCMAKE_LINKER_TYPE=MOLD
-+        -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold"
-+        -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
-         -DLLVM_INSTALL_UTILS=ON
-         -DLLVM_ENABLE_BINDINGS=OFF
-         -DLLVM_LINK_LLVM_DYLIB=OFF
-@@ -80,6 +92,8 @@ package_rocm-llvm() {
++        -D CLANG_DEFAULT_LINKER=mold
++        -D CMAKE_LINKER_TYPE=MOLD
++        -D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold"
++        -D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
+         -D CLANG_DEFAULT_RTLIB=compiler-rt
+         -D CLANG_DEFAULT_UNWINDLIB=libgcc
+         -D LLVM_INSTALL_UTILS=ON
+@@ -97,6 +105,8 @@ package_rocm-llvm() {
  
      DESTDIR="$pkgdir" cmake --install build
  
@@ -46,7 +37,7 @@ index 3523ba3..451f2dd 100644
      # Provide symlink to old LLVM location, pre ROCm 6.0.0
      ln -s /opt/rocm/lib/llvm "$pkgdir/opt/rocm/llvm"
  
-@@ -119,3 +133,7 @@ package_comgr() {
+@@ -132,3 +142,7 @@ package_comgr() {
      cd "$pkgbase/amd/comgr"
      install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
