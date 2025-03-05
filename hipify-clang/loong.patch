@@ -1,20 +1,10 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 65b35ae..e206e2f 100644
+index 2c24c71..5e5d043 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -23,6 +23,8 @@ build() {
-                     -DCMAKE_BUILD_TYPE=None
-                     -DCMAKE_INSTALL_PREFIX=/opt/rocm
-                     -DCMAKE_PREFIX_PATH=/opt/rocm/lib/llvm/lib/cmake
-+                    -D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold"
-+                    -D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
-                    )
-   cmake "${cmake_args[@]}"
-   cmake --build build
-@@ -35,3 +37,6 @@ package() {
+@@ -35,3 +35,5 @@ package() {
  
    install -Dm644 "$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
 +depends=(${depends[@]/cuda})
-+makedepends+=(mold)
