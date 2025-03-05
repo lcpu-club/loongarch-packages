@@ -1,15 +1,30 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c07c678..21e19e4 100644
+index c07c678..f07c2bd 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -50,8 +50,9 @@ build() {
+@@ -35,6 +35,9 @@ prepare() {
+ 
+     # Set version used for path construction in getRelativeClangCompilerRTLibPath()
+     sed -i "s/ldc::llvm_version_base/\"$_clangversion\"/" driver/linker-gcc.cpp
++
++    # Patches for loong64
++    patch -Np1 -i "${srcdir}/runtime-Link-libatomic-on-64-bit-RISC-V-and-LoongArch.patch"
+ }
+ 
+ build() {
+@@ -50,7 +53,7 @@ build() {
      -DBUILD_SHARED_LIBS=BOTH \
      -DBUILD_LTO_LIBS=ON \
      -DLDC_WITH_LLD=OFF \
 -    -DD_COMPILER_FLAGS="-link-defaultlib-shared=false -linker=lld --flto=thin" \
 +    -DD_COMPILER_FLAGS="-link-defaultlib-shared=false -linker=lld --flto=thin -L--plugin-opt=-mattr=+d" \
      -DADDITIONAL_DEFAULT_LDC_SWITCHES="\"-link-defaultlib-shared\"," \
-+    -DLD_FLAGS="-Wl,--no-as-needed -latomic -Wl,--as-needed" \
      ..
      ninja
+@@ -102,3 +105,6 @@ package_liblphobos() {
+     # licenses
+     install -D -m644 "$srcdir/ldc/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
++
++source+=("runtime-Link-libatomic-on-64-bit-RISC-V-and-LoongArch.patch::https://github.com/ldc-developers/ldc/commit/89b1b8479aeb170a6a7d9534f86fcb166b626e7f.patch")
++sha256sums+=('311e09f42dcb96b96001d4eb9e4def0029210783f045bfc670d6a44c2d0da461')
