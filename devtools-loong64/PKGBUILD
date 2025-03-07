@@ -1,7 +1,7 @@
 # Maintainer: wszqkzqk <wszqkzqk@qq.com>
 
-_pkgver=1.3.1
-_patchver=3
+_pkgver=1.3.2
+_patchver=1
 pkgname=devtools-loong64
 pkgver=${_pkgver}.patch${_patchver}
 pkgrel=1
@@ -71,6 +71,12 @@ package() {
   else # loongarch64 <--> loong64
     echo "$(uname -m)" > "$pkgdir"/usr/share/devtools/setarch-aliases.d/loong64
   fi
+
+  install -dm755 "$pkgdir"/usr/share/devtools/makepkg.conf.d/loong64.conf.d
+
+  for conf in fortran.conf rust.conf; do
+    ln -s '../conf.d/'$conf "$pkgdir"/usr/share/devtools/makepkg.conf.d/loong64.conf.d/$conf
+  done
 
   install -Dm755 "${srcdir}/get-loong64-pkg" -t "$pkgdir"/usr/bin/
   install -Dm755 "${srcdir}/export-loong64-patches" -t "$pkgdir"/usr/bin/
