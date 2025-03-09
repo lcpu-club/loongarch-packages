@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 680eec5..975238c 100644
+index 08ed078..6f8eeca 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -457,6 +457,16 @@ prepare() {
+@@ -457,6 +457,14 @@ prepare() {
    sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
    sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
  
@@ -13,23 +13,21 @@ index 680eec5..975238c 100644
 +
 +  # Apply in advance to so that makepkg-source-roller.py will not throw error
 +  patch -Np1 -d chromium-mirror_third_party_depot_tools -i "${srcdir}/depot_tools-loong64-support.patch"
-+  # Get the binary from the npm package
-+  npm install @esbuild/linux-loong64@0.14.54
 +
    cp -r chromium-mirror_third_party_depot_tools depot_tools
    export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
    #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
-@@ -465,6 +475,9 @@ prepare() {
+@@ -465,6 +473,9 @@ prepare() {
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
    rbash prepare-electron-source-tree.sh "$CARCH"
-+  # Add esbuild binary manually
++  # Create symlink to esbuild binary
 +  mkdir -p src/third_party/devtools-frontend/src/third_party/esbuild
-+  cp node_modules/@esbuild/linux-loong64/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
++  ln -s /usr/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
    mv electron src/electron
  
    echo "Running hooks..."
-@@ -477,12 +490,48 @@ prepare() {
+@@ -477,12 +488,48 @@ prepare() {
      -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
    src/build/util/lastchange.py \
      -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
@@ -80,7 +78,7 @@ index 680eec5..975238c 100644
    src/electron/script/apply_all_patches.py \
        src/electron/patches/config.json
  
-@@ -508,7 +557,9 @@ prepare() {
+@@ -508,7 +555,9 @@ prepare() {
    ## Upstream fixes
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
@@ -91,7 +89,7 @@ index 680eec5..975238c 100644
  
    # Fixes for building with libstdc++ instead of libc++
    patch -Np1 -i ../chromium-patches-*/chromium-130-interference-size.patch
-@@ -526,6 +577,13 @@ prepare() {
+@@ -526,6 +575,13 @@ prepare() {
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
    # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
  
@@ -105,7 +103,7 @@ index 680eec5..975238c 100644
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -586,7 +644,7 @@ build() {
+@@ -586,7 +642,7 @@ build() {
      'clang_base_path="/usr"'
      'clang_use_chrome_plugins=false'
      "clang_version=\"$_clang_version\""
@@ -114,12 +112,12 @@ index 680eec5..975238c 100644
    )
  
    # Allow the use of nightly features with stable Rust compiler
-@@ -655,3 +713,19 @@ package() {
+@@ -655,3 +711,19 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
 +
-+makedepends+=(jq)
++makedepends+=(jq esbuild)
 +source+=("depot_tools-loong64-support.patch"
 +         "makepkg-source-roller.py.diff"
 +         "compiler-rt-adjust-paths-loong64.patch"
