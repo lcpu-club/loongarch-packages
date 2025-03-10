@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 44c9e24..7729562 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -22,7 +22,6 @@ depends=(
+@@ -23,7 +23,6 @@ depends=(
    'abseil-cpp'
  )
  makedepends=(
@@ -10,12 +8,12 @@ index 44c9e24..7729562 100644
    'cmake'
    'gtest'
    'python-build'
-@@ -70,10 +69,10 @@ build() {
+@@ -71,10 +70,10 @@ build() {
    cmake "${cmake_options[@]}"
    cmake --build build --verbose
  
 -  cd "$pkgbase-$pkgver"
--  bazel build //python/dist:binary_wheel
+-  bazel build //python/dist:binary_wheel --enable_workspace=true
 +  cd "$pkgbase-5.$pkgver"
 +  python -m build --wheel --no-isolation
  
@@ -24,7 +22,7 @@ index 44c9e24..7729562 100644
    local _gemdir="$(gem env gemdir)"
    local _gemver=4.$pkgver
  
-@@ -144,7 +143,7 @@ package_python-protobuf() {
+@@ -145,7 +144,7 @@ package_python-protobuf() {
      'python'
    )
  
@@ -33,7 +31,7 @@ index 44c9e24..7729562 100644
    install -vDm 644 $pkgbase-$pkgver/LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
  
-@@ -159,3 +158,6 @@ package_ruby-google-protobuf() {
+@@ -160,3 +159,6 @@ package_ruby-google-protobuf() {
    install -vDm 644 $pkgbase-$pkgver/LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
    install -Dm 0644 $pkgbase-$pkgver/ruby/*.md -t "$pkgdir/usr/share/doc/${pkgname}"
  }
