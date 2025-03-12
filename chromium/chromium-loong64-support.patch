@@ -146,22 +146,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
  }
  
  assert(!toolchain_has_rust || rust_target_arch != "")
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/chromecast/browser/cast_browser_main_parts.cc b/chromecast/browser/cast_browser_main_parts.cc
---- a/chromecast/browser/cast_browser_main_parts.cc	2000-01-01 00:00:00.000000000 +0800
-+++ b/chromecast/browser/cast_browser_main_parts.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -315,11 +315,10 @@ const DefaultCommandLineSwitch kDefaultS
- #endif  // BUILDFLAG(IS_ANDROID)
- #endif  // BUILDFLAG(IS_CAST_AUDIO_ONLY)
- #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
--#if defined(ARCH_CPU_X86_FAMILY)
-     // This is needed for now to enable the x11 Ozone platform to work with
-     // current Linux/NVidia OpenGL drivers.
-     {switches::kIgnoreGpuBlocklist, ""},
--#elif defined(ARCH_CPU_ARM_FAMILY)
-+#if defined(ARCH_CPU_ARM_FAMILY)
- #if !BUILDFLAG(IS_CAST_AUDIO_ONLY)
-     {switches::kEnableHardwareOverlays, "cast"},
- #endif
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/media_router/common/providers/cast/channel/enum_table.h b/components/media_router/common/providers/cast/channel/enum_table.h
 --- a/components/media_router/common/providers/cast/channel/enum_table.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/components/media_router/common/providers/cast/channel/enum_table.h	2000-01-01 00:00:00.000000000 +0800
