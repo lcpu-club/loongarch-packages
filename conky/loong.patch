@@ -1,15 +1,15 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -21,7 +21,7 @@ makedepends=(
-   'docbook-xsl'
+@@ -49,7 +49,7 @@ makedepends=(
    'git'
+   'gperf'
    'man-db'
 -  'pandoc'
 +  #'pandoc'
-   'python-yaml'
    'python-jinja'
+   'python-yaml'
    'wayland-protocols'
-@@ -80,7 +80,7 @@ build() {
+@@ -82,7 +82,7 @@ build() {
      -D CMAKE_CXX_FLAGS="$CXXFLAGS -ffat-lto-objects" \
      -D MAINTAINER_MODE=OFF \
      -D BUILD_TESTS=ON \
