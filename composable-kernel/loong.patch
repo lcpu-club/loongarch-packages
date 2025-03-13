@@ -1,19 +1,28 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4dbf746..6d26607 100644
+index 804b0f0..6451684 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -34,6 +34,8 @@ build() {
-     -D CMAKE_HIP_ARCHITECTURES="gfx900;gfx906:xnack-;gfx908:xnack-;gfx90a:xnack+;gfx90a:xnack-;gfx940;gfx941;gfx942;gfx1010;gfx1012;gfx1030;gfx1100;gfx1101;gfx1102"
+@@ -17,6 +17,7 @@ options=(!lto !buildflags)
+ _dirname="$(basename "$url")-$(basename "${source[0]}" .tar.gz)"
+ 
+ prepare() {
++    patch -Np1 -d $_dirname -i "${srcdir}/composable_kernel_loongarch.patch"
+     # Remove tests as they require a supported AMD GPU to run
+     sed -i '/add_subdirectory(test)/d' "$_dirname/CMakeLists.txt"
+ }
+@@ -34,6 +35,8 @@ build() {
+     -D CMAKE_HIP_ARCHITECTURES="gfx900;gfx906:xnack-;gfx908:xnack-;gfx90a:xnack+;gfx90a:xnack-;gfx940;gfx941;gfx942;gfx1010;gfx1012;gfx1030;gfx1100;gfx1101;gfx1102;gfx1151"
      -D BUILD_DEV=OFF
      -D INSTANCES_ONLY=ON
-+    -D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold"
-+    -D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
++    -D CMAKE_C_FLAGS="-mcmodel=medium"
++    -D CMAKE_CXX_FLAGS="-mcmodel=medium"
    )
    cmake "${_cmake_args[@]}"
    cmake --build build
-@@ -44,3 +46,5 @@ package() {
+@@ -44,3 +47,6 @@ package() {
  
    install -Dm644 "$_dirname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
-+makedepends+=(mold)
++source+=("composable_kernel_loongarch.patch::https://raw.githubusercontent.com/loongarch-moe/rocm-loongarch/228273601fa054e40056547339012e6d698c2855/stage5/4.rocm-composable_kernel/composable_kernel_loongarch.patch")
++sha256sums+=('195a78775026d34bafda436ab77374f6a3b86ea162e0c90fda75cf285dca2918')
