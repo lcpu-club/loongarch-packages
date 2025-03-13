@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 2ef55de..83ad7de 100644
+index 896b5ea..75c4a73 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -42,14 +42,15 @@ prepare() {
@@ -35,22 +35,10 @@ index 2ef55de..83ad7de 100644
  
    echo "Build with rocm/hip backend"
    cd "${srcdir}/${_pkgname}-${pkgver}-hip"
-@@ -90,7 +93,9 @@ build() {
-     -DBUILD_SHARED_LIBS=ON \
-     -DMAGMA_ENABLE_HIP=ON \
-     -DGPU_TARGET="$(_valid_gfx)" \
--    -DAMDGPU_TARGETS="$(_valid_gfx | tr ' ' ';')"
-+    -DAMDGPU_TARGETS="$(_valid_gfx | tr ' ' ';')" \
-+    -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold" \
-+    -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
-   ninja -C build
- }
- 
-@@ -127,4 +132,7 @@ package_magma-hip() {
+@@ -127,4 +130,6 @@ package_magma-hip() {
    _package "/opt/rocm"
  }
  
 +pkgname=(${pkgname[@]/magma-cuda})
 +makedepends=(${makedepends[@]/cuda})
-+makedepends+=(mold)
  # vim:set ts=2 sw=2 et:
