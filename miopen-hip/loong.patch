@@ -1,31 +1,19 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 8c88590..7c0c7b5 100644
+index 0001e6e..acd1f74 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -26,6 +26,8 @@ _dirname="$(basename "$_git")-$(basename "${source[0]}" .tar.gz)"
- _mlirname="$(basename "$_mlir")-$(basename "${source[1]}" .tar.gz)"
+@@ -37,6 +37,7 @@ prepare() {
  
- prepare() {
-+    patch -Np1 -d "${_mlirname}" -i "${srcdir}/fix-RocMLIRPasses.h.inc.patch"
-+    patch -Np1 -d "${_mlirname}" -i "${srcdir}/fix-cmake-dependency-for-transforms.patch"
-     # Disable tests as they require an AMD GPU at build time
-     sed -i '/add_subdirectory(test)/d' "$_dirname/CMakeLists.txt"
+   git -c protocol.file.allow=always submodule update --init --recursive
+ 
++  patch -Np1 -d "${srcdir}/${pkgname}" -i "${srcdir}/miopen-loong64-support.patch"
+   # Disable tests as they require an AMD GPU at build time
+   sed -i '/add_subdirectory(test)/d' CMakeLists.txt
  }
-@@ -33,6 +35,7 @@ prepare() {
- build() {
-   export CC=/opt/rocm/llvm/bin/clang
-   export CXX=/opt/rocm/llvm/bin/clang++
-+  export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
-   # -fcf-protection is not supported by HIP, see
-   # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
-   # Set ROCm test chipset to Vega in order to pass the configuration step.
-@@ -74,3 +77,9 @@ package() {
+@@ -97,3 +98,6 @@ package() {
  
-   install -Dm644 "$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+   install -Dm644 "$pkgname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
-+makedepends+=(mold)
-+source+=("fix-RocMLIRPasses.h.inc.patch::https://github.com/ROCm/rocMLIR/commit/8f43885b05c8c398225c1b702570391f67dd65f9.patch"
-+         "fix-cmake-dependency-for-transforms.patch::https://github.com/ROCm/rocMLIR/commit/17a9ebe5c7878d62546d44c8889202aa05acd0db.patch")
-+sha256sums+=('b2f6b4fbecc9de29cbbbe92eff18ddb6b567b6d481993e40ef266cb639dbad88'
-+             '8012518e23d97bb1c954d2d108752779631131937af74c12c8303dd15a8d9b80')
++source+=("miopen-loong64-support.patch::https://raw.githubusercontent.com/loongarch-moe/rocm-loongarch/228273601fa054e40056547339012e6d698c2855/stage5/5.rocm-MIOpen/miopen.patch")
++sha256sums+=('4dcc44677baa71f1d6d0fc7f371d3fd55a05c4db1b55ff654df471bdfff536f5')
