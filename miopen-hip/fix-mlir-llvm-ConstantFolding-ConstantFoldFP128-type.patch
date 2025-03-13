@@ -1,0 +1,13 @@
+diff --git a/external/llvm-project/llvm/lib/Analysis/ConstantFolding.cpp b/external/llvm-project/llvm/lib/Analysis/ConstantFolding.cpp
+index 6664e8ce3cde..924132bcdff3 100644
+--- a/external/llvm-project/llvm/lib/Analysis/ConstantFolding.cpp
++++ b/external/llvm-project/llvm/lib/Analysis/ConstantFolding.cpp
+@@ -2126,7 +2126,7 @@ static Constant *ConstantFoldScalarCall1(StringRef Name,
+       LibFunc Fp128Func = NotLibFunc;
+       if (TLI && TLI->getLibFunc(Name, Fp128Func) && TLI->has(Fp128Func) &&
+           Fp128Func == LibFunc_logl)
+-        return ConstantFoldFP128(logf128, Op->getValueAPF(), Ty);
++        return ConstantFoldFP128((float128 (*)(float128))logf128, Op->getValueAPF(), Ty);
+     }
+ #endif
+ 
