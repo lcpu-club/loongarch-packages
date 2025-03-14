@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 931dfd6..9dee3f4 100644
+index ff8dfdb..6479fd4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -77,6 +77,10 @@ prepare() {
@@ -65,11 +65,11 @@ index 931dfd6..9dee3f4 100644
 +         '0003-LOONGARCH-from-AOSCOS-more-fixes-for-Xe-on-LoongArch.patch')
 +sha256sums+=('d604e6329f38f2fdd33365f705489e9c3f16f2e0576e225c1f1736775eeaeea7'
 +             '7fb7c79fcc055990a77e2aba686edacfbc1a3ee68098797a93c2db0ed3aff6e1'
-+             '98b14e2f49d7c21c864776ab80227eb77bb4d16d3baf9be8df6cf29820b6f6f0'
++             '5f6c9983e49c16941b2ede98e25deb860259f371d9ab89dddb5ebf4968d91be3'
 +             '5c4ccb967efcd79f8ea5f63836cd424b2e22255ffd89deaeeac6b6fcd40ea88a')
 +b2sums+=('bd756d5284581fd0e4c404c7fb1bef8d8edfa6363c056b90bcdf017e138b8f71674075621709eac10c2a850cb3c550ad265e04e43b911083636fdcb329d1f304'
 +         '1fc07a8aa13618d9f24803adc84ef21b4427d97b860f16a7f9ce348c19f03d2bcfec4f7ee3e1cbd1f5015918b3e48be97a4d4a992be5d0b74127e392f9867dc6'
-+         '9fac202566f2d0634e596a68afd5d06540c6dcc99cc03eec0159eaa8367527eec69ceac3b90cf1fc96ad4676c449c6025bfd3bb966b85002bc2d711833aeb4b7'
++         'd7cefaedcf5226c6d8fb54437098798f9512e80ffb033274799e90c655d6659912ed5e9dc81bfaf0b47b3ebbabf7bf1efb48817759cf272d0cfaaf7446548f99'
 +         '5dca610d93e67f096b87d0679cdb4bcf439ede2d527630842784ca2c00c4e363ee9fcbfc72c2f92ae2469a3a46ddf449f350e48c5a8a6459d1adfb3881b48ebe')
 +
  # vim:set ts=8 sts=2 sw=2 et:
