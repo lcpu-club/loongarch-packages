@@ -6,6 +6,6 @@
           gmp)
 -makedepends=(boost)
 +makedepends=(boost python-setuptools)
- source=(https://github.com/flatsurf/e-antic/releases/download/$pkgver/$pkgname-$pkgver.tar.gz)
- sha256sums=('8328e6490129dfec7f4aa478ebd54dc07686bd5e5e7f5f30dcf20c0f11b67f60')
- 
+ source=(https://github.com/flatsurf/e-antic/releases/download/$pkgver/$pkgname-$pkgver.tar.gz
+         https://github.com/flatsurf/e-antic/commit/66ecdffd.patch
+         flint-3.2-test.patch)
