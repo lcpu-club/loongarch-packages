@@ -1,0 +1,100 @@
+diff --git a/Configure.cmake b/Configure.cmake
+index 19a153f..ab893ec 100644
+--- a/Configure.cmake
++++ b/Configure.cmake
+@@ -130,6 +130,8 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "s390x")
+   set(CLANG_FLAGS_ENABLE_PURECFMA_SCALAR "-march=z14;-mzvector")
+ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv64")
+   set(SLEEF_ARCH_RISCV64 ON CACHE INTERNAL "True for RISCV64 architecture.")
++elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "loongarch64")
++  set(SLEEF_ARCH_LOONGARCH64 ON CACHE INTERNAL "True for LoongArch64 architecture.")
+ endif()
+ 
+ set(COMPILER_SUPPORTS_PUREC_SCALAR 1)
+diff --git a/src/arch/helperpurec_scalar.h b/src/arch/helperpurec_scalar.h
+index 2826ea0..c0827b4 100644
+--- a/src/arch/helperpurec_scalar.h
++++ b/src/arch/helperpurec_scalar.h
+@@ -54,7 +54,7 @@
+ #define ENABLE_FMA_SP
+ //@#define ENABLE_FMA_SP
+ 
+-#if defined(__AVX2__) || defined(__aarch64__) || defined(__arm__) || defined(__powerpc64__) || defined(__zarch__) || defined(__riscv) || CONFIG == 3
++#if defined(__AVX2__) || defined(__aarch64__) || defined(__arm__) || defined(__powerpc64__) || defined(__zarch__) || defined(__riscv) || defined(__loongarch64) || CONFIG == 3
+ #ifndef FP_FAST_FMA
+ //@#ifndef FP_FAST_FMA
+ #define FP_FAST_FMA
+diff --git a/src/libm-tester/CMakeLists.txt b/src/libm-tester/CMakeLists.txt
+index 1b5a2a5..4ee07b2 100644
+--- a/src/libm-tester/CMakeLists.txt
++++ b/src/libm-tester/CMakeLists.txt
+@@ -55,6 +55,9 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "s390x")
+ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv64")
+   set(TEST3_CINZ purec_scalar rvvm1nofma rvvm2nofma)
+   set(TEST3_FINZ purecfma_scalar rvvm1 rvvm2)
++elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "loongarch64")
++  set(TEST3_CINZ purec_scalar)
++  set(TEST3_FINZ purecfma_scalar)
+ endif()
+ 
+ #
+diff --git a/src/libm/CMakeLists.txt b/src/libm/CMakeLists.txt
+index 5cab91a..541267c 100644
+--- a/src/libm/CMakeLists.txt
++++ b/src/libm/CMakeLists.txt
+@@ -69,6 +69,12 @@ elseif(SLEEF_ARCH_RISCV64)
+     PUREC_SCALAR
+     PURECFMA_SCALAR
+     )
++elseif(SLEEF_ARCH_LOONGARCH64)
++  set(SLEEF_HEADER_LIST
++    PUREC_SCALAR
++    PURECFMA_SCALAR
++    DSP_SCALAR
++    )
+ endif()
+ 
+ # HEADER_PARAMS
+diff --git a/src/libm/sleeflibm_header.h.org.in b/src/libm/sleeflibm_header.h.org.in
+index 075e520..9d15bbd 100644
+--- a/src/libm/sleeflibm_header.h.org.in
++++ b/src/libm/sleeflibm_header.h.org.in
+@@ -21,7 +21,7 @@
+ #define SLEEF_INLINE __forceinline
+ #endif
+ 
+-#if defined(__AVX2__) || defined(__aarch64__) || defined(__arm__) || defined(__powerpc64__) || defined(__zarch__)
++#if defined(__AVX2__) || defined(__aarch64__) || defined(__arm__) || defined(__powerpc64__) || defined(__zarch__) || defined(__loongarch64)
+ #ifndef FP_FAST_FMA
+ #define FP_FAST_FMA
+ #endif
+diff --git a/src/quad/CMakeLists.txt b/src/quad/CMakeLists.txt
+index 4d9700d..1e24dfd 100644
+--- a/src/quad/CMakeLists.txt
++++ b/src/quad/CMakeLists.txt
+@@ -93,6 +93,12 @@ elseif(SLEEF_ARCH_RISCV64)
+     PURECFMA_SCALAR
+     DSPSCALAR
+     )
++elseif(SLEEF_ARCH_LOONGARCH64)
++  set(SLEEF_HEADER_LIST
++    PUREC_SCALAR
++    PURECFMA_SCALAR
++    DSPSCALAR
++    )
+ endif()
+ 
+ #
+diff --git a/src/quad/sleefquad_header.h.org.in b/src/quad/sleefquad_header.h.org.in
+index 05b5e12..09d2abc 100644
+--- a/src/quad/sleefquad_header.h.org.in
++++ b/src/quad/sleefquad_header.h.org.in
+@@ -47,7 +47,7 @@ extern "C"
+ #define SLEEF_FLOAT128_IS_IEEEQP
+ #endif
+ 
+-#if !defined(SLEEF_FLOAT128_IS_IEEEQP) && defined(__SIZEOF_LONG_DOUBLE__) && __SIZEOF_LONG_DOUBLE__ == 16 && (defined(__aarch64__) || defined(__zarch__))
++#if !defined(SLEEF_FLOAT128_IS_IEEEQP) && defined(__SIZEOF_LONG_DOUBLE__) && __SIZEOF_LONG_DOUBLE__ == 16 && (defined(__aarch64__) || defined(__zarch__) || defined(__loongarch64))
+ #define SLEEF_LONGDOUBLE_IS_IEEEQP
+ #endif
+ 
