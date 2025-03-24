@@ -1,14 +1,14 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -10,7 +10,6 @@ pkgname=(
-   opencl-clover-mesa
+@@ -11,7 +11,6 @@ pkgname=(
    opencl-rusticl-mesa
+   vulkan-dzn
    vulkan-gfxstream
 -  vulkan-intel
-   vulkan-mesa-layers
    vulkan-nouveau
    vulkan-radeon
-@@ -205,7 +204,7 @@ build() {
+   vulkan-swrast
+@@ -188,7 +187,7 @@ build() {
    local meson_options=(
      -D android-libbacktrace=disabled
      -D b_ndebug=true
@@ -17,7 +17,7 @@
      -D gallium-extra-hud=true
      -D gallium-nine=true
      -D gallium-opencl=icd
-@@ -213,12 +212,13 @@ build() {
+@@ -196,12 +195,13 @@ build() {
      -D gles1=disabled
      -D html-docs=enabled
      -D libunwind=disabled
@@ -26,20 +26,20 @@
      -D osmesa=true
      -D valgrind=enabled
      -D video-codecs=all
--    -D vulkan-drivers=amd,gfxstream,intel,intel_hasvk,nouveau,swrast,virtio
+-    -D vulkan-drivers=amd,gfxstream,intel,intel_hasvk,nouveau,swrast,virtio,microsoft-experimental
 -    -D vulkan-layers=device-select,intel-nullhw,overlay,screenshot,vram-report-limit
-+    -D vulkan-drivers=amd,gfxstream,nouveau,swrast,virtio
++    -D vulkan-drivers=amd,gfxstream,nouveau,swrast,virtio,microsoft-experimental
 +    -D vulkan-layers=device-select,overlay,screenshot,vram-report-limit
    )
  
    # Build only minimal debug info to reduce size
-@@ -299,9 +299,6 @@ package_mesa() {
-     _pick vkgfxstr $icddir/gfxstream*.json
-     _pick vkgfxstr $libdir/libvulkan_gfxstream*.so
+@@ -287,9 +287,6 @@ package_mesa() {
+     _pick vkgfxstr $icddir/gfxstream_vk_icd.*.json
+     _pick vkgfxstr $libdir/libvulkan_gfxstream.so
  
--    _pick vkintel $icddir/intel_*.json
--    _pick vkintel $libdir/libvulkan_intel*.so
+-    _pick vkintel $icddir/intel{,_hasvk}_icd.*.json
+-    _pick vkintel $libdir/libvulkan_intel{,_hasvk}.so
 -
-     _pick vklayer $libdir/libVkLayer_*.so
-     _pick vklayer usr/bin/mesa-*-control.py
-     _pick vklayer usr/share/vulkan/{ex,im}plicit_layer.d
+     _pick vknvidia $icddir/nouveau_icd.*.json
+     _pick vknvidia $libdir/libvulkan_nouveau.so
+ 
