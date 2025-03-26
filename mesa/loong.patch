@@ -1,14 +1,8 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 226c5e7..f7ec920 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -11,7 +11,6 @@ pkgname=(
-   opencl-rusticl-mesa
-   vulkan-dzn
-   vulkan-gfxstream
--  vulkan-intel
-   vulkan-nouveau
-   vulkan-radeon
-   vulkan-swrast
-@@ -188,7 +187,7 @@ build() {
+@@ -188,7 +188,7 @@ build() {
    local meson_options=(
      -D android-libbacktrace=disabled
      -D b_ndebug=true
@@ -17,7 +11,7 @@
      -D gallium-extra-hud=true
      -D gallium-nine=true
      -D gallium-opencl=icd
-@@ -196,12 +195,13 @@ build() {
+@@ -196,12 +196,13 @@ build() {
      -D gles1=disabled
      -D html-docs=enabled
      -D libunwind=disabled
@@ -33,7 +27,7 @@
    )
  
    # Build only minimal debug info to reduce size
-@@ -287,9 +287,6 @@ package_mesa() {
+@@ -287,9 +288,6 @@ package_mesa() {
      _pick vkgfxstr $icddir/gfxstream_vk_icd.*.json
      _pick vkgfxstr $libdir/libvulkan_gfxstream.so
  
@@ -43,3 +37,10 @@
      _pick vknvidia $icddir/nouveau_icd.*.json
      _pick vknvidia $libdir/libvulkan_nouveau.so
  
+@@ -580,4 +578,6 @@ package_mesa-docs() {
+   install -Dm644 mesa-$pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+ }
+ 
++pkgname=(${pkgname[@]/vulkan-intel})
++
+ # vim:set sw=2 sts=-1 et:
