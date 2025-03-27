@@ -1,18 +1,18 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -20,7 +20,7 @@ makedepends=(cmake
-              python-setuptools
-              python-setuptools-scm
-              python-wheel)
+@@ -22,7 +22,7 @@ makedepends=(cmake
+              python-installer
+              python-scikit-build-core
+              python-setuptools-scm)
 -checkdepends=(intel-oneapi-mkl
 +checkdepends=(#intel-oneapi-mkl
-               python-pytest)
- source=(git+https://github.com/osqp/osqp-python#tag=v$pkgver
-         git+https://github.com/osqp/osqp
-@@ -51,7 +51,8 @@ check() {
-   cd osqp-python
+               python-joblib
+               python-pytest
+               python-pytorch)
+@@ -46,7 +46,8 @@ check() {
    python -m venv --system-site-packages test-env
    test-env/bin/python -m installer dist/*.whl
+   ln -s /usr/share/osqp/codegen_files $(ls -d test-env/lib/python*)/site-packages/osqp/codegen/codegen_src
 -  test-env/bin/python -m pytest -v
 +  test-env/bin/python -m pytest -v \
 +    --deselect src/osqp/tests/mkl_pardiso_test.py::mkl_pardiso_tests::test_issue14
