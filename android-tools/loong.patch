@@ -1,16 +1,18 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 5ed54a7..3e55962 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -40,3 +40,11 @@ package() {
+@@ -21,7 +21,7 @@ sha256sums=('d2c3222280315f36d8bfa5c02d7632b47e365bfe2e77e99a3564fb6576f04097'
+ prepare() {
+   cd android-tools-$_tag
+   patch -Np 1 -d "vendor/extras" < ../android-tools-35.0.2-fix-protobuf-30.0-compilation.patch
+-
++  patch -Np 1 -d "vendor" < ../boringssl-add-loong64-support.patch
+ }
+ 
+ build() {
+@@ -48,3 +48,6 @@ package() {
  
    DESTDIR="${pkgdir}" ninja -C build install
  }
-+
-+prepare() {
-+  cd android-tools-$_tag
-+  patch -d vendor -p1 -i "${srcdir}/boringssl-add-loong64-support.patch"
-+}
 +
 +source+=("boringssl-add-loong64-support.patch")
 +sha256sums+=('b37c782b1aced1d671da08be743a8fd870672238169395cd68a514860ea33c60')
