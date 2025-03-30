@@ -1,23 +1,23 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index ba83315..9504942 100644
+index a6e86e3..3788d1c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -46,8 +46,10 @@ makedepends=(bash
- url='https://tug.org/texlive/'
- _commit=cf0f89c44f5d409c6d1bc0592a808af278611428 # tags/texlive-2024.2
- source=(git+https://github.com/Tex-Live/texlive-source.git#commit=$_commit
-+        texlive-bin-loong64.patch
-         ptex-debug-print.patch)
- sha256sums=('bf83f4db38318468e86795c7416e972a010f46d1dcd22cc20064141dae5a952f'
-+            '0c09915ccb8bad1792f11a69cc7057d775cdf54a443427d9ca77f5602432f1aa' 
-             'aa838f09003c62c2efb5770a8de66f99b409df049fbd65098d80fd1957d06c50')
- 
- prepare() {
-@@ -60,6 +62,7 @@ prepare() {
+@@ -60,6 +60,9 @@ prepare() {
    sed -i s/SELFAUTOPARENT/TEXMFROOT/ texk/tex4htk/t4ht.c
  # remove spurious ptex "guessed encoding" print
    patch -p1 -i ../ptex-debug-print.patch
++# loong64-specific patches
 +  patch -p1 -i $srcdir/texlive-bin-loong64.patch
++  patch -p1 -d libs/luajit/LuaJIT-src -i $srcdir/texlive-luajit-loong.patch
  }
  
  build() {
+@@ -194,3 +197,8 @@ package_texlive-bin() {
+   rm "$pkgdir"/usr/lib/libsynctex.*
+   rm "$pkgdir"/usr/lib/pkgconfig/synctex.pc
+ }
++
++source+=(texlive-bin-loong64.patch
++         texlive-luajit-loong.patch)
++sha256sums+=('3b91a0c022fc3195b58f9c03c4fcd81562539f57c19a0b3638720b63ab37329d'
++             '5508b6d15cc956c30e6eb4e48647196d402110b291147742ba2d1bc437a414be')
