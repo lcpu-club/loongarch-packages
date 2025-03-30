@@ -1,14 +1,5 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -6,7 +6,7 @@
- # Contributor: Sebastian Voecking < voeck at web dot de >
- 
- pkgbase=root
--pkgname=(root root-cuda)
-+pkgname=(root)
- pkgver=6.34.04
- pkgrel=1
- pkgdesc='C++ data analysis framework and interpreter from CERN'
 @@ -60,8 +60,6 @@ makedepends=(
    cfitsio
    chromium
@@ -18,7 +9,7 @@
    gcc-fortran
    git
    go
-@@ -186,8 +184,11 @@ build() {
+@@ -188,8 +186,11 @@ build() {
    cmake --build build
  
    ## ROOT with CUDA
@@ -30,11 +21,11 @@
  }
  
  _package() {
-@@ -303,4 +304,7 @@ package_root-cuda() {
+@@ -305,4 +306,7 @@ package_root-cuda() {
    _package build-cuda
  }
  
 +source+=("add-loong64-support.patch::https://github.com/root-project/root/commit/0c716a13bcdb05a2b60c7c60e053f06e70aae49f.patch")
 +b2sums+=('224448d2036a304ad0d129b931e0265d3dcff79589c102a46ef24fb50221c7dd04f41ee770810a466f7c14a59399a976857e373effda6c24ca7d7d5eb1bd799a')
-+
++pkgname=(root)
  # vim: ts=2 sw=2 et:
