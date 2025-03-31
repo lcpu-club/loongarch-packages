@@ -1,20 +1,24 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0b3d993..6005ee3 100644
+index eacc0fc..bb3dbce 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -65,6 +65,7 @@ check() {
+@@ -65,6 +65,8 @@ check() {
  
  prepare() {
    cd $pkgname-$pkgver
-+  patch -Np1 -i "${srcdir}/0001-fix-installer-skip-waiting-for-mirror-selection-on-l.patch"
++  patch -Np1 -i "${srcdir}/fix-installer-skip-waiting-for-mirror-selection-on-l.patch"
++  patch -Np1 -i "${srcdir}/fix-installer-use-platform.machine-for-target-archit.patch"
    # Patching away `wayfire` as it's an AUR package.
    # Instead of pushing an entire release on github, we patch
    # here for simplicity until the next version is out.
-@@ -82,3 +83,7 @@ package() {
+@@ -82,3 +84,10 @@ package() {
    python -m installer --destdir="$pkgdir" dist/*.whl
    install -vDm 644 docs/_build/man/archinstall.1 -t "$pkgdir/usr/share/man/man1/"
  }
 +
-+source+=("0001-fix-installer-skip-waiting-for-mirror-selection-on-l.patch")
-+sha512sums+=('dc28724dfe4ed25a88de0516296233dff75809737ef979cdbe8be32f068774d3addd8748bcfe49e2416d82d0cd740979ce716d91f0450078ea03b7e0068fdb45')
-+b2sums+=('63cd91f10f53b9f7aba8370da33d70793a796d036298cdc5ca9adc6ebb040a6189eee9c30532b373e5890745d6f8a1189e38cb17bd828ac1eff57fdd904a593b')
++source+=("fix-installer-use-platform.machine-for-target-archit.patch::https://github.com/wszqkzqk/archinstall/commit/1681304c614efc920d17120656dbda5c36e543cc.diff"
++         "fix-installer-skip-waiting-for-mirror-selection-on-l.patch::https://github.com/wszqkzqk/archinstall/commit/94b75f6cd9e50f43ba7ec83e3d966895cd8c0ce8.diff")
++sha512sums+=('c0c19f879e53604ac0816b6ad08e9141b399082bc0093697edd07a85a19ba8babb83f86a4e397301a7f7ad09b248440db47631175b5c630d9a4189811f06e3cd'
++             '0065e4bed0f8427c48708f9a28e131acc929be65d263e801061d87e2d8de3fff1109845196cedb1dfab7cbf15e9c6b17a7aea354e1a4a7078e1193ae3174d401')
++b2sums+=('f731c8a3db578af66cb639a1410d43575e2f5983a17b60a3e16b9db7d6c95b29729200908ee3a792ba62463d0ae6793dd5d91721df90f0570dba193b2c32cebb'
++         '8fa9698f9e397162e04bcd4aec05e6eaa436ae5a2f6a0117ecd26403ce0b7879ea2aaa8cee08e145bf19e1ba96b9bf9e6c1eff91a782963d0f040e7caaa42502')
