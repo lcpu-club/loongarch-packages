@@ -1,8 +1,14 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 4ef144c..d1a459b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -162,7 +162,7 @@ build() {
+@@ -167,6 +167,7 @@ build() {
+     -Ddriver_hyperv=disabled \
+     -Ddriver_libxl=disabled \
+     -Ddriver_vz=disabled \
++    -Ddriver_ch=disabled \
+     -Dsanlock=disabled \
+     -Dsecdriver_apparmor=disabled \
+     -Dsecdriver_selinux=disabled \
+@@ -182,7 +183,7 @@ build() {
  check() {
    cd "$pkgname-$pkgver"
  
