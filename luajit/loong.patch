@@ -1,16 +1,18 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 004fed3..9ad4b3d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -8,19 +8,19 @@
+@@ -8,19 +8,20 @@
  
  pkgname=luajit
  # LuaJIT has a "rolling release" where you should follow git HEAD
 -_commit=538a82133ad6fddfd0ca64de167c4aca3bc1a2da
-+_commit=44577b3ebcc4898bcedff931a0cc7b34053e3b9a
++_commit=653b14db641a1d792d14f50c164681478f577624
  # The patch version is the timestamp of the above git commit, obtain via `git show -s --format=%ct`
 -_ct=1741730670
 -pkgver="2.1.${_ct}"
-+_ct=1743333461
-+_ctarch=1727870382
++_ct=1743338651
++_ctarch=1741730670
 +pkgver="2.1.${_ctarch}"
  pkgrel=1
  pkgdesc='Just-in-time compiler and drop-in replacement for Lua 5.1'
@@ -21,8 +23,9 @@
 -source=("LuaJIT-${_commit}.tar.gz::https://github.com/LuaJIT/LuaJIT/archive/${_commit}.tar.gz")
 -sha256sums=('7acbc36be8f21072422eb9a5e5fc468d0eaa55bec1b70260d651e845684621e2')
 -b2sums=('d95324b6a12919107f33d12e168ac798a91e829d8ddda7a2362dd6dff893e68e5fcc68322023216ab84352507107a2bff9934a87c1aa1427185645157cc78fc8')
-+source=("LuaJIT-${_commit}.tar.gz::https://github.com/setarcos/LuaJIT/archive/${_commit}.tar.gz")
-+sha256sums=('2ffcc50beacc044bce73e442925377f4b5f2be8d8d7b8ac8a1a4c85a447e8293')
++source=("LuaJIT-${_commit}.tar.gz::https://github.com/yetist/LuaJIT/archive/${_commit}.tar.gz")
++sha256sums=('902c30ed15a78519f3817f924eb57be16921b509883027cd0876f1da04430169')
++b2sums=('6669669c0905bd5168593b9b91870a638cddcfaf1c3cf0125369d9cd64140a754fef965119ab8122642b0815517f0403f06748b65f208c5b38036df3a901c9f2')
  
  build() {
    cd "LuaJIT-${_commit}"
