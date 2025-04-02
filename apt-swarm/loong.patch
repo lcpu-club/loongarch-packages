@@ -1,0 +1,11 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 0b16b65..e9b8c0e 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -53,4 +53,6 @@ package() {
+   "${pkgdir}/usr/bin/${pkgname}" plumbing completions fish > "${pkgdir}/usr/share/fish/vendor_completions.d/${pkgname}.fish"
+ }
+ 
++makedepends+=(cmake clang)
++
+ # vim: ts=2 sw=2 et:
