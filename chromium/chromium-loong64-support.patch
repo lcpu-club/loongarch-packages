@@ -373,10 +373,10 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
 --- a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -37,7 +37,7 @@
+@@ -35,7 +35,7 @@
+ #include "sandbox/linux/system_headers/linux_time.h"
  
- #if (BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS_LACROS)) && \
-     !defined(__arm__) && !defined(__aarch64__) &&             \
+ #if BUILDFLAG(IS_LINUX) && !defined(__arm__) && !defined(__aarch64__) && \
 -    !defined(PTRACE_GET_THREAD_AREA)
 +    !defined(PTRACE_GET_THREAD_AREA) && !defined(__loongarch__)
  // Also include asm/ptrace-abi.h since ptrace.h in older libc (for instance

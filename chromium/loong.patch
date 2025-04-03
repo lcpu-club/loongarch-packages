@@ -1,9 +1,9 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 252211c..25dddc7 100644
+index 0203c66..ae7d3ed 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -111,11 +111,18 @@ prepare() {
-   patch -Np1 -d third_party/skia <../skia-fix-cfi-icall-failure-with-use_system_libjpeg-true.patch
+@@ -115,11 +115,17 @@ prepare() {
+   patch -Np1 -i ../add-more-CFI-suppressions-for-inline-PipeWire-functions.patch
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
 -  patch -Np1 -i ../compiler-rt-adjust-paths.patch
@@ -17,12 +17,11 @@ index 252211c..25dddc7 100644
 +  # Patches for loong64
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
-+  patch -Np1 -d third_party/swiftshader -i "${srcdir}/swiftshader-cpp-fix.patch"
 +
    # Fixes for building with libstdc++ instead of libc++
  
    # Link to system tools required by the build
-@@ -207,7 +214,7 @@ build() {
+@@ -211,7 +217,7 @@ build() {
        'clang_base_path="/usr"'
        'clang_use_chrome_plugins=false'
        "clang_version=\"$_clang_version\""
@@ -31,17 +30,15 @@ index 252211c..25dddc7 100644
      )
  
      # Allow the use of nightly features with stable Rust compiler
-@@ -324,4 +331,13 @@ package() {
+@@ -328,4 +334,11 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
 +         "compiler-rt-adjust-paths-loong64.patch"
-+         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
-+         "swiftshader-cpp-fix.patch::https://raw.githubusercontent.com/riscv-forks/electron/27a4ff46397145e1cec1ff34ebf36a5bdfa8788b/patches/swiftshader/0001-Fix-LLVM-s-AlignOf-after-previous-change-to-support-.patch")
-+sha256sums+=('e849f525f61464ddd1ae622a3b07c3633e01e982ccd00d5accfaa69163819285'
++         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
++sha256sums+=('3111811502800d314bd926d5806cae862a50a97adb20202ed3a842627938365d'
 +             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
-+             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
-+             '046219fd2287dd199cb03981b5ad73f08e99d517bd3f6f6f265d5ce37f2fba1e')
++             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
 +
  # vim:set ts=2 sw=2 et:
