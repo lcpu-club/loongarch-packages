@@ -19,15 +19,15 @@
    'perl'
    'perl-ipc-run'
    'python'
-@@ -95,6 +92,7 @@ prepare() {
+@@ -90,6 +87,7 @@ prepare() {
+   cd postgresql-${pkgver}
    patch -p1 < ../0001-Set-DEFAULT_PGSOCKET_DIR-to-run-postgresql.patch
    patch -p1 < ../0002-Force-RPATH-to-be-used-for-the-PL-Perl-plugin.patch
-   patch -p1 < ../0003-fix-regression-tests-tz.patch
 +  patch -p1 < ../add-loongarch-support.patch
  }
  
  build() {
-@@ -112,7 +110,6 @@ build() {
+@@ -107,7 +105,6 @@ build() {
      --with-ldap
      --with-libxml
      --with-libxslt
@@ -35,7 +35,7 @@
      --with-lz4
      --with-openssl
      --with-pam
-@@ -143,6 +140,7 @@ _postgres_check() {
+@@ -138,6 +135,7 @@ _postgres_check() {
  
  check() {
    export LANG=C LC_ALL=C
@@ -43,7 +43,7 @@
    cd postgresql-${pkgver}
    _postgres_check check
    _postgres_check check-world
-@@ -279,4 +277,8 @@ package_postgresql-docs() {
+@@ -274,4 +272,8 @@ package_postgresql-docs() {
    install -Dm 644 COPYRIGHT -t "${pkgdir}/usr/share/licenses/${pkgname}"
  }
  
