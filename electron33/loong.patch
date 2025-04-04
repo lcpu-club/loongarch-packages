@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 09a2a6f..bc1ab59 100644
+index 0b2be63..032ae68 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -456,6 +456,16 @@ prepare() {
+@@ -460,6 +460,16 @@ prepare() {
    sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
    sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
  
@@ -19,7 +19,7 @@ index 09a2a6f..bc1ab59 100644
    cp -r chromium-mirror_third_party_depot_tools depot_tools
    export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
    #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
-@@ -464,6 +474,9 @@ prepare() {
+@@ -468,6 +478,9 @@ prepare() {
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
    rbash prepare-electron-source-tree.sh "$CARCH"
@@ -29,7 +29,7 @@ index 09a2a6f..bc1ab59 100644
    mv electron src/electron
  
    echo "Running hooks..."
-@@ -476,8 +489,16 @@ prepare() {
+@@ -480,8 +493,16 @@ prepare() {
      -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
    src/build/util/lastchange.py \
      -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
@@ -48,8 +48,8 @@ index 09a2a6f..bc1ab59 100644
  
    # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
    src/third_party/node/update_npm_deps
-@@ -507,7 +528,9 @@ prepare() {
-   ## Upstream fixes
+@@ -513,7 +534,9 @@ prepare() {
+   patch -Np1 -i ../add-more-CFI-suppressions-for-inline-PipeWire-functions.patch
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
 -  patch -Np1 -i ../compiler-rt-adjust-paths.patch
@@ -58,8 +58,8 @@ index 09a2a6f..bc1ab59 100644
 +  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
  
    # Fixes for building with libstdc++ instead of libc++
-   patch -Np1 -i ../chromium-patches-*/chromium-128-compiler.patch
-@@ -530,6 +553,15 @@ prepare() {
+   patch -Np1 -i ../chromium-patches-*/chromium-130-interference-size.patch
+@@ -536,6 +559,16 @@ prepare() {
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
    # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
  
@@ -69,13 +69,14 @@ index 09a2a6f..bc1ab59 100644
 +  patch -Np1 -i "${srcdir}/components-variations-add-loong64.patch"
 +  patch -Np1 -i "${srcdir}/fix-base-process-launch.h.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++  patch -Np1 -i "${srcdir}/devtools-frontend-disable-terser.patch"
 +  # Add loong64 support for electron
 +  patch -Np1 -d electron -i "${srcdir}/electron_runtime_api_dalagate-add-loong64-support.patch"
 +
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -590,7 +622,7 @@ build() {
+@@ -596,7 +629,7 @@ build() {
      'clang_base_path="/usr"'
      'clang_use_chrome_plugins=false'
      "clang_version=\"$_clang_version\""
@@ -84,7 +85,7 @@ index 09a2a6f..bc1ab59 100644
    )
  
    # Allow the use of nightly features with stable Rust compiler
-@@ -659,3 +691,23 @@ package() {
+@@ -665,3 +698,25 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
@@ -98,7 +99,8 @@ index 09a2a6f..bc1ab59 100644
 +         "chromium-loong64-support.patch"
 +         "components-variations-add-loong64.patch"
 +         "fix-base-process-launch.h.patch"
-+         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
++         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++         "devtools-frontend-disable-terser.patch")
 +sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
 +             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
 +             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
@@ -107,4 +109,5 @@ index 09a2a6f..bc1ab59 100644
 +             '1d54c67518372511fb23658b14008e154dbf7dba54453ab7d0bf48a35fdcf4c4'
 +             'a131da5af26ab680bf282bdd25c04e1ee7cf14e210f3f6d897c5f5707b468838'
 +             '8473db8c1a63cb280aebedba0958cdfa0d63d7b4b0a7f7b262f171cbd8e0b1f6'
-+             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
++             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
++             'a5c18b38b6969f63c4216b630ecd84e6e0a72a2eddbbf5d2d0a4a40103f7f0c0')
