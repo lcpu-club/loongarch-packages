@@ -1,0 +1,139 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index df346bb..463acd1 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -434,6 +434,16 @@ prepare() {
+   sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
+   sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
+ 
++  # Patching makepkg-source-roller-orig.py
++  cp "${srcdir}/makepkg-source-roller.py" "makepkg-source-roller-new.py"
++  patch "makepkg-source-roller-new.py" -i "${srcdir}/makepkg-source-roller.py.diff"
++  mv -f "makepkg-source-roller-new.py" "makepkg-source-roller.py"
++
++  # Apply in advance to so that makepkg-source-roller.py will not throw error
++  patch -Np1 -d chromium-mirror_third_party_depot_tools -i "${srcdir}/depot_tools-loong64-support.patch"
++  # Get the binary from the npm package
++  npm install @esbuild/linux-loong64@0.24.0
++
+   cp -r chromium-mirror_third_party_depot_tools depot_tools
+   export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
+   #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
+@@ -442,6 +452,9 @@ prepare() {
+   # Generate gclient gn args file and prepare-electron-source-tree.sh
+   python makepkg-source-roller.py generate electron/DEPS $pkgname
+   rbash prepare-electron-source-tree.sh "$CARCH"
++  # Add esbuild binary manually
++  mkdir -p src/third_party/devtools-frontend/src/third_party/esbuild
++  cp node_modules/@esbuild/linux-loong64/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+   mv electron src/electron
+ 
+   echo "Running hooks..."
+@@ -454,12 +467,48 @@ prepare() {
+     -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
+   src/build/util/lastchange.py \
+     -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
+-  src/tools/update_pgo_profiles.py --target=linux update \
+-    --gs-url-base=chromium-optimization-profiles/pgo_profiles
++  #src/tools/update_pgo_profiles.py --target=linux update \
++  #  --gs-url-base=chromium-optimization-profiles/pgo_profiles
++
++  # Link to system tools required by the build in advance
++  pushd src
++  mkdir -p third_party/node/linux/node-linux-x64/bin
++  ln -sfn /usr/bin/node third_party/node/linux/node-linux-x64/bin/
++  mkdir -p third_party/jdk/current/bin
++  ln -sfn /usr/bin/java third_party/jdk/current/bin/
++  ln -sfn /usr/bin/clang-format buildtools/linux64
++  popd
++
++  pushd src/third_party/node/
++  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
++  #local _rollup_ver="$(jq -r .dependencies.\"@rollup/wasm-node\" package.json)"
++  local _rollup_ver="4.32.0" # Known version that supports loong64
++  jq ".dependencies.rollup=\"$_rollup_ver\"" package.json > package.json.new
++  mv package.json{.new,}
++  popd
+ 
+   # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
+   src/third_party/node/update_npm_deps
+ 
++  pushd src/third_party/devtools-frontend/src
++  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" scripts/devtools_paths.py
++  #local _rollup_ver="$(jq -r .devDependencies.\"@rollup/wasm-node\" package.json)"
++  jq ".devDependencies.rollup=\"$_rollup_ver\" | .devDependencies.\"@rollup/rollup-linux-loongarch64-gnu\"=\"$_rollup_ver\""  package.json > package.json.new
++  mv package.json{.new,}
++  # Chromium hosts a custom registry at https://npm.skia.org/chrome-devtools/
++  # and rejects some packages:
++  # Package fs-extra with version 11.3.0 was created 108h0m0s time ago. This is less than 1 week and so failed the audit.
++  sed -i /registry/d .npmrc
++  # Replace direct invocation of wasm rollup
++  sed -i 's\@rollup/wasm-node\rollup\' \
++    inspector_overlay/BUILD.gn \
++    front_end/models/live-metrics/web-vitals-injected/BUILD.gn \
++    front_end/Images/BUILD.gn \
++    front_end/panels/recorder/injected/BUILD.gn \
++    scripts/build/ninja/bundle.gni
++  popd
++  python src/third_party/devtools-frontend/src/scripts/deps/manage_node_deps.py
++
+   src/electron/script/apply_all_patches.py \
+       src/electron/patches/config.json
+ 
+@@ -488,7 +537,9 @@ prepare() {
+   git -C third_party/webrtc cherry-pick -n 0a9787897f3d36055130b0532967d31c31e8408f
+ 
+   # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
+-  patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  #patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  # Use modified version for loong64 support
++  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
+ 
+   # Fixes for building with libstdc++ instead of libc++
+   patch -Np1 -i ../chromium-patches-*/chromium-132-compiler.patch
+@@ -507,6 +558,14 @@ prepare() {
+   patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
+   # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
+ 
++  # Add loong64 support for chromium
++  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
++  patch -Np1 -i "${srcdir}/extensions-common-api-runtime.json-add-loong64.patch"
++  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++  patch -Np1 -d third_party/swiftshader -i "${srcdir}/swiftshader-cpp-fix.patch"
++  # Add loong64 support for electron
++  patch -Np1 -d electron -i "${srcdir}/electron_runtime_api_dalagate-add-loong64-support.patch"
++
+   # Allow building against system libraries in official builds
+   echo "Patching Chromium for using system libraries..."
+   sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
+@@ -568,7 +627,7 @@ build() {
+     'clang_base_path="/usr"'
+     'clang_use_chrome_plugins=false'
+     "clang_version=\"$_clang_version\""
+-    'chrome_pgo_phase=2'
++    'chrome_pgo_phase=0'
+   )
+ 
+   # Allow the use of nightly features with stable Rust compiler
+@@ -637,3 +696,21 @@ package() {
+   install -Dm644 src/electron/default_app/icon.png \
+           "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
+ }
++
++makedepends+=(jq)
++source+=("depot_tools-loong64-support.patch"
++         "makepkg-source-roller.py.diff"
++         "compiler-rt-adjust-paths-loong64.patch"
++         "chromium-loong64-support.patch"
++         "extensions-common-api-runtime.json-add-loong64.patch"
++         "electron_runtime_api_dalagate-add-loong64-support.patch"
++         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++         "swiftshader-cpp-fix.patch::https://raw.githubusercontent.com/riscv-forks/electron/27a4ff46397145e1cec1ff34ebf36a5bdfa8788b/patches/swiftshader/0001-Fix-LLVM-s-AlignOf-after-previous-change-to-support-.patch")
++sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
++             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
++             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
++             '553337fe20dcdef42e7224aea324ffe00c00194b94070770e737fca4c1496381'
++             '2f3662096c15de8797113a60afda4cd746ca64bfb7f901fe976eb3d29389c659'
++             '0e9152849d7ff20e54eea3e71f6cecedbfd923579557e81158369577e047c5d9'
++             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
++             '046219fd2287dd199cb03981b5ad73f08e99d517bd3f6f6f265d5ce37f2fba1e')
