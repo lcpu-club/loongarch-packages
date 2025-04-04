@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index fcb05d1..3fe1f58 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,6 +25,7 @@ sha256sums=('0a02f98d7b4fd516065757e4942c7d2490104a044e31306f7f4b259db8ba36b3')
+ validpgpkeys=('487EACC08557AD082088DABA1EB2638FF56C0C53') # Dave Reisner <d@falconindy.com>
+ 
+ build() {
++    patch -Np1 -d "$pkgname" -i "${srcdir}/fix-handle-loongarch64-architecture-correctly-in-updater.patch"
+     arch-meson "$pkgname" build
+     meson compile -C build
+ }
+@@ -32,3 +33,6 @@ build() {
+ package() {
+     meson install -C build --destdir "$pkgdir"
+ }
++
++source+=("fix-handle-loongarch64-architecture-correctly-in-updater.patch::https://github.com/wszqkzqk/pkgfile/commit/78df4856a198538d444822e458771a44d05f4cef.diff")
++sha256sums+=('ac849c627ef5ba0963be300d1e770c7993630c043af8f880f0ff3c0b427208ef')
