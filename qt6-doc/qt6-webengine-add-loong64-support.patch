@@ -1,7 +1,7 @@
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/cmake/Functions.cmake b/qtwebengine/cmake/Functions.cmake
 --- a/qtwebengine/cmake/Functions.cmake	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/cmake/Functions.cmake	2000-01-01 00:00:00.000000000 +0800
-@@ -636,6 +636,8 @@ function(get_gn_arch result arch)
+@@ -356,6 +356,8 @@ function(get_gn_arch result arch)
          set(${result} "mips64el" PARENT_SCOPE)
      elseif(arch STREQUAL "riscv64")
          set(${result} "riscv64" PARENT_SCOPE)
@@ -10,10 +10,59 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      else()
          message(FATAL_ERROR "Unknown architecture: ${arch}")
      endif()
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/base/process/launch.h b/qtwebengine/src/3rdparty/chromium/base/process/launch.h
+--- a/qtwebengine/src/3rdparty/chromium/base/process/launch.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/base/process/launch.h	2000-01-01 00:00:00.000000000 +0800
+@@ -51,7 +51,7 @@ namespace base {
+ // defined as a constant.
+ 
+ // These constants are borrowed from glibc’s (arch)/bits/pthread_stack_min.h.
+-#if defined(ARCH_CPU_ARM64)
++#if defined(ARCH_CPU_ARM64) || defined(ARCH_CPU_LOONGARCH64)
+ #define PTHREAD_STACK_MIN_CONST \
+   (__builtin_constant_p(PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : 131072)
+ #else
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/components/metrics/debug/metrics_internals_utils.cc b/qtwebengine/src/3rdparty/chromium/components/metrics/debug/metrics_internals_utils.cc
+--- a/qtwebengine/src/3rdparty/chromium/components/metrics/debug/metrics_internals_utils.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/components/metrics/debug/metrics_internals_utils.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -69,6 +69,8 @@ std::string CpuArchitectureToString(
+       return "arm32";
+     case variations::Study::TRANSLATED_X86_64:
+       return "translated_x86_64";
++    case variations::Study::LOONGARCH64:
++      return "loongarch64";
+   }
+   NOTREACHED_IN_MIGRATION();
+ }
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/components/variations/proto/study.proto b/qtwebengine/src/3rdparty/chromium/components/variations/proto/study.proto
+--- a/qtwebengine/src/3rdparty/chromium/components/variations/proto/study.proto	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/components/variations/proto/study.proto	2000-01-01 00:00:00.000000000 +0800
+@@ -262,6 +262,8 @@ message Study {
+     // A Mac-only value, indicating an x86-64 binary running on an arm64 host
+     // via "Rosetta 2" binary translation.
+     TRANSLATED_X86_64 = 4;
++
++    LOONGARCH64 = 5;
+   }
+ 
+   // Enum to pass as optional bool.
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/components/variations/service/variations_field_trial_creator_base.cc b/qtwebengine/src/3rdparty/chromium/components/variations/service/variations_field_trial_creator_base.cc
+--- a/qtwebengine/src/3rdparty/chromium/components/variations/service/variations_field_trial_creator_base.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/components/variations/service/variations_field_trial_creator_base.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -106,6 +106,9 @@ Study::CpuArchitecture GetCurrentCpuArch
+   if (process_arch == "ARM") {
+     return Study::ARM32;
+   }
++  if (process_arch == "LOONGARCH_64") {
++    return Study::LOONGARCH64;
++  }
+   if (process_arch == "x86") {
+     return Study::X86_32;
+   }
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/content/browser/BUILD.gn b/qtwebengine/src/3rdparty/chromium/content/browser/BUILD.gn
 --- a/qtwebengine/src/3rdparty/chromium/content/browser/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/content/browser/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -194,6 +194,7 @@ jumbo_source_set("browser") {
+@@ -218,6 +218,7 @@ jumbo_source_set("browser") {
      "//components/services/storage/dom_storage:local_storage_proto",
      "//components/services/storage/public/cpp",
      "//components/services/storage/public/mojom",
@@ -24,7 +73,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/extensions/browser/api/declarative_net_request/BUILD.gn b/qtwebengine/src/3rdparty/chromium/extensions/browser/api/declarative_net_request/BUILD.gn
 --- a/qtwebengine/src/3rdparty/chromium/extensions/browser/api/declarative_net_request/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/extensions/browser/api/declarative_net_request/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -20,6 +20,7 @@ source_set("declarative_net_request") {
+@@ -19,6 +19,7 @@ source_set("declarative_net_request") {
    deps = [
      "//base",
      "//content/public/browser",
@@ -170,7 +219,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
 --- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -354,6 +354,7 @@ intptr_t SIGSYSSchedHandler(const struct
+@@ -359,6 +359,7 @@ intptr_t SIGSYSSchedHandler(const struct
  
  intptr_t SIGSYSFstatatHandler(const struct arch_seccomp_data& args,
                                void* fs_denied_errno) {
@@ -178,7 +227,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
    if (args.nr == __NR_fstatat_default) {
      if (*reinterpret_cast<const char*>(args.args[1]) == '\0' &&
          args.args[3] == static_cast<uint64_t>(AT_EMPTY_PATH)) {
-@@ -362,6 +363,7 @@ intptr_t SIGSYSFstatatHandler(const stru
+@@ -367,6 +368,7 @@ intptr_t SIGSYSFstatatHandler(const stru
      }
      return -reinterpret_cast<intptr_t>(fs_denied_errno);
    }
@@ -341,7 +390,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR_accept:
      case __NR_accept4:
      case __NR_bind:
-@@ -553,7 +559,7 @@ bool SyscallSets::IsAllowedAddressSpaceA
+@@ -554,7 +560,7 @@ bool SyscallSets::IsAllowedAddressSpaceA
      case __NR_mincore:
      case __NR_mlockall:
  #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -350,7 +399,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR_mmap:
  #endif
  #if defined(__i386__) || defined(__arm__) || \
-@@ -586,7 +592,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
+@@ -587,7 +593,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
      (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
      case __NR__llseek:
  #endif
@@ -359,7 +408,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR_poll:
  #endif
      case __NR_ppoll:
-@@ -607,7 +613,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
+@@ -608,7 +614,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
      case __NR_recv:
  #endif
  #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -368,7 +417,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR_recvfrom:  // Could specify source.
      case __NR_recvmsg:   // Could specify source.
  #endif
-@@ -622,7 +628,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
+@@ -623,7 +629,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
      case __NR_send:
  #endif
  #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -377,7 +426,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR_sendmsg:  // Could specify destination.
      case __NR_sendto:   // Could specify destination.
  #endif
-@@ -671,7 +677,7 @@ bool SyscallSets::IsSeccomp(int sysno) {
+@@ -672,7 +678,7 @@ bool SyscallSets::IsSeccomp(int sysno) {
  bool SyscallSets::IsAllowedBasicScheduler(int sysno) {
    switch (sysno) {
      case __NR_sched_yield:
@@ -386,7 +435,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR_pause:
  #endif
      case __NR_nanosleep:
-@@ -755,7 +761,7 @@ bool SyscallSets::IsNuma(int sysno) {
+@@ -756,7 +762,7 @@ bool SyscallSets::IsNuma(int sysno) {
      case __NR_getcpu:
      case __NR_mbind:
  #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -395,7 +444,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR_migrate_pages:
  #endif
      case __NR_move_pages:
-@@ -803,7 +809,9 @@ bool SyscallSets::IsGlobalProcessEnviron
+@@ -804,7 +810,9 @@ bool SyscallSets::IsGlobalProcessEnviron
      case __NR_getrusage:
      case __NR_personality:  // Can change its personality as well.
      case __NR_prlimit64:    // Like setrlimit / getrlimit.
@@ -405,7 +454,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR_times:
        return true;
      default:
-@@ -825,7 +833,7 @@ bool SyscallSets::IsDebug(int sysno) {
+@@ -826,7 +834,7 @@ bool SyscallSets::IsDebug(int sysno) {
  
  bool SyscallSets::IsGlobalSystemStatus(int sysno) {
    switch (sysno) {
@@ -414,7 +463,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR__sysctl:
      case __NR_sysfs:
  #endif
-@@ -843,7 +851,7 @@ bool SyscallSets::IsGlobalSystemStatus(i
+@@ -844,7 +852,7 @@ bool SyscallSets::IsGlobalSystemStatus(i
  
  bool SyscallSets::IsEventFd(int sysno) {
    switch (sysno) {
@@ -423,7 +472,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR_eventfd:
  #endif
      case __NR_eventfd2:
-@@ -895,7 +903,7 @@ bool SyscallSets::IsKeyManagement(int sy
+@@ -896,7 +904,7 @@ bool SyscallSets::IsKeyManagement(int sy
  }
  
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -432,7 +481,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
  bool SyscallSets::IsSystemVSemaphores(int sysno) {
    switch (sysno) {
      case __NR_semctl:
-@@ -915,7 +923,7 @@ bool SyscallSets::IsSystemVSemaphores(in
+@@ -916,7 +924,7 @@ bool SyscallSets::IsSystemVSemaphores(in
  
  #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
      defined(__aarch64__) ||                                         \
@@ -441,7 +490,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
  // These give a lot of ambient authority and bypass the setuid sandbox.
  bool SyscallSets::IsSystemVSharedMemory(int sysno) {
    switch (sysno) {
-@@ -931,7 +939,7 @@ bool SyscallSets::IsSystemVSharedMemory(
+@@ -932,7 +940,7 @@ bool SyscallSets::IsSystemVSharedMemory(
  #endif
  
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -450,7 +499,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
  bool SyscallSets::IsSystemVMessageQueue(int sysno) {
    switch (sysno) {
      case __NR_msgctl:
-@@ -962,7 +970,7 @@ bool SyscallSets::IsSystemVIpc(int sysno
+@@ -963,7 +971,7 @@ bool SyscallSets::IsSystemVIpc(int sysno
  
  bool SyscallSets::IsAnySystemV(int sysno) {
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -459,7 +508,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
    return IsSystemVMessageQueue(sysno) || IsSystemVSemaphores(sysno) ||
           IsSystemVSharedMemory(sysno);
  #elif defined(__i386__) || \
-@@ -999,7 +1007,7 @@ bool SyscallSets::IsAdvancedScheduler(in
+@@ -1000,7 +1008,7 @@ bool SyscallSets::IsAdvancedScheduler(in
  bool SyscallSets::IsInotify(int sysno) {
    switch (sysno) {
      case __NR_inotify_add_watch:
@@ -468,7 +517,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      case __NR_inotify_init:
  #endif
      case __NR_inotify_init1:
-@@ -1134,7 +1142,7 @@ bool SyscallSets::IsMisc(int sysno) {
+@@ -1135,7 +1143,7 @@ bool SyscallSets::IsMisc(int sysno) {
  #if defined(__x86_64__)
      case __NR_tuxcall:
  #endif
@@ -505,7 +554,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc
 --- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/seccomp-bpf/syscall.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -18,7 +18,7 @@ namespace sandbox {
+@@ -23,7 +23,7 @@ namespace sandbox {
  namespace {
  
  #if defined(ARCH_CPU_X86_FAMILY) || defined(ARCH_CPU_ARM_FAMILY) || \
@@ -514,7 +563,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
  // Number that's not currently used by any Linux kernel ABIs.
  const int kInvalidSyscallNumber = 0x351d3;
  #else
-@@ -308,6 +308,27 @@ asm(// We need to be able to tell the ke
+@@ -313,6 +313,27 @@ asm(// We need to be able to tell the ke
      "2:ret\n"
      ".cfi_endproc\n"
      ".size SyscallAsm, .-SyscallAsm\n"
@@ -542,7 +591,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
  #endif
      );  // asm
  
-@@ -425,6 +446,18 @@ intptr_t Syscall::Call(int nr,
+@@ -430,6 +451,18 @@ intptr_t Syscall::Call(int nr,
      ret = inout;
    }
  
@@ -564,9 +613,9 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc
 --- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/services/credentials.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -80,7 +80,7 @@ bool ChrootToSafeEmptyDir() {
-   pid_t pid = -1;
-   alignas(16) char stack_buf[PTHREAD_STACK_MIN];
+@@ -87,7 +87,7 @@ bool ChrootToSafeEmptyDir() {
+   alignas(16) char stack_buf[PTHREAD_STACK_MIN_CONST];
+ 
  #if defined(ARCH_CPU_X86_FAMILY) || defined(ARCH_CPU_ARM_FAMILY) || \
 -    defined(ARCH_CPU_MIPS_FAMILY)
 +    defined(ARCH_CPU_MIPS_FAMILY) || defined(ARCH_CPU_LOONGARCH_FAMILY)
@@ -670,10 +719,10 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
  struct kernel_stat;
  struct kernel_stat64;
 +struct kernel_statx;
+ struct landlock_ruleset_attr;
  
  namespace sandbox {
- 
-@@ -91,6 +92,7 @@ SANDBOX_EXPORT int sys_sigaction(int sig
+@@ -92,6 +93,7 @@ SANDBOX_EXPORT int sys_sigaction(int sig
  // architectures, with the same capabilities as stat() and lstat().
  SANDBOX_EXPORT int sys_stat(const char* path, struct kernel_stat* stat_buf);
  SANDBOX_EXPORT int sys_lstat(const char* path, struct kernel_stat* stat_buf);
@@ -684,7 +733,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc
 --- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_client.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -193,6 +193,21 @@ int BrokerClient::Stat64(const char* pat
+@@ -198,6 +198,21 @@ int BrokerClient::Stat64(const char* pat
                             sizeof(*sb));
  }
  
@@ -733,7 +782,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc
 --- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/broker_host.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -297,6 +297,21 @@ void BrokerHost::StatFileForIPC(BrokerCo
+@@ -302,6 +302,21 @@ void BrokerHost::StatFileForIPC(BrokerCo
      RAW_CHECK(reply->AddIntToMessage(0));
      RAW_CHECK(
          reply->AddDataToMessage(reinterpret_cast<char*>(&sb), sizeof(sb)));
@@ -755,7 +804,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
  #else  // defined(__NR_fstatat64)
      // We should not reach here on 64-bit systems, as the *stat*64() are only
      // necessary on 32-bit.
-@@ -436,7 +451,8 @@ bool BrokerHost::HandleRemoteCommand(Bro
+@@ -441,7 +456,8 @@ bool BrokerHost::HandleRemoteCommand(Bro
        break;
      }
      case COMMAND_STAT:
@@ -844,7 +893,16 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc
 --- a/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/sandbox/linux/syscall_broker/syscall_dispatcher.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -169,6 +169,19 @@ int SyscallDispatcher::DispatchSyscall(c
+@@ -29,6 +29,8 @@ int SyscallDispatcher::DefaultStatForTes
+                                              default_stat_struct* sb) {
+ #if defined(__NR_fstatat64)
+   return Stat64(pathname, follow_links, sb);
++#elif defined(__NR_statx)
++  return Statx(pathname, follow_links ? 0 : AT_SYMLINK_NOFOLLOW, sb);
+ #elif defined(__NR_newfstatat)
+   return Stat(pathname, follow_links, sb);
+ #endif
+@@ -174,6 +176,19 @@ int SyscallDispatcher::DispatchSyscall(c
        return Stat64(reinterpret_cast<const char*>(args.args[0]), true,
                      reinterpret_cast<struct kernel_stat64*>(args.args[1]));
  #endif
@@ -2250,7 +2308,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc
 --- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/bpf_network_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -255,7 +255,7 @@ ResultExpr NetworkProcessPolicy::Evaluat
+@@ -260,7 +260,7 @@ ResultExpr NetworkProcessPolicy::Evaluat
      case __NR_fdatasync:
      case __NR_fsync:
      case __NR_mremap:
@@ -2274,7 +2332,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc
 --- a/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/sandbox/policy/linux/sandbox_linux.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -586,6 +586,7 @@ bpf_dsl::ResultExpr SandboxLinux::Handle
+@@ -596,6 +596,7 @@ bpf_dsl::ResultExpr SandboxLinux::Handle
    const bpf_dsl::ResultExpr handle_via_broker =
        bpf_dsl::Trap(syscall_broker::BrokerClient::SIGSYS_Handler,
                      broker_process_->GetBrokerClientSignalBased());
@@ -2282,7 +2340,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
    if (sysno == __NR_fstatat_default) {
      // This may be an fstatat(fd, "", stat_buf, AT_EMPTY_PATH), which should be
      // rewritten as fstat(fd, stat_buf). This should be consistent with how the
-@@ -596,6 +597,15 @@ bpf_dsl::ResultExpr SandboxLinux::Handle
+@@ -606,6 +607,15 @@ bpf_dsl::ResultExpr SandboxLinux::Handle
      return bpf_dsl::If((flags & AT_EMPTY_PATH) == AT_EMPTY_PATH,
                         RewriteFstatatSIGSYS(BPFBasePolicy::GetFSDeniedErrno()))
          .Else(handle_via_broker);
@@ -2301,15 +2359,36 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn b/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn
 --- a/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/skia/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -754,6 +754,8 @@ skia_source_set("skia_opts") {
-     # Conditional and empty body needed to avoid assert() below.
-   } else if (current_cpu == "riscv64") {
-     # Conditional and empty body needed to avoid assert() below.
-+  } else if (current_cpu == "loong64") {
-+    # Conditional and empty body needed to avoid assert() below.
-   } else {
-     assert(false, "Unknown cpu target")
+@@ -169,7 +169,7 @@ config("skia_config") {
+   if (current_cpu == "loong64") {
+     cflags = [
+       "-mlsx",
+-      "-flax-vector-conversions=all",
++      "-flax-vector-conversions",
+     ]
    }
+ }
+@@ -759,7 +759,7 @@ if (current_cpu == "loong64") {
+     sources = skia_opts.lasx_sources
+     cflags = [
+       "-mlasx",
+-      "-flax-vector-conversions=all",
++      "-flax-vector-conversions",
+     ]
+     visibility = [ ":skia_opts" ]
+   }
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/BUILD.gn b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/BUILD.gn
+--- a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
+@@ -1645,7 +1645,7 @@ jumbo_component("platform") {
+   if (current_cpu == "loong64") {
+     cflags = [
+       "-mlsx",
+-      "-flax-vector-conversions=all",
++      "-flax-vector-conversions",
+     ]
+   }
+ 
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
 --- a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
@@ -2369,7 +2448,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
  
      component_r = __lsx_vpickev_b(component_r, component_r);
      component_r = __lsx_vpickev_b(component_r, component_r);
-@@ -173,41 +173,41 @@ ALWAYS_INLINE void PackOneRowOfRGBA8Litt
+@@ -172,41 +172,41 @@ ALWAYS_INLINE void PackOneRowOfRGBA8Litt
    v4f32 mask_falpha = __lsx_vffint_s_w(mask_lalpha);
    v16u8 rgba_index = {0,1,2,19, 4,5,6,23, 8,9,10,27, 12,13,14,31};
    for (unsigned i = 0; i < pixels_per_row_trunc; i += 4) {
@@ -2528,7 +2607,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
      default: {
        LOG(ERROR) << "unknown context architecture "
                   << context_snapshot->architecture;
-@@ -601,5 +608,44 @@ size_t MinidumpContextRISCV64Writer::Con
+@@ -605,5 +612,44 @@ size_t MinidumpContextRISCV64Writer::Con
    DCHECK_GE(state(), kStateFrozen);
    return sizeof(context_);
  }
@@ -2658,11 +2737,11 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 +      break;
      default:
        NOTREACHED();
-       cpu_architecture = kMinidumpCPUArchitectureUnknown;
+   }
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc
 --- a/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/crashpad/crashpad/snapshot/capture_memory.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -122,6 +122,11 @@ void CaptureMemory::PointedToByContext(c
+@@ -123,6 +123,11 @@ void CaptureMemory::PointedToByContext(c
    for (size_t i = 0; i < std::size(context.riscv64->regs); ++i) {
      MaybeCaptureMemoryAround(delegate, context.riscv64->regs[i]);
    }
@@ -2698,8 +2777,8 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 +      return loong64->csr_era;
      default:
        NOTREACHED();
-       return ~0ull;
-@@ -191,6 +193,8 @@ uint64_t CPUContext::StackPointer() cons
+   }
+@@ -190,6 +192,8 @@ uint64_t CPUContext::StackPointer() cons
        return arm64->sp;
      case kCPUArchitectureRISCV64:
        return riscv64->regs[1];
@@ -2707,8 +2786,8 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 +      return loong64->regs[3];
      default:
        NOTREACHED();
-       return ~0ull;
-@@ -232,6 +236,7 @@ bool CPUContext::Is64Bit() const {
+   }
+@@ -227,6 +231,7 @@ bool CPUContext::Is64Bit() const {
      case kCPUArchitectureARM64:
      case kCPUArchitectureMIPS64EL:
      case kCPUArchitectureRISCV64:
@@ -3047,7 +3126,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
  #else
  #error port to your architecture
  #endif
-@@ -385,6 +393,9 @@ bool SystemSnapshotLinux::NXEnabled() co
+@@ -380,6 +388,9 @@ bool SystemSnapshotLinux::NXEnabled() co
  #elif defined(ARCH_CPU_RISCV64)
    // Not implemented
    return false;
@@ -3316,20 +3395,12 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js b/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js
 --- a/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js	2000-01-01 00:00:00.000000000 +0800
-@@ -19,11 +19,11 @@ export default commandLineArgs => ({
+@@ -19,7 +19,7 @@ export default commandLineArgs => ({
      sourcemap: Boolean(commandLineArgs.configSourcemaps),
    }],
    plugins: [
--    terser({
--      compress: {
--        pure_funcs: commandLineArgs.configDCHECK ? ['Platform.DCHECK'] : [],
--      },
--    }),
-+    // terser({
-+    //   compress: {
-+    //     pure_funcs: commandLineArgs.configDCHECK ? ['Platform.DCHECK'] : [],
-+    //   },
-+    // }),
+-    terser(),
++    // terser(),
      {
        name: 'devtools-plugin',
        resolveId(source, importer) {
@@ -9340,11 +9411,8 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c
 --- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/codec_list.c	2000-01-01 00:00:00.000000000 +0800
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,15 @@
 +static const FFCodec * const codec_list[] = {
-+    &ff_theora_decoder,
-+    &ff_vp3_decoder,
-+    &ff_vp8_decoder,
 +    &ff_flac_decoder,
 +    &ff_mp3_decoder,
 +    &ff_vorbis_decoder,
@@ -9362,21 +9430,19 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c
 --- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavcodec/parser_list.c	2000-01-01 00:00:00.000000000 +0800
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,7 @@
 +static const AVCodecParser * const parser_list[] = {
 +    &ff_flac_parser,
 +    &ff_mpegaudio_parser,
 +    &ff_opus_parser,
 +    &ff_vorbis_parser,
-+    &ff_vp3_parser,
-+    &ff_vp8_parser,
 +    &ff_vp9_parser,
 +    NULL };
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c
 --- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/libavformat/demuxer_list.c	2000-01-01 00:00:00.000000000 +0800
 @@ -0,0 +1,8 @@
-+static const AVInputFormat * const demuxer_list[] = {
++static const FFInputFormat * const demuxer_list[] = {
 +    &ff_flac_demuxer,
 +    &ff_matroska_demuxer,
 +    &ff_mov_demuxer,
@@ -9409,16 +9475,15 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni
 --- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni	2000-01-01 00:00:00.000000000 +0800
-@@ -270,7 +270,7 @@ if ((is_apple && ffmpeg_branding == "Chr
-   ]
- }
+@@ -251,6 +251,7 @@ if ((current_cpu == "arm64" && ffmpeg_br
  
--if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") || (current_cpu == "x64" && ffmpeg_branding == "Chrome") || (is_android && current_cpu == "arm" && arm_use_neon && ffmpeg_branding == "Chrome") || (is_android && current_cpu == "x86" && ffmpeg_branding == "Chrome") || (is_apple && ffmpeg_branding == "Chrome") || (is_win && ffmpeg_branding == "Chrome") || (use_linux_config && ffmpeg_branding == "Chrome") || (use_linux_config && ffmpeg_branding == "ChromeOS")) {
-+if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") || (current_cpu == "x64" && ffmpeg_branding == "Chrome") || (current_cpu == "loong64" && ffmpeg_branding == "Chrome") || (is_android && current_cpu == "arm" && arm_use_neon && ffmpeg_branding == "Chrome") || (is_android && current_cpu == "x86" && ffmpeg_branding == "Chrome") || (is_apple && ffmpeg_branding == "Chrome") || (is_win && ffmpeg_branding == "Chrome") || (use_linux_config && ffmpeg_branding == "Chrome") || (use_linux_config && ffmpeg_branding == "ChromeOS")) {
-   ffmpeg_c_sources += [
-     "libavcodec/aac_ac3_parser.c",
-     "libavcodec/aac_parser.c",
-@@ -467,6 +467,19 @@ if ((is_android && current_cpu == "arm64
+ if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
+     (current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
++    (current_cpu == "loong64" && ffmpeg_branding == "Chrome") ||
+     (is_android && current_cpu == "arm" && arm_use_neon &&
+      ffmpeg_branding == "Chrome") ||
+     (is_android && current_cpu == "x86" && ffmpeg_branding == "Chrome") ||
+@@ -366,6 +367,19 @@ if (current_cpu == "x64" || (is_android
    ]
  }
  
@@ -9435,9 +9500,120 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 +  ]
 +}
 +
- if ((is_android && current_cpu == "arm" && arm_use_neon) || (use_linux_config && current_cpu == "arm" && arm_use_neon) || (use_linux_config && current_cpu == "arm")) {
-   ffmpeg_c_sources += [
-     "libavcodec/arm/flacdsp_init_arm.c",
+ if ((is_android && current_cpu == "arm" && arm_use_neon) ||
+     (use_linux_config && current_cpu == "arm" && arm_use_neon) ||
+     (use_linux_config && current_cpu == "arm")) {
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/skia/gn/core.gni b/qtwebengine/src/3rdparty/chromium/third_party/skia/gn/core.gni
+--- a/qtwebengine/src/3rdparty/chromium/third_party/skia/gn/core.gni	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/skia/gn/core.gni	2000-01-01 00:00:00.000000000 +0800
+@@ -272,7 +272,7 @@ skia_core_sources = [
+   "$_src/core/SkBitmapProcState.h",
+   "$_src/core/SkBitmapProcState_matrixProcs.cpp",
+   "$_src/core/SkBitmapProcState_opts.cpp",
+-  "$_src/core/SkBitmapProcState_opts_lasx.cpp",
++  # "$_src/core/SkBitmapProcState_opts_lasx.cpp",
+   "$_src/core/SkBitmapProcState_opts_ssse3.cpp",
+   "$_src/core/SkBlendMode.cpp",
+   "$_src/core/SkBlendModeBlender.cpp",
+@@ -287,7 +287,7 @@ skia_core_sources = [
+   "$_src/core/SkBlitRow_D32.cpp",
+   "$_src/core/SkBlitRow_opts.cpp",
+   "$_src/core/SkBlitRow_opts_hsw.cpp",
+-  "$_src/core/SkBlitRow_opts_lasx.cpp",
++  # "$_src/core/SkBlitRow_opts_lasx.cpp",
+   "$_src/core/SkBlitter.cpp",
+   "$_src/core/SkBlitter.h",
+   "$_src/core/SkBlitter_A8.cpp",
+@@ -569,7 +569,7 @@ skia_core_sources = [
+   "$_src/core/SkSwizzlePriv.h",
+   "$_src/core/SkSwizzler_opts.cpp",
+   "$_src/core/SkSwizzler_opts_hsw.cpp",
+-  "$_src/core/SkSwizzler_opts_lasx.cpp",
++  # "$_src/core/SkSwizzler_opts_lasx.cpp",
+   "$_src/core/SkSwizzler_opts_ssse3.cpp",
+   "$_src/core/SkTDynamicHash.h",
+   "$_src/core/SkTHash.h",
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/skia/include/private/base/SkFeatures.h b/qtwebengine/src/3rdparty/chromium/third_party/skia/include/private/base/SkFeatures.h
+--- a/qtwebengine/src/3rdparty/chromium/third_party/skia/include/private/base/SkFeatures.h	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/skia/include/private/base/SkFeatures.h	2000-01-01 00:00:00.000000000 +0800
+@@ -121,9 +121,9 @@
+ #endif
+ 
+ #ifndef SK_CPU_LSX_LEVEL
+-    #if defined(__loongarch_asx)
++    #if defined(__loongarch_asx) && 0
+         #define SK_CPU_LSX_LEVEL    SK_CPU_LSX_LEVEL_LASX
+-    #elif defined(__loongarch_sx)
++    #elif defined(__loongarch_sx) && 0
+         #define SK_CPU_LSX_LEVEL    SK_CPU_LSX_LEVEL_LSX
+     #endif
+ #endif
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkBitmapProcState_opts.cpp b/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkBitmapProcState_opts.cpp
+--- a/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkBitmapProcState_opts.cpp	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkBitmapProcState_opts.cpp	2000-01-01 00:00:00.000000000 +0800
+@@ -22,7 +22,6 @@ namespace SkOpts {
+     DEFINE_DEFAULT(S32_alpha_D32_filter_DXDY);
+ 
+     void Init_BitmapProcState_ssse3();
+-    void Init_BitmapProcState_lasx();
+ 
+     static bool init() {
+     #if defined(SK_ENABLE_OPTIMIZE_SIZE)
+@@ -31,10 +30,6 @@ namespace SkOpts {
+         #if SK_CPU_SSE_LEVEL < SK_CPU_SSE_LEVEL_SSSE3
+             if (SkCpu::Supports(SkCpu::SSSE3)) { Init_BitmapProcState_ssse3(); }
+         #endif
+-    #elif defined(SK_CPU_LOONGARCH)
+-        #if SK_CPU_LSX_LEVEL < SK_CPU_LSX_LEVEL_LASX
+-            if (SkCpu::Supports(SkCpu::LOONGARCH_ASX)) { Init_BitmapProcState_lasx(); }
+-        #endif
+     #endif
+       return true;
+     }
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkBlitRow_opts.cpp b/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkBlitRow_opts.cpp
+--- a/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkBlitRow_opts.cpp	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkBlitRow_opts.cpp	2000-01-01 00:00:00.000000000 +0800
+@@ -22,7 +22,6 @@ namespace SkOpts {
+     DEFINE_DEFAULT(blit_row_s32a_opaque);
+ 
+     void Init_BlitRow_hsw();
+-    void Init_BlitRow_lasx();
+ 
+     static bool init() {
+     #if defined(SK_ENABLE_OPTIMIZE_SIZE)
+@@ -31,10 +30,6 @@ namespace SkOpts {
+         #if SK_CPU_SSE_LEVEL < SK_CPU_SSE_LEVEL_AVX2
+             if (SkCpu::Supports(SkCpu::HSW)) { Init_BlitRow_hsw(); }
+         #endif
+-    #elif defined(SK_CPU_LOONGARCH)
+-        #if SK_CPU_LSX_LEVEL < SK_CPU_LSX_LEVEL_LASX
+-            if (SkCpu::Supports(SkCpu::LOONGARCH_ASX)) { Init_BlitRow_lasx(); }
+-        #endif
+     #endif
+       return true;
+     }
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkSwizzler_opts.cpp b/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkSwizzler_opts.cpp
+--- a/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkSwizzler_opts.cpp	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/skia/src/core/SkSwizzler_opts.cpp	2000-01-01 00:00:00.000000000 +0800
+@@ -33,7 +33,6 @@ namespace SkOpts {
+ 
+     void Init_Swizzler_ssse3();
+     void Init_Swizzler_hsw();
+-    void Init_Swizzler_lasx();
+ 
+     static bool init() {
+     #if defined(SK_ENABLE_OPTIMIZE_SIZE)
+@@ -46,10 +45,6 @@ namespace SkOpts {
+         #if SK_CPU_SSE_LEVEL < SK_CPU_SSE_LEVEL_AVX2
+             if (SkCpu::Supports(SkCpu::HSW)) { Init_Swizzler_hsw(); }
+         #endif
+-    #elif defined(SK_CPU_LOONGARCH)
+-        #if SK_CPU_LSX_LEVEL < SK_CPU_LSX_LEVEL_LASX
+-            if (SkCpu::Supports(SkCpu::LOONGARCH_ASX)) { Init_Swizzler_lasx(); }
+-        #endif
+     #endif
+       return true;
+     }
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn b/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn
 --- a/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/third_party/llvm-10.0/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
