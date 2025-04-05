@@ -1,33 +1,33 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 08ed078..6f8eeca 100644
+index f5a9ce0..66b8399 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -457,6 +457,14 @@ prepare() {
+@@ -460,6 +460,9 @@ prepare() {
    sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
    sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
  
-+  # Patching makepkg-source-roller-orig.py
-+  cp "${srcdir}/makepkg-source-roller.py" "makepkg-source-roller-new.py"
-+  patch "makepkg-source-roller-new.py" -i "${srcdir}/makepkg-source-roller.py.diff"
-+  mv -f "makepkg-source-roller-new.py" "makepkg-source-roller.py"
-+
 +  # Apply in advance to so that makepkg-source-roller.py will not throw error
 +  patch -Np1 -d chromium-mirror_third_party_depot_tools -i "${srcdir}/depot_tools-loong64-support.patch"
 +
    cp -r chromium-mirror_third_party_depot_tools depot_tools
    export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
    #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
-@@ -465,6 +473,9 @@ prepare() {
+@@ -467,6 +470,14 @@ prepare() {
+   echo "Putting together electron sources"
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
-   rbash prepare-electron-source-tree.sh "$CARCH"
-+  # Create symlink to esbuild binary
++  # Do not use the script to fetch esbuild since google doesn't distribute it
++  # The esbuild is added manually
++  sed -i '/esbuild/d' prepare-electron-source-tree.sh
++  # Add esbuild binary manually
++  npm install @esbuild/linux-loong64@0.24.0
 +  mkdir -p src/third_party/devtools-frontend/src/third_party/esbuild
-+  ln -s /usr/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
++  mv node_modules/@esbuild/linux-loong64/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
++  rm -r node_modules # Cleaning
+   rbash prepare-electron-source-tree.sh "$CARCH"
    mv electron src/electron
  
-   echo "Running hooks..."
-@@ -477,12 +488,48 @@ prepare() {
+@@ -480,12 +491,48 @@ prepare() {
      -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
    src/build/util/lastchange.py \
      -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
@@ -78,8 +78,8 @@ index 08ed078..6f8eeca 100644
    src/electron/script/apply_all_patches.py \
        src/electron/patches/config.json
  
-@@ -508,7 +555,9 @@ prepare() {
-   ## Upstream fixes
+@@ -513,7 +560,9 @@ prepare() {
+   patch -Np1 -i ../add-more-CFI-suppressions-for-inline-PipeWire-functions.patch
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
 -  patch -Np1 -i ../compiler-rt-adjust-paths.patch
@@ -89,7 +89,7 @@ index 08ed078..6f8eeca 100644
  
    # Fixes for building with libstdc++ instead of libc++
    patch -Np1 -i ../chromium-patches-*/chromium-130-interference-size.patch
-@@ -526,6 +575,13 @@ prepare() {
+@@ -531,6 +580,13 @@ prepare() {
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
    # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
  
@@ -103,7 +103,7 @@ index 08ed078..6f8eeca 100644
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -586,7 +642,7 @@ build() {
+@@ -591,7 +647,7 @@ build() {
      'clang_base_path="/usr"'
      'clang_use_chrome_plugins=false'
      "clang_version=\"$_clang_version\""
@@ -112,21 +112,19 @@ index 08ed078..6f8eeca 100644
    )
  
    # Allow the use of nightly features with stable Rust compiler
-@@ -655,3 +711,19 @@ package() {
+@@ -660,3 +716,17 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
 +
-+makedepends+=(jq esbuild)
++makedepends+=(jq)
 +source+=("depot_tools-loong64-support.patch"
-+         "makepkg-source-roller.py.diff"
 +         "compiler-rt-adjust-paths-loong64.patch"
 +         "chromium-loong64-support.patch"
 +         "extensions-common-api-runtime.json-add-loong64.patch"
 +         "electron_runtime_api_dalagate-add-loong64-support.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
 +sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
-+             '1cc70217edd60e77c3395a1f7b957921ebc69f3e472856c95afbf9aced4a4105'
 +             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
 +             '341be25d397923be5cfdcf9b59a4d8ff714a5d2861f8a171be6a3391a9a30428'
 +             '2f3662096c15de8797113a60afda4cd746ca64bfb7f901fe976eb3d29389c659'
