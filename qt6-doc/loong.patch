@@ -1,20 +1,20 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c5a439b..999f2a7 100644
+index 0353908..4179a13 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -38,6 +38,8 @@ source=(https://download.qt.io/official_releases/qt/${_pkgver%.*}/${_pkgver}/sin
- sha256sums=('70f1a87c6ecc6c108dec6e9389e564f8798bd48bec4c596f28d0564c1dbbc2c6')
+@@ -41,6 +41,8 @@ source=(https://download.qt.io/official_releases/qt/${_pkgver%.*}/${_pkgver}/sin
+ sha256sums=('4f61e50551d0004a513fefbdb0a410595d94812a48600646fb7341ea0d17e1cb')
  
  build() {
-+  patch -d "$_pkgfn" -p1 -i "${srcdir}/0002-qt6-webengine-add-loong64-support.patch"
++  patch -d "$_pkgfn" -p1 -i "${srcdir}/qt6-webengine-add-loong64-support.patch"
 +
    cmake -B build -S $_pkgfn -G Ninja \
      -DCMAKE_INSTALL_PREFIX=/usr \
      -DINSTALL_BINDIR=lib/qt6/bin \
-@@ -78,3 +80,6 @@ package_qt6-examples() {
+@@ -81,3 +83,6 @@ package_qt6-examples() {
      cp -rn $_dir/* $_base
    done
  }
 +
-+source+=("0002-qt6-webengine-add-loong64-support.patch")
-+sha256sums+=('77e8dcf1519b30f801e5783b9604b2147749034c3f10a65e40aa9038cd2d3bcd')
++source+=("qt6-webengine-add-loong64-support.patch")
++sha256sums+=('b67d9d55d65ee4aff62d38d11ce01b95e04cc26442adec903f9bc720475438e0')
