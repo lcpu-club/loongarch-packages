@@ -1,31 +1,26 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 3440b83..27450d9 100644
+index 55fffb8..70efcc9 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -87,6 +87,15 @@ prepare() {
+@@ -89,6 +89,12 @@ prepare() {
    git submodule set-url src/3rdparty "$srcdir"/qtwebengine-chromium
    git -c protocol.file.allow=always submodule update
  
 +  pushd "${srcdir}/${_pkgfn}"
-+  # Fix libyuv's lsx and lsax
-+  patch -d src/3rdparty -p1 -i "$srcdir/0001-fix-libyuv-unified-source-and-LoongArch-SIMD-build.patch"
 +  # Fix build for loong64 (Chen Jiajie's patch)
-+  patch -p2 -i "$srcdir/0002-add-loong64-support.patch"
++  patch -p2 -i "$srcdir/add-loong64-support.patch"
 +  # Temporarily switch to mold to workaround with binutils's bfd's bug
 +  export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
 +  popd
-+
-   cd src/3rdparty
-   git cherry-pick -n 24e9ff7caa6aa78c1c73e7329cf1230a455d0c1b # Fix playback issues with system ffmpeg
+   patch -d src/3rdparty/chromium/third_party/webrtc -p1 < ../pipewire-1.4.patch
  }
-@@ -110,3 +119,10 @@ package() {
+ 
+@@ -111,3 +117,8 @@ package() {
  
    install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
  }
 +
-+source+=("0001-fix-libyuv-unified-source-and-LoongArch-SIMD-build.patch"
-+         "0002-add-loong64-support.patch")
-+sha256sums+=("d971477d4920a51de1ef9ffb96d1c755bf48d7ba6f3fbf869da2131f083d9f40"
-+             "9d479ad8d8222daf620a0c514d33ec5e3f1f20eed79e4b5adb84492161c8846e")
++source+=("add-loong64-support.patch")
++sha256sums+=("b67d9d55d65ee4aff62d38d11ce01b95e04cc26442adec903f9bc720475438e0")
 +# Temporarily switch to mold to workaround with binutils's bfd's bug
 +makedepends+=(mold)
