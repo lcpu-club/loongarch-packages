@@ -1,14 +1,12 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 82a25d6..1d70ce1 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -67,6 +67,9 @@ prepare() {
-   sed -i "s/var VERSION.*/var VERSION = \"$version\"/" common/version.go
-   sed -i "s/var REVISION.*/var REVISION = \"$revision\"/" common/version.go
-   sed -i "s/var BRANCH.*/var BRANCH = \"$branch\"/" common/version.go
+@@ -85,3 +85,9 @@ package() {
+ 
+   install -Dm644 -t "${pkgdir}/usr/share/licenses/$pkgname/" LICENSE
+ }
 +
++prepare () {
++  cd gitlab-runner
 +  go mod edit -replace=github.com/cilium/ebpf=github.com/cilium/ebpf@v0.16.0
 +  go mod tidy
- }
- 
- build() {
++}
