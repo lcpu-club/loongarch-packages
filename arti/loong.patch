@@ -1,19 +1,11 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index a679b6c..4bcd104 100644
+index a679b6c..056d88d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -23,6 +23,7 @@ sha256sums=('551bccd10186988d20a94f0a96eac10d7e36512608543170361b79d27e69eaa9')
- b2sums=('6349f18c9e48ecad17c52022c31a708d5963e4890bb1cc967a4821016dd229fb1f38f956c6faa7f9bffb7d9f394246926e06b13128e3f13f7f2f7762b2c3a4f1')
- 
- prepare() {
-+  export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
-   mv "$pkgname-$pkgname-v$pkgver" "$pkgname-$pkgver"
-   cd "$pkgname-$pkgver"
-   cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
-@@ -54,4 +55,6 @@ package() {
+@@ -54,4 +54,6 @@ package() {
    install -Dm 644 LICENSE-MIT -t "$pkgdir/usr/share/licenses/$pkgname"
  }
  
-+makedepends+=(cmake clang mold)
++makedepends+=(clang cmake)
 +
  # vim:set ts=2 sw=2 et:
