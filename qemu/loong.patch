@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 15e027a..698f947 100644
+index 812890d..3eb252e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -22,7 +22,6 @@ pkgname=(
@@ -9,8 +9,8 @@ index 15e027a..698f947 100644
 -  qemu-vmsr-helper
    qemu-{base,desktop,emulators-full,full}
  )
- pkgver=9.1.0
-@@ -217,7 +216,6 @@ _qemu_desktop_optdepends=(
+ pkgver=9.2.3
+@@ -219,7 +218,6 @@ _qemu_desktop_optdepends=(
    'qemu-tests: for QEMU tests'
    'qemu-tools: for QEMU tools'
    'qemu-user: for user mode emulation of QEMU targets'
@@ -18,7 +18,7 @@ index 15e027a..698f947 100644
  )
  
  _qemu_base_optdepends=(
-@@ -606,8 +604,6 @@ package_qemu-common() {
+@@ -609,8 +607,6 @@ package_qemu-common() {
  
      _pick qemu-vhost-user-gpu usr/lib/qemu/vhost-user-gpu
      _pick qemu-vhost-user-gpu usr/share/qemu/vhost-user/50-qemu-gpu.json
@@ -27,7 +27,25 @@ index 15e027a..698f947 100644
    )
  }
  
-@@ -1231,7 +1227,6 @@ package_qemu-full() {
+@@ -863,7 +859,7 @@ package_qemu-system-hppa-firmware() {
+ 
+ package_qemu-system-loongarch64() {
+   pkgdesc="QEMU system emulator for LoongArch64"
+-  depends=("${_qemu_system_deps[@]}" dtc systemd-libs)
++  depends=("${_qemu_system_deps[@]}" dtc systemd-libs edk2-loongarch64)
+   mv -v $pkgname/* "$pkgdir"
+   _install_licenses
+ }
+@@ -1178,7 +1174,7 @@ package_qemu-base() {
+   depends=(
+     qemu-common=$pkgver-$pkgrel
+     qemu-img=$pkgver-$pkgrel
+-    qemu-system-x86=$pkgver-$pkgrel
++    qemu-system-loongarch64=$pkgver-$pkgrel
+     virtiofsd
+   )
+   optdepends=("${_qemu_base_optdepends[@]}")
+@@ -1227,11 +1223,12 @@ package_qemu-full() {
      qemu-tests=$pkgver-$pkgrel
      qemu-tools=$pkgver-$pkgrel
      qemu-user=$pkgver-$pkgrel
@@ -35,3 +53,9 @@ index 15e027a..698f947 100644
    )
    optdepends=("${_qemu_full_optdepends[@]}")
    provides=(qemu=$pkgver)
+   _install_licenses
+ }
+ 
++_qemu_desktop_optdepends+=("qemu-system-x86: for x86 system emulator")
++
+ # vim:set ts=2 sw=2 et:
