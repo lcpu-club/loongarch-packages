@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 2c2598d..8f2f9d0 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,9 @@ sha256sums=('0b586419ce4e29e02eb165e0ab668e0661fac305840348467ab5f45e42551a5a')
+ prepare() {
+   cd $pkgname-$pkgver
+   export RUSTUP_TOOLCHAIN=stable
++  # Temporarily switch to wszqkzqk's fork of hnsw_rs
++  printf '\n[patch.crates-io]\nhnsw_rs = { git = "https://github.com/wszqkzqk/hnswlib-rs.git", rev = "41d206273ee291b6e24ceca21db4aa427b573178" }\n' >> Cargo.toml
++  cargo update -p hnsw_rs
+   cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+ }
+ 
