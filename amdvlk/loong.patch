@@ -1,0 +1,28 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c0b31da..0b7fb65 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,6 +32,8 @@ prepare() {
+       popd
+     (( nrepos-- ))
+   done
++
++  patch -Np1 -d pal/shared/devdriver/third_party/stb_sprintf/inc/ -i "${srcdir}/support-other-64bit-platform.patch"
+ }
+ 
+ build() {
+@@ -39,6 +41,7 @@ build() {
+   cmake -H. -Bbuilds/Release64 \
+     -DCMAKE_BUILD_TYPE=Release \
+     -DBUILD_WAYLAND_SUPPORT=On \
++    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+     -G Ninja
+     
+   ninja -C builds/Release64
+@@ -60,3 +63,6 @@ package() {
+   sed -i "s#/lib64#/lib#g" "${pkgdir}"/usr/share/vulkan/icd.d/amd_icd64.json
+   sed -i "s#/lib64#/lib#g" "${pkgdir}"/usr/share/vulkan/implicit_layer.d/amd_icd64.json
+ }
++
++source+=("support-other-64bit-platform.patch::https://patch-diff.githubusercontent.com/raw/nothings/stb/pull/1610.diff")
++sha256sums+=('70d118457549628a932b87c4dee0ec59a4873705f45e0e198e6bde7dbfac322b')
