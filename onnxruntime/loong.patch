@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index a24e133..093fafc 100644
+index a24e133..5a923ac 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -81,8 +81,20 @@ prepare() {
@@ -19,7 +19,7 @@ index a24e133..093fafc 100644
 +
    patch -Np1 -i "${srcdir}/${pkgbase}-install-orttraining-files.patch"
    patch -Np1 -i "${srcdir}/${pkgbase}-system-flatbuffers.patch"
-+  patch -Np1 -i "${srcdir}/fix-loongarch-qgemm.h.patch"
++  patch -Np1 -i "${srcdir}/qgemm_kernel_lsx-add-S8U8-S8S8.patch"
  
    cd "${srcdir}"
    cp -r "${pkgbase}" "${pkgbase}-cuda"
@@ -155,5 +155,5 @@ index a24e133..093fafc 100644
 +
 +depends=($(printf "%s\n" "${depends[@]}" | grep -Ev '^(intel-oneapi-mkl)$'))
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|cudnn|nccl|gcc13)$'))
-+source+=("fix-loongarch-qgemm.h.patch")
-+b2sums+=('490222dfaf2c3f99b4cd58a10644f47efd4fec3d68689384e7e5dcfb560c7774e2c036340812512701ded5bac5b9cacea305382aa6d452e2f2bfb0a27948f9ce')
++source+=("qgemm_kernel_lsx-add-S8U8-S8S8.patch::https://github.com/microsoft/onnxruntime/commit/641449fa23e89d6577582c903fe31d44f4d82a15.diff")
++b2sums+=('ff3bda75bd08218a409fd1dbc0197e0a36fb6ecf8d75e673f8e86ea785bc7bed310a27049958049d4378e78fc91c2009b3aadc1d1e0989030a5cab989803d448')
