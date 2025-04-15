@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8e53813..9c55ef9 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -79,6 +79,10 @@ prepare() {
@@ -11,7 +13,7 @@
    make olddefconfig
    diff -u ../config .config || :
  
-@@ -145,7 +149,11 @@ _package-headers() {
+@@ -146,7 +150,11 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -24,7 +26,7 @@
    cp -t "$builddir" -a scripts
    ln -srt "$builddir" "$builddir/scripts/gdb/vmlinux-gdb.py"
  
-@@ -157,8 +165,13 @@ _package-headers() {
+@@ -158,8 +166,13 @@ _package-headers() {
  
    echo "Installing headers..."
    cp -t "$builddir" -a include
@@ -40,7 +42,7 @@
  
    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
-@@ -180,7 +193,11 @@ _package-headers() {
+@@ -189,7 +202,11 @@ _package-headers() {
    echo "Removing unneeded architectures..."
    local arch
    for arch in "$builddir"/arch/*/; do
@@ -53,24 +55,21 @@
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -248,4 +265,20 @@ for _p in "${pkgname[@]}"; do
+@@ -257,4 +274,17 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
 +source+=('loong-addition.config'
 +         '0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch'
 +         '0002-LOONGARCH-drm-xe-fix-build-on-non-4K-kernels.patch'
-+         '0003-LOONGARCH-from-AOSCOS-more-fixes-for-Xe-on-LoongArch.patch'
-+         'rust-gcc-loong64.patch')
++         '0003-LOONGARCH-from-AOSCOS-more-fixes-for-Xe-on-LoongArch.patch')
 +sha256sums+=('d604e6329f38f2fdd33365f705489e9c3f16f2e0576e225c1f1736775eeaeea7'
 +             'd146728a3b3c722f433e310cad21e93c53e64a7afe948b5b43b077e962750941'
 +             'c723e02bbeb42c2a99461b0390d1cbcbb6d998e1191d6621ed02680efb17a554'
-+             'fb058222b06a3cee7984c554a18ce4475f3d71f9ade030e3fe6e3841222fad1b'
-+             '61a19086ee5ef2504772b7ccf8cadfa0438bbbdef1bc2decb798d30390e8b20c')
++             'fb058222b06a3cee7984c554a18ce4475f3d71f9ade030e3fe6e3841222fad1b')
 +b2sums+=('bd756d5284581fd0e4c404c7fb1bef8d8edfa6363c056b90bcdf017e138b8f71674075621709eac10c2a850cb3c550ad265e04e43b911083636fdcb329d1f304'
 +         '4a0b268f1a28d4bfa37d9b644477c75a5215083414fe5cc5d637e2edc4895aace9e42b3b33ac0b3e2a15a18340bec651511fa3c347c1c3e347ed3418c033582c'
 +         'dc9528bb0aec946948273cd9d718db058440527439a81d488c8294f022d39bd626152eefb2e4310a60546a3e1d7d107e53a7833fecc5218924d201d065717add'
-+         '0c9d8e9814d29e30ae71f4301fb1b7d6cd3285edcdb5c18c43933b853332c1cba72adc70d1086c7087364ef5ce6b364e9e531d8f0a81b26aadd1777b781fa906'
-+         '01c3d3f65733f0ae0fbdb71d836b656e99c78d167a78212ae15fac66d10d16c6ff582be1a1361acc53635bf69214f74d440c64d019c9e8021b57a26b19e5db9a')
++         '0c9d8e9814d29e30ae71f4301fb1b7d6cd3285edcdb5c18c43933b853332c1cba72adc70d1086c7087364ef5ce6b364e9e531d8f0a81b26aadd1777b781fa906')
 +
  # vim:set ts=8 sts=2 sw=2 et:
