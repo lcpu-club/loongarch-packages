@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0203c66..ae7d3ed 100644
+index 08ebb31..4dffd7e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -115,11 +115,17 @@ prepare() {
@@ -37,7 +37,7 @@ index 0203c66..ae7d3ed 100644
 +source+=("chromium-loong64-support.patch"
 +         "compiler-rt-adjust-paths-loong64.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
-+sha256sums+=('3111811502800d314bd926d5806cae862a50a97adb20202ed3a842627938365d'
++sha256sums+=('bda6b137e57df1538ad975c551eb0868396ba53bdf25368126de00274ddd4d0f'
 +             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
 +
