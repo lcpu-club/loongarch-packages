@@ -12,32 +12,33 @@
               git
               glew
               hdf5
-@@ -100,7 +97,6 @@ build() {
-          -DINSTALL_PYTHON_EXAMPLES=ON \
-          -DCMAKE_INSTALL_PREFIX=/usr \
-          -DCPU_BASELINE_DISABLE=SSE3 \
--         -DCPU_BASELINE_REQUIRE=SSE2 \
-          -DOPENCV_EXTRA_MODULES_PATH=$srcdir/opencv_contrib/modules \
-          -DOPENCV_SKIP_PYTHON_LOADER=ON \
-          -DLAPACK_LIBRARIES=/usr/lib/liblapack.so;/usr/lib/libblas.so;/usr/lib/libcblas.so \
-@@ -118,6 +114,8 @@ build() {
+@@ -109,7 +106,6 @@ build() {
+     -DINSTALL_PYTHON_EXAMPLES=ON
+     -DCMAKE_INSTALL_PREFIX=/usr
+     -DCPU_BASELINE_DISABLE=SSE3
+-    -DCPU_BASELINE_REQUIRE=SSE2
+     -DOPENCV_EXTRA_MODULES_PATH="$srcdir"/opencv_contrib/modules
+     -DOPENCV_SKIP_PYTHON_LOADER=ON
+     # cmake's FindLAPACK doesn't add cblas to LAPACK_LIBRARIES, so we need to specify them manually
+@@ -128,7 +124,8 @@ build() {
+   cmake -B build -S $pkgname "${cmake_options[@]}" \
      -DBUILD_WITH_DEBUG_INFO=ON
    cmake --build build
- 
+-
 +  # Use a "multi-line comment" to keep patch from rotting
 +  : <<'COMMENT_SEPARATOR'
-   CFLAGS="${CFLAGS} -fno-lto" CXXFLAGS="${CXXFLAGS} -fno-lto" LDFLAGS="${LDFLAGS} -fno-lto" \
-   cmake -B build-cuda -S $pkgname $_opts \
-     -DBUILD_WITH_DEBUG_INFO=OFF \
-@@ -128,6 +126,7 @@ build() {
-     -DCUDA_ARCH_BIN='52-real;53-real;60-real;61-real;62-real;70-real;72-real;75-real;80-real;86-real;87-real;89-real;90-real;90-virtual' \
-     -DCUDA_ARCH_PTX='90-virtual'
-   cmake --build build-cuda
+   # In general, we want to list all real archs (sm_XX) and the latest virtual arch (compute_XX) for future PTX compatibility.
+   # Valid values can be discovered from nvcc --help
+   local cuda_archs="50;52;53;60;61;62;70;72;75;80;86;87;89;90;90a;100;100a;101;101a;120;120a;120-virtual"
+@@ -145,6 +142,7 @@ build() {
+     -DENABLE_CUDA_FIRST_CLASS_LANGUAGE=ON \
+     -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
+   cmake --build build-cuda --verbose
 +COMMENT_SEPARATOR
  }
  
  package_opencv() {
-@@ -208,3 +207,9 @@ package_python-opencv-cuda() {
+@@ -225,3 +223,9 @@ package_python-opencv-cuda() {
  
    DESTDIR="$pkgdir" cmake --install build-cuda/modules/python3
  }
