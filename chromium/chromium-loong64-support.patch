@@ -1,7 +1,7 @@
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/base/allocator/partition_allocator/partition_alloc.gni b/base/allocator/partition_allocator/partition_alloc.gni
 --- a/base/allocator/partition_allocator/partition_alloc.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/base/allocator/partition_allocator/partition_alloc.gni	2000-01-01 00:00:00.000000000 +0800
-@@ -304,7 +304,7 @@ declare_args() {
+@@ -362,7 +362,7 @@ declare_args() {
  
  stack_scan_supported =
      current_cpu == "x64" || current_cpu == "x86" || current_cpu == "arm" ||
@@ -13,7 +13,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ba
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
 --- a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
 +++ b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -500,6 +500,9 @@ if (is_clang_or_gcc) {
+@@ -521,6 +521,9 @@ if (is_clang_or_gcc) {
      } else if (current_cpu == "riscv64") {
        assert(stack_scan_supported)
        sources += [ "stack/asm/riscv64/push_registers_asm.cc" ]
@@ -91,7 +91,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ba
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/base/system/sys_info.cc b/base/system/sys_info.cc
 --- a/base/system/sys_info.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/base/system/sys_info.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -261,6 +261,8 @@ std::string SysInfo::ProcessCPUArchitect
+@@ -256,6 +256,8 @@ std::string SysInfo::ProcessCPUArchitect
    return "ARM_64";
  #elif defined(ARCH_CPU_RISCV64)
    return "RISCV_64";
@@ -100,18 +100,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ba
  #else
    return std::string();
  #endif
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
---- a/build/config/compiler/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/build/config/compiler/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -621,7 +621,7 @@ config("compiler") {
-     # TODO(crbug.com/376278218): This causes segfault on Linux ARM builds.
-     if (is_linux && !llvm_android_mainline && current_cpu != "arm" &&
-         default_toolchain != "//build/toolchain/cros:target") {
--      cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
-+      # cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
-     }
-   }
- 
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/build/config/loongarch64.gni b/build/config/loongarch64.gni
 --- a/build/config/loongarch64.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/build/config/loongarch64.gni	2000-01-01 00:00:00.000000000 +0800
@@ -127,7 +115,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/build/config/rust.gni b/build/config/rust.gni
 --- a/build/config/rust.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/build/config/rust.gni	2000-01-01 00:00:00.000000000 +0800
-@@ -200,6 +200,9 @@ if (is_linux || is_chromeos) {
+@@ -199,6 +199,9 @@ if (is_linux || is_chromeos) {
    } else if (current_cpu == "riscv64") {
      rust_abi_target = "riscv64gc-unknown-linux-gnu"
      cargo_target_abi = ""
@@ -137,7 +125,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
    } else {
      # Best guess for other future platforms.
      rust_abi_target = current_cpu + "-unknown-linux-gnu"
-@@ -320,6 +323,8 @@ if (current_cpu == "x86") {
+@@ -319,6 +322,8 @@ if (current_cpu == "x86") {
    rust_target_arch = "powerpc64"
  } else if (current_cpu == "riscv64") {
    rust_target_arch = "riscv64"
@@ -146,6 +134,27 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
  }
  
  assert(!toolchain_has_rust || rust_target_arch != "")
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc
+--- a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -311,6 +311,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
+     info->arch = extensions::api::runtime::PlatformArch::kMips;
+   } else if (strcmp(arch, "mips64el") == 0) {
+     info->arch = extensions::api::runtime::PlatformArch::kMips64;
++  } else if (strcmp(arch, "loongarch64") == 0) {
++    info->arch = extensions::api::runtime::PlatformArch::kLoongarch64;
+   } else {
+     NOTREACHED();
+   }
+@@ -326,6 +328,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
+     info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kMips;
+   } else if (strcmp(nacl_arch, "mips64") == 0) {
+     info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kMips64;
++  } else if (strcmp(nacl_arch, "loongarch64") == 0) {
++    info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kLoongarch64;
+   } else {
+     NOTREACHED();
+   }
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/media_router/common/providers/cast/channel/enum_table.h b/components/media_router/common/providers/cast/channel/enum_table.h
 --- a/components/media_router/common/providers/cast/channel/enum_table.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/components/media_router/common/providers/cast/channel/enum_table.h	2000-01-01 00:00:00.000000000 +0800
@@ -157,7 +166,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/co
  #include <optional>
  #include <ostream>
  #include <string_view>
-@@ -366,7 +365,8 @@ class EnumTable {
+@@ -368,7 +367,8 @@ class EnumTable {
  
   private:
  #ifdef ARCH_CPU_64_BITS
@@ -194,7 +203,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/co
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/variations/service/variations_field_trial_creator_base.cc b/components/variations/service/variations_field_trial_creator_base.cc
 --- a/components/variations/service/variations_field_trial_creator_base.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/components/variations/service/variations_field_trial_creator_base.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -107,6 +107,9 @@ Study::CpuArchitecture GetCurrentCpuArch
+@@ -114,6 +114,9 @@ Study::CpuArchitecture GetCurrentCpuArch
    if (process_arch == "ARM") {
      return Study::ARM32;
    }
@@ -207,7 +216,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/co
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/content/common/user_agent.cc b/content/common/user_agent.cc
 --- a/content/common/user_agent.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/content/common/user_agent.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -174,6 +174,8 @@ std::string GetCpuArchitecture() {
+@@ -243,6 +243,8 @@ std::string GetCpuArchitecture() {
                cpu_info.substr(2, 2) == "86") ||
               base::StartsWith(cpu_info, "x86")) {
      return "x86";
@@ -216,6 +225,29 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/co
    }
  #elif BUILDFLAG(IS_FUCHSIA)
    std::string cpu_arch = base::SysInfo::ProcessCPUArchitecture();
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/extensions/common/api/runtime.json b/extensions/common/api/runtime.json
+--- a/extensions/common/api/runtime.json	2000-01-01 00:00:00.000000000 +0800
++++ b/extensions/common/api/runtime.json	2000-01-01 00:00:00.000000000 +0800
+@@ -98,7 +98,8 @@
+             {"name": "x86-32", "description": "Specifies the processer architecture as x86-32."},
+             {"name": "x86-64", "description": "Specifies the processer architecture as x86-64."},
+             {"name": "mips", "description": "Specifies the processer architecture as mips."},
+-            {"name": "mips64", "description": "Specifies the processer architecture as mips64."}
++            {"name": "mips64", "description": "Specifies the processer architecture as mips64."},
++            {"name": "loongarch64", "description": "Specifies the processer architecture as loongarch64."}
+          ],
+         "description": "The machine's processor architecture."
+       },
+@@ -111,7 +112,8 @@
+           {"name": "x86-32", "description": "Specifies the native client architecture as x86-32."},
+           {"name": "x86-64", "description": "Specifies the native client architecture as x86-64."},
+           {"name": "mips", "description": "Specifies the native client architecture as mips."},
+-          {"name": "mips64", "description": "Specifies the native client architecture as mips64."}
++          {"name": "mips64", "description": "Specifies the native client architecture as mips64."},
++          {"name": "loongarch64", "description": "Specifies the native client architecture as loongarch64."}
+         ]
+       },
+       {
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/features.gni b/sandbox/features.gni
 --- a/sandbox/features.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/features.gni	2000-01-01 00:00:00.000000000 +0800
@@ -382,7 +414,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  // Also include asm/ptrace-abi.h since ptrace.h in older libc (for instance
  // the one in Ubuntu 16.04 LTS) is missing PTRACE_GET_THREAD_AREA.
  // asm/ptrace-abi.h doesn't exist on arm32 and PTRACE_GET_THREAD_AREA isn't
-@@ -346,7 +346,7 @@ ResultExpr RestrictFutex() {
+@@ -344,7 +344,7 @@ ResultExpr RestrictFutex() {
        .Cases({FUTEX_WAIT, FUTEX_WAKE, FUTEX_REQUEUE, FUTEX_CMP_REQUEUE,
  #if BUILDFLAG(ENABLE_MUTEX_PRIORITY_INHERITANCE)
                // Enable priority-inheritance operations.
@@ -391,7 +423,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
                FUTEX_WAIT_REQUEUE_PI, FUTEX_CMP_REQUEUE_PI,
  #endif  // BUILDFLAG(ENABLE_MUTEX_PRIORITY_INHERITANCE)
                FUTEX_WAKE_OP, FUTEX_WAIT_BITSET, FUTEX_WAKE_BITSET},
-@@ -462,8 +462,11 @@ ResultExpr RestrictPtrace() {
+@@ -460,8 +460,11 @@ ResultExpr RestrictPtrace() {
    return Switch(request)
        .Cases({
  #if !defined(__aarch64__)
@@ -768,7 +800,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/services/syscall_wrappers.cc b/sandbox/linux/services/syscall_wrappers.cc
 --- a/sandbox/linux/services/syscall_wrappers.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/services/syscall_wrappers.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -5,6 +5,7 @@
+@@ -10,6 +10,7 @@
  #include "sandbox/linux/services/syscall_wrappers.h"
  
  #include <fcntl.h>
@@ -776,7 +808,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  #include <pthread.h>
  #include <sched.h>
  #include <setjmp.h>
-@@ -58,7 +59,7 @@ long sys_clone(unsigned long flags,
+@@ -63,7 +64,7 @@ long sys_clone(unsigned long flags,
    if (ctid) MSAN_UNPOISON(ctid, sizeof(*ctid));
    // See kernel/fork.c in Linux. There is different ordering of sys_clone
    // parameters depending on CONFIG_CLONE_BACKWARDS* configuration options.
@@ -785,7 +817,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    return syscall(__NR_clone, flags, child_stack, ptid, ctid, tls);
  #elif defined(ARCH_CPU_X86) || defined(ARCH_CPU_ARM_FAMILY) || \
      defined(ARCH_CPU_MIPS_FAMILY)
-@@ -163,9 +164,53 @@ int sys_sigaction(int signum,
+@@ -168,9 +169,53 @@ int sys_sigaction(int signum,
    return sigaction(signum, act, oldact);
  }
  
@@ -840,7 +872,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    res = syscall(__NR_newfstatat, AT_FDCWD, path, stat_buf, 0);
  #else
    res = syscall(__NR_stat, path, stat_buf);
-@@ -177,7 +222,12 @@ int sys_stat(const char* path, struct ke
+@@ -182,7 +227,12 @@ int sys_stat(const char* path, struct ke
  
  int sys_lstat(const char* path, struct kernel_stat* stat_buf) {
    int res;
@@ -1047,7 +1079,16 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/syscall_broker/syscall_dispatcher.cc b/sandbox/linux/syscall_broker/syscall_dispatcher.cc
 --- a/sandbox/linux/syscall_broker/syscall_dispatcher.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/syscall_broker/syscall_dispatcher.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -174,6 +174,19 @@ int SyscallDispatcher::DispatchSyscall(c
+@@ -31,6 +31,8 @@ int SyscallDispatcher::DefaultStatForTes
+   return Stat64(pathname, follow_links, sb);
+ #elif defined(__NR_newfstatat)
+   return Stat(pathname, follow_links, sb);
++#elif defined(__NR_statx)
++  return Statx(pathname, follow_links, sb);
+ #endif
+ }
+ 
+@@ -174,6 +176,19 @@ int SyscallDispatcher::DispatchSyscall(c
        return Stat64(reinterpret_cast<const char*>(args.args[0]), true,
                      reinterpret_cast<struct kernel_stat64*>(args.args[1]));
  #endif
@@ -2439,7 +2480,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/policy/linux/bpf_gpu_policy_linux.cc b/sandbox/policy/linux/bpf_gpu_policy_linux.cc
 --- a/sandbox/policy/linux/bpf_gpu_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/policy/linux/bpf_gpu_policy_linux.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -73,7 +73,7 @@ ResultExpr GpuProcessPolicy::EvaluateSys
+@@ -72,7 +72,7 @@ ResultExpr GpuProcessPolicy::EvaluateSys
      (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
      case __NR_ftruncate64:
  #endif
@@ -2475,7 +2516,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/policy/linux/sandbox_linux.cc b/sandbox/policy/linux/sandbox_linux.cc
 --- a/sandbox/policy/linux/sandbox_linux.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/policy/linux/sandbox_linux.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -595,6 +595,7 @@ bpf_dsl::ResultExpr SandboxLinux::Handle
+@@ -579,6 +579,7 @@ bpf_dsl::ResultExpr SandboxLinux::Handle
    const bpf_dsl::ResultExpr handle_via_broker =
        bpf_dsl::Trap(syscall_broker::BrokerClient::SIGSYS_Handler,
                      broker_process_->GetBrokerClientSignalBased());
@@ -2483,7 +2524,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    if (sysno == __NR_fstatat_default) {
      // This may be an fstatat(fd, "", stat_buf, AT_EMPTY_PATH), which should be
      // rewritten as fstat(fd, stat_buf). This should be consistent with how the
-@@ -605,6 +606,18 @@ bpf_dsl::ResultExpr SandboxLinux::Handle
+@@ -589,6 +590,18 @@ bpf_dsl::ResultExpr SandboxLinux::Handle
      return bpf_dsl::If((flags & AT_EMPTY_PATH) == AT_EMPTY_PATH,
                         RewriteFstatatSIGSYS(BPFBasePolicy::GetFSDeniedErrno()))
          .Else(handle_via_broker);
@@ -2502,6 +2543,23 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    } else {
      return handle_via_broker;
    }
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/blink/renderer/build/scripts/gperf.py b/third_party/blink/renderer/build/scripts/gperf.py
+--- a/third_party/blink/renderer/build/scripts/gperf.py	2000-01-01 00:00:00.000000000 +0800
++++ b/third_party/blink/renderer/build/scripts/gperf.py	2000-01-01 00:00:00.000000000 +0800
+@@ -37,8 +37,11 @@ def generate_gperf(gperf_path, gperf_inp
+         # -Wimplicit-fallthrough needs an explicit fallthrough statement,
+         # so replace gperf's /*FALLTHROUGH*/ comment with the statement.
+         # https://savannah.gnu.org/bugs/index.php?53029
+-        gperf_output = gperf_output.replace('/*FALLTHROUGH*/',
+-                                            '  [[fallthrough]];')
++        # so replace gperf 3.1's /*FALLTHROUGH*/ comment with the statement.
++        # https://savannah.gnu.org/bugs/index.php?53029 (fixed in 3.2)
++        if '/* C++ code produced by gperf version 3.1 */' in gperf_output:
++            gperf_output = gperf_output.replace('/*FALLTHROUGH*/',
++                                                '  [[fallthrough]];')
+         # -Wpointer-to-int-cast warns about casting pointers to smaller ints
+         # Replace {(int)(long)&(foo), bar} with
+         # {static_cast<int>(reinterpret_cast<uintptr_t>(&(foo)), bar}
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h b/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
 --- a/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
@@ -2646,7 +2704,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/crashpad/crashpad/minidump/minidump_context.h b/third_party/crashpad/crashpad/minidump/minidump_context.h
 --- a/third_party/crashpad/crashpad/minidump/minidump_context.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/crashpad/crashpad/minidump/minidump_context.h	2000-01-01 00:00:00.000000000 +0800
-@@ -687,6 +687,56 @@ struct MinidumpContextRISCV64 {
+@@ -686,6 +686,56 @@ struct MinidumpContextRISCV64 {
    uint32_t fcsr;
  };
  
@@ -3137,7 +3195,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h b/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
 --- a/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h	2000-01-01 00:00:00.000000000 +0800
-@@ -91,6 +91,8 @@ class ExceptionSnapshotLinux final : pub
+@@ -94,6 +94,8 @@ class ExceptionSnapshotLinux final : pub
      CPUContextMIPS64 mips64;
  #elif defined(ARCH_CPU_RISCV64)
      CPUContextRISCV64 riscv64;
@@ -3269,7 +3327,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h b/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
 --- a/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h	2000-01-01 00:00:00.000000000 +0800
-@@ -76,6 +76,8 @@ class ThreadSnapshotLinux final : public
+@@ -79,6 +79,8 @@ class ThreadSnapshotLinux final : public
      CPUContextMIPS64 mips64;
  #elif defined(ARCH_CPU_RISCV64)
      CPUContextRISCV64 riscv64;
@@ -3552,6 +3610,18 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 +
 +#define TRIM_DSP_FUNCTIONS 1
 +
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/devtools-frontend/src/scripts/build/rollup.config.mjs b/third_party/devtools-frontend/src/scripts/build/rollup.config.mjs
+--- a/third_party/devtools-frontend/src/scripts/build/rollup.config.mjs	2000-01-01 00:00:00.000000000 +0800
++++ b/third_party/devtools-frontend/src/scripts/build/rollup.config.mjs	2000-01-01 00:00:00.000000000 +0800
+@@ -19,7 +19,7 @@ export default commandLineArgs => ({
+     sourcemap: Boolean(commandLineArgs.configSourcemaps),
+   }],
+   plugins: [
+-    terser(),
++    // terser(),
+     {
+       name: 'devtools-plugin',
+       resolveId(source, importer) {
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h b/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h
 --- a/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h	2000-01-01 00:00:00.000000000 +0800
@@ -9714,7 +9784,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/ffmpeg/ffmpeg_generated.gni b/third_party/ffmpeg/ffmpeg_generated.gni
 --- a/third_party/ffmpeg/ffmpeg_generated.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/ffmpeg/ffmpeg_generated.gni	2000-01-01 00:00:00.000000000 +0800
-@@ -253,6 +253,7 @@ if ((current_cpu == "arm64" && ffmpeg_br
+@@ -255,6 +255,7 @@ if ((current_cpu == "arm64" && ffmpeg_br
  
  if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
      (current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
@@ -9722,7 +9792,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
      (is_android && current_cpu == "arm" && arm_use_neon &&
       ffmpeg_branding == "Chrome") ||
      (is_android && current_cpu == "x86" && ffmpeg_branding == "Chrome") ||
-@@ -382,6 +383,19 @@ if (current_cpu == "x64" || (is_android
+@@ -384,6 +385,19 @@ if (current_cpu == "x64" || (is_android
    ]
  }
  
@@ -9773,17 +9843,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
  
      deps = [
        ":swiftshader_reactor_base",
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/swiftshader/src/Vulkan/BUILD.gn b/third_party/swiftshader/src/Vulkan/BUILD.gn
---- a/third_party/swiftshader/src/Vulkan/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/swiftshader/src/Vulkan/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -229,6 +229,7 @@ swiftshader_shared_library("swiftshader_
-   }
- 
-   deps = [ ":_swiftshader_libvulkan" ]
-+  libs = [ "m" ]
- }
- 
- swiftshader_static_library("swiftshader_libvulkan_static") {
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/swiftshader/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def b/third_party/swiftshader/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def
 --- a/third_party/swiftshader/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/swiftshader/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def	2000-01-01 00:00:00.000000000 +0800
@@ -9920,3 +9979,108 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
  #else
  #error "unknown architecture"
  #endif
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h b/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h
+--- a/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h	2000-01-01 00:00:00.000000000 +0800
++++ b/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h	2000-01-01 00:00:00.000000000 +0800
+@@ -18,7 +18,6 @@
+ #include "llvm/ADT/StringExtras.h"
+ #include "llvm/ADT/Twine.h"
+ #include "llvm/Config/abi-breaking.h"
+-#include "llvm/Support/AlignOf.h"
+ #include "llvm/Support/Compiler.h"
+ #include "llvm/Support/Debug.h"
+ #include "llvm/Support/ErrorHandling.h"
+@@ -669,22 +668,22 @@ private:
+ 
+   storage_type *getStorage() {
+     assert(!HasError && "Cannot get value when an error exists!");
+-    return reinterpret_cast<storage_type *>(&TStorage);
++    return &TStorage;
+   }
+ 
+   const storage_type *getStorage() const {
+     assert(!HasError && "Cannot get value when an error exists!");
+-    return reinterpret_cast<const storage_type *>(&TStorage);
++    return &TStorage;
+   }
+ 
+   error_type *getErrorStorage() {
+     assert(HasError && "Cannot get error when a value exists!");
+-    return reinterpret_cast<error_type *>(&ErrorStorage);
++    return &ErrorStorage;
+   }
+ 
+   const error_type *getErrorStorage() const {
+     assert(HasError && "Cannot get error when a value exists!");
+-    return reinterpret_cast<const error_type *>(&ErrorStorage);
++    return &ErrorStorage;
+   }
+ 
+   // Used by ExpectedAsOutParameter to reset the checked flag.
+@@ -716,8 +715,8 @@ private:
+   }
+ 
+   union {
+-    AlignedCharArrayUnion<storage_type> TStorage;
+-    AlignedCharArrayUnion<error_type> ErrorStorage;
++    storage_type TStorage;
++    error_type ErrorStorage;
+   };
+   bool HasError : 1;
+ #if LLVM_ENABLE_ABI_BREAKING_CHECKS
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/ErrorOr.h b/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/ErrorOr.h
+--- a/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/ErrorOr.h	2000-01-01 00:00:00.000000000 +0800
++++ b/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/ErrorOr.h	2000-01-01 00:00:00.000000000 +0800
+@@ -15,7 +15,6 @@
+ #ifndef LLVM_SUPPORT_ERROROR_H
+ #define LLVM_SUPPORT_ERROROR_H
+ 
+-#include "llvm/Support/AlignOf.h"
+ #include <cassert>
+ #include <system_error>
+ #include <type_traits>
+@@ -235,26 +234,27 @@ private:
+ 
+   storage_type *getStorage() {
+     assert(!HasError && "Cannot get value when an error exists!");
+-    return reinterpret_cast<storage_type *>(&TStorage);
++    return &TStorage;
+   }
+ 
+   const storage_type *getStorage() const {
+     assert(!HasError && "Cannot get value when an error exists!");
+-    return reinterpret_cast<const storage_type *>(&TStorage);
++    return &TStorage;
+   }
+ 
+   std::error_code *getErrorStorage() {
+     assert(HasError && "Cannot get error when a value exists!");
+-    return reinterpret_cast<std::error_code *>(&ErrorStorage);
++    return &ErrorStorage;
+   }
+ 
+   const std::error_code *getErrorStorage() const {
+-    return const_cast<ErrorOr<T> *>(this)->getErrorStorage();
++    assert(HasError && "Cannot get error when a value exists!");
++    return &ErrorStorage;
+   }
+ 
+   union {
+-    AlignedCharArrayUnion<storage_type> TStorage;
+-    AlignedCharArrayUnion<std::error_code> ErrorStorage;
++    storage_type TStorage;
++    std::error_code ErrorStorage;
+   };
+   bool HasError : 1;
+ };
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/TrailingObjects.h b/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/TrailingObjects.h
+--- a/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/TrailingObjects.h	2000-01-01 00:00:00.000000000 +0800
++++ b/third_party/swiftshader/third_party/llvm-16.0/llvm/include/llvm/Support/TrailingObjects.h	2000-01-01 00:00:00.000000000 +0800
+@@ -46,7 +46,6 @@
+ #ifndef LLVM_SUPPORT_TRAILINGOBJECTS_H
+ #define LLVM_SUPPORT_TRAILINGOBJECTS_H
+ 
+-#include "llvm/Support/AlignOf.h"
+ #include "llvm/Support/Alignment.h"
+ #include "llvm/Support/Compiler.h"
+ #include "llvm/Support/MathExtras.h"
