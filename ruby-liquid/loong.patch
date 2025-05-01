@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,7 +23,6 @@ depends=(
+   ruby-base64
+   ruby-bigdecimal
+   ruby-lru_redux
+-  ruby-strscan
+ )
+ options=('!emptydirs')
+ source=(${pkgname}-${pkgver}.tar.gz::https://github.com/Shopify/${_name}/archive/v${pkgver}.tar.gz)
