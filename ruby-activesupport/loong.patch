@@ -1,0 +1,18 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -11,15 +11,12 @@ license=(MIT)
+ depends=(
+   ruby
+   ruby-base64
+-  ruby-benchmark
+   ruby-bigdecimal
+   ruby-concurrent
+   ruby-connection_pool
+   ruby-drb
+-  ruby-logger
+   ruby-i18n  # NOTE: bootstrap without (circular dependency)
+   ruby-minitest
+-  ruby-securerandom
+   ruby-tzinfo
+   ruby-uri
+   ruby-zeitwerk
