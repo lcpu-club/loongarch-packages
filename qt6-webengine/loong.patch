@@ -1,21 +1,20 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 55fffb8..70efcc9 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -89,6 +89,12 @@ prepare() {
-   git submodule set-url src/3rdparty "$srcdir"/qtwebengine-chromium
-   git -c protocol.file.allow=always submodule update
- 
+@@ -111,6 +111,13 @@ prepare() {
+   # Bump chromium to head of stable branch
+   cd src/3rdparty
+   [[ -n $_chromium ]] && git checkout $_chromium
++
 +  pushd "${srcdir}/${_pkgfn}"
 +  # Fix build for loong64 (Chen Jiajie's patch)
 +  patch -p2 -i "$srcdir/add-loong64-support.patch"
 +  # Temporarily switch to mold to workaround with binutils's bfd's bug
 +  export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
 +  popd
-   patch -d src/3rdparty/chromium/third_party/webrtc -p1 < ../pipewire-1.4.patch
  }
  
-@@ -111,3 +117,8 @@ package() {
+ build() {
+@@ -132,3 +139,8 @@ package() {
  
    install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
  }
