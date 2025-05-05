@@ -48,9 +48,9 @@
    'level-zero-headers'
    'libdecor'
    'mold'
-@@ -109,11 +98,6 @@ makedepends=(
-   'subversion'
+@@ -110,11 +99,6 @@ makedepends=(
    'wayland-protocols'
+   'vulkan-headers'
  )
 -optdepends=('cuda: Cycles renderer CUDA support'
 -            'intel-compute-runtime: Cycles renderer Intel OneAPI support'
@@ -60,7 +60,7 @@
  # We're using !lto here as otherwise we get stuff such as FS#77557
  options=('!lto')
  source=("git+https://projects.blender.org/blender/blender.git#tag=v$pkgver"
-@@ -139,6 +123,9 @@ prepare() {
+@@ -140,6 +124,9 @@ prepare() {
    git -C release/datafiles/assets lfs checkout
  
    patch -p1 -i "$srcdir"/hiprt-lib-path.patch
@@ -70,7 +70,7 @@
  }
  
  _get_pyver() {
-@@ -159,9 +146,6 @@ build() {
+@@ -160,9 +147,6 @@ build() {
      -D CMAKE_BUILD_TYPE=Release
      -D CMAKE_INSTALL_PREFIX=/usr
      -D WITH_LINKER_MOLD=ON
@@ -80,7 +80,7 @@
      -D OCLOC_INSTALL_DIR=/usr
      -D OPTIX_ROOT_DIR="$srcdir"
      -D PYTHON_VERSION="$(_get_pyver)"
-@@ -172,6 +156,13 @@ build() {
+@@ -173,6 +157,13 @@ build() {
      -D WITH_CYCLES_OSL=ON
      -D WITH_INSTALL_PORTABLE=OFF
      -D WITH_PYTHON_INSTALL=OFF
@@ -94,7 +94,7 @@
      -G Ninja
      -S "$pkgname"
      -W no-dev
-@@ -193,7 +184,11 @@ package() {
+@@ -194,7 +185,11 @@ package() {
  
    # Move OneAPI AOT lib to proper place
    mkdir "${pkgdir}"/usr/lib/
@@ -104,6 +104,6 @@
    install -vDm 644 doc/license/{BSD-{2,3}-Clause,MIT,Zlib}-license.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
 +
-+source+=("add-loong64-support.patch::https://projects.blender.org/blender/blender/commit/d18a0cf277e3d7403eb18718b9cb7a6ec036819f.patch")
-+sha512sums+=('4bcbe578638dec0d7d3808835d7191f890c7060adbd6b4006e1e1fc4eee70ae403527419c6583913c43254d5ca8dbf6427ba9b445d45ac5f4af7e5a26b88c98b')
++source+=("add-loong64-support.patch::https://projects.blender.org/blender/blender/commit/0353d8225644784eb5838d9d02c6e9fb4c9bb697.patch")
++sha512sums+=('8655061b1fb68167ec1afc04d36050bd12e6f92caf8484612f7eb19352dec9e91bda669809cd7fd2a8fc001e8a6d0fbafb0854afcc2d7af6f751e9f7f83b0769')
 +makedepends+=(vulkan-headers)
