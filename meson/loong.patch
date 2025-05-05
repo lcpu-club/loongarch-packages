@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 4a03ce2..3536bf4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -25,7 +25,6 @@ checkdepends=(
+@@ -28,7 +28,6 @@ checkdepends=(
    boost
    clang
    cmake
@@ -10,7 +8,7 @@ index 4a03ce2..3536bf4 100644
    cython
    doxygen
    gcc-fortran
-@@ -39,7 +38,7 @@ checkdepends=(
+@@ -42,7 +41,7 @@ checkdepends=(
    graphviz
    gtest
    gtk-doc
@@ -18,8 +16,8 @@ index 4a03ce2..3536bf4 100644
 +#  gtk-sharp-2
    gtk3
    gtkmm3
-   hotdoc
-@@ -50,7 +49,7 @@ checkdepends=(
+   hdf5
+@@ -55,13 +54,13 @@ checkdepends=(
    libwmf
    llvm
    mercurial
@@ -28,12 +26,19 @@ index 4a03ce2..3536bf4 100644
    nasm
    netcdf-fortran
    openmpi
-@@ -64,7 +63,7 @@ checkdepends=(
+   openssh
+   protobuf
+-  pypy3
++#  pypy3
+   python-gobject
+   python-lxml
+   python-pytest-xdist
+@@ -74,7 +73,7 @@ checkdepends=(
    rust-bindgen
    sdl2
    vala
 -  valgrind
 +#  valgrind
+   vulkan-headers
+   vulkan-icd-loader
    vulkan-validation-layers
-   wxgtk3
- )
