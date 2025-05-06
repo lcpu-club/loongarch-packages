@@ -1,5 +1,3 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 91d42ef..9cbea2d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -69,6 +69,8 @@ prepare() {
@@ -16,6 +14,6 @@ index 91d42ef..9cbea2d 100644
  }
  
 +source+=("LoongArch-Allow-f16-codegen-with-expansion-to-libcalls.patch::https://github.com/llvm/llvm-project/pull/94456/commits/bbb1854a5a76a8199c50d60a2ae5809163f9d1c5.patch")
-+sha256sums+=('c384b21354a23f9b8ad7d376edc1d21f8f2d67fae693d0be7281323aeca61885')
++sha256sums+=('c485df407ab98dd299c80aa2b26f59c18c728b326a8ae32348bec57418515dcb')
 +
  # vim:set ts=2 sw=2 et:
