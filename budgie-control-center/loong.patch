@@ -1,17 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 5128b75..eef2a0c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -10,7 +10,7 @@ license=("GPL-2.0-or-later")
- groups=("budgie")
- depends=(accountsservice gcr gnome-bluetooth gnome-settings-daemon ibus libgtop libpwquality smbclient
-          libcheese libnma udisks2 libhandy gsound colord-gtk)
--makedepends=(docbook-xsl modemmanager meson)
-+makedepends=(docbook-xsl modemmanager meson glib2-devel colord)
- optdepends=("system-config-printer: Printer settings"
-             "gnome-user-share: WebDAV file sharing"
-             "rygel: Media sharing"
-@@ -30,3 +30,10 @@ build() {
+@@ -31,3 +31,10 @@ build() {
  package() {
      meson install -C build --destdir "$pkgdir"
  }
