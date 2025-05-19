@@ -1,7 +1,7 @@
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/base/allocator/partition_allocator/partition_alloc.gni b/base/allocator/partition_allocator/partition_alloc.gni
 --- a/base/allocator/partition_allocator/partition_alloc.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/base/allocator/partition_allocator/partition_alloc.gni	2000-01-01 00:00:00.000000000 +0800
-@@ -362,7 +362,7 @@ declare_args() {
+@@ -363,7 +363,7 @@ declare_args() {
  
  stack_scan_supported =
      current_cpu == "x64" || current_cpu == "x86" || current_cpu == "arm" ||
@@ -13,7 +13,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ba
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
 --- a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
 +++ b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -521,6 +521,9 @@ if (is_clang_or_gcc) {
+@@ -523,6 +523,9 @@ if (is_clang_or_gcc) {
      } else if (current_cpu == "riscv64") {
        assert(stack_scan_supported)
        sources += [ "stack/asm/riscv64/push_registers_asm.cc" ]
@@ -76,18 +76,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ba
 +    "  ld.d $fp, $sp, 72                                 \n"
 +    "  addi.d $sp, $sp, 96                               \n"
 +    "  jr $ra                                            \n");
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/base/process/launch.h b/base/process/launch.h
---- a/base/process/launch.h	2000-01-01 00:00:00.000000000 +0800
-+++ b/base/process/launch.h	2000-01-01 00:00:00.000000000 +0800
-@@ -55,7 +55,7 @@ namespace base {
- // defined as a constant.
- 
- // These constants are borrowed from glibc’s (arch)/bits/pthread_stack_min.h.
--#if defined(ARCH_CPU_ARM64)
-+#if defined(ARCH_CPU_ARM64) || defined(ARCH_CPU_LOONGARCH64)
- #define PTHREAD_STACK_MIN_CONST \
-   (__builtin_constant_p(PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : 131072)
- #else
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/base/system/sys_info.cc b/base/system/sys_info.cc
 --- a/base/system/sys_info.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/base/system/sys_info.cc	2000-01-01 00:00:00.000000000 +0800
@@ -115,7 +103,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/build/config/rust.gni b/build/config/rust.gni
 --- a/build/config/rust.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/build/config/rust.gni	2000-01-01 00:00:00.000000000 +0800
-@@ -199,6 +199,9 @@ if (is_linux || is_chromeos) {
+@@ -213,6 +213,9 @@ if (is_linux || is_chromeos) {
    } else if (current_cpu == "riscv64") {
      rust_abi_target = "riscv64gc-unknown-linux-gnu"
      cargo_target_abi = ""
@@ -125,7 +113,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
    } else {
      # Best guess for other future platforms.
      rust_abi_target = current_cpu + "-unknown-linux-gnu"
-@@ -319,6 +322,8 @@ if (current_cpu == "x86") {
+@@ -368,6 +371,8 @@ if (current_cpu == "x86") {
    rust_target_arch = "powerpc64"
  } else if (current_cpu == "riscv64") {
    rust_target_arch = "riscv64"
@@ -137,7 +125,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc
 --- a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -311,6 +311,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
+@@ -310,6 +310,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
      info->arch = extensions::api::runtime::PlatformArch::kMips;
    } else if (strcmp(arch, "mips64el") == 0) {
      info->arch = extensions::api::runtime::PlatformArch::kMips64;
@@ -146,7 +134,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ch
    } else {
      NOTREACHED();
    }
-@@ -326,6 +328,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
+@@ -325,6 +327,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
      info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kMips;
    } else if (strcmp(nacl_arch, "mips64") == 0) {
      info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kMips64;
@@ -155,6 +143,18 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ch
    } else {
      NOTREACHED();
    }
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/embedder_support/user_agent_utils.cc b/components/embedder_support/user_agent_utils.cc
+--- a/components/embedder_support/user_agent_utils.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/components/embedder_support/user_agent_utils.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -749,6 +749,8 @@ std::string GetCpuArchitecture() {
+               cpu_info.substr(2, 2) == "86") ||
+              base::StartsWith(cpu_info, "x86")) {
+     return "x86";
++  } else if (base::StartsWith(cpu_info, "loong")) {
++    return "loongarch";
+   }
+ #elif BUILDFLAG(IS_FUCHSIA)
+   std::string cpu_arch = base::SysInfo::ProcessCPUArchitecture();
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/media_router/common/providers/cast/channel/enum_table.h b/components/media_router/common/providers/cast/channel/enum_table.h
 --- a/components/media_router/common/providers/cast/channel/enum_table.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/components/media_router/common/providers/cast/channel/enum_table.h	2000-01-01 00:00:00.000000000 +0800
@@ -179,7 +179,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/co
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/metrics/debug/metrics_internals_utils.cc b/components/metrics/debug/metrics_internals_utils.cc
 --- a/components/metrics/debug/metrics_internals_utils.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/components/metrics/debug/metrics_internals_utils.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -69,6 +69,8 @@ std::string CpuArchitectureToString(
+@@ -72,6 +72,8 @@ std::string CpuArchitectureToString(
        return "arm32";
      case variations::Study::TRANSLATED_X86_64:
        return "translated_x86_64";
@@ -213,18 +213,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/co
    if (process_arch == "x86") {
      return Study::X86_32;
    }
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/content/common/user_agent.cc b/content/common/user_agent.cc
---- a/content/common/user_agent.cc	2000-01-01 00:00:00.000000000 +0800
-+++ b/content/common/user_agent.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -243,6 +243,8 @@ std::string GetCpuArchitecture() {
-               cpu_info.substr(2, 2) == "86") ||
-              base::StartsWith(cpu_info, "x86")) {
-     return "x86";
-+  } else if (base::StartsWith(cpu_info, "loong")) {
-+    return "loongarch";
-   }
- #elif BUILDFLAG(IS_FUCHSIA)
-   std::string cpu_arch = base::SysInfo::ProcessCPUArchitecture();
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/extensions/common/api/runtime.json b/extensions/common/api/runtime.json
 --- a/extensions/common/api/runtime.json	2000-01-01 00:00:00.000000000 +0800
 +++ b/extensions/common/api/runtime.json	2000-01-01 00:00:00.000000000 +0800
@@ -248,6 +236,28 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ex
          ]
        },
        {
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/gpu/config/software_rendering_list.json b/gpu/config/software_rendering_list.json
+--- a/gpu/config/software_rendering_list.json	2000-01-01 00:00:00.000000000 +0800
++++ b/gpu/config/software_rendering_list.json	2000-01-01 00:00:00.000000000 +0800
+@@ -1447,6 +1447,18 @@
+       "features": [
+         "accelerated_2d_canvas"
+       ]
++    },
++    {
++      "id": 184,
++      "description": "Corrupted webpage rendering on Loongson LG100/110 graphics with 2D acceleration enabled",
++      "os": {
++        "type" : "linux"
++      },
++      "vendor_id": "0x0014",
++      "device_id": [ "0x7a36" ],
++      "features": [
++        "accelerated_2d_canvas"
++      ]
+     }
+   ]
+ }
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/features.gni b/sandbox/features.gni
 --- a/sandbox/features.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/features.gni	2000-01-01 00:00:00.000000000 +0800
@@ -405,7 +415,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
 --- a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -35,7 +35,7 @@
+@@ -37,7 +37,7 @@
  #include "sandbox/linux/system_headers/linux_time.h"
  
  #if BUILDFLAG(IS_LINUX) && !defined(__arm__) && !defined(__aarch64__) && \
@@ -414,16 +424,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  // Also include asm/ptrace-abi.h since ptrace.h in older libc (for instance
  // the one in Ubuntu 16.04 LTS) is missing PTRACE_GET_THREAD_AREA.
  // asm/ptrace-abi.h doesn't exist on arm32 and PTRACE_GET_THREAD_AREA isn't
-@@ -344,7 +344,7 @@ ResultExpr RestrictFutex() {
-       .Cases({FUTEX_WAIT, FUTEX_WAKE, FUTEX_REQUEUE, FUTEX_CMP_REQUEUE,
- #if BUILDFLAG(ENABLE_MUTEX_PRIORITY_INHERITANCE)
-               // Enable priority-inheritance operations.
--              FUTEX_LOCK_PI, FUTEX_UNLOCK_PI, FUTEX_TRYLOCK_PI,
-+              FUTEX_LOCK_PI, FUTEX_LOCK_PI2, FUTEX_UNLOCK_PI, FUTEX_TRYLOCK_PI,
-               FUTEX_WAIT_REQUEUE_PI, FUTEX_CMP_REQUEUE_PI,
- #endif  // BUILDFLAG(ENABLE_MUTEX_PRIORITY_INHERITANCE)
-               FUTEX_WAKE_OP, FUTEX_WAIT_BITSET, FUTEX_WAKE_BITSET},
-@@ -460,8 +460,11 @@ ResultExpr RestrictPtrace() {
+@@ -471,8 +471,11 @@ ResultExpr RestrictPtrace() {
    return Switch(request)
        .Cases({
  #if !defined(__aarch64__)
@@ -1003,7 +1004,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/syscall_broker/broker_process.cc b/sandbox/linux/syscall_broker/broker_process.cc
 --- a/sandbox/linux/syscall_broker/broker_process.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/syscall_broker/broker_process.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -121,44 +121,46 @@ bool BrokerProcess::IsSyscallBrokerable(
+@@ -120,44 +120,46 @@ bool BrokerProcess::IsSyscallBrokerable(
    // and are default disabled in Android. So, we should refuse to broker them
    // to be consistent with the platform's restrictions.
    switch (sysno) {
@@ -1057,7 +1058,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_stat:
      case __NR_lstat:
  #endif
-@@ -168,6 +170,9 @@ bool BrokerProcess::IsSyscallBrokerable(
+@@ -167,6 +169,9 @@ bool BrokerProcess::IsSyscallBrokerable(
  #if defined(__NR_fstatat64)
      case __NR_fstatat64:
  #endif
@@ -1067,7 +1068,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  #if defined(__x86_64__) || defined(__aarch64__)
      case __NR_newfstatat:
  #endif
-@@ -183,7 +188,7 @@ bool BrokerProcess::IsSyscallBrokerable(
+@@ -182,7 +187,7 @@ bool BrokerProcess::IsSyscallBrokerable(
        return !fast_check || policy_->allowed_command_set.test(COMMAND_STAT);
  #endif
  
@@ -9815,7 +9816,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/skia/src/opts/SkOpts_SetTarget.h b/third_party/skia/src/opts/SkOpts_SetTarget.h
 --- a/third_party/skia/src/opts/SkOpts_SetTarget.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/skia/src/opts/SkOpts_SetTarget.h	2000-01-01 00:00:00.000000000 +0800
-@@ -135,9 +135,10 @@
+@@ -136,9 +136,10 @@
          #define SK_OPTS_NS lasx
          // The intrinsic from lasxintrin.h is wrapped by the __loongarch_asx macro, so we need to define it.
          #define __loongarch_asx
