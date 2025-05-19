@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -68,7 +68,7 @@ build() {
- 
- check() {
-   cd node
+@@ -85,7 +85,7 @@ check() {
+   rm test/parallel/test-http2-client-set-priority.js
+   rm test/parallel/test-http2-priority-event.js
+   rm test/parallel/test-http-outgoing-end-cork.js
 -  make test-only
 +  make test-only || echo "Watch out for failed tests!"
  }
