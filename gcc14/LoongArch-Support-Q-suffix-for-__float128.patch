@@ -1,0 +1,71 @@
+In r14-3635 supports `__float128`, but does not support the 'q/Q' suffix.
+
+	PR target/119408
+
+gcc/ChangeLog:
+
+	* config/loongarch/loongarch.cc
+	(loongarch_c_mode_for_suffix): New.
+	(TARGET_C_MODE_FOR_SUFFIX): Define.
+
+gcc/testsuite/ChangeLog:
+
+	* gcc.target/loongarch/pr119408.c: New test.
+
+---
+ gcc/config/loongarch/loongarch.cc             | 13 +++++++++++++
+ gcc/testsuite/gcc.target/loongarch/pr119408.c | 12 ++++++++++++
+ 2 files changed, 25 insertions(+)
+ create mode 100644 gcc/testsuite/gcc.target/loongarch/pr119408.c
+
+diff --git a/gcc/config/loongarch/loongarch.cc b/gcc/config/loongarch/loongarch.cc
+index 01f048664b5..7533e53839f 100644
+--- a/gcc/config/loongarch/loongarch.cc
++++ b/gcc/config/loongarch/loongarch.cc
+@@ -11206,6 +11206,16 @@ loongarch_asm_code_end (void)
+ #undef DUMP_FEATURE
+ }
+ 
++/* Target hook for c_mode_for_suffix.  */
++static machine_mode
++loongarch_c_mode_for_suffix (char suffix)
++{
++  if (suffix == 'q')
++    return TFmode;
++
++  return VOIDmode;
++}
++
+ /* Initialize the GCC target structure.  */
+ #undef TARGET_ASM_ALIGNED_HI_OP
+ #define TARGET_ASM_ALIGNED_HI_OP "\t.half\t"
+@@ -11477,6 +11487,9 @@ loongarch_asm_code_end (void)
+ #undef TARGET_OPTION_VALID_ATTRIBUTE_P
+ #define TARGET_OPTION_VALID_ATTRIBUTE_P loongarch_option_valid_attribute_p
+ 
++#undef TARGET_C_MODE_FOR_SUFFIX
++#define TARGET_C_MODE_FOR_SUFFIX loongarch_c_mode_for_suffix
++
+ struct gcc_target targetm = TARGET_INITIALIZER;
+ 
+ #include "gt-loongarch.h"
+diff --git a/gcc/testsuite/gcc.target/loongarch/pr119408.c b/gcc/testsuite/gcc.target/loongarch/pr119408.c
+new file mode 100644
+index 00000000000..f46399aa0b5
+--- /dev/null
++++ b/gcc/testsuite/gcc.target/loongarch/pr119408.c
+@@ -0,0 +1,12 @@
++/* { dg-do compile } */
++/* { dg-options "-O2 -Wno-pedantic" } */
++
++__float128 a;
++__float128 b;
++void
++test (void)
++{
++  a = 1.11111111Q;
++  b = 1.434345q;	
++}
++
+-- 
+2.34.1
