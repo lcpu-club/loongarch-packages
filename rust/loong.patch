@@ -1,27 +1,19 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c6c27af..444a3cf 100644
+index 28f5b91..4c4d4aa 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -7,7 +7,6 @@
- pkgbase=rust
- pkgname=(
-   rust
--  lib32-rust-libs
-   rust-musl
-   rust-aarch64-gnu
-   rust-aarch64-musl
-@@ -41,8 +40,6 @@ makedepends=(
-   aarch64-linux-gnu-glibc
-   clang
-   cmake
--  lib32-gcc-libs
--  lib32-glibc
-   libffi
-   lld
-   llvm
-@@ -110,9 +107,8 @@ link-shared = true
+@@ -86,6 +86,8 @@ COMPRESSZST+=(--long)
+ prepare() {
+   cd rustc-$pkgver-src
  
++  patch -Np1 -i ../Filter-out-LoongArch-features-not-supported-by-the-current-LLVM-version.patch
++
+   # Patch bootstrap so that rust-analyzer-proc-macro-srv
+   # is in /usr/lib instead of /usr/libexec
+   patch -Np1 -i ../0001-bootstrap-Change-libexec-dir.patch
+@@ -119,9 +121,8 @@ link-shared = true
  [build]
+ description = "Arch Linux $pkgbase $epoch:$pkgver-$pkgrel"
  target = [
 -  "x86_64-unknown-linux-gnu",
 -  "i686-unknown-linux-gnu",
@@ -31,7 +23,7 @@ index c6c27af..444a3cf 100644
    "aarch64-unknown-linux-gnu",
    "aarch64-unknown-linux-musl",
    "wasm32-unknown-unknown",
-@@ -164,24 +160,20 @@ jemalloc = true
+@@ -172,24 +173,20 @@ jemalloc = true
  compression-formats = ["gz"]
  compression-profile = "fast"
  
@@ -60,7 +52,7 @@ index c6c27af..444a3cf 100644
  sanitizers = false
  musl-root = "/usr/lib/musl"
  
-@@ -297,12 +289,9 @@ build() {
+@@ -304,12 +301,9 @@ build() {
  
    # rustbuild always installs copies of the shared libraries to /usr/lib,
    # overwrite them with symlinks to the per-architecture versions
@@ -74,4 +66,14 @@ index c6c27af..444a3cf 100644
 +  _pick dest-musl usr/lib/rustlib/$(uname -m)-unknown-linux-musl
    _pick dest-aarch64-gnu usr/lib/rustlib/aarch64-unknown-linux-gnu
    _pick dest-aarch64-musl usr/lib/rustlib/aarch64-unknown-linux-musl
-   _pick dest-wasm usr/lib/rustlib/wasm32-*
+   _pick dest-wasm usr/lib/rustlib/wasm32{,v1}-*
+@@ -418,4 +412,9 @@ package_rust-src() {
+     rustc-$pkgver-src/{COPYRIGHT,LICENSE-MIT}
+ }
+ 
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(lib32-rust-libs)$'))
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(lib32-gcc-libs|lib32-glibc)$'))
++source+=("Filter-out-LoongArch-features-not-supported-by-the-current-LLVM-version.patch")
++b2sums+=('020ec45fde43cba3c673bdcb919d629a8d13670e721e360fbd7eb48f1f3e3169c7bc20901e4da1a73632bb0621c6612e83583ae7562e1b55d001cc19c81aa8de')
++
+ # vim:set ts=2 sw=2 et:
