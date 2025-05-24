@@ -1,13 +1,21 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 9b86cb2..c048fcc 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -34,7 +34,7 @@ build() {
- 
- check() {
-   cd "$pkgname"
--  ninja -C build check
-+  ninja -C build check || echo "Watch out for failed tests!"
- }
- 
- package() {
+@@ -13,7 +13,7 @@ license=('MIT')
+ source=("git+https://github.com/pocl/pocl#tag=v$pkgver"
+         "pocl-link-cudart.patch::https://github.com/pocl/pocl/pull/1804.patch")
+ depends=('clang' 'hwloc' 'opencl-icd-loader')
+-makedepends=('llvm' 'cmake' 'opencl-headers' 'ocl-icd' 'ninja' 'python' 'git' 'nvidia-utils' 'cuda' 'cudnn')
++makedepends=('llvm' 'cmake' 'opencl-headers' 'ocl-icd' 'ninja' 'python' 'git' 'nvidia-utils')
+ optdepends=('cuda: CUDA driver'
+             'cudnn: CUDA driver')
+ sha512sums=('afbb59125990b02339da6f16f0a8989c8ae62ffea7c66a3cd7dafe36212dc33b96967ed682b520dda72f1fc8b4d346dab24a789dc629c0c5a3ebffc156110015'
+@@ -31,9 +31,6 @@ build() {
+       -DKERNELLIB_HOST_CPU_VARIANTS=distro
+       # Should be provided by opencl-headers, avoid conflict
+       -DINSTALL_OPENCL_HEADERS=OFF
+-      -DENABLE_CUDA=ON
+-      -DENABLE_CUDNN=ON
+-      -DCUDA_TOOLKIT_ROOT_DIR=/opt/cuda
+   )
+   cmake "${cmake_options[@]}"
+   ninja -C build
