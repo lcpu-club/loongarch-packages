@@ -1,0 +1,14 @@
+diff --git a/cipd b/cipd
+index 7f9cca27..3acbe4ad 100755
+--- a/cipd
++++ b/cipd
+@@ -80,6 +80,9 @@ if [ -z $ARCH ]; then
+     riscv64)
+       ARCH=riscv64
+       ;;
++    loongarch64)
++      ARCH=loong64
++      ;;
+     *)
+       >&2 echo "UNKNOWN Machine architecture: ${UNAME}"
+       exit 1
