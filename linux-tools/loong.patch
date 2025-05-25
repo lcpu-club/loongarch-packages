@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 9455ade..108a794 100644
+index 497acd4..fff6e5b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -5,15 +5,10 @@ pkgname=(
@@ -16,9 +16,9 @@ index 9455ade..108a794 100644
    'usbip'
 -  'x86_energy_perf_policy'
  )
- pkgver=6.12
- pkgrel=11
-@@ -108,10 +103,13 @@ build() {
+ pkgver=6.14
+ pkgrel=1
+@@ -105,10 +100,13 @@ build() {
    make VERSION=$pkgver-$pkgrel
    popd
  
@@ -32,7 +32,7 @@ index 9455ade..108a794 100644
  
    echo ':: usbip'
    pushd linux/tools/usb/usbip
-@@ -127,6 +125,7 @@ build() {
+@@ -124,6 +122,7 @@ build() {
    make
    popd
  
@@ -40,7 +40,7 @@ index 9455ade..108a794 100644
    echo ':: turbostat'
    pushd linux/tools/power/x86/turbostat
    make
-@@ -136,6 +135,7 @@ build() {
+@@ -133,6 +132,7 @@ build() {
    pushd linux/tools/hv
    CFLAGS+=' -DKVP_SCRIPTS_PATH=\"/usr/lib/hypervkvpd/\"' make
    popd
@@ -48,7 +48,7 @@ index 9455ade..108a794 100644
  
    echo ':: bpf'
    pushd linux/tools/bpf
-@@ -151,6 +151,7 @@ build() {
+@@ -148,6 +148,7 @@ build() {
    make
    popd
  
@@ -56,7 +56,7 @@ index 9455ade..108a794 100644
    echo ':: intel-speed-select'
    pushd linux/tools/power/x86/intel-speed-select
    make
-@@ -160,6 +161,7 @@ build() {
+@@ -157,6 +158,7 @@ build() {
    pushd linux/tools/arch/x86/kcpuid
    make
    popd
@@ -64,7 +64,7 @@ index 9455ade..108a794 100644
  }
  
  package_linux-tools-meta() {
-@@ -169,14 +171,9 @@ package_linux-tools-meta() {
+@@ -166,14 +168,9 @@ package_linux-tools-meta() {
      'bootconfig'
      'bpf'
      'cpupower'
@@ -79,3 +79,20 @@ index 9455ade..108a794 100644
    )
    conflicts=(
      'acpidump'
+@@ -191,7 +188,7 @@ package_perf() {
+     prefix=/usr \
+     lib=lib/perf \
+     perfexecdir=lib/perf \
+-    EXTRA_CFLAGS=' -Wno-error=bad-function-cast -Wno-error=declaration-after-statement -Wno-error=switch-enum' \
++    EXTRA_CFLAGS=' -Wno-error=bad-function-cast -Wno-error=declaration-after-statement -Wno-error=switch-enum -Wno-error=aggressive-loop-optimizations -Wno-error=unterminated-string-initialization' \
+     NO_SDT=1 \
+     BUILD_BPF_SKEL=1 \
+     PYTHON=python \
+@@ -322,4 +319,7 @@ package_kcpuid() {
+   make BINDIR=/usr/bin HWDATADIR="/usr/share/misc" DESTDIR="$pkgdir" -C linux/tools/arch/x86/kcpuid install
+ }
+ 
++source+=("fix-perf-in-loong64.patch")
++sha256sums+=('7e5c86eb2c487ec799f789bd51f1fe1a7466a351a5b8db70235c43883cb82ab2')
++
+ # vim:set ts=2 sw=2 et:
