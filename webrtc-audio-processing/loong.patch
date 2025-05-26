@@ -1,15 +1,18 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -27,8 +27,12 @@ validpgpkeys=(
+@@ -30,6 +30,7 @@ prepare() {
  
- prepare() {
-   cd webrtc-audio-processing
+   # Fix compilation with gcc 15
+   git cherry-pick -n e9c78dc4712fa6362b0c839ad57b6b46dce1ba83
 +  patch -Np1 -i ../webrtc-audio-processing-loong64.patch
  }
  
+ build() {
+@@ -53,5 +54,6 @@ package() {
+   install -Dm644 webrtc-audio-processing/COPYING \
+     -t "$pkgdir/usr/share/licenses/$pkgname"
+ }
+-
 +source+=('webrtc-audio-processing-loong64.patch')
 +b2sums+=('82645a6da3e482209975fd04eec41bf4b94781e2fd0ed9df433c959738cba26c41e6d7833fadc5427a37feaa8a12a71ee5600b9531de6a6651f1b60ccd4983ed')
-+
- build() {
-   local meson_options=(
-     # must match abseil
+ # vim:set sw=2 sts=-1 et:
