@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index aa8c33a..8cd4adc 100644
+index 2226438..5b00b26 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -29,6 +29,7 @@ prepare() {
@@ -15,5 +15,5 @@ index aa8c33a..8cd4adc 100644
    install -Dm644 "$srcdir/$pkgname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
-+source+=("rccl-loongarch64-support.patch::https://raw.githubusercontent.com/loongarch-moe/rocm-loongarch/refs/tags/6.3.1a3/stage4/6.rocm-rccl/rccl-loongarch64.patch")
-+sha256sums+=('a2c08bf49d1b5cb463a89e4ec8ad7f1f1f4a83c405f8526d5c3881edd7e53bcd')
++source+=("rccl-loongarch64-support.patch")
++sha256sums+=('10e3306db067a75a5ade7681212ca2bcf44c20c715a2609a09f2d21cf5978073')
