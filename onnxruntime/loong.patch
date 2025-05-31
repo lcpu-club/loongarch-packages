@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index a24e133..5a923ac 100644
+index df9aac5..f19d44f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -81,8 +81,20 @@ prepare() {
+@@ -78,8 +78,20 @@ prepare() {
        -e '368aadd_library(nsync::nsync_cpp ALIAS nsync_cpp)' \
        -i cmake/external/onnxruntime_external_deps.cmake
  
@@ -23,7 +23,7 @@ index a24e133..5a923ac 100644
  
    cd "${srcdir}"
    cp -r "${pkgbase}" "${pkgbase}-cuda"
-@@ -108,7 +120,7 @@ build() {
+@@ -106,7 +118,7 @@ build() {
      -DBUILD_TESTING=OFF
      -Donnxruntime_ENABLE_TRAINING=ON
      -Donnxruntime_ENABLE_LAZY_TENSOR=OFF
@@ -32,9 +32,9 @@ index a24e133..5a923ac 100644
      -Donnxruntime_USE_DNNL=ON
      # Stable release of eigen is too old for onnxruntime.
      -Donnxruntime_USE_PREINSTALLED_EIGEN=OFF
-@@ -148,22 +160,22 @@ build() {
-   export CXX="$NVCC_CCBIN"
-   export CC="${NVCC_CCBIN/g++/gcc}"
+@@ -150,9 +162,9 @@ build() {
+ 
+   ##### onnxruntime-cuda
  
 -  echo "Build onnxruntime with CUDA without optimization"
 +  echo "Build onnxruntime without optimization" # We don't have cuda
@@ -42,10 +42,11 @@ index a24e133..5a923ac 100644
 -  cmake "${_cmake_cuda_args[@]}"
 +  cmake "${_cmake_args[@]}"
    cmake --build build
-   cd build
-   install -Dm644 ../docs/python/README.rst docs/python/README.rst
-   ln -s ../setup.py .
-   python -m build --wheel --no-isolation
+ 
+   # Manually fix https://github.com/microsoft/onnxruntime/issues/24570
+@@ -164,13 +176,13 @@ build() {
+ 
+   ##### onnxruntime-opt-cuda
  
 -  echo "Build onnxruntime with CUDA with AVX optimizations"
 +  echo "Build onnxruntime with LASX optimizations"
@@ -59,9 +60,9 @@ index a24e133..5a923ac 100644
 -  cmake "${_cmake_cuda_args[@]}"
 +  cmake "${_cmake_args[@]}"
    cmake --build build
-   cd build
-   install -Dm644 ../docs/python/README.rst docs/python/README.rst
-@@ -181,9 +193,9 @@ build() {
+ 
+   # Manually fix https://github.com/microsoft/onnxruntime/issues/24570
+@@ -198,9 +210,9 @@ build() {
  
    echo "Build onnxruntime with ROCm with AVX optimizations"
    cd "${srcdir}/${pkgbase}-opt-rocm"
@@ -73,7 +74,7 @@ index a24e133..5a923ac 100644
      >> cmake/adjust_global_compile_flags.cmake
    cmake "${_cmake_rocm_args[@]}"
    cmake --build build
-@@ -195,29 +207,22 @@ build() {
+@@ -214,9 +226,6 @@ build() {
  
  package_onnxruntime() {
    pkgdesc="$_pkgdesc"
@@ -83,10 +84,7 @@ index a24e133..5a923ac 100644
  
    cd "${pkgbase}-cuda"
    DESTDIR="${pkgdir}" cmake --install build
--  rm -r "${pkgdir}"/usr/include/cudnn_*
- 
-   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
-   install -Dm644 ThirdPartyNotices.txt "${pkgdir}/usr/share/licenses/${pkgname}/ThirdPartyNotices.txt"
+@@ -226,10 +235,8 @@ package_onnxruntime() {
  }
  
  package_onnxruntime-opt() {
@@ -99,13 +97,7 @@ index a24e133..5a923ac 100644
    provides=("${pkgbase}=${pkgver}")
    conflicts=("${pkgbase}")
  
-   cd "${pkgbase}-opt-cuda"
-   DESTDIR="${pkgdir}" cmake --install build
--  rm -r "${pkgdir}"/usr/include/cudnn_*
- 
-   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
-   install -Dm644 ThirdPartyNotices.txt "${pkgdir}/usr/share/licenses/${pkgname}/ThirdPartyNotices.txt"
-@@ -237,7 +242,7 @@ package_onnxruntime-rocm() {
+@@ -254,7 +261,7 @@ package_onnxruntime-rocm() {
  
  package_onnxruntime-opt-rocm() {
    echo "foo"
@@ -114,7 +106,7 @@ index a24e133..5a923ac 100644
    depends+=('rocm-hip-sdk' 'roctracer' 'rccl')
    provides=("${pkgbase}=${pkgver}")
    conflicts=("${pkgbase}")
-@@ -251,9 +256,6 @@ package_onnxruntime-opt-rocm() {
+@@ -268,9 +275,6 @@ package_onnxruntime-opt-rocm() {
  package_python-onnxruntime() {
    pkgdesc="$_pkgdesc"
    depends+=("${pkgbase}" "${_pydepends[@]}")
@@ -122,9 +114,9 @@ index a24e133..5a923ac 100644
 -               'cudnn: nVidia GPU acceleration'
 -               'nccl: nVidia GPU acceleration')
  
-   cd "${pkgbase}-cuda/build"
+   cd "${pkgbase}-cuda"
    python -m installer --destdir="${pkgdir}" dist/*.whl
-@@ -262,13 +264,10 @@ package_python-onnxruntime() {
+@@ -279,13 +283,10 @@ package_python-onnxruntime() {
  }
  
  package_python-onnxruntime-opt() {
@@ -137,9 +129,9 @@ index a24e133..5a923ac 100644
 -               'cudnn: nVidia GPU acceleration'
 -               'nccl: nVidia GPU acceleration')
  
-   cd "${pkgbase}-opt-cuda/build"
+   cd "${pkgbase}-opt-cuda"
    python -m installer --destdir="${pkgdir}" dist/*.whl
-@@ -289,7 +288,7 @@ package_python-onnxruntime-rocm() {
+@@ -306,7 +307,7 @@ package_python-onnxruntime-rocm() {
  }
  
  package_python-onnxruntime-opt-rocm() {
@@ -148,9 +140,9 @@ index a24e133..5a923ac 100644
    depends+=("${pkgbase}-opt-rocm" "${_pydepends[@]}")
    provides=("python-${pkgbase}=${pkgver}")
    conflicts=("python-${pkgbase}")
-@@ -299,3 +298,8 @@ package_python-onnxruntime-opt-rocm() {
-   install -Dm644 ../LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
-   install -Dm644 ../ThirdPartyNotices.txt "${pkgdir}/usr/share/licenses/${pkgname}/ThirdPartyNotices.txt"
+@@ -316,3 +317,8 @@ package_python-onnxruntime-opt-rocm() {
+   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+   install -Dm644 ThirdPartyNotices.txt "${pkgdir}/usr/share/licenses/${pkgname}/ThirdPartyNotices.txt"
  }
 +
 +depends=($(printf "%s\n" "${depends[@]}" | grep -Ev '^(intel-oneapi-mkl)$'))
