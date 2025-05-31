@@ -1,0 +1,25 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -37,9 +37,11 @@ makedepends=(python-build python-installer python-wheel
+              git yarn)
+ source=("git+https://github.com/buildbot/buildbot.git?signed#tag=v$pkgver"
+         "disable-flaky-tests.diff"
++        "yarn.diff"
+         "fully-locked-system-accounts.diff")
+ sha256sums=('687e860d0e78df499e297c3781a49751066127719023cf9538b954dd7889d5ca'
+             '175cb41a707a278b0a7c0864304a00459d6e2dee16cd5ddbc28a6dc90abfd3fc'
++            '6cbc98ae60c5c3c5c8118375947054f7b9e1e286152ba978de624b7cd5a150f8'
+             'eb88c48ede01ee4d2fcbde83f2141b92387b4fb584e092bfd7374e2ac8929845')
+ validpgpkeys=(
+   'FD0004A26EADFE43A4C3F249C6F7AE200374452D'  # https://github.com/p12tic.gpg
+@@ -69,6 +71,9 @@ prepare() {
+   # See https://github.com/buildbot/buildbot/issues/6776 for an earlier report about those flaky tests
+   patch -Np1 -i ../disable-flaky-tests.diff
+ 
++  # backport yarn.lock to support loong64
++  patch -Np1 -i ../yarn.diff
++
+   # https://archlinux.org/todo/change-sysusers-to-fully-locked-system-accounts/
+   patch -Np1 -i ../fully-locked-system-accounts.diff
+ }
+
