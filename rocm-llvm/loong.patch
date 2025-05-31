@@ -1,47 +1,26 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index b84308d..762f214 100644
+index ff5b5c5..843e537 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -18,6 +18,10 @@ build() {
-     CFLAGS+=' -g1'
-     CXXFLAGS+=' -g1'
- 
-+    export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
-+    export LD=mold
-+    patch -Np1 -d "$pkgbase" -i "${srcdir}/rocm-llvm-fix-fp16.patch"
+@@ -37,6 +37,12 @@ prepare() {
+   # Add fix for missing function overload (openat)
+   # https://github.com/llvm/llvm-project/issues/100754
+   git cherry-pick -n 155b7a12820ec45095988b6aa6e057afaf2bc892
 +
-     local _rocm_exe_rpath='\$ORIGIN/../lib:\$ORIGIN/../../../lib'
-     local _rocm_lib_rpath='\$ORIGIN'
-     # Flags according to
-@@ -34,8 +38,12 @@ build() {
-         -D LLVM_ENABLE_RUNTIMES='compiler-rt;libunwind;libcxx;libcxxabi'
-         -D LIBCXX_ENABLE_STATIC=ON
++  # Fix llvm-mc abi
++  git cherry-pick -n 3acb0e9e600cbe3668b7db3956238a592ebadc0a
++
++  # Fix libraries_sha.inc:1:42: error: narrowing conversion of ‘-30’ from ‘int’ to ‘char’
++  git cherry-pick -n 74c3df6cb5540c937ad8b58f95275901efae8669
+ }
+ 
+ build() {
+@@ -65,7 +71,7 @@ build() {
+         -D LIBCXXABI_ENABLE_SHARED=OFF
          -D LIBCXXABI_ENABLE_STATIC=ON
+         -D LIBCXXABI_INSTALL_STATIC_LIBRARY=OFF
 -        -D LLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;X86'
--        -D CLANG_DEFAULT_LINKER=lld
 +        -D LLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;LoongArch'
-+        # lld is broken here so we need to switch to another linker
-+        -D CLANG_DEFAULT_LINKER=mold
-+        -D CMAKE_LINKER_TYPE=MOLD
-+        -D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold"
-+        -D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold"
+         -D CLANG_DEFAULT_LINKER=lld
          -D CLANG_DEFAULT_RTLIB=compiler-rt
          -D CLANG_DEFAULT_UNWINDLIB=libgcc
-         -D LLVM_INSTALL_UTILS=ON
-@@ -97,6 +105,8 @@ package_rocm-llvm() {
- 
-     DESTDIR="$pkgdir" cmake --install build
- 
-+    depends+=(mold)
-+
-     # Provide symlink to old LLVM location, pre ROCm 6.0.0
-     ln -s /opt/rocm/lib/llvm "$pkgdir/opt/rocm/llvm"
- 
-@@ -132,3 +142,7 @@ package_comgr() {
-     cd "$pkgbase/amd/comgr"
-     install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
- }
-+
-+makedepends+=(mold)
-+source+=("rocm-llvm-fix-fp16.patch")
-+sha256sums+=('a0ed008fcc206ce252e0c5ca9898b768429e8fa8de13d2eb4709d1f6a98d08f5')
