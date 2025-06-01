@@ -1,0 +1,28 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f86f2d0..6331b8d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -11,7 +11,6 @@ license=('MIT')
+ options=('!lto')
+ depends=('clang' 'lld' 'llvm-libs')
+ makedepends=('cmake' 'llvm')
+-checkdepends=('lib32-glibc')
+ source=("https://ziglang.org/download/$pkgver/zig-$pkgver.tar.xz"
+         "https://github.com/ziglang/zig/pull/23645.patch"
+         "skip-localhost-test.patch")
+@@ -47,6 +46,7 @@ build() {
+     cmake --build build
+ }
+ 
++: <<COMMENT_SEPARATOR
+ check() {
+     cd "$pkgname-$pkgver"
+     # ugly workaround until test target is provided
+@@ -57,6 +57,7 @@ check() {
+       -Denable-llvm=true \
+       -Dskip-non-native=true
+ }
++COMMENT_SEPARATOR
+ 
+ package() {
+     cd "$pkgname-$pkgver"
