@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -27,8 +27,12 @@ pkgver() {
+@@ -35,8 +35,12 @@ prepare() {
  
- prepare() {
-   cd webrtc-audio-processing
+   # Fix compilation with gcc 15
+   git apply -3 ../0001-Fix-compilation-with-GCC-15.patch
 +  patch -Np1 -i ../webrtc-audio-processing-loong64.patch
  }
  
