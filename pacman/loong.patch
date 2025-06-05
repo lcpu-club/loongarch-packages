@@ -1,17 +1,15 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 6bf51ca..df2509c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -22,7 +22,7 @@ depends=(
-   gpgme
+@@ -23,7 +23,7 @@ depends=(
    grep
-   libarchive
+   libarchive libarchive.so
+   openssl libcrypto.so
 -  pacman-mirrorlist
 +  pacman-mirrorlist-loong64
    systemd
  )
  makedepends=(
-@@ -64,6 +64,15 @@ pkgver() {
+@@ -65,6 +65,15 @@ pkgver() {
  }
  
  prepare() {
@@ -27,7 +25,7 @@ index 6bf51ca..df2509c 100644
    cd "$pkgname"
  
    # apply patch level commits on top of annotated tag
-@@ -135,4 +144,11 @@ package() {
+@@ -139,4 +148,11 @@ package() {
    done
  }
  
