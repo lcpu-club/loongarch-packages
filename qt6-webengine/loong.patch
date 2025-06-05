@@ -1,10 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -111,6 +111,13 @@ prepare() {
+@@ -91,6 +91,12 @@ prepare() {
    # Bump chromium to head of stable branch
    cd src/3rdparty
-   [[ -n $_chromium ]] && git checkout $_chromium
-+
+   [[ -n $_chromium ]] && git checkout $_chromium || true
 +  pushd "${srcdir}/${_pkgfn}"
 +  # Fix build for loong64 (Chen Jiajie's patch)
 +  patch -p2 -i "$srcdir/add-loong64-support.patch"
@@ -14,12 +13,12 @@
  }
  
  build() {
-@@ -132,3 +139,8 @@ package() {
+@@ -112,3 +118,8 @@ package() {
  
    install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
  }
 +
 +source+=("add-loong64-support.patch")
-+sha256sums+=("b67d9d55d65ee4aff62d38d11ce01b95e04cc26442adec903f9bc720475438e0")
++sha256sums+=("093b17adbbd549241bf8b9c25f8df6587e5126512943b56ac1c2f97de815f2bc")
 +# Temporarily switch to mold to workaround with binutils's bfd's bug
 +makedepends+=(mold)
