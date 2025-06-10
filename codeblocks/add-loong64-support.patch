@@ -1,5 +1,5 @@
---- a/src/include/mozilla_chardet/nsprpub/pr/include/prcpucfg_linux.h
-+++ b/src/include/mozilla_chardet/nsprpub/pr/include/prcpucfg_linux.h
+--- a/src/sdk/mozilla_chardet/include/nsprpub/pr/include/prcpucfg_linux.h
++++ b/src/sdk/mozilla_chardet/include/nsprpub/pr/include/prcpucfg_linux.h
 @@ -914,6 +914,52 @@
  #define PR_BYTES_PER_WORD_LOG2   2
  #define PR_BYTES_PER_DWORD_LOG2  3
@@ -53,29 +53,3 @@
  #else
  
  #error "Unknown CPU architecture"
---- a/src/plugins/contrib/dragscroll/dragscrollcfg.h
-+++ b/src/plugins/contrib/dragscroll/dragscrollcfg.h
-@@ -1,6 +1,8 @@
- #ifndef DragScrollCfg_H
- #define DragScrollCfg_H
- 
-+#include <csignal>
-+
- #ifdef __BORLANDC__
-     #pragma hdrstop
- #endif
-@@ -35,7 +37,13 @@
-         wxString GetBitmapBaseName() const;
-         void OnApply();
-         void OnCancel(){}
--        virtual void InitDialog(){ asm("int3");} /*trap*/
-+        virtual void InitDialog(){ /*trap*/
-+#if defined(__i386__) || defined(__x86_64__)
-+            asm("int3");
-+#else
-+            std::raise(SIGTRAP);
-+#endif
-+        }
- 
-         // pointer to owner of the configuration diaglog needed to
-         // complete the OnApply/OnCancel EndModal() logic
