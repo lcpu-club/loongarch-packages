@@ -1,5 +1,3 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 497acd4..fff6e5b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -5,15 +5,10 @@ pkgname=(
@@ -16,7 +14,7 @@ index 497acd4..fff6e5b 100644
    'usbip'
 -  'x86_energy_perf_policy'
  )
- pkgver=6.14
+ pkgver=6.15
  pkgrel=1
 @@ -105,10 +100,13 @@ build() {
    make VERSION=$pkgver-$pkgrel
@@ -88,11 +86,3 @@ index 497acd4..fff6e5b 100644
      NO_SDT=1 \
      BUILD_BPF_SKEL=1 \
      PYTHON=python \
-@@ -322,4 +319,7 @@ package_kcpuid() {
-   make BINDIR=/usr/bin HWDATADIR="/usr/share/misc" DESTDIR="$pkgdir" -C linux/tools/arch/x86/kcpuid install
- }
- 
-+source+=("fix-perf-in-loong64.patch")
-+sha256sums+=('7e5c86eb2c487ec799f789bd51f1fe1a7466a351a5b8db70235c43883cb82ab2')
-+
- # vim:set ts=2 sw=2 et:
