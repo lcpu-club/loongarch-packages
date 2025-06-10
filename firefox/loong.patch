@@ -1,16 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index d563f56..6df5c6a 100644
+index 4575373..8e6bf01 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -125,7 +125,6 @@ ac_add_options --enable-optimize
- ac_add_options --enable-rust-simd
- ac_add_options --enable-linker=lld
- ac_add_options --disable-install-strip
--ac_add_options --disable-elf-hack
- ac_add_options --disable-bootstrap
- ac_add_options --with-wasi-sysroot=/usr/share/wasi-sysroot
- 
-@@ -149,7 +148,7 @@ ac_add_options --with-system-nss
+@@ -148,7 +148,7 @@ ac_add_options --with-system-nss
  # Features
  ac_add_options --enable-alsa
  ac_add_options --enable-jack
