@@ -1,16 +1,14 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index f86f2d0..6331b8d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -11,7 +11,6 @@ license=('MIT')
  options=('!lto')
- depends=('clang' 'lld' 'llvm-libs')
- makedepends=('cmake' 'llvm')
+ depends=('clang19' 'lld19' 'llvm19-libs')
+ makedepends=('cmake' 'llvm19')
 -checkdepends=('lib32-glibc')
  source=("https://ziglang.org/download/$pkgver/zig-$pkgver.tar.xz"
-         "https://github.com/ziglang/zig/pull/23645.patch"
          "skip-localhost-test.patch")
-@@ -47,6 +46,7 @@ build() {
+ sha256sums=('237f8abcc8c3fd68c70c66cdbf63dce4fb5ad4a2e6225ac925e3d5b4c388f203'
+@@ -45,6 +44,7 @@ build() {
      cmake --build build
  }
  
@@ -18,7 +16,7 @@ index f86f2d0..6331b8d 100644
  check() {
      cd "$pkgname-$pkgver"
      # ugly workaround until test target is provided
-@@ -57,6 +57,7 @@ check() {
+@@ -55,6 +55,7 @@ check() {
        -Denable-llvm=true \
        -Dskip-non-native=true
  }
