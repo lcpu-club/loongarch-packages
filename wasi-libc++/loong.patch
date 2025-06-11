@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c587601..9c1557f 100644
+index 7d999ae..018f762 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -40,8 +40,8 @@ build() {
+@@ -50,8 +50,9 @@ build() {
      -e 's/-fcf-protection ?//'
      -e 's/-fexceptions ?//'
      -e 's/-fstack-clash-protection ?//'
@@ -10,6 +10,7 @@ index c587601..9c1557f 100644
 -    -e 's/-mtune=generic ?//'
 +    -e 's/-march=loongarch64 ?//'
 +    -e 's/-mabi=lp64d ?//'
++    -e 's/-mcmodel=medium ?//'
    )
    CFLAGS="$(<<<"$CFLAGS" sed "${sanitize_flags[@]}")"
    CXXFLAGS="$(<<<"$CXXFLAGS" sed "${sanitize_flags[@]}")"
