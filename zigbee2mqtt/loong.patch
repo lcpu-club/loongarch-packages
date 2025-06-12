@@ -1,0 +1,10 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5c445cd..01b713d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -92,3 +92,5 @@ package() {
+   fi
+ 
+ }
++
++makedepends+=(python)
