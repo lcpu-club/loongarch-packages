@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index a54005a..c464627 100644
+index c633f35..42055b6 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -92,6 +92,7 @@ validpgpkeys=('3CE1780F78DD88DF45194FD706BC317B515ACE7C') # Kovid Goyal (New lon
@@ -15,7 +15,7 @@ index a54005a..c464627 100644
  	cd "$_archive"
  	export LANG='en_US.UTF-8'
 -	python setup.py test --under-sanitize --exclude-test-name test_piper
-+	python setup.py test --under-sanitize --exclude-test-name test_piper --exclude-test-name test_searching
++	python setup.py test --under-sanitize --exclude-test-name test_piper --exclude-test-name test_7z
  	python setup.py test_rs
  }
  
