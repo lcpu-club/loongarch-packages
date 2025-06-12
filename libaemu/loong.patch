@@ -1,0 +1,25 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5cceba8..ab5dad5 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,6 +15,11 @@ sha256sums=('a971602ce7397fa13587a0c9d9cc38e4c0725110881d4a8520bed48f014da019')
+ depends=(glibc gcc-libs)
+ makedepends=(cmake git clang)
+ 
++prepare() {
++  cd "$_pkgname"
++  patch -Np1 -i "${srcdir}/aemu-add-loong64-support.patch"
++}
++
+ build() {
+   cd "$_pkgname"
+   cmake -B build \
+@@ -34,4 +39,8 @@ package() {
+   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+   install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+ }
++
++source+=("aemu-add-loong64-support.patch")
++sha256sums+=('86788e2cfcab640d1d000e1f026508760804f7badaea9d88878829cc578f8e48')
++
+ # vim:set ts=2 sw=2 et:
