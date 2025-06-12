@@ -1,0 +1,22 @@
+diff --git a/base/include/aemu/base/synchronization/Lock.h b/base/include/aemu/base/synchronization/Lock.h
+index 2b88f05a..a84ed10f 100644
+--- a/base/include/aemu/base/synchronization/Lock.h
++++ b/base/include/aemu/base/synchronization/Lock.h
+@@ -235,7 +235,7 @@ private:
+ static inline __attribute__((always_inline)) void SmpWmb() {
+ #if defined(__aarch64__)
+         asm volatile("dmb ishst" ::: "memory");
+-#elif defined(__x86_64__)
++#elif defined(__x86_64__) || defined(__loongarch_lp64)
+         std::atomic_thread_fence(std::memory_order_release);
+ #else
+ #error "Unimplemented SmpWmb for current CPU architecture"
+@@ -245,7 +245,7 @@ static inline __attribute__((always_inline)) void SmpWmb() {
+ static inline __attribute__((always_inline)) void SmpRmb() {
+ #if defined(__aarch64__)
+         asm volatile("dmb ishld" ::: "memory");
+-#elif defined(__x86_64__)
++#elif defined(__x86_64__) || defined(__loongarch_lp64)
+         std::atomic_thread_fence(std::memory_order_acquire);
+ #else
+ #error "Unimplemented SmpRmb for current CPU architecture"
