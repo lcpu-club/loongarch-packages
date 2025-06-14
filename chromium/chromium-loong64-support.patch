@@ -245,7 +245,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/gp
        ]
 +    },
 +    {
-+      "id": 184,
++      "id": 23333,
 +      "description": "Corrupted webpage rendering on Loongson LG100/110 graphics with 2D acceleration enabled",
 +      "os": {
 +        "type" : "linux"
@@ -261,16 +261,12 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/gp
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/features.gni b/sandbox/features.gni
 --- a/sandbox/features.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/features.gni	2000-01-01 00:00:00.000000000 +0800
-@@ -9,7 +9,7 @@
+@@ -9,4 +9,4 @@
  use_seccomp_bpf = (is_linux || is_chromeos || is_android) &&
                    (current_cpu == "x86" || current_cpu == "x64" ||
                     current_cpu == "arm" || current_cpu == "arm64" ||
 -                   current_cpu == "mipsel" || current_cpu == "mips64el")
-+                   current_cpu == "mipsel" || current_cpu == "mips64el" || current_cpu == "loong64")
- 
- # SSBD (Speculative Store Bypass Disable) is a mitigation of Spectre Variant 4.
- # As Spectre Variant 4 can be mitigated by site isolation, opt-out SSBD on site
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/bpf_dsl/linux_syscall_ranges.h b/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
++                   current_cpu == "mipsel" || current_cpu == "mips64el"  || current_cpu == "loong64")
 --- a/sandbox/linux/bpf_dsl/linux_syscall_ranges.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/bpf_dsl/linux_syscall_ranges.h	2000-01-01 00:00:00.000000000 +0800
 @@ -56,6 +56,13 @@
@@ -2544,23 +2540,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    } else {
      return handle_via_broker;
    }
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/blink/renderer/build/scripts/gperf.py b/third_party/blink/renderer/build/scripts/gperf.py
---- a/third_party/blink/renderer/build/scripts/gperf.py	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/blink/renderer/build/scripts/gperf.py	2000-01-01 00:00:00.000000000 +0800
-@@ -37,8 +37,11 @@ def generate_gperf(gperf_path, gperf_inp
-         # -Wimplicit-fallthrough needs an explicit fallthrough statement,
-         # so replace gperf's /*FALLTHROUGH*/ comment with the statement.
-         # https://savannah.gnu.org/bugs/index.php?53029
--        gperf_output = gperf_output.replace('/*FALLTHROUGH*/',
--                                            '  [[fallthrough]];')
-+        # so replace gperf 3.1's /*FALLTHROUGH*/ comment with the statement.
-+        # https://savannah.gnu.org/bugs/index.php?53029 (fixed in 3.2)
-+        if '/* C++ code produced by gperf version 3.1 */' in gperf_output:
-+            gperf_output = gperf_output.replace('/*FALLTHROUGH*/',
-+                                                '  [[fallthrough]];')
-         # -Wpointer-to-int-cast warns about casting pointers to smaller ints
-         # Replace {(int)(long)&(foo), bar} with
-         # {static_cast<int>(reinterpret_cast<uintptr_t>(&(foo)), bar}
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h b/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
 --- a/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h	2000-01-01 00:00:00.000000000 +0800
