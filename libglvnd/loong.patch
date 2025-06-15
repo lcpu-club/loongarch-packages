@@ -1,14 +1,5 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -2,7 +2,7 @@
- 
- pkgname=libglvnd
- pkgver=1.7.0
--pkgrel=1
-+pkgrel=1.1
- pkgdesc="The GL Vendor-Neutral Dispatch library"
- arch=('x86_64')
- url="https://gitlab.freedesktop.org/glvnd/libglvnd"
 @@ -17,7 +17,7 @@ sha512sums=('7b6eb8e075b48f1d915b892044adc3260547d74ed61d1e2fa6c5f0f8c3527754abe
  
  build() {
