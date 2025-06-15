@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6c9044d..0a40979 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,6 +17,7 @@ sha256sums=('ca224a3ba77cc2ccc5a4e3a7e081c2c0914ea1481fdeb4c4c007e04d8675c5fe')
+ 
+ build() {
+ 	cd "${_pkgname}-${pkgver}"
++	patch -Np1 -i "${srcdir}/fix-incompatible-pointer-types.patch"
+ 	python -m build --wheel --no-isolation
+ }
+ 
+@@ -26,3 +27,6 @@ package() {
+ 
+ 	install -Dm 644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+ }
++
++source+=("fix-incompatible-pointer-types.patch::https://github.com/fdintino/pillow-avif-plugin/commit/16abb50310aa36a4ee459adc4dc331dab116a464.diff")
++sha256sums+=('a3f3c56a6f2a69dfc9e514dadcf64b175b072429ef3cac35d426cc898f94df24')
