@@ -1,0 +1,10 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index ed1312f..ab21ef0 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -54,3 +54,5 @@ package() {
+ 
+   install -Dm644 "$srcdir/$pkgname/LICENSE" "$pkgdir/usr/share/licenses/task/LICENSE"
+ }
++
++makedepends+=(clang)
