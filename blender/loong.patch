@@ -1,88 +1,27 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index d919f18..d62c066 100644
+index d919f18..4e74b8f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -30,7 +30,6 @@ depends=(
-   'bash'
-   'boost-libs'
-   'draco'  # seems to use static lib and should probably only be makedepends
--  'embree'
-   'expat'
-   'ffmpeg'
-   'fftw'
-@@ -41,8 +40,6 @@ depends=(
-   'gmp'
-   'hicolor-icon-theme'
-   'imath'
--  'intel-oneapi-compiler-dpcpp-cpp-runtime-libs'
--  'intel-oneapi-compiler-shared-runtime-libs'
-   'jack'  # dlopen'ed
-   'jemalloc'
-   'level-zero-loader'  # dlopen'ed
-@@ -67,7 +64,6 @@ depends=(
-   'openal'
-   'opencolorio'
-   'openexr'
--  'openimagedenoise'
-   'openimageio'
-   'openjpeg2'
-   'openpgl'
-@@ -83,7 +79,6 @@ depends=(
-   'python-requests'
-   'sdl2'  # dlopen'ed
-   'shared-mime-info'
--  'usd'
-   'xdg-utils'
-   'yaml-cpp'
-   'zlib'
-@@ -92,14 +87,8 @@ depends=(
- makedepends=(
-   'boost'
-   'cmake'
--  'cuda'
-   'git'
-   'git-lfs'
--  'hip-runtime-amd'
--  'hiprt'
--  'intel-oneapi-compiler-shared-runtime'
--  'intel-oneapi-dpcpp-cpp'
--  'intel-compute-runtime'
-   'level-zero-headers'
-   'libdecor'
-   'mold'
-@@ -110,11 +99,6 @@ makedepends=(
-   'wayland-protocols'
-   'vulkan-headers'
- )
--optdepends=('cuda: Cycles renderer CUDA support'
--            'intel-compute-runtime: Cycles renderer Intel OneAPI support'
--            'hip-runtime-amd: Cycles renderer AMD ROCm support'
--            'hiprt: Ray tracing AMD ROCm support'
--            'libdecor: wayland support')
- # We're using !lto here as otherwise we get stuff such as FS#77557
- options=('!lto')
- source=("git+https://projects.blender.org/blender/blender.git#tag=v$pkgver"
-@@ -140,6 +124,9 @@ prepare() {
+@@ -140,6 +140,10 @@ prepare() {
    git -C release/datafiles/assets lfs checkout
  
    patch -p1 -i "$srcdir"/hiprt-lib-path.patch
 +
 +  # Support loong64
 +  patch -p1 -i "$srcdir"/add-loong64-support.patch
++  patch -p1 -i "$srcdir"/Add-__LP64__-to-64-bit-platform-detection.patch
  }
  
  _get_pyver() {
-@@ -160,9 +147,6 @@ build() {
+@@ -160,7 +164,6 @@ build() {
      -D CMAKE_BUILD_TYPE=Release
      -D CMAKE_INSTALL_PREFIX=/usr
      -D WITH_LINKER_MOLD=ON
 -    -D CUDA_HOST_COMPILER="$NVCC_CCBIN"
--    -D HIP_ROOT_DIR=/opt/rocm
--    -D HIPRT_INCLUDE_DIR=/opt/rocm/include
+     -D HIP_ROOT_DIR=/opt/rocm
+     -D HIPRT_INCLUDE_DIR=/opt/rocm/include
      -D OCLOC_INSTALL_DIR=/usr
-     -D OPTIX_ROOT_DIR="$srcdir"
-     -D PYTHON_VERSION="$(_get_pyver)"
-@@ -173,6 +157,13 @@ build() {
+@@ -173,6 +176,11 @@ build() {
      -D WITH_CYCLES_OSL=ON
      -D WITH_INSTALL_PORTABLE=OFF
      -D WITH_PYTHON_INSTALL=OFF
@@ -91,12 +30,10 @@ index d919f18..d62c066 100644
 +    -D WITH_CYCLES_DEVICE_OPTIX=OFF
 +    -D WITH_CYCLES_CUDA_BINARIES=OFF
 +    -D WITH_CUDA_DYNLOAD=OFF
-+    -D WITH_CYCLES_DEVICE_HIP=OFF
-+    -D WITH_CYCLES_HIP_BINARIES=OFF
      -G Ninja
      -S "$pkgname"
      -W no-dev
-@@ -194,7 +185,12 @@ package() {
+@@ -194,7 +202,17 @@ package() {
  
    # Move OneAPI AOT lib to proper place
    mkdir "${pkgdir}"/usr/lib/
@@ -107,6 +44,11 @@ index d919f18..d62c066 100644
  }
 +
 +# https://projects.blender.org/blender/blender/pulls/130916
-+source+=("add-loong64-support.patch")
-+sha512sums+=('8655061b1fb68167ec1afc04d36050bd12e6f92caf8484612f7eb19352dec9e91bda669809cd7fd2a8fc001e8a6d0fbafb0854afcc2d7af6f751e9f7f83b0769')
++# https://projects.blender.org/blender/blender/pulls/140528
++source+=("add-loong64-support.patch"
++         "Add-__LP64__-to-64-bit-platform-detection.patch")
++sha512sums+=('8655061b1fb68167ec1afc04d36050bd12e6f92caf8484612f7eb19352dec9e91bda669809cd7fd2a8fc001e8a6d0fbafb0854afcc2d7af6f751e9f7f83b0769'
++             '15b75764993226418513faccc3acdfc07df212f278a0f689a3e2a5a96b5dcf20a31f337d488e128723dfecef7b9bbbceadee1774a0f7964461b71eee3a9d6b8a')
++depends=($(printf "%s\n" "${depends[@]}" | grep -Ev '^(embree|intel-oneapi-compiler-dpcpp-cpp-runtime-libs|intel-oneapi-compiler-shared-runtime-libs|openimagedenoise|usd)$'))
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|intel-oneapi-compiler-shared-runtime|intel-oneapi-dpcpp-cpp|intel-compute-runtime)$'))
 +makedepends+=(vulkan-headers)
