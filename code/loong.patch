@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index e1098d6..083ff2c 100644
+index d0abb42..3690bda 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -48,6 +48,10 @@ case "$CARCH" in
+@@ -53,6 +53,10 @@ case "$CARCH" in
      _vscode_arch=riscv64
      _electron_arch=riscv64
      ;;
@@ -13,9 +13,18 @@ index e1098d6..083ff2c 100644
    *)
      # Needed for mksrcinfo
      _vscode_arch=DUMMY
-@@ -115,6 +119,9 @@ prepare() {
+@@ -71,7 +75,7 @@ prepare() {
+   _electronver=$(jq -r '.packages[""].devDependencies.electron' package-lock.json)
+ 
+   # Add vsce-sign necessary for extensions' signature verification
+-  pnpm add @vscode/vsce-sign @vscode/vsce-sign-linux-$_vscode_arch
++  #pnpm add @vscode/vsce-sign @vscode/vsce-sign-linux-$_vscode_arch
+ 
+   # Change electron binary name to the target electron
+   sed -e "s|name=electron|name=$_electron |" \
+@@ -123,6 +127,9 @@ prepare() {
    local _electron_zip="electron-v$_electronver-linux-$_electron_arch.zip"
-   cd "/usr/lib/$_electron" && zip -r "$_cache_dir/$_electron_zip" . && cd -
+   zip -q "$_cache_dir/$_electron_zip" . -i .
    echo "$(sha256sum "$_cache_dir/$_electron_zip" | cut -d " " -f 1) *$_electron_zip" > build/checksums/electron.txt
 +
 +  # Add missing loong64 definition
