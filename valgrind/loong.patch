@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4f4e75a..8b1386f 100644
+index 90e1e9e..9b3bc6b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -20,11 +20,10 @@ arch=('x86_64')
@@ -15,12 +15,12 @@ index 4f4e75a..8b1386f 100644
    'python: cg_* scripts'
  )
  provides=('valgrind-multilib')
-@@ -45,7 +44,7 @@ b2sums=('9312761b0531006725f13270984b26c48f71ebe66e355b04410d7c01773c9b78ec21db3
+@@ -45,7 +44,7 @@ b2sums=('5337096c846b62899017589fbb242ca601741ebb353834cd788efb60f951f2380c5904b
  options=(!lto) # https://bugs.kde.org/show_bug.cgi?id=338252
  
  prepare() {
 -  cd valgrind-${pkgver}
-+  cd valgrind-loongarch64-${pkgver%.*}-GIT
++  cd valgrind-loongarch64
    patch -Np1 < ../valgrind-3.7.0-respect-flags.patch
    sed -i 's|sgml/docbook/xsl-stylesheets|xml/docbook/xsl-stylesheets-1.79.2-nons|' docs/Makefile.am
  
@@ -29,7 +29,7 @@ index 4f4e75a..8b1386f 100644
  
  build() {
 -  cd valgrind-${pkgver}
-+  cd valgrind-loongarch64-${pkgver%.*}-GIT
++  cd valgrind-loongarch64
    ./configure \
      --prefix=/usr \
      --sysconfdir=/etc \
@@ -38,7 +38,7 @@ index 4f4e75a..8b1386f 100644
    if ! pacman -Q glibc-debug; then echo -e "\033[1;31mcheck() not run, supply glibc-debug if unintended!\033[0m"; return 0; fi
  
 -  cd valgrind-${pkgver}
-+  cd valgrind-loongarch64-${pkgver%.*}-GIT
++  cd valgrind-loongarch64
  
    # Make sure a basic binary runs. There should be no errors.
    ./vg-in-place --error-exitcode=1 /bin/true
@@ -47,15 +47,18 @@ index 4f4e75a..8b1386f 100644
  
  package() {
 -  cd valgrind-${pkgver}
-+  cd valgrind-loongarch64-${pkgver%.*}-GIT
++  cd valgrind-loongarch64
    make DESTDIR="${pkgdir}" install
  
    install -Dm644 docs/*.1 -t "$pkgdir/usr/share/man/man1"
-@@ -117,4 +116,8 @@ package() {
+@@ -117,4 +116,11 @@ package() {
    fi
  }
  
-+source+=("valgrind-loongarch64-${pkgver%.*}-GIT.tar.gz::https://github.com/FreeFlyingSheep/valgrind-loongarch64/archive/refs/tags/v${pkgver%.*}-GIT.tar.gz")
++# Unable to use the version control used by Arch Linux upstream
++_commit_hash='1e729f9bf417a8af9e2aa5f3933d6efb12f8d46c'
++source+=("git+https://github.com/FreeFlyingSheep/valgrind-loongarch64.git#commit=${_commit_hash}")
++makedepends+=(git)
 +sha512sums+=('SKIP')
 +b2sums+=('SKIP')
 +
