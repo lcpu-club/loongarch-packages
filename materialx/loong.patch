@@ -1,16 +1,19 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -36,8 +36,13 @@ prepare() {
+@@ -51,7 +51,8 @@ prepare() {
    sed -i 's|"libraries"|"/usr/share/materialx/libraries"|g' source/MaterialXGenShader/GenOptions.h
  
    dos2unix python/Scripts/*
+-
 +  dos2unix source/MaterialXView/NanoGUI/CMakeLists.txt
 +  patch -Np1 -i "$srcdir"/nanogui-do-not-fallback-to-nehalem.patch -d source/MaterialXView/NanoGUI
+   patch -Np1 -i "$srcdir"/materialx-2338.patch
  }
  
+@@ -108,3 +109,6 @@ package() {
+   # Remove empty dirs
+   find ${pkgdir}/usr -empty -type d -delete
+ }
++
 +source+=("nanogui-do-not-fallback-to-nehalem.patch::https://github.com/mitsuba-renderer/nanogui/pull/156.diff")
 +sha256sums+=('fe60c485ddc71df9be0bd79ddda8bdd127d1ff8beec7b6fc2ffc4e1dcc0bbb70')
-+
- build() {
-   cmake -S MaterialX-${pkgver} -B build -G Ninja \
-   	-DCMAKE_INSTALL_PREFIX=/usr \
