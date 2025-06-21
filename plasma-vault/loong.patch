@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -11,7 +11,6 @@ license=(LGPL-2.0-or-later)
+ depends=(fuse2
+          gcc-libs
+          glibc
+-         gocryptfs
+          kconfig
+          kcoreaddons
+          kdbusaddons
