@@ -1,17 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 805d625..268a642 100644
+index 1d765f3..29d84be 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -2,7 +2,7 @@
- # Contributor: Thomas Bächler <thomas@archlinux.org>
- 
- pkgbase=linux-firmware
--pkgname=(linux-firmware-whence linux-firmware amd-ucode
-+pkgname=(linux-firmware-whence linux-firmware
-          linux-firmware-{nfp,mellanox,marvell,qcom,liquidio,qlogic,bnx2x}
- )
- _tag=20241017
-@@ -64,6 +64,14 @@ build() {
+@@ -91,6 +91,14 @@ build() {
    echo kernel/x86/microcode/AuthenticAMD.bin |
      bsdtar --uid 0 --gid 0 -cnf - -T - |
      bsdtar --null -cf - --format=newc @- > amd-ucode.img
@@ -26,11 +17,13 @@ index 805d625..268a642 100644
  }
  
  _pick() {
-@@ -178,3 +186,7 @@ package_linux-firmware-bnx2x() {
- 
-   mv -v linux-firmware-bnx2x/* "${pkgdir}"
+@@ -390,4 +398,9 @@ package_linux-firmware-realtek() {
+     -t "${pkgdir}/usr/share/licenses/${pkgname}"
  }
-+
+ 
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(amd-ucode)$'))
 +source+=("lg100_cp.bin::https://github.com/cl91/linux-gsgpu-archpkg/raw/master/gsgpu-firmware/lg100_cp.bin")
 +b2sums+=('68301cdbdbb7b03c8a8c3c051ad415f2e6313306ea725664628a6606c049b1f69200464ef16fc74e0462c9b9ac926342646e7518f90a6424ad82f240925d903a')
 +noextract=('lg100_cp.bin')
++
+ # vim:set sw=2 sts=-1 et:
