@@ -1,12 +1,30 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b5866d1..ba3175e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -85,3 +85,9 @@ package() {
+@@ -62,10 +62,14 @@ build() {
+   export CGO_CFLAGS="${CFLAGS}"
+   export CGO_CXXFLAGS="${CXXFLAGS}"
+   export CGO_LDFLAGS="${LDFLAGS}"
+-  export GOFLAGS="-buildmode=pie -trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw"
++  # Workaround: `-buildmode=pie` requires external (cgo) linking, but cgo is not enabled
++  # Temporarily remove `-buildmode=pie`
++  export GOFLAGS="-trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw"
  
-   install -Dm644 -t "${pkgdir}/usr/share/licenses/$pkgname/" LICENSE
- }
-+
-+prepare () {
-+  cd gitlab-runner
+   cd gitlab-runner
+-  make out/binaries/gitlab-runner-linux-amd64
 +  go mod edit -replace=github.com/cilium/ebpf=github.com/cilium/ebpf@v0.16.0
 +  go mod tidy
-+}
++  make out/binaries/gitlab-runner-linux-loong64
+ }
+ 
+ package() {
+@@ -75,7 +79,7 @@ package() {
+   install -Dm644 "${srcdir}/gitlab-runner.service" "${pkgdir}/usr/lib/systemd/system/gitlab-runner.service"
+   install -Dm644 "${srcdir}/gitlab-runner.sysusers" "${pkgdir}/usr/lib/sysusers.d/gitlab-runner.conf"
+   install -Dm644 "${srcdir}/gitlab-runner.tmpfiles" "${pkgdir}/usr/lib/tmpfiles.d/gitlab-runner.conf"
+-  install -Dm755 out/binaries/gitlab-runner-linux-amd64 "${pkgdir}/usr/bin/gitlab-runner"
++  install -Dm755 out/binaries/gitlab-runner-linux-loong64 "${pkgdir}/usr/bin/gitlab-runner"
+   install -Dm755 packaging/root/usr/share/gitlab-runner/clear-docker-cache "${pkgdir}/usr/share/gitlab-runner/clear-docker-cache"
+ 
+   # Move prebuilt Docker images to hard-coded canonical location
