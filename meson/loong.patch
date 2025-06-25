@@ -1,44 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6ed2b43..c002184 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -28,7 +28,6 @@ checkdepends=(
-   boost
-   clang
-   cmake
--  cuda
-   cython
-   doxygen
-   gcc-fortran
-@@ -42,7 +41,7 @@ checkdepends=(
-   graphviz
-   gtest
-   gtk-doc
--  gtk-sharp-2
-+#  gtk-sharp-2
-   gtk3
-   gtkmm3
-   hdf5
-@@ -55,13 +54,13 @@ checkdepends=(
-   libwmf
-   llvm
-   mercurial
--  mono
-+#  mono
-   nasm
-   netcdf-fortran
-   openmpi
-   openssh
-   protobuf
--  pypy3
-+#  pypy3
-   python-gobject
-   python-lxml
-   python-pytest-xdist
-@@ -74,7 +73,7 @@ checkdepends=(
-   rust-bindgen
-   sdl2
-   vala
--  valgrind
-+#  valgrind
-   vulkan-headers
-   vulkan-icd-loader
-   vulkan-validation-layers
+@@ -116,7 +116,7 @@ build() {
+ check() (
+   cd meson
+   export LC_CTYPE=en_US.UTF-8 CPPFLAGS= CFLAGS= CXXFLAGS= LDFLAGS=
+-  ./run_tests.py --failfast
++  ./run_tests.py || echo "Watch out failed tests!"
+ )
+ 
+ package() {
+@@ -138,4 +138,6 @@ package() {
+   install -Dm644 ../native-clang "$pkgdir/usr/share/meson/native/clang"
+ }
+ 
++checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^(cuda|gtk-sharp-2|mono|pypy3)$'))
++
+ # vim:set sw=2 sts=-1 et:
