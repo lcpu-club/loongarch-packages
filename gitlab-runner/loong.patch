@@ -1,25 +1,20 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index b5866d1..ba3175e 100644
+index b5866d1..7240c88 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -62,10 +62,14 @@ build() {
-   export CGO_CFLAGS="${CFLAGS}"
-   export CGO_CXXFLAGS="${CXXFLAGS}"
-   export CGO_LDFLAGS="${LDFLAGS}"
--  export GOFLAGS="-buildmode=pie -trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw"
-+  # Workaround: `-buildmode=pie` requires external (cgo) linking, but cgo is not enabled
-+  # Temporarily remove `-buildmode=pie`
-+  export GOFLAGS="-trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw"
+@@ -65,7 +65,10 @@ build() {
+   export GOFLAGS="-buildmode=pie -trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw"
  
    cd gitlab-runner
 -  make out/binaries/gitlab-runner-linux-amd64
 +  go mod edit -replace=github.com/cilium/ebpf=github.com/cilium/ebpf@v0.16.0
 +  go mod tidy
++  export CGO_ENABLED=1
 +  make out/binaries/gitlab-runner-linux-loong64
  }
  
  package() {
-@@ -75,7 +79,7 @@ package() {
+@@ -75,7 +78,7 @@ package() {
    install -Dm644 "${srcdir}/gitlab-runner.service" "${pkgdir}/usr/lib/systemd/system/gitlab-runner.service"
    install -Dm644 "${srcdir}/gitlab-runner.sysusers" "${pkgdir}/usr/lib/sysusers.d/gitlab-runner.conf"
    install -Dm644 "${srcdir}/gitlab-runner.tmpfiles" "${pkgdir}/usr/lib/tmpfiles.d/gitlab-runner.conf"
