@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index d0abb42..3690bda 100644
+index d3ff448..c45274a 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -53,6 +53,10 @@ case "$CARCH" in
+@@ -55,6 +55,10 @@ case "$CARCH" in
      _vscode_arch=riscv64
      _electron_arch=riscv64
      ;;
@@ -13,16 +13,17 @@ index d0abb42..3690bda 100644
    *)
      # Needed for mksrcinfo
      _vscode_arch=DUMMY
-@@ -71,7 +75,7 @@ prepare() {
-   _electronver=$(jq -r '.packages[""].devDependencies.electron' package-lock.json)
+@@ -83,7 +87,8 @@ prepare() {
+   patch -p0 -i ../product_json.diff
  
-   # Add vsce-sign necessary for extensions' signature verification
--  pnpm add @vscode/vsce-sign @vscode/vsce-sign-linux-$_vscode_arch
-+  #pnpm add @vscode/vsce-sign @vscode/vsce-sign-linux-$_vscode_arch
+   # OpenVSX signature verification
+-  patch -p1 -i ../0009-openvsx-extension-signature.patch
++  # Not supported on loong64
++  #patch -p1 -i ../0009-openvsx-extension-signature.patch
  
-   # Change electron binary name to the target electron
-   sed -e "s|name=electron|name=$_electron |" \
-@@ -123,6 +127,9 @@ prepare() {
+   # Set the commit and build date
+   sed -e "s/@COMMIT@/$(git rev-parse HEAD)/" -e "s/@DATE@/$(date -u -Is | sed 's/\+00:00/Z/')/" -i product.json
+@@ -125,6 +130,9 @@ prepare() {
    local _electron_zip="electron-v$_electronver-linux-$_electron_arch.zip"
    zip -q "$_cache_dir/$_electron_zip" . -i .
    echo "$(sha256sum "$_cache_dir/$_electron_zip" | cut -d " " -f 1) *$_electron_zip" > build/checksums/electron.txt
