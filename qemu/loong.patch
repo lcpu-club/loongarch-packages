@@ -1,16 +1,33 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 812890d..3eb252e 100644
+index f1e2c2c..52b36d5 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -22,7 +22,6 @@ pkgname=(
+@@ -10,7 +10,7 @@ pkgname=(
+   qemu-chardev-{baum,spice}
+   qemu-docs
+   qemu-guest-agent
+-  qemu-hw-display-{qxl,virtio-{gpu{,-{gl,rutabaga,pci,pci-gl,pci-rutabaga}},vga{,-gl,-rutabaga}}}
++  qemu-hw-display-{qxl,virtio-{gpu{,-{gl,pci,pci-gl}},vga{,-gl}}}
+   qemu-hw-s390x-virtio-gpu-ccw
+   qemu-hw-uefi-vars
+   qemu-hw-usb-{host,redirect,smartcard}
+@@ -23,7 +23,6 @@ pkgname=(
    qemu-ui-{curses,dbus,egl-headless,gtk,opengl,sdl,spice-{app,core}}
    qemu-user{,-static}{,-binfmt}
    qemu-vhost-user-gpu
 -  qemu-vmsr-helper
    qemu-{base,desktop,emulators-full,full}
  )
- pkgver=9.2.3
-@@ -219,7 +218,6 @@ _qemu_desktop_optdepends=(
+ pkgver=10.0.0
+@@ -112,7 +111,6 @@ makedepends=(
+   python-pip
+   python-sphinx
+   python-sphinx_rtd_theme
+-  rutabaga-ffi
+   sdl2
+   sdl2_image
+   snappy
+@@ -221,7 +219,6 @@ _qemu_desktop_optdepends=(
    'qemu-tests: for QEMU tests'
    'qemu-tools: for QEMU tools'
    'qemu-user: for user mode emulation of QEMU targets'
@@ -18,7 +35,43 @@ index 812890d..3eb252e 100644
  )
  
  _qemu_base_optdepends=(
-@@ -609,8 +607,6 @@ package_qemu-common() {
+@@ -243,13 +240,10 @@ _qemu_base_optdepends=(
+   'qemu-hw-display-qxl: for the QXL display device'
+   'qemu-hw-display-virtio-vga: for the virtio-vga display device'
+   'qemu-hw-display-virtio-vga-gl: for the virtio-vga-gl display device'
+-  'qemu-hw-display-virtio-vga-rutabaga: for the virtio-vga-rutabaga display device'
+   'qemu-hw-display-virtio-gpu: for the virtio-gpu display device'
+   'qemu-hw-display-virtio-gpu-gl: for the virtio-gpu-gl display device'
+-  'qemu-hw-display-virtio-gpu-rutabaga: for the virtio-gpu-rutabaga display device'
+   'qemu-hw-display-virtio-gpu-pci: for the virtio-gpu-pci display device'
+   'qemu-hw-display-virtio-gpu-pci-gl: for the virtio-gpu-pci-gl display device'
+-  'qemu-hw-display-virtio-gpu-pci-rutabaga: for the virtio-gpu-pci-rutabaga display device'
+   'qemu-hw-uefi-vars: for UEFI variable support'
+   'qemu-hw-usb-host: for host USB support'
+   'qemu-hw-usb-redirect: for USB redirect support'
+@@ -323,7 +317,6 @@ build() {
+     --enable-sdl
+     --enable-slirp
+     --enable-tpm
+-    --enable-rutabaga-gfx
+     --smbd=/usr/bin/smbd
+     --with-coroutine=ucontext
+   )
+@@ -488,13 +481,10 @@ package_qemu-common() {
+     _pick qemu-hw-display-qxl usr/lib/qemu/hw-display-qxl.so
+     _pick qemu-hw-display-virtio-gpu usr/lib/qemu/hw-display-virtio-gpu.so
+     _pick qemu-hw-display-virtio-gpu-gl usr/lib/qemu/hw-display-virtio-gpu-gl.so
+-    _pick qemu-hw-display-virtio-gpu-rutabaga usr/lib/qemu/hw-display-virtio-gpu-rutabaga.so
+     _pick qemu-hw-display-virtio-gpu-pci usr/lib/qemu/hw-display-virtio-gpu-pci.so
+     _pick qemu-hw-display-virtio-gpu-pci-gl usr/lib/qemu/hw-display-virtio-gpu-pci-gl.so
+-    _pick qemu-hw-display-virtio-gpu-pci-rutabaga usr/lib/qemu/hw-display-virtio-gpu-pci-rutabaga.so
+     _pick qemu-hw-display-virtio-vga usr/lib/qemu/hw-display-virtio-vga.so
+     _pick qemu-hw-display-virtio-vga-gl usr/lib/qemu/hw-display-virtio-vga-gl.so
+-    _pick qemu-hw-display-virtio-vga-rutabaga usr/lib/qemu/hw-display-virtio-vga-rutabaga.so
+ 
+     _pick qemu-hw-usb-host usr/lib/qemu/hw-usb-host.so
+     _pick qemu-hw-usb-redirect usr/lib/qemu/hw-usb-redirect.so
+@@ -621,8 +611,6 @@ package_qemu-common() {
  
      _pick qemu-vhost-user-gpu usr/lib/qemu/vhost-user-gpu
      _pick qemu-vhost-user-gpu usr/share/qemu/vhost-user/50-qemu-gpu.json
@@ -27,7 +80,7 @@ index 812890d..3eb252e 100644
    )
  }
  
-@@ -863,7 +859,7 @@ package_qemu-system-hppa-firmware() {
+@@ -896,7 +884,7 @@ package_qemu-system-hppa-firmware() {
  
  package_qemu-system-loongarch64() {
    pkgdesc="QEMU system emulator for LoongArch64"
@@ -36,7 +89,7 @@ index 812890d..3eb252e 100644
    mv -v $pkgname/* "$pkgdir"
    _install_licenses
  }
-@@ -1178,7 +1174,7 @@ package_qemu-base() {
+@@ -1218,7 +1206,7 @@ package_qemu-base() {
    depends=(
      qemu-common=$pkgver-$pkgrel
      qemu-img=$pkgver-$pkgrel
@@ -45,7 +98,18 @@ index 812890d..3eb252e 100644
      virtiofsd
    )
    optdepends=("${_qemu_base_optdepends[@]}")
-@@ -1227,11 +1223,12 @@ package_qemu-full() {
+@@ -1233,8 +1221,8 @@ package_qemu-desktop() {
+     qemu-audio-{alsa,dbus,jack,oss,pa,pipewire,sdl,spice}=$pkgver-$pkgrel
+     qemu-block-{curl,dmg,nfs,ssh}=$pkgver-$pkgrel
+     qemu-chardev-spice=$pkgver-$pkgrel
+-    qemu-hw-display-{qxl,virtio-gpu{,-{gl,rutabaga,pci,pci-gl,pci-rutabaga}}}=$pkgver-$pkgrel
+-    qemu-hw-display-virtio-vga{,-gl,-rutabaga}=$pkgver-$pkgrel
++    qemu-hw-display-{qxl,virtio-gpu{,-{gl,pci,pci-gl}}}=$pkgver-$pkgrel
++    qemu-hw-display-virtio-vga{,-gl}=$pkgver-$pkgrel
+     qemu-hw-uefi-vars=$pkgver-$pkgrel
+     qemu-hw-usb-{host,redirect,smartcard}=$pkgver-$pkgrel
+     qemu-ui-{curses,dbus,egl-headless,gtk,opengl,sdl,spice-{app,core}}=$pkgver-$pkgrel
+@@ -1268,11 +1256,12 @@ package_qemu-full() {
      qemu-tests=$pkgver-$pkgrel
      qemu-tools=$pkgver-$pkgrel
      qemu-user=$pkgver-$pkgrel
