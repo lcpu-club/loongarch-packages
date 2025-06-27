@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index bf659a0..551c909 100644
+index 5f061b9..46779cc 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -79,6 +79,10 @@ prepare() {
@@ -63,11 +63,11 @@ index bf659a0..551c909 100644
 +         '0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch'
 +         '0002-LOONGARCH-drm-xe-fix-build-on-non-4K-kernels.patch'
 +         '0003-LOONGARCH-from-AOSCOS-more-fixes-for-Xe-on-LoongArch.patch')
-+sha256sums+=('d604e6329f38f2fdd33365f705489e9c3f16f2e0576e225c1f1736775eeaeea7'
++sha256sums+=('77eba2e995872642d763af67747228ef2e27b9d0a7958e8db0a12c4cdcc9acc1'
 +             'd146728a3b3c722f433e310cad21e93c53e64a7afe948b5b43b077e962750941'
 +             'c723e02bbeb42c2a99461b0390d1cbcbb6d998e1191d6621ed02680efb17a554'
 +             'fb058222b06a3cee7984c554a18ce4475f3d71f9ade030e3fe6e3841222fad1b')
-+b2sums+=('bd756d5284581fd0e4c404c7fb1bef8d8edfa6363c056b90bcdf017e138b8f71674075621709eac10c2a850cb3c550ad265e04e43b911083636fdcb329d1f304'
++b2sums+=('652069e50060a3d84530f004f7064d98d6ac9bb02e690a3510d092d0df17598c9b3d564ae07fdb0dbbecc68d2d12d58c4c78c02cc08fbcbb8c01ba6e6256d922'
 +         '4a0b268f1a28d4bfa37d9b644477c75a5215083414fe5cc5d637e2edc4895aace9e42b3b33ac0b3e2a15a18340bec651511fa3c347c1c3e347ed3418c033582c'
 +         'dc9528bb0aec946948273cd9d718db058440527439a81d488c8294f022d39bd626152eefb2e4310a60546a3e1d7d107e53a7833fecc5218924d201d065717add'
 +         '0c9d8e9814d29e30ae71f4301fb1b7d6cd3285edcdb5c18c43933b853332c1cba72adc70d1086c7087364ef5ce6b364e9e531d8f0a81b26aadd1777b781fa906')
