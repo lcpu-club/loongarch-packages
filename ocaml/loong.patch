@@ -1,15 +1,22 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 3e6e94d..35ad0b0 100644
+index cb0777e..f0fb586 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -20,8 +20,8 @@ build() {
+@@ -20,7 +20,9 @@ build() {
    cd "${srcdir}/${pkgname}-${pkgver}"
    CFLAGS+=' -ffat-lto-objects'
    CXXFLAGS+=' -ffat-lto-objects'
 -  ./configure --prefix /usr --mandir /usr/share/man -enable-frame-pointers
--  make --debug=v world.opt
++  patch -Np1 -i "${srcdir}/add-loongarch-architecture-support.patch"
++  autoconf -fiv
 +  ./configure --prefix /usr --mandir /usr/share/man
-+  make --debug=v world
+   make --debug=v world.opt
  }
  
- package_ocaml() {
+@@ -53,3 +55,6 @@ optdepends=()
+   install -m755 -d "${pkgdir}/usr/share/licenses/${pkgname}"
+   install -m644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/"
+ }
++
++source+=("add-loongarch-architecture-support.patch::https://patch-diff.githubusercontent.com/raw/ocaml/ocaml/pull/11974.diff")
++sha256sums+=('fb6020ef87a121892416ee2cb5b190261124655b7b878f8bebfb26d85f29c413')
