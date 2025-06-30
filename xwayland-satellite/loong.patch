@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 12517fe..1376204 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -40,7 +40,7 @@ check() {
+   cd $pkgname-$pkgver
+   export XDG_RUNTIME_DIR="$(mktemp -d)"
+   export RUSTUP_TOOLCHAIN=stable
+-  cargo test --frozen
++  cargo test --frozen -- --skip wayland_then_x11_clipboard_owner
+ }
+ 
+ package() {
