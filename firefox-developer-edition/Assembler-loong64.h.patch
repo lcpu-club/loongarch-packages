@@ -1,0 +1,11 @@
+--- a/js/src/jit/loong64/Assembler-loong64.h
++++ b/js/src/jit/loong64/Assembler-loong64.h
+@@ -1794,6 +1794,8 @@
+   ABIArg next(MIRType argType);
+   ABIArg& current() { return current_; }
+ 
++  void startWasm();
++
+  protected:
+   unsigned intRegIndex_;
+   unsigned floatRegIndex_;
