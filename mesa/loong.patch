@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4906798..304f98d 100644
+index 4906798..e3283d2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -185,7 +185,7 @@ build() {
@@ -11,17 +11,16 @@ index 4906798..304f98d 100644
      -D gallium-extra-hud=true
      -D gallium-rusticl=true
      -D gallium-xa=disabled
-@@ -196,7 +196,8 @@ build() {
+@@ -196,7 +196,7 @@ build() {
      -D microsoft-clc=disabled
      -D valgrind=enabled
      -D video-codecs=all
 -    -D vulkan-drivers=amd,gfxstream,intel,intel_hasvk,nouveau,swrast,virtio,microsoft-experimental
-+    -D llvm=enabled
 +    -D vulkan-drivers=amd,gfxstream,intel,nouveau,swrast,virtio,microsoft-experimental
      -D vulkan-layers=device-select,intel-nullhw,overlay,screenshot,vram-report-limit
    )
  
-@@ -279,8 +280,8 @@ package_mesa() {
+@@ -279,8 +279,8 @@ package_mesa() {
      _pick vkgfxstr $icddir/gfxstream_vk_icd.*.json
      _pick vkgfxstr $libdir/libvulkan_gfxstream.so
  
