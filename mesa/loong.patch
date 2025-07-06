@@ -1,40 +1,34 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4906798..304f98d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -175,7 +175,7 @@ build() {
+@@ -185,7 +185,7 @@ build() {
    local meson_options=(
      -D android-libbacktrace=disabled
      -D b_ndebug=true
 -    -D gallium-drivers=r300,r600,radeonsi,nouveau,virgl,svga,llvmpipe,softpipe,iris,crocus,i915,zink,d3d12
-+    -D gallium-drivers=r300,r600,radeonsi,nouveau,virgl,svga,llvmpipe,softpipe,zink,d3d12
++    -D gallium-drivers=r300,r600,radeonsi,nouveau,virgl,svga,llvmpipe,softpipe,iris,zink,d3d12
      -D gallium-extra-hud=true
      -D gallium-rusticl=true
      -D gallium-xa=disabled
-@@ -185,8 +185,9 @@ build() {
+@@ -196,7 +196,8 @@ build() {
      -D microsoft-clc=disabled
      -D valgrind=enabled
      -D video-codecs=all
 -    -D vulkan-drivers=amd,gfxstream,intel,intel_hasvk,nouveau,swrast,virtio,microsoft-experimental
--    -D vulkan-layers=device-select,intel-nullhw,overlay,screenshot,vram-report-limit
 +    -D llvm=enabled
-+    -D vulkan-drivers=amd,gfxstream,nouveau,swrast,virtio,microsoft-experimental
-+    -D vulkan-layers=device-select,overlay,screenshot,vram-report-limit
++    -D vulkan-drivers=amd,gfxstream,intel,nouveau,swrast,virtio,microsoft-experimental
+     -D vulkan-layers=device-select,intel-nullhw,overlay,screenshot,vram-report-limit
    )
  
-   # Build only minimal debug info to reduce size
-@@ -268,9 +269,6 @@ package_mesa() {
+@@ -279,8 +280,8 @@ package_mesa() {
      _pick vkgfxstr $icddir/gfxstream_vk_icd.*.json
      _pick vkgfxstr $libdir/libvulkan_gfxstream.so
  
 -    _pick vkintel $icddir/intel{,_hasvk}_icd.*.json
 -    _pick vkintel $libdir/libvulkan_intel{,_hasvk}.so
--
++    _pick vkintel $icddir/intel_icd.*.json
++    _pick vkintel $libdir/libvulkan_intel.so
+ 
      _pick vknvidia $icddir/nouveau_icd.*.json
      _pick vknvidia $libdir/libvulkan_nouveau.so
- 
-@@ -541,4 +539,6 @@ package_mesa-docs() {
-   install -Dm644 mesa-$pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
- }
- 
-+pkgname=(${pkgname[@]/vulkan-intel})
-+
- # vim:set sw=2 sts=-1 et:
