@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 1bf04f5..8108450 100644
+index f307dd2..75b13bb 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -28,3 +28,19 @@ package() {
+@@ -28,3 +28,23 @@ package() {
    install -vDm 644 $pkgname-$pkgver/README.md -t "$pkgdir/usr/share/doc/$pkgname/"
    install -vDm 644 $pkgname-$pkgver/COPYING -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
@@ -10,6 +10,7 @@ index 1bf04f5..8108450 100644
 +prepare() {
 +  patch -d $pkgname-$pkgver -p1 -i "${srcdir}/Fix-type-convert-error-for-LSX.patch"
 +  patch -d $pkgname-$pkgver -p1 -i "${srcdir}/loongarch-float16-use-a-portable-version-to-avoid-compilation-errors.patch"
++  patch -d $pkgname-$pkgver -p1 -i "${srcdir}/simde-add-LSX-support-for-sse2-header-file.patch"
 +  # GCC will fail with `internal compiler error`
 +  export CC=clang
 +  export CXX=clang++
@@ -17,8 +18,11 @@ index 1bf04f5..8108450 100644
 +
 +makedepends+=(clang)
 +source+=( "Fix-type-convert-error-for-LSX.patch::https://github.com/simd-everywhere/simde/commit/bda3cdf310925b1e88388f0dc800732dcb690e03.patch"
-+          "loongarch-float16-use-a-portable-version-to-avoid-compilation-errors.patch")
++          "loongarch-float16-use-a-portable-version-to-avoid-compilation-errors.patch"
++          "simde-add-LSX-support-for-sse2-header-file.patch")
 +sha512sums+=( 'd97e4e3c36bed2a710fbc9055337cbd27c4eb6b4bb70545a9abd539b5f8ef29195eadd64a6fb481d40924ae36133b1111e6861c65d4bcab69e73465578761c55'
-+              '468d632a0633df0f276cb5134eeda08cf989b627b6912a3be48548885b34920a5f57aff65ed16a6174fe0a2553a3b27b8eb568ece25cb5a5a6fcd5158d914aa3')
++              '468d632a0633df0f276cb5134eeda08cf989b627b6912a3be48548885b34920a5f57aff65ed16a6174fe0a2553a3b27b8eb568ece25cb5a5a6fcd5158d914aa3'
++              '0cafb092829d4547b9d5a6c4dd88400510426bdd4d31696dabd6fbe629a789a1353a8b725cf38a664a1efeeaa2552b2f122d5c7fc9b115cc77cd89832c4ca4c2')
 +b2sums+=( 'b22758c45bdb7ebdc27071238e66ec7b9a7c97ee7df349008e5f6510ff63a8e810964926f81ffa94e1b26a631d354d818d24d1776de4e642acef46d19a5aedf7'
-+          '83908820aeafd1fb06b81b6126bb771a2ce342a3ffd2b06756b4d25c714a3f550e017442884b0461a13250b0fea4b1cc1af8fd2cbeee1644e20131e29242bfda')
++          '83908820aeafd1fb06b81b6126bb771a2ce342a3ffd2b06756b4d25c714a3f550e017442884b0461a13250b0fea4b1cc1af8fd2cbeee1644e20131e29242bfda'
++          'b5757fdb86d319191738c4388528a1eb1db315f579134dc79b6d855911dab98593fd1a4a9765cba953cbc0816da36ee483987f7830b4486a690dd3dcd4e235f3')
