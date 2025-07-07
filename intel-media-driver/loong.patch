@@ -1,18 +1,16 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 9940606..d2e875f 100644
+index 9940606..9881be1 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -14,6 +14,9 @@ source=(${url}/archive/${pkgname%-*}-${pkgver}.tar.gz)
+@@ -14,6 +14,7 @@ source=(${url}/archive/${pkgname%-*}-${pkgver}.tar.gz)
  sha256sums=('fa17a3266fa8ee2ef9b4b1fac9079bd7362a38e5ab4ab8d510c2a48a6cdd95e5')
  
  build() {
 +  patch -Np1 -d ${pkgname#*-}-${pkgname%-*}-${pkgver} -i "${srcdir}/add-loongarch64-build-support.patch"
-+  export CFLAGS="${CFLAGS} -DSIMDE_NO_NATIVE"
-+  export CXXFLAGS="${CXXFLAGS} -DSIMDE_NO_NATIVE"
    cmake -B build -S ${pkgname#*-}-${pkgname%-*}-${pkgver} \
      -G 'Unix Makefiles' \
      -DCMAKE_INSTALL_PREFIX=/usr \
-@@ -29,3 +32,7 @@ package() {
+@@ -29,3 +30,7 @@ package() {
    DESTDIR="${pkgdir}" cmake --install build
    install -Dm644 ${pkgname#*-}-${pkgname%-*}-${pkgver}/LICENSE.md -t "${pkgdir}"/usr/share/licenses/${pkgname}/
  }
