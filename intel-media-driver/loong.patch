@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 9940606..d2e875f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -14,6 +14,9 @@ source=(${url}/archive/${pkgname%-*}-${pkgver}.tar.gz)
+ sha256sums=('fa17a3266fa8ee2ef9b4b1fac9079bd7362a38e5ab4ab8d510c2a48a6cdd95e5')
+ 
+ build() {
++  patch -Np1 -d ${pkgname#*-}-${pkgname%-*}-${pkgver} -i "${srcdir}/add-loongarch64-build-support.patch"
++  export CFLAGS="${CFLAGS} -DSIMDE_NO_NATIVE"
++  export CXXFLAGS="${CXXFLAGS} -DSIMDE_NO_NATIVE"
+   cmake -B build -S ${pkgname#*-}-${pkgname%-*}-${pkgver} \
+     -G 'Unix Makefiles' \
+     -DCMAKE_INSTALL_PREFIX=/usr \
+@@ -29,3 +32,7 @@ package() {
+   DESTDIR="${pkgdir}" cmake --install build
+   install -Dm644 ${pkgname#*-}-${pkgname%-*}-${pkgver}/LICENSE.md -t "${pkgdir}"/usr/share/licenses/${pkgname}/
+ }
++
++source+=("add-loongarch64-build-support.patch::https://patch-diff.githubusercontent.com/raw/intel/media-driver/pull/1936.diff")
++sha256sums+=('f3ac703356ba6689080c981a8dd6b38fc7e155e8c7a976b1f07363d97e77e502')
++makedepends+=(simde)
