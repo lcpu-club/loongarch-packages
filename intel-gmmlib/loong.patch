@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 25faac7..a8319b7 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,6 +18,9 @@ source=(https://github.com/${pkgname/-//}/archive/${pkgname}-${pkgver}.tar.gz)
+ sha256sums=('36f2ff2b59158d1253a33d735f4e35a1b5740c4751818bdaa222b8ddf96ee881')
+ 
+ build() {
++  patch -Np1 -d gmmlib-${pkgname}-${pkgver} -i "${srcdir}/add-loongarch64-build-support.patch"
++  export CFLAGS="${CFLAGS} -DSIMDE_NO_NATIVE"
++  export CXXFLAGS="${CXXFLAGS} -DSIMDE_NO_NATIVE"
+   cmake -B build -S gmmlib-${pkgname}-${pkgver} \
+     -G 'Unix Makefiles' \
+     -DCMAKE_BUILD_TYPE=Release \
+@@ -32,3 +35,7 @@ package() {
+   DESTDIR="${pkgdir}" cmake --install build
+   install -Dm644 gmmlib-${pkgname}-${pkgver}/LICENSE.md -t "${pkgdir}"/usr/share/licenses/${pkgname}/
+ }
++
++source+=("add-loongarch64-build-support.patch::https://patch-diff.githubusercontent.com/raw/intel/gmmlib/pull/133.diff")
++sha256sums+=('3205f921fa1bedff310e99df69afb75862969593c3e26e0c71c9f071600ad6e2')
++makedepends+=(simde)
