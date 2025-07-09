@@ -1,9 +1,9 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 15a7da1..3730628 100644
+index 1eaca90..0e94155 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -116,7 +116,13 @@ prepare() {
-   patch -Np1 -i ../chromium-136-drop-nodejs-ver-check.patch
+@@ -111,7 +111,13 @@ prepare() {
+   patch -Np1 -i ../chromium-138-nodejs-version-check.patch
  
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
 -  patch -Np1 -i ../compiler-rt-adjust-paths.patch
@@ -17,7 +17,7 @@ index 15a7da1..3730628 100644
  
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
-@@ -211,7 +217,7 @@ build() {
+@@ -204,7 +210,7 @@ build() {
        'clang_base_path="/usr"'
        'clang_use_chrome_plugins=false'
        "clang_version=\"$_clang_version\""
@@ -26,15 +26,27 @@ index 15a7da1..3730628 100644
      )
  
      # Allow the use of nightly features with stable Rust compiler
-@@ -328,4 +334,11 @@ package() {
+@@ -245,6 +251,8 @@ build() {
+   # https://crbug.com/957519#c122
+   CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
+ 
++  # Disable xnnpack on loong64
++  _flags+=('build_tflite_with_xnnpack=false')
+   gn gen out/Release --args="${_flags[*]}"
+   ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
+ }
+@@ -321,4 +329,14 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
 +         "compiler-rt-adjust-paths-loong64.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
-+sha256sums+=('eb2ff43f15d569b6a91eec2a0a12836638e549b82d0bd72edcc448ea8095c328'
-+             '56e8d50b7c744f51953990aefceeae5b7dd08063baaf06df98ddeec02a2d4690'
++sha256sums+=('ef7484bf4c7aa821100f96f6d9503bb8e9d15da32965bc2c8fbcd3e67f0f41bb'
++             '640ea1fa9cd6eac337afc41520184061fe60dd994613da7ba992e0e73f88057d'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
++# nodejs 24 is broken upstream
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(nodejs)$'))
++makedepends+=(nodejs-lts-jod)
 +
  # vim:set ts=2 sw=2 et:
