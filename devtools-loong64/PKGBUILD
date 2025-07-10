@@ -1,7 +1,7 @@
 # Maintainer: wszqkzqk <wszqkzqk@qq.com>
 
 _pkgver=1.3.2
-_patchver=1
+_patchver=2
 pkgname=devtools-loong64
 pkgver=${_pkgver}.patch${_patchver}
 pkgrel=1
@@ -38,7 +38,7 @@ sha256sums=('7b9efdecfe9b770cedf9f8a7039aad31842454167caddb63315ec58949edaf24'
             '3e048911fb330cd92d88c330c91232d8e271c892aa239c82d979ffedc20c215c'
             '820cb7964fd724b88b3a4df87f3ca86b53c3d3e5c314024599dfc50afdcbc7a0'
             'a33135cf0adf39bc93076928eade0a9b2efb24d8bdc692d61bd1a00552c74d7a'
-            '823233b871e845225f3071d572aaa39ad91da6aed08b9ab6b2a7a11f40a8799f'
+            '0bd5e25fe219fd913e820e49f1de170089d641dafe7dc4167601d10efaaaab54'
             'b0d95a78ea22f28dc9d0c450e7c7f376a8772e15b7140be034d4c0538a95f63c'
             '0fa4957e6a2097a288036d18953969ff765912518f5b6a01f983a3d2f7f6a8e1')
 

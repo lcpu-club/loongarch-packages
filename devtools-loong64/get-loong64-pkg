@@ -8,6 +8,7 @@ This script handles the following tasks:
 - Applies loong64-specific patches to packages
 - Manages package version control
 - Updates build configurations for loong64 architecture
+- Fetches patches from pull requests if specified
 """
 
 import os
@@ -21,13 +22,13 @@ import re
 from typing import Optional, List
 import gi
 gi.require_version('GLib', '2.0')
-from gi.repository import GLib
+from gi.repository import GLib # type: ignore
 
 CACHE_DIR: str = os.path.join(GLib.get_user_cache_dir(), "devtools-loong64")
 PATCH_GIT: str = "https://github.com/lcpu-club/loongarch-packages.git"
 PATCH_FILE: str = "loong.patch"
 PATCH_REPO_PATH: str = os.path.join(CACHE_DIR, "loongarch-packages")
-X86_REPOS: tuple[str] = (
+X86_REPOS: tuple = (
     "core-staging",
     "core-testing",
     "core",
@@ -53,8 +54,7 @@ def download_file(source: str, dest: str) -> None:
     """
     headers = {"User-Agent": "Mozilla/5.0"}
     repo_path = os.path.dirname(dest)
-    if not os.path.exists(repo_path):
-        os.makedirs(repo_path)
+    os.makedirs(repo_path, exist_ok=True)
 
     try:
         req = urllib.request.Request(source, headers=headers)
@@ -103,16 +103,18 @@ def update_status(mirror_x86: str) -> None:
     Args:
         mirror_x86 (str): The base URL of the x86_64 package mirror
     """
-    if os.path.isdir(PATCH_REPO_PATH):
-        print(f"Updating cached patch set repository...")
-        subprocess.run(["git", "-C", PATCH_REPO_PATH, "fetch", "--all"])
-        subprocess.run(["git", "-C", PATCH_REPO_PATH, "reset", "--hard", "origin/master"])
-    else:
+    print(f"Updating cached patch set repository...")
+    subprocess.run(["git", "-C", PATCH_REPO_PATH, "fetch", "--all"])
+    update_repo(mirror_x86)
+
+def ensure_patch_repo_exists() -> None:
+    """
+    Ensures that the patch repository is cloned.
+    """
+    if not os.path.isdir(PATCH_REPO_PATH):
         print(f"Cloning patch set repository...")
         os.makedirs(os.path.dirname(PATCH_REPO_PATH), exist_ok=True)
         subprocess.run(["git", "clone", PATCH_GIT, PATCH_REPO_PATH])
-
-    update_repo(mirror_x86)
 
 def modify_pkgbuild_config(pkgbuild_path: str) -> None:
     """
@@ -226,6 +228,10 @@ def main() -> None:
     parser.add_argument('--skip-update',
         help='Skip updating patch repository and package database cache',
         action='store_true')
+    parser.add_argument('-p', '--pr',
+        help='Fetch patches from a specific pull request. '
+             'Use a PR number (e.g., "123") for PRs on the main repository.',
+        metavar='PR_NUMBER')
 
     args: argparse.Namespace = parser.parse_args()
 
@@ -233,9 +239,25 @@ def main() -> None:
     pkgbase: str = args.pkgbase
     version: Optional[str] = args.checkout
     skip_update: bool = args.skip_update
+    pr_info: Optional[str] = args.pr
+
+    ensure_patch_repo_exists()
 
     if not skip_update:
         update_status(mirror_x86)
+
+    if pr_info:
+        if pr_info.isdigit():
+            patch_branch = f"pull/{pr_info}/head"
+            print(f"Fetching PR #{pr_info} from {PATCH_GIT}")
+            subprocess.run(["git", "-C", PATCH_REPO_PATH, "fetch", "origin", patch_branch])
+            subprocess.run(["git", "-C", PATCH_REPO_PATH, "checkout", "FETCH_HEAD"])
+        else:
+            print(f"Invalid --pr format. Use a PR number.")
+            sys.exit(1)
+    else:
+        subprocess.run(["git", "-C", PATCH_REPO_PATH, "checkout", "master"])
+        subprocess.run(["git", "-C", PATCH_REPO_PATH, "reset", "--hard", "origin/master"])
 
     patch_dir: str = os.path.join(PATCH_REPO_PATH, pkgbase)
 
@@ -311,6 +333,11 @@ def main() -> None:
             print(f"No PKGBUILD found in {pkgbase}.")
             sys.exit(1)
     print("Done.")
+
+    print("Ensureing the patch repository is on the master branch...")
+    subprocess.run(["git", "-C", PATCH_REPO_PATH, "checkout", "master"])
+    subprocess.run(["git", "-C", PATCH_REPO_PATH, "reset", "--hard", "origin/master"])
+
 
 if __name__ == "__main__":
     main()
