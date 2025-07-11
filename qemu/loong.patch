@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index f1e2c2c..52b36d5 100644
+index 58df815..1d42815 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -10,7 +10,7 @@ pkgname=(
@@ -18,16 +18,16 @@ index f1e2c2c..52b36d5 100644
 -  qemu-vmsr-helper
    qemu-{base,desktop,emulators-full,full}
  )
- pkgver=10.0.0
+ pkgver=10.0.2
 @@ -112,7 +111,6 @@ makedepends=(
-   python-pip
    python-sphinx
    python-sphinx_rtd_theme
+   rdma-core
 -  rutabaga-ffi
    sdl2
    sdl2_image
    snappy
-@@ -221,7 +219,6 @@ _qemu_desktop_optdepends=(
+@@ -222,7 +220,6 @@ _qemu_desktop_optdepends=(
    'qemu-tests: for QEMU tests'
    'qemu-tools: for QEMU tools'
    'qemu-user: for user mode emulation of QEMU targets'
@@ -35,7 +35,7 @@ index f1e2c2c..52b36d5 100644
  )
  
  _qemu_base_optdepends=(
-@@ -243,13 +240,10 @@ _qemu_base_optdepends=(
+@@ -244,13 +241,10 @@ _qemu_base_optdepends=(
    'qemu-hw-display-qxl: for the QXL display device'
    'qemu-hw-display-virtio-vga: for the virtio-vga display device'
    'qemu-hw-display-virtio-vga-gl: for the virtio-vga-gl display device'
@@ -49,7 +49,7 @@ index f1e2c2c..52b36d5 100644
    'qemu-hw-uefi-vars: for UEFI variable support'
    'qemu-hw-usb-host: for host USB support'
    'qemu-hw-usb-redirect: for USB redirect support'
-@@ -323,7 +317,6 @@ build() {
+@@ -324,7 +318,6 @@ build() {
      --enable-sdl
      --enable-slirp
      --enable-tpm
@@ -57,7 +57,7 @@ index f1e2c2c..52b36d5 100644
      --smbd=/usr/bin/smbd
      --with-coroutine=ucontext
    )
-@@ -488,13 +481,10 @@ package_qemu-common() {
+@@ -489,13 +482,10 @@ package_qemu-common() {
      _pick qemu-hw-display-qxl usr/lib/qemu/hw-display-qxl.so
      _pick qemu-hw-display-virtio-gpu usr/lib/qemu/hw-display-virtio-gpu.so
      _pick qemu-hw-display-virtio-gpu-gl usr/lib/qemu/hw-display-virtio-gpu-gl.so
@@ -71,7 +71,7 @@ index f1e2c2c..52b36d5 100644
  
      _pick qemu-hw-usb-host usr/lib/qemu/hw-usb-host.so
      _pick qemu-hw-usb-redirect usr/lib/qemu/hw-usb-redirect.so
-@@ -621,8 +611,6 @@ package_qemu-common() {
+@@ -622,8 +612,6 @@ package_qemu-common() {
  
      _pick qemu-vhost-user-gpu usr/lib/qemu/vhost-user-gpu
      _pick qemu-vhost-user-gpu usr/share/qemu/vhost-user/50-qemu-gpu.json
@@ -80,7 +80,7 @@ index f1e2c2c..52b36d5 100644
    )
  }
  
-@@ -896,7 +884,7 @@ package_qemu-system-hppa-firmware() {
+@@ -897,7 +885,7 @@ package_qemu-system-hppa-firmware() {
  
  package_qemu-system-loongarch64() {
    pkgdesc="QEMU system emulator for LoongArch64"
@@ -89,7 +89,7 @@ index f1e2c2c..52b36d5 100644
    mv -v $pkgname/* "$pkgdir"
    _install_licenses
  }
-@@ -1218,7 +1206,7 @@ package_qemu-base() {
+@@ -1219,7 +1207,7 @@ package_qemu-base() {
    depends=(
      qemu-common=$pkgver-$pkgrel
      qemu-img=$pkgver-$pkgrel
@@ -98,7 +98,7 @@ index f1e2c2c..52b36d5 100644
      virtiofsd
    )
    optdepends=("${_qemu_base_optdepends[@]}")
-@@ -1233,8 +1221,8 @@ package_qemu-desktop() {
+@@ -1234,8 +1222,8 @@ package_qemu-desktop() {
      qemu-audio-{alsa,dbus,jack,oss,pa,pipewire,sdl,spice}=$pkgver-$pkgrel
      qemu-block-{curl,dmg,nfs,ssh}=$pkgver-$pkgrel
      qemu-chardev-spice=$pkgver-$pkgrel
@@ -109,7 +109,7 @@ index f1e2c2c..52b36d5 100644
      qemu-hw-uefi-vars=$pkgver-$pkgrel
      qemu-hw-usb-{host,redirect,smartcard}=$pkgver-$pkgrel
      qemu-ui-{curses,dbus,egl-headless,gtk,opengl,sdl,spice-{app,core}}=$pkgver-$pkgrel
-@@ -1268,11 +1256,12 @@ package_qemu-full() {
+@@ -1269,11 +1257,12 @@ package_qemu-full() {
      qemu-tests=$pkgver-$pkgrel
      qemu-tools=$pkgver-$pkgrel
      qemu-user=$pkgver-$pkgrel
