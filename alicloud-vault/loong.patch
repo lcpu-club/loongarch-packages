@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a088ea4..a169c30 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,8 @@ build() {
+   export CGO_CFLAGS="${CFLAGS}"
+   export CGO_CXXFLAGS="${CXXFLAGS}"
+   export GOFLAGS="-buildmode=pie -trimpath"
++  go mod edit -replace=golang.org/x/sys=golang.org/x/sys@v0.26.0
++  go mod tidy
+   go build -v \
+     -ldflags "-linkmode=external -extldflags '${LDFLAGS}' -X main.Version=${pkgver}" .
+ }
