@@ -1,9 +1,18 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4470524..c1472ee 100644
+index 0c36e89..c87c112 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -79,6 +79,10 @@ prepare() {
+@@ -77,8 +77,19 @@ prepare() {
+     patch -Np1 < "../$src"
+   done
  
++  # Ensure amdkfd is avaliable
++  sed -i '/^[[:space:]]*depends on DRM_AMDGPU && (/ {
++    /LOONGARCH/! {
++        s/)[[:space:]]*$/ || LOONGARCH)/
++    }
++  }' drivers/gpu/drm/amd/amdkfd/Kconfig
++
    echo "Setting config..."
    cp ../config .config
 +  if [ $CARCH == loong64 ]; then
@@ -13,7 +22,7 @@ index 4470524..c1472ee 100644
    make olddefconfig
    diff -u ../config .config || :
  
-@@ -145,7 +149,11 @@ _package-headers() {
+@@ -145,7 +156,11 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -26,7 +35,7 @@ index 4470524..c1472ee 100644
    cp -t "$builddir" -a scripts
    ln -srt "$builddir" "$builddir/scripts/gdb/vmlinux-gdb.py"
  
-@@ -157,8 +165,13 @@ _package-headers() {
+@@ -157,8 +172,13 @@ _package-headers() {
  
    echo "Installing headers..."
    cp -t "$builddir" -a include
@@ -42,7 +51,7 @@ index 4470524..c1472ee 100644
  
    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
-@@ -188,7 +201,11 @@ _package-headers() {
+@@ -188,7 +208,11 @@ _package-headers() {
    echo "Removing unneeded architectures..."
    local arch
    for arch in "$builddir"/arch/*/; do
@@ -55,7 +64,7 @@ index 4470524..c1472ee 100644
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -256,4 +273,17 @@ for _p in "${pkgname[@]}"; do
+@@ -256,4 +280,17 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
