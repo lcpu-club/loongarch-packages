@@ -1,19 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index d919f18..4e74b8f 100644
+index a5d4e16..a225787 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -140,6 +140,10 @@ prepare() {
-   git -C release/datafiles/assets lfs checkout
- 
-   patch -p1 -i "$srcdir"/hiprt-lib-path.patch
-+
-+  # Support loong64
-+  patch -p1 -i "$srcdir"/add-loong64-support.patch
-+  patch -p1 -i "$srcdir"/Add-__LP64__-to-64-bit-platform-detection.patch
- }
- 
- _get_pyver() {
-@@ -160,7 +164,6 @@ build() {
+@@ -149,7 +149,6 @@ build() {
      -D CMAKE_BUILD_TYPE=Release
      -D CMAKE_INSTALL_PREFIX=/usr
      -D WITH_LINKER_MOLD=ON
@@ -21,7 +10,7 @@ index d919f18..4e74b8f 100644
      -D HIP_ROOT_DIR=/opt/rocm
      -D HIPRT_INCLUDE_DIR=/opt/rocm/include
      -D OCLOC_INSTALL_DIR=/usr
-@@ -173,6 +176,11 @@ build() {
+@@ -162,6 +161,11 @@ build() {
      -D WITH_CYCLES_OSL=ON
      -D WITH_INSTALL_PORTABLE=OFF
      -D WITH_PYTHON_INSTALL=OFF
@@ -33,7 +22,7 @@ index d919f18..4e74b8f 100644
      -G Ninja
      -S "$pkgname"
      -W no-dev
-@@ -194,7 +202,17 @@ package() {
+@@ -183,7 +187,11 @@ package() {
  
    # Move OneAPI AOT lib to proper place
    mkdir "${pkgdir}"/usr/lib/
@@ -43,12 +32,6 @@ index d919f18..4e74b8f 100644
    install -vDm 644 doc/license/{BSD-{2,3}-Clause,MIT,Zlib}-license.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
 +
-+# https://projects.blender.org/blender/blender/pulls/130916
-+# https://projects.blender.org/blender/blender/pulls/140528
-+source+=("add-loong64-support.patch"
-+         "Add-__LP64__-to-64-bit-platform-detection.patch")
-+sha512sums+=('8655061b1fb68167ec1afc04d36050bd12e6f92caf8484612f7eb19352dec9e91bda669809cd7fd2a8fc001e8a6d0fbafb0854afcc2d7af6f751e9f7f83b0769'
-+             '15b75764993226418513faccc3acdfc07df212f278a0f689a3e2a5a96b5dcf20a31f337d488e128723dfecef7b9bbbceadee1774a0f7964461b71eee3a9d6b8a')
 +depends=($(printf "%s\n" "${depends[@]}" | grep -Ev '^(embree|intel-oneapi-compiler-dpcpp-cpp-runtime-libs|intel-oneapi-compiler-shared-runtime-libs|openimagedenoise|usd)$'))
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|intel-oneapi-compiler-shared-runtime|intel-oneapi-dpcpp-cpp|intel-compute-runtime)$'))
 +makedepends+=(vulkan-headers)
