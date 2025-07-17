@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 3b6b780..f696f5b 100644
+index 3b6b780..6cb0ee2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -77,8 +77,19 @@ prepare() {
+@@ -77,13 +77,36 @@ prepare() {
      patch -Np1 < "../$src"
    done
  
@@ -19,10 +19,51 @@ index 3b6b780..f696f5b 100644
 +    make savedefconfig
 +    cat defconfig ../loong-addition.config > .config
 +  fi
++  # Copy the source to build an extra 4K kernel
++  cp -r "${srcdir}/${_srcname}" "${srcdir}/${_srcname}-4k"
    make olddefconfig
    diff -u ../config .config || :
  
-@@ -146,7 +157,11 @@ _package-headers() {
+   make -s kernelrelease > version
+   echo "Prepared $pkgbase version $(<version)"
++
++  # Config for 4K kernel
++  cd "${srcdir}/${_srcname}-4k"
++  echo "${pkgbase#linux}-4k" > localversion.20-pkgname
++  echo "CONFIG_4KB_3LEVEL=y" >> .config
++  make olddefconfig
++  diff -u "$srcdir/$_srcname/.config" .config || :
++
++  make -s kernelrelease > version
++  echo "Prepared $pkgbase-4k version $(<version)"
+ }
+ 
+ build() {
+@@ -91,6 +114,10 @@ build() {
+   make all
+   make -C tools/bpf/bpftool vmlinux.h feature-clang-bpf-co-re=1
+   make htmldocs
++  cd "${srcdir}/${_srcname}-4k"
++  make all
++  make -C tools/bpf/bpftool vmlinux.h feature-clang-bpf-co-re=1
++  make htmldocs
+ }
+ 
+ _package() {
+@@ -125,7 +152,11 @@ _package() {
+   install -Dm644 "$(make -s image_name)" "$modulesdir/vmlinuz"
+ 
+   # Used by mkinitcpio to name the kernel
+-  echo "$pkgbase" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
++  if [[ $_srcname == *-4k ]]; then
++    echo "$pkgbase-4k" > "$modulesdir/version"
++  else
++    echo "$pkgbase" > "$modulesdir/version"
++  fi
+ 
+   echo "Installing modules..."
+   ZSTD_CLEVEL=19 make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 \
+@@ -146,7 +177,11 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -35,7 +76,7 @@ index 3b6b780..f696f5b 100644
    cp -t "$builddir" -a scripts
    ln -srt "$builddir" "$builddir/scripts/gdb/vmlinux-gdb.py"
  
-@@ -158,8 +173,13 @@ _package-headers() {
+@@ -158,8 +193,13 @@ _package-headers() {
  
    echo "Installing headers..."
    cp -t "$builddir" -a include
@@ -51,7 +92,7 @@ index 3b6b780..f696f5b 100644
  
    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
-@@ -189,7 +209,11 @@ _package-headers() {
+@@ -189,7 +229,11 @@ _package-headers() {
    echo "Removing unneeded architectures..."
    local arch
    for arch in "$builddir"/arch/*/; do
@@ -64,7 +105,63 @@ index 3b6b780..f696f5b 100644
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -257,4 +281,17 @@ for _p in "${pkgname[@]}"; do
+@@ -223,7 +267,11 @@ _package-headers() {
+ 
+   echo "Adding symlink..."
+   mkdir -p "$pkgdir/usr/src"
+-  ln -sr "$builddir" "$pkgdir/usr/src/$pkgbase"
++  if [[ $_srcname == *-4k ]]; then
++    ln -sr "$builddir" "$pkgdir/usr/src/$pkgbase-4k"
++  else
++    ln -sr "$builddir" "$pkgdir/usr/src/$pkgbase"
++  fi
+ }
+ 
+ _package-docs() {
+@@ -242,13 +290,41 @@ _package-docs() {
+ 
+   echo "Adding symlink..."
+   mkdir -p "$pkgdir/usr/share/doc"
+-  ln -sr "$builddir/Documentation" "$pkgdir/usr/share/doc/$pkgbase"
++  if [[ $_srcname == *-4k ]]; then
++    ln -sr "$builddir/Documentation" "$pkgdir/usr/share/doc/$pkgbase-4k"
++  else
++    ln -sr "$builddir/Documentation" "$pkgdir/usr/share/doc/$pkgbase"
++  fi
++}
++
++_package-4k() {
++  _srcname_bak=$_srcname
++  _srcname="${_srcname}-4k"
++  _package
++  _srcname=$_srcname_bak
++}
++
++_package-4k-headers() {
++  _srcname_bak=$_srcname
++  _srcname="${_srcname}-4k"
++  _package-headers
++  _srcname=$_srcname_bak
++}
++
++_package-4k-docs() {
++  _srcname_bak=$_srcname
++  _srcname="${_srcname}-4k"
++  _package-docs
++  _srcname=$_srcname_bak
+ }
+ 
+ pkgname=(
+   "$pkgbase"
+   "$pkgbase-headers"
+   "$pkgbase-docs"
++  "$pkgbase-4k"
++  "$pkgbase-4k-headers"
++  "$pkgbase-4k-docs"
+ )
+ for _p in "${pkgname[@]}"; do
+   eval "package_$_p() {
+@@ -257,4 +333,17 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
