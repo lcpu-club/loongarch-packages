@@ -1,2 +1,6 @@
+Server = https://mirrors.wsyu.edu.cn/loongarch/archlinux/$repo/os/$arch
 Server = https://mirrors.pku.edu.cn/loongarch-lcpu/archlinux/$repo/os/$arch
+Server = https://mirrors.nju.edu.cn/loongarch/archlinux/$repo/os/$arch
+Server = https://mirror.iscas.ac.cn/loongarch/archlinux/$repo/os/$arch
+Server = https://mirrors.pku.edu.cn/loongarch/archlinux/$repo/os/$arch
 Server = https://loongarchlinux.lcpu.dev/loongarch/archlinux/$repo/os/$arch
