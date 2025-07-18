@@ -1,7 +1,7 @@
 # Maintainer: wszqkzqk <wszqkzqk@qq.com>
 
 pkgname=pacman-mirrorlist-loong64
-pkgver=20250717
+pkgver=20250718
 pkgrel=1
 pkgdesc="Arch Linux mirror list for use by pacman"
 arch=('any')
@@ -9,7 +9,7 @@ url="https://github.com/lcpu-club/loongarch-packages"
 license=('GPL-2.0-or-later')
 backup=(etc/pacman.d/mirrorlist-loong64)
 source=(mirrorlist-loong64)
-sha256sums=('0680a68f9d8bae070ad2ebc0252b3575e0cf7c25c12aa0dfb588cd4dafa85a1f')
+sha256sums=('9510b27d5f3f360bc57d6911d061ac3a5cca24a824ed2c3f215da80ac05e528e')
 
 pkgver() {
   date +'%Y%m%d'
