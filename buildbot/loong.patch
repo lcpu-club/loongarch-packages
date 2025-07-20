@@ -1,0 +1,23 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d5ab302..ae9ee57 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -69,6 +69,9 @@ prepare() {
+   # See https://github.com/buildbot/buildbot/issues/6776 for an earlier report about those flaky tests
+   patch -Np1 -i ../disable-flaky-tests.diff
+ 
++  # backport yarn.lock to support loong64
++  patch -Np1 -i ../yarn.diff
++
+   # https://archlinux.org/todo/change-sysusers-to-fully-locked-system-accounts/
+   patch -Np1 -i ../fully-locked-system-accounts.diff
+ }
+@@ -297,3 +300,8 @@ package_python-buildbot-react-wsgi-dashboards() {
+   pkgdesc='Buildbot plugin to integrate flask or bottle dashboards to buildbot UI (React)'
+   depends=(${pkgname/-react/}=$pkgver-$pkgrel)
+ }
++
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(nodejs)$'))
++makedepends+=(nodejs-lts-jod)
++source+=("yarn.diff")
++sha256sums+=('6cbc98ae60c5c3c5c8118375947054f7b9e1e286152ba978de624b7cd5a150f8')
