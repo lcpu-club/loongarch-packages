@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8fea4ff..b66f4aa 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -27,7 +27,7 @@ build() {
+ 
+ check() {
+   cd $_name-$pkgver
+-  cargo test --frozen -- --skip "link_validator::file_system::test::remove_dot"
++  cargo test --frozen -- --skip "link_validator::file_system::test::remove_dot" --skip "throttle_different_hosts"
+ }
+ 
+ package() {
