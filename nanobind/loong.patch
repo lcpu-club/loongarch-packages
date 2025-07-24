@@ -7,6 +7,6 @@
 -  python-pytorch
    python-scipy
 -  python-tensorflow
+   python-tests
  )
  source=(
-   "$pkgname-$pkgver::git+$url.git#tag=v$pkgver"
