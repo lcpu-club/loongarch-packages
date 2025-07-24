@@ -1,18 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index ef8e5c1..da8ac24 100644
+index e4b18f8..fc60464 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -116,6 +116,9 @@ prepare() {
- 
-   echo -n "$_google_api_key" >google-api-key
- 
-+  # Fix build on loong64
-+  patch -Np1 -i "${srcdir}/Assembler-loong64.h.patch"
-+
-   cat >../mozconfig <<END
- ac_add_options --enable-application=browser
- mk_add_options MOZ_OBJDIR=${PWD@Q}/obj
-@@ -152,7 +155,7 @@ ac_add_options --with-system-nss
+@@ -151,7 +151,7 @@ ac_add_options --with-system-nss
  # Features
  ac_add_options --enable-alsa
  ac_add_options --enable-jack
@@ -21,12 +11,3 @@ index ef8e5c1..da8ac24 100644
  ac_add_options --disable-updater
  ac_add_options --disable-tests
  END
-@@ -281,4 +284,8 @@ Version=2
- END
- }
- 
-+source+=("Assembler-loong64.h.patch")
-+sha256sums+=('82436eebad493465fd33ec5c6062b65599b205bfefcaa2097bde3141629d70ac')
-+b2sums+=('06b043f937f9060761125d24da990353107753865f339eec7ca0a3e797c0f7ff7e13c86e9052dbffae40b28b93d01be156395c6f864c1e7f964058f8a882b89b')
-+
- # vim:set sw=2 sts=-1 et:
