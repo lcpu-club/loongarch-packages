@@ -489,15 +489,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_recvfrom:  // Could specify source.
      case __NR_recvmsg:   // Could specify source.
  #endif
-@@ -623,7 +631,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
-     case __NR_send:
- #endif
- #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
--    defined(__aarch64__)
-+    defined(__aarch64__) || defined(__loongarch__)
-     case __NR_sendmsg:  // Could specify destination.
-     case __NR_sendto:   // Could specify destination.
- #endif
 @@ -672,7 +680,7 @@ bool SyscallSets::IsSeccomp(int sysno) {
  bool SyscallSets::IsAllowedBasicScheduler(int sysno) {
    switch (sysno) {
