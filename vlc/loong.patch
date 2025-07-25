@@ -1,15 +1,15 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -343,7 +343,7 @@ package_vlc() {
+@@ -341,7 +341,7 @@ package_vlc() {
+     'vlc-plugin-musepack: for MusePack demux support'
      'vlc-plugin-nfs: for NFS access support'
-     'vlc-plugin-notify: for notify support'
-     'vlc-plugin-ogg: for OGG mux and demux support'
+     'vlc-plugin-notify: for notification support'
 -    'vlc-plugin-quicksync: for Intel QuickSync H264/H262 codec support'
 +#    'vlc-plugin-quicksync: for Intel QuickSync H264/H262 codec support'
      'vlc-plugin-samplerate: for samplerate audio filter support'
      'vlc-plugin-sdl: for SDL codec support'
      'vlc-plugin-sftp: for SFTP access support'
-@@ -511,7 +511,7 @@ package_vlc() {
+@@ -509,7 +509,7 @@ package_vlc() {
      _pick $pkgname-plugin-pulse usr/lib/vlc/plugins/audio_output/libpulse_plugin.so
      _pick $pkgname-plugin-pulse usr/lib/vlc/plugins/services_discovery/libpulselist_plugin.so
  
@@ -18,7 +18,7 @@
  
      _pick $pkgname-plugin-samplerate usr/lib/vlc/plugins/audio_filter/libsamplerate_plugin.so
  
-@@ -792,16 +792,16 @@ package_vlc() {
+@@ -790,16 +790,16 @@ package_vlc() {
      _pick vlc-plugins-base usr/lib/vlc/plugins/video_chroma/libgrey_yuv_plugin.so
      _pick vlc-plugins-base usr/lib/vlc/plugins/video_chroma/libi420_10_p010_plugin.so
      _pick vlc-plugins-base usr/lib/vlc/plugins/video_chroma/libi420_nv12_plugin.so
@@ -41,7 +41,7 @@
      _pick vlc-plugins-base usr/lib/vlc/plugins/video_chroma/librv32_plugin.so
      _pick vlc-plugins-base usr/lib/vlc/plugins/video_chroma/libyuvp_plugin.so
      _pick vlc-plugins-base usr/lib/vlc/plugins/video_chroma/libyuy2_i420_plugin.so
-@@ -1916,7 +1916,7 @@ package_vlc-plugins-extra() {
+@@ -1964,7 +1964,7 @@ package_vlc-plugins-extra() {
      vlc-plugin-mtp
      vlc-plugin-musepack
      vlc-plugin-nfs
@@ -50,7 +50,7 @@
      vlc-plugin-samplerate
      vlc-plugin-sdl
      vlc-plugin-sftp
-@@ -1969,5 +1969,6 @@ package_vlc-plugins-visualization() {
+@@ -2018,5 +2018,6 @@ package_vlc-plugins-visualization() {
  
    mv -v $pkgname/* "$pkgdir"
  }
