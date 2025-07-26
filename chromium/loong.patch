@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 01d4648..baa7acd 100644
+index 01d4648..a5d7978 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -112,7 +112,13 @@ prepare() {
@@ -13,7 +13,7 @@ index 01d4648..baa7acd 100644
 +
 +  # Patches for loong64
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
-+  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch" 
++  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
  
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
@@ -26,23 +26,14 @@ index 01d4648..baa7acd 100644
      )
  
      # Allow the use of nightly features with stable Rust compiler
-@@ -246,6 +252,8 @@ build() {
-   # https://crbug.com/957519#c122
-   CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
- 
-+  # Disable xnnpack on loong64
-+  _flags+=('build_tflite_with_xnnpack=false')
-   gn gen out/Release --args="${_flags[*]}"
-   ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
- }
-@@ -322,4 +330,14 @@ package() {
+@@ -322,4 +328,14 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
 +         "compiler-rt-adjust-paths-loong64.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
-+sha256sums+=('f085401b671544c7f77c34b4e6ea0c5e1055a3c7faf17948718386d10c5e25d2'
++sha256sums+=('aaff56e86f58731c788e31c21965f8aec7335abcb33a8290e40ec980d64c9f5a'
 +             '640ea1fa9cd6eac337afc41520184061fe60dd994613da7ba992e0e73f88057d'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
 +# nodejs 24 is broken upstream
