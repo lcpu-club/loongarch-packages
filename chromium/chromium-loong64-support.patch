@@ -336,7 +336,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
 --- a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -103,7 +103,7 @@ bool SyscallSets::IsUmask(int sysno) {
+@@ -103,7 +103,7 @@
  // Both EPERM and ENOENT are valid errno unless otherwise noted in comment.
  bool SyscallSets::IsFileSystem(int sysno) {
    switch (sysno) {
@@ -345,7 +345,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_access:  // EPERM not a valid errno.
      case __NR_chmod:
      case __NR_chown:
-@@ -161,7 +161,9 @@ bool SyscallSets::IsFileSystem(int sysno
+@@ -161,7 +161,9 @@
  #endif
      case __NR_openat:
      case __NR_readlinkat:
@@ -355,7 +355,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_renameat2:
  #if defined(__i386__) || defined(__arm__) || \
      (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
-@@ -211,7 +213,11 @@ bool SyscallSets::IsTruncate(int sysno)
+@@ -211,7 +213,11 @@
  
  bool SyscallSets::IsAllowedFileSystemAccessViaFd(int sysno) {
    switch (sysno) {
@@ -367,7 +367,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_ftruncate:
  #if defined(__i386__) || defined(__arm__) || \
      (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
-@@ -241,7 +247,7 @@ bool SyscallSets::IsAllowedFileSystemAcc
+@@ -241,7 +247,7 @@
      case __NR_oldfstat:
  #endif
  #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -376,7 +376,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_sync_file_range:  // EPERM not a valid errno.
  #elif defined(__arm__)
      case __NR_arm_sync_file_range:  // EPERM not a valid errno.
-@@ -260,7 +266,7 @@ bool SyscallSets::IsDeniedFileSystemAcce
+@@ -260,7 +266,7 @@
  #if defined(__i386__) || defined(__arm__)
      case __NR_fchown32:
  #endif
@@ -385,7 +385,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_getdents:    // EPERM not a valid errno.
  #endif
      case __NR_getdents64:  // EPERM not a valid errno.
-@@ -339,7 +345,7 @@ bool SyscallSets::IsProcessPrivilegeChan
+@@ -339,7 +345,7 @@
  bool SyscallSets::IsProcessGroupOrSession(int sysno) {
    switch (sysno) {
      case __NR_setpgid:
@@ -394,7 +394,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_getpgrp:
  #endif
      case __NR_setsid:
-@@ -373,7 +379,7 @@ bool SyscallSets::IsAllowedSignalHandlin
+@@ -373,7 +379,7 @@
      case __NR_rt_sigqueueinfo:
      case __NR_rt_sigsuspend:
      case __NR_rt_tgsigqueueinfo:
@@ -403,7 +403,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_signalfd:
  #endif
      case __NR_signalfd4:
-@@ -397,12 +403,12 @@ bool SyscallSets::IsAllowedOperationOnFd
+@@ -397,12 +403,12 @@
    switch (sysno) {
      case __NR_close:
      case __NR_dup:
@@ -418,7 +418,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_shutdown:
  #endif
        return true;
-@@ -441,7 +447,7 @@ bool SyscallSets::IsAllowedProcessStartO
+@@ -441,7 +447,7 @@
        return true;
      case __NR_clone:  // Should be parameter-restricted.
      case __NR_setns:  // Privileged.
@@ -427,7 +427,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_fork:
  #endif
  #if defined(__i386__) || defined(__x86_64__)
-@@ -452,7 +458,7 @@ bool SyscallSets::IsAllowedProcessStartO
+@@ -452,7 +458,7 @@
  #endif
      case __NR_set_tid_address:
      case __NR_unshare:
@@ -436,7 +436,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_vfork:
  #endif
      default:
-@@ -477,7 +483,7 @@ bool SyscallSets::IsAllowedFutex(int sys
+@@ -477,7 +483,7 @@
  
  bool SyscallSets::IsAllowedEpoll(int sysno) {
    switch (sysno) {
@@ -445,7 +445,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_epoll_create:
      case __NR_epoll_wait:
  #endif
-@@ -499,7 +505,7 @@ bool SyscallSets::IsAllowedEpoll(int sys
+@@ -499,7 +505,7 @@
  bool SyscallSets::IsDeniedGetOrModifySocket(int sysno) {
    switch (sysno) {
  #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -454,7 +454,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_accept:
      case __NR_accept4:
      case __NR_bind:
-@@ -548,13 +554,15 @@ bool SyscallSets::IsAllowedAddressSpaceA
+@@ -548,13 +554,15 @@
      case __NR_mlock:
      case __NR_munlock:
      case __NR_munmap:
@@ -471,7 +471,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_mmap:
  #endif
  #if defined(__i386__) || defined(__arm__) || \
-@@ -587,7 +595,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
+@@ -587,7 +595,7 @@
      (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
      case __NR__llseek:
  #endif
@@ -480,7 +480,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_poll:
  #endif
      case __NR_ppoll:
-@@ -608,7 +616,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
+@@ -608,7 +616,7 @@
      case __NR_recv:
  #endif
  #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -489,7 +489,25 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_recvfrom:  // Could specify source.
      case __NR_recvmsg:   // Could specify source.
  #endif
-@@ -672,7 +680,7 @@ bool SyscallSets::IsSeccomp(int sysno) {
+@@ -639,7 +647,7 @@
+     case __NR_send:
+ #endif
+ #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
+-    defined(__mips__) || defined(__aarch64__)
++    defined(__mips__) || defined(__aarch64__) || defined(__loongarch__)
+     case __NR_sendmsg:  // Could specify destination.
+     case __NR_sendto:   // Could specify destination.
+ #endif
+@@ -656,7 +664,7 @@
+     case __NR_send:
+ #endif
+ #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
+-    defined(__mips__) || defined(__aarch64__)
++    defined(__mips__) || defined(__aarch64__) || defined(__loongarch__)
+     case __NR_sendmsg:  // Could specify destination.
+     case __NR_sendto:   // Could specify destination.
+ #endif
+@@ -690,7 +698,7 @@
  bool SyscallSets::IsAllowedBasicScheduler(int sysno) {
    switch (sysno) {
      case __NR_sched_yield:
@@ -498,7 +516,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_pause:
  #endif
      case __NR_nanosleep:
-@@ -756,7 +764,7 @@ bool SyscallSets::IsNuma(int sysno) {
+@@ -774,7 +782,7 @@
      case __NR_getcpu:
      case __NR_mbind:
  #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -507,7 +525,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_migrate_pages:
  #endif
      case __NR_move_pages:
-@@ -804,7 +812,9 @@ bool SyscallSets::IsGlobalProcessEnviron
+@@ -822,7 +830,9 @@
      case __NR_getrusage:
      case __NR_personality:  // Can change its personality as well.
      case __NR_prlimit64:    // Like setrlimit / getrlimit.
@@ -517,7 +535,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_times:
        return true;
      default:
-@@ -826,7 +836,7 @@ bool SyscallSets::IsDebug(int sysno) {
+@@ -844,7 +854,7 @@
  
  bool SyscallSets::IsGlobalSystemStatus(int sysno) {
    switch (sysno) {
@@ -526,7 +544,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR__sysctl:
      case __NR_sysfs:
  #endif
-@@ -844,7 +854,7 @@ bool SyscallSets::IsGlobalSystemStatus(i
+@@ -862,7 +872,7 @@
  
  bool SyscallSets::IsEventFd(int sysno) {
    switch (sysno) {
@@ -535,7 +553,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_eventfd:
  #endif
      case __NR_eventfd2:
-@@ -896,7 +906,7 @@ bool SyscallSets::IsKeyManagement(int sy
+@@ -914,7 +924,7 @@
  }
  
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -544,7 +562,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  bool SyscallSets::IsSystemVSemaphores(int sysno) {
    switch (sysno) {
      case __NR_semctl:
-@@ -916,7 +926,7 @@ bool SyscallSets::IsSystemVSemaphores(in
+@@ -934,7 +944,7 @@
  
  #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
      defined(__aarch64__) ||                                         \
@@ -553,7 +571,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  // These give a lot of ambient authority and bypass the setuid sandbox.
  bool SyscallSets::IsSystemVSharedMemory(int sysno) {
    switch (sysno) {
-@@ -932,7 +942,7 @@ bool SyscallSets::IsSystemVSharedMemory(
+@@ -950,7 +960,7 @@
  #endif
  
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -562,7 +580,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  bool SyscallSets::IsSystemVMessageQueue(int sysno) {
    switch (sysno) {
      case __NR_msgctl:
-@@ -963,7 +973,7 @@ bool SyscallSets::IsSystemVIpc(int sysno
+@@ -981,7 +991,7 @@
  
  bool SyscallSets::IsAnySystemV(int sysno) {
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -571,7 +589,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    return IsSystemVMessageQueue(sysno) || IsSystemVSemaphores(sysno) ||
           IsSystemVSharedMemory(sysno);
  #elif defined(__i386__) || \
-@@ -1000,7 +1010,7 @@ bool SyscallSets::IsAdvancedScheduler(in
+@@ -1018,7 +1028,7 @@
  bool SyscallSets::IsInotify(int sysno) {
    switch (sysno) {
      case __NR_inotify_add_watch:
@@ -580,7 +598,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_inotify_init:
  #endif
      case __NR_inotify_init1:
-@@ -1135,7 +1145,7 @@ bool SyscallSets::IsMisc(int sysno) {
+@@ -1153,7 +1163,7 @@
  #if defined(__x86_64__)
      case __NR_tuxcall:
  #endif
