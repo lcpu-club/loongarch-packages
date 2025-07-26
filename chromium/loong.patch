@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 01d4648..baa7acd 100644
+index 01d4648..4604296 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -112,7 +112,13 @@ prepare() {
@@ -42,7 +42,7 @@ index 01d4648..baa7acd 100644
 +source+=("chromium-loong64-support.patch"
 +         "compiler-rt-adjust-paths-loong64.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
-+sha256sums+=('f085401b671544c7f77c34b4e6ea0c5e1055a3c7faf17948718386d10c5e25d2'
++sha256sums+=('9d96b078934e41b6d14645ead011a06fb7a079f5b0725e5b07811be5b76e0e5d'
 +             '640ea1fa9cd6eac337afc41520184061fe60dd994613da7ba992e0e73f88057d'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
 +# nodejs 24 is broken upstream
