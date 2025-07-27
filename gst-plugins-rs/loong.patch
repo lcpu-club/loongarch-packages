@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 0d9dac0..11f87b3 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -103,6 +103,7 @@ _cargo_c_options=(
+   --exclude gst-plugin-csound
+   --exclude gst-plugin-ndi
+   --exclude gst-plugin-vvdec
++  --exclude gst-plugin-skia
+ )
+ 
+ # Link with libsodium from system
+@@ -605,4 +606,9 @@ package_gst-plugin-webrtchttp() {
+   mv plugin-webrtchttp/* "$pkgdir"
+ }
+ 
++# To build aws-lc-sys and skia-bindings on loong64
++makedepends+=(cmake clang)
++# Upstream doesn't provide the skia or gn binary for loong64
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(gst-plugin-skia)$'))
++
+ # vim:set sw=2 sts=-1 et:
