@@ -25,7 +25,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc
 --- a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -310,6 +310,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
+@@ -346,6 +346,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
      info->arch = extensions::api::runtime::PlatformArch::kMips;
    } else if (strcmp(arch, "mips64el") == 0) {
      info->arch = extensions::api::runtime::PlatformArch::kMips64;
@@ -34,7 +34,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ch
    } else {
      NOTREACHED();
    }
-@@ -325,6 +327,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
+@@ -361,6 +363,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
      info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kMips;
    } else if (strcmp(nacl_arch, "mips64") == 0) {
      info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kMips64;
@@ -46,7 +46,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ch
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/embedder_support/user_agent_utils.cc b/components/embedder_support/user_agent_utils.cc
 --- a/components/embedder_support/user_agent_utils.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/components/embedder_support/user_agent_utils.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -749,6 +749,8 @@ std::string GetCpuArchitecture() {
+@@ -757,6 +757,8 @@ std::string GetCpuArchitecture() {
                cpu_info.substr(2, 2) == "86") ||
               base::StartsWith(cpu_info, "x86")) {
      return "x86";
@@ -139,9 +139,9 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/ex
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/gpu/config/software_rendering_list.json b/gpu/config/software_rendering_list.json
 --- a/gpu/config/software_rendering_list.json	2000-01-01 00:00:00.000000000 +0800
 +++ b/gpu/config/software_rendering_list.json	2000-01-01 00:00:00.000000000 +0800
-@@ -1447,6 +1447,18 @@
+@@ -1463,6 +1463,18 @@
        "features": [
-         "accelerated_2d_canvas"
+         "skia_graphite"
        ]
 +    },
 +    {
@@ -166,7 +166,8 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
                    (current_cpu == "x86" || current_cpu == "x64" ||
                     current_cpu == "arm" || current_cpu == "arm64" ||
 -                   current_cpu == "mipsel" || current_cpu == "mips64el")
-+                   current_cpu == "mipsel" || current_cpu == "mips64el"  || current_cpu == "loong64")
++                   current_cpu == "mipsel" || current_cpu == "mips64el" || current_cpu == "loong64")
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/bpf_dsl/linux_syscall_ranges.h b/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
 --- a/sandbox/linux/bpf_dsl/linux_syscall_ranges.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/bpf_dsl/linux_syscall_ranges.h	2000-01-01 00:00:00.000000000 +0800
 @@ -56,6 +56,13 @@
@@ -237,7 +238,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc b/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
 --- a/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -193,7 +193,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
+@@ -197,7 +197,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
      return RestrictFcntlCommands();
  #endif
  
@@ -246,7 +247,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    // fork() is never used as a system call (clone() is used instead), but we
    // have seen it in fallback code on Android.
    if (sysno == __NR_fork) {
-@@ -255,7 +255,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
+@@ -259,7 +259,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
    }
  
  #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -255,7 +256,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    if (sysno == __NR_mmap)
      return RestrictMmapFlags();
  #endif
-@@ -276,7 +276,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
+@@ -280,7 +280,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
      return RestrictPrctl();
  
  #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -264,7 +265,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    if (sysno == __NR_socketpair) {
      // Only allow AF_UNIX, PF_UNIX. Crash if anything else is seen.
      static_assert(AF_UNIX == PF_UNIX,
-@@ -302,6 +302,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
+@@ -306,6 +306,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
      return Allow();
    }
  
@@ -272,7 +273,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    // The fstatat syscalls are file system syscalls, which will be denied below
    // with fs_denied_errno. However some allowed fstat syscalls are rewritten by
    // libc implementations to fstatat syscalls, and we need to rewrite them back.
-@@ -319,6 +320,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
+@@ -323,6 +324,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
      return If(mask == STATX_BASIC_STATS, Error(ENOSYS))
          .Else(Error(fs_denied_errno));
    }
@@ -280,7 +281,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  
    if (SyscallSets::IsFileSystem(sysno) ||
        SyscallSets::IsCurrentDirectory(sysno)) {
-@@ -366,7 +368,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
+@@ -370,7 +372,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
    // Allow creating pipes, but don't allow weird flags to pipe2().
    // O_NOTIFICATION_PIPE (== O_EXCL) can be used to create
    // "notification pipes", which are rarely used.
@@ -311,7 +312,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
 --- a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -37,7 +37,7 @@
+@@ -39,7 +39,7 @@
  #include "sandbox/linux/system_headers/linux_time.h"
  
  #if BUILDFLAG(IS_LINUX) && !defined(__arm__) && !defined(__aarch64__) && \
@@ -320,7 +321,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  // Also include asm/ptrace-abi.h since ptrace.h in older libc (for instance
  // the one in Ubuntu 16.04 LTS) is missing PTRACE_GET_THREAD_AREA.
  // asm/ptrace-abi.h doesn't exist on arm32 and PTRACE_GET_THREAD_AREA isn't
-@@ -471,8 +471,11 @@ ResultExpr RestrictPtrace() {
+@@ -476,8 +476,11 @@ ResultExpr RestrictPtrace() {
    return Switch(request)
        .Cases({
  #if !defined(__aarch64__)
@@ -333,6 +334,15 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  #endif
  #if defined(__arm__)
                   PTRACE_GETVFPREGS,
+@@ -521,7 +524,7 @@ SANDBOX_EXPORT bpf_dsl::ResultExpr Restr
+       break;
+ #endif
+ #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
+-    defined(__mips__) || defined(__aarch64__)
++    defined(__mips__) || defined(__aarch64__) || defined(__loongarch__)
+     case __NR_sendto:  // Could specify destination.
+       argIndex = 3;
+       break;
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
 --- a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc	2000-01-01 00:00:00.000000000 +0800
@@ -489,7 +499,25 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_recvfrom:  // Could specify source.
      case __NR_recvmsg:   // Could specify source.
  #endif
-@@ -672,7 +680,7 @@ bool SyscallSets::IsSeccomp(int sysno) {
+@@ -639,7 +647,7 @@ bool SyscallSets::IsAllowedGeneralIo(int
+     case __NR_send:
+ #endif
+ #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
+-    defined(__mips__) || defined(__aarch64__)
++    defined(__mips__) || defined(__aarch64__) || defined(__loongarch__)
+     case __NR_sendmsg:  // Could specify destination.
+     case __NR_sendto:   // Could specify destination.
+ #endif
+@@ -656,7 +664,7 @@ bool SyscallSets::IsSockSendOneMsg(int s
+     case __NR_send:
+ #endif
+ #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
+-    defined(__mips__) || defined(__aarch64__)
++    defined(__mips__) || defined(__aarch64__) || defined(__loongarch__)
+     case __NR_sendmsg:  // Could specify destination.
+     case __NR_sendto:   // Could specify destination.
+ #endif
+@@ -690,7 +698,7 @@ bool SyscallSets::IsSeccomp(int sysno) {
  bool SyscallSets::IsAllowedBasicScheduler(int sysno) {
    switch (sysno) {
      case __NR_sched_yield:
@@ -498,7 +526,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_pause:
  #endif
      case __NR_nanosleep:
-@@ -756,7 +764,7 @@ bool SyscallSets::IsNuma(int sysno) {
+@@ -774,7 +782,7 @@ bool SyscallSets::IsNuma(int sysno) {
      case __NR_getcpu:
      case __NR_mbind:
  #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -507,7 +535,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_migrate_pages:
  #endif
      case __NR_move_pages:
-@@ -804,7 +812,9 @@ bool SyscallSets::IsGlobalProcessEnviron
+@@ -822,7 +830,9 @@ bool SyscallSets::IsGlobalProcessEnviron
      case __NR_getrusage:
      case __NR_personality:  // Can change its personality as well.
      case __NR_prlimit64:    // Like setrlimit / getrlimit.
@@ -517,7 +545,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_times:
        return true;
      default:
-@@ -826,7 +836,7 @@ bool SyscallSets::IsDebug(int sysno) {
+@@ -844,7 +854,7 @@ bool SyscallSets::IsDebug(int sysno) {
  
  bool SyscallSets::IsGlobalSystemStatus(int sysno) {
    switch (sysno) {
@@ -526,7 +554,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR__sysctl:
      case __NR_sysfs:
  #endif
-@@ -844,7 +854,7 @@ bool SyscallSets::IsGlobalSystemStatus(i
+@@ -862,7 +872,7 @@ bool SyscallSets::IsGlobalSystemStatus(i
  
  bool SyscallSets::IsEventFd(int sysno) {
    switch (sysno) {
@@ -535,7 +563,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_eventfd:
  #endif
      case __NR_eventfd2:
-@@ -896,7 +906,7 @@ bool SyscallSets::IsKeyManagement(int sy
+@@ -914,7 +924,7 @@ bool SyscallSets::IsKeyManagement(int sy
  }
  
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -544,7 +572,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  bool SyscallSets::IsSystemVSemaphores(int sysno) {
    switch (sysno) {
      case __NR_semctl:
-@@ -916,7 +926,7 @@ bool SyscallSets::IsSystemVSemaphores(in
+@@ -934,7 +944,7 @@ bool SyscallSets::IsSystemVSemaphores(in
  
  #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
      defined(__aarch64__) ||                                         \
@@ -553,7 +581,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  // These give a lot of ambient authority and bypass the setuid sandbox.
  bool SyscallSets::IsSystemVSharedMemory(int sysno) {
    switch (sysno) {
-@@ -932,7 +942,7 @@ bool SyscallSets::IsSystemVSharedMemory(
+@@ -950,7 +960,7 @@ bool SyscallSets::IsSystemVSharedMemory(
  #endif
  
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -562,7 +590,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  bool SyscallSets::IsSystemVMessageQueue(int sysno) {
    switch (sysno) {
      case __NR_msgctl:
-@@ -963,7 +973,7 @@ bool SyscallSets::IsSystemVIpc(int sysno
+@@ -981,7 +991,7 @@ bool SyscallSets::IsSystemVIpc(int sysno
  
  bool SyscallSets::IsAnySystemV(int sysno) {
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -571,7 +599,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    return IsSystemVMessageQueue(sysno) || IsSystemVSemaphores(sysno) ||
           IsSystemVSharedMemory(sysno);
  #elif defined(__i386__) || \
-@@ -1000,7 +1010,7 @@ bool SyscallSets::IsAdvancedScheduler(in
+@@ -1018,7 +1028,7 @@ bool SyscallSets::IsAdvancedScheduler(in
  bool SyscallSets::IsInotify(int sysno) {
    switch (sysno) {
      case __NR_inotify_add_watch:
@@ -580,7 +608,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
      case __NR_inotify_init:
  #endif
      case __NR_inotify_init1:
-@@ -1135,7 +1145,7 @@ bool SyscallSets::IsMisc(int sysno) {
+@@ -1153,7 +1163,7 @@ bool SyscallSets::IsMisc(int sysno) {
  #if defined(__x86_64__)
      case __NR_tuxcall:
  #endif
@@ -592,7 +620,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
 --- a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h	2000-01-01 00:00:00.000000000 +0800
-@@ -79,18 +79,18 @@ class SANDBOX_EXPORT SyscallSets {
+@@ -80,18 +80,18 @@ class SANDBOX_EXPORT SyscallSets {
    static bool IsAsyncIo(int sysno);
    static bool IsKeyManagement(int sysno);
  #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -617,7 +645,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/seccomp-bpf/syscall.cc b/sandbox/linux/seccomp-bpf/syscall.cc
 --- a/sandbox/linux/seccomp-bpf/syscall.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/seccomp-bpf/syscall.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -23,7 +23,7 @@ namespace sandbox {
+@@ -19,7 +19,7 @@ namespace sandbox {
  namespace {
  
  #if defined(ARCH_CPU_X86_FAMILY) || defined(ARCH_CPU_ARM_FAMILY) || \
@@ -626,7 +654,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  // Number that's not currently used by any Linux kernel ABIs.
  const int kInvalidSyscallNumber = 0x351d3;
  #else
-@@ -313,6 +313,27 @@ asm(// We need to be able to tell the ke
+@@ -309,6 +309,27 @@ asm(// We need to be able to tell the ke
      "2:ret\n"
      ".cfi_endproc\n"
      ".size SyscallAsm, .-SyscallAsm\n"
@@ -654,7 +682,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  #endif
      );  // asm
  
-@@ -430,6 +451,18 @@ intptr_t Syscall::Call(int nr,
+@@ -426,6 +447,18 @@ intptr_t Syscall::Call(int nr,
      ret = inout;
    }
  
@@ -676,7 +704,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/services/credentials.cc b/sandbox/linux/services/credentials.cc
 --- a/sandbox/linux/services/credentials.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/services/credentials.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -87,7 +87,7 @@ bool ChrootToSafeEmptyDir() {
+@@ -90,7 +90,7 @@ bool ChrootToSafeEmptyDir() {
    alignas(16) char stack_buf[PTHREAD_STACK_MIN_CONST];
  
  #if defined(ARCH_CPU_X86_FAMILY) || defined(ARCH_CPU_ARM_FAMILY) || \
@@ -967,7 +995,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/syscall_broker/syscall_dispatcher.cc b/sandbox/linux/syscall_broker/syscall_dispatcher.cc
 --- a/sandbox/linux/syscall_broker/syscall_dispatcher.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/syscall_broker/syscall_dispatcher.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -31,6 +31,8 @@ int SyscallDispatcher::DefaultStatForTes
+@@ -27,6 +27,8 @@ int SyscallDispatcher::DefaultStatForTes
    return Stat64(pathname, follow_links, sb);
  #elif defined(__NR_newfstatat)
    return Stat(pathname, follow_links, sb);
@@ -976,7 +1004,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  #endif
  }
  
-@@ -174,6 +176,19 @@ int SyscallDispatcher::DispatchSyscall(c
+@@ -170,6 +172,19 @@ int SyscallDispatcher::DispatchSyscall(c
        return Stat64(reinterpret_cast<const char*>(args.args[0]), true,
                      reinterpret_cast<struct kernel_stat64*>(args.args[1]));
  #endif
@@ -9655,15 +9683,15 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/ffmpeg/ffmpeg_generated.gni b/third_party/ffmpeg/ffmpeg_generated.gni
 --- a/third_party/ffmpeg/ffmpeg_generated.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/ffmpeg/ffmpeg_generated.gni	2000-01-01 00:00:00.000000000 +0800
-@@ -255,6 +255,7 @@ if ((current_cpu == "arm64" && ffmpeg_br
- 
- if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
+@@ -258,6 +258,7 @@ if (((current_cpu == "arm64" || current_
+ if (((current_cpu == "arm64" || current_cpu == "arm64e") &&
+      ffmpeg_branding == "Chrome") ||
      (current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
 +    (current_cpu == "loong64" && ffmpeg_branding == "Chrome") ||
      (is_android && current_cpu == "arm" && arm_use_neon &&
       ffmpeg_branding == "Chrome") ||
      (is_android && current_cpu == "x86" && ffmpeg_branding == "Chrome") ||
-@@ -384,6 +385,19 @@ if (current_cpu == "x64" || (is_android
+@@ -390,6 +391,19 @@ if (current_cpu == "arm64" || current_cp
    ]
  }
  
@@ -9955,3 +9983,214 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
  #include "llvm/Support/Alignment.h"
  #include "llvm/Support/Compiler.h"
  #include "llvm/Support/MathExtras.h"
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/xnnpack/BUILD.gn b/third_party/xnnpack/BUILD.gn
+--- a/third_party/xnnpack/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
++++ b/third_party/xnnpack/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
+@@ -1494,6 +1494,16 @@ if (current_cpu == "x64" || current_cpu
+     ":xx-pad_arm64_standalone",
+     ":xx-transposev_arm64_standalone",
+   ]
++} else if (current_cpu == "loong64") {
++  xnnpack_deps = [
++    ":configs_loong64",
++    ":enums_loong64",
++  ]
++
++  xnnpack_standalone_deps = [
++    ":configs_loong64_standalone",
++    ":enums_loong64_standalone",
++  ]
+ } else {
+   xnnpack_deps = []
+   xnnpack_standalone_deps = []
+@@ -42035,6 +42045,160 @@ if (current_cpu == "arm64") {
+     ]
+ 
+     configs -= [ "//build/config/compiler:chromium_code" ]
++    configs += [ "//build/config/compiler:no_chromium_code" ]
++    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
++
++    deps = [
++      "//third_party/cpuinfo",
++      "//third_party/fp16",
++      "//third_party/fxdiv",
++      "//third_party/pthreadpool:pthreadpool_standalone",
++    ]
++
++    public_configs = [ ":xnnpack_config" ]
++
++    if (!(is_android && use_order_profiling)) {
++      assert_no_deps = [ "//base" ]
++    }
++  }
++}
++
++if (current_cpu == "loong64") {
++  source_set("configs_loong64") {
++    cflags = []
++
++    sources = [
++      "src/include/xnnpack.h",
++      "src/src/configs/argmaxpool-config.c",
++      "src/src/configs/avgpool-config.c",
++      "src/src/configs/binary-elementwise-config.c",
++      "src/src/configs/cmul-config.c",
++      "src/src/configs/conv-hwc2chw-config.c",
++      "src/src/configs/dwconv-config.c",
++      "src/src/configs/dwconv2d-chw-config.c",
++      "src/src/configs/gemm-config.c",
++      "src/src/configs/hardware-config.c",
++      "src/src/configs/ibilinear-chw-config.c",
++      "src/src/configs/ibilinear-config.c",
++      "src/src/configs/lut32norm-config.c",
++      "src/src/configs/maxpool-config.c",
++      "src/src/configs/pack-lh-config.c",
++      "src/src/configs/raddstoreexpminusmax-config.c",
++      "src/src/configs/reduce-config.c",
++      "src/src/configs/spmm-config.c",
++      "src/src/configs/transpose-config.c",
++      "src/src/configs/unary-elementwise-config.c",
++      "src/src/configs/unpool-config.c",
++      "src/src/configs/vmulcaddc-config.c",
++      "src/src/configs/x8-lut-config.c",
++      "src/src/configs/xx-fill-config.c",
++      "src/src/configs/xx-pad-config.c",
++    ]
++
++    configs -= [ "//build/config/compiler:chromium_code" ]
++    configs += [ "//build/config/compiler:no_chromium_code" ]
++    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
++
++    deps = [
++      "//third_party/cpuinfo",
++      "//third_party/fp16",
++      "//third_party/fxdiv",
++      "//third_party/pthreadpool",
++    ]
++
++    public_configs = [ ":xnnpack_config" ]
++  }
++
++  # This is a target that cannot depend on //base.
++  source_set("configs_loong64_standalone") {
++    cflags = []
++
++    sources = [
++      "src/include/xnnpack.h",
++      "src/src/configs/argmaxpool-config.c",
++      "src/src/configs/avgpool-config.c",
++      "src/src/configs/binary-elementwise-config.c",
++      "src/src/configs/cmul-config.c",
++      "src/src/configs/conv-hwc2chw-config.c",
++      "src/src/configs/dwconv-config.c",
++      "src/src/configs/dwconv2d-chw-config.c",
++      "src/src/configs/gemm-config.c",
++      "src/src/configs/hardware-config.c",
++      "src/src/configs/ibilinear-chw-config.c",
++      "src/src/configs/ibilinear-config.c",
++      "src/src/configs/lut32norm-config.c",
++      "src/src/configs/maxpool-config.c",
++      "src/src/configs/pack-lh-config.c",
++      "src/src/configs/raddstoreexpminusmax-config.c",
++      "src/src/configs/reduce-config.c",
++      "src/src/configs/spmm-config.c",
++      "src/src/configs/transpose-config.c",
++      "src/src/configs/unary-elementwise-config.c",
++      "src/src/configs/unpool-config.c",
++      "src/src/configs/vmulcaddc-config.c",
++      "src/src/configs/x8-lut-config.c",
++      "src/src/configs/xx-fill-config.c",
++      "src/src/configs/xx-pad-config.c",
++    ]
++
++    configs -= [ "//build/config/compiler:chromium_code" ]
++    configs += [ "//build/config/compiler:no_chromium_code" ]
++    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
++
++    deps = [
++      "//third_party/cpuinfo",
++      "//third_party/fp16",
++      "//third_party/fxdiv",
++      "//third_party/pthreadpool:pthreadpool_standalone",
++    ]
++
++    public_configs = [ ":xnnpack_config" ]
++
++    if (!(is_android && use_order_profiling)) {
++      assert_no_deps = [ "//base" ]
++    }
++  }
++
++  source_set("enums_loong64") {
++    cflags = []
++
++    sources = [
++      "src/include/xnnpack.h",
++      "src/src/enums/allocation-type.c",
++      "src/src/enums/datatype-strings.c",
++      "src/src/enums/microkernel-type.c",
++      "src/src/enums/node-type.c",
++      "src/src/enums/operator-type.c",
++    ]
++
++    configs -= [ "//build/config/compiler:chromium_code" ]
++    configs += [ "//build/config/compiler:no_chromium_code" ]
++    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
++
++    deps = [
++      "//third_party/cpuinfo",
++      "//third_party/fp16",
++      "//third_party/fxdiv",
++      "//third_party/pthreadpool",
++    ]
++
++    public_configs = [ ":xnnpack_config" ]
++  }
++
++  # This is a target that cannot depend on //base.
++  source_set("enums_loong64_standalone") {
++    cflags = []
++
++    sources = [
++      "src/include/xnnpack.h",
++      "src/src/enums/allocation-type.c",
++      "src/src/enums/datatype-strings.c",
++      "src/src/enums/microkernel-type.c",
++      "src/src/enums/node-type.c",
++      "src/src/enums/operator-type.c",
++    ]
++
++    configs -= [ "//build/config/compiler:chromium_code" ]
+     configs += [ "//build/config/compiler:no_chromium_code" ]
+     configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
+ 
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/xnnpack/src/src/xnnpack/common.h b/third_party/xnnpack/src/src/xnnpack/common.h
+--- a/third_party/xnnpack/src/src/xnnpack/common.h	2000-01-01 00:00:00.000000000 +0800
++++ b/third_party/xnnpack/src/src/xnnpack/common.h	2000-01-01 00:00:00.000000000 +0800
+@@ -79,6 +79,12 @@
+ #define XNN_ARCH_WASMRELAXEDSIMD 0
+ #endif
+ 
++#if defined(__loongarch__)
++#define XNN_ARCH_LOONGARCH 1
++#else
++#define XNN_ARCH_LOONGARCH 0
++#endif
++
+ // Define platform identification macros
+ 
+ #if defined(__ANDROID__)
+diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/xnnpack/src/src/xnnpack/hardware-config.h b/third_party/xnnpack/src/src/xnnpack/hardware-config.h
+--- a/third_party/xnnpack/src/src/xnnpack/hardware-config.h	2000-01-01 00:00:00.000000000 +0800
++++ b/third_party/xnnpack/src/src/xnnpack/hardware-config.h	2000-01-01 00:00:00.000000000 +0800
+@@ -77,6 +77,10 @@ enum xnn_arch_flags {
+ #if XNN_ARCH_HEXAGON
+   xnn_arch_hvx = 1 << 0,
+ #endif  // XNN_ARCH_HEXAGON
++#if XNN_ARCH_LOONGARCH
++  xnn_arch_lsx = 1 << 0,
++  xnn_arch_lasx = 1 << 1,
++#endif  // XNN_ARCH_LOONGARCH
+ };
+ 
+ struct xnn_hardware_config {
