@@ -1,0 +1,10 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c2521f1..a241075 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -131,3 +131,5 @@ package() {
+   python -m installer --destdir="$pkgdir" dist/*.whl
+   install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+ }
++
++checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^(python-numba)$'))
