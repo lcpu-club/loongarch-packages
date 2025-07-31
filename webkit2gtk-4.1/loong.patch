@@ -1,25 +1,21 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 5851653..817dcf1 100644
+index 5a22552..35a9872 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -120,6 +120,8 @@ validpgpkeys=(
+@@ -121,6 +121,7 @@ validpgpkeys=(
  
  prepare() {
    cd webkitgtk-$pkgver
 +  patch -p1 -i "${srcdir}/loongarch-simde-use-a-portable-version-to-avoid-comp.patch"
-+  patch -p1 -i "${srcdir}/add-lasx-sources-to-CMakeList.txt.patch"
  }
  
  build() {
-@@ -190,4 +192,11 @@ package_webkit2gtk-4.1-docs() {
+@@ -193,4 +194,8 @@ package_webkit2gtk-4.1-docs() {
    mv doc/* "$pkgdir"
  }
  
-+source+=("loongarch-simde-use-a-portable-version-to-avoid-comp.patch"
-+         "add-lasx-sources-to-CMakeList.txt.patch")
-+sha256sums+=('9d386e91becb40c811f67858de5857f321cedfda4b6c4b6d171fb69c8640cfbc'
-+             '47bdffdb426b38dff53c5ecf14c231179b5106f46c0c0f06b6eb8f3c14a1d3f3')
-+b2sums+=('e35fc51cb8083e632928e29c4f5b484e5cdb5787b3822c3f2ce019fbb408c093365c7316a82f94afdb382ec4b521f21b44d37d26ab05c9a68e448efbe09d2b68'
-+         '70e8cf541386212f83a0b569385b2d8d99679f52f189820417e12f5915492d1e9660261db91a3cc60b9082c39180825d9ec83c949cc02585de772ca83b85fa65')
++source+=("loongarch-simde-use-a-portable-version-to-avoid-comp.patch")
++sha256sums+=('9d386e91becb40c811f67858de5857f321cedfda4b6c4b6d171fb69c8640cfbc')
++b2sums+=('e35fc51cb8083e632928e29c4f5b484e5cdb5787b3822c3f2ce019fbb408c093365c7316a82f94afdb382ec4b521f21b44d37d26ab05c9a68e448efbe09d2b68')
 +
  # vim:set sw=2 sts=-1 et:
