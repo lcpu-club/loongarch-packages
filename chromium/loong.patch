@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index fc49567..ffb9bc5 100644
+index fc49567..32f814f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -8,7 +8,7 @@ pkgname=chromium
@@ -44,7 +44,7 @@ index fc49567..ffb9bc5 100644
        )
      fi
  
-@@ -331,4 +339,14 @@ package() {
+@@ -331,4 +339,11 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
@@ -54,8 +54,5 @@ index fc49567..ffb9bc5 100644
 +sha256sums+=('aaff56e86f58731c788e31c21965f8aec7335abcb33a8290e40ec980d64c9f5a'
 +             '640ea1fa9cd6eac337afc41520184061fe60dd994613da7ba992e0e73f88057d'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
-+# nodejs 24 is broken upstream
-+makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(nodejs)$'))
-+makedepends+=(nodejs-lts-jod)
 +
  # vim:set ts=2 sw=2 et:
