@@ -80,7 +80,7 @@
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -252,14 +250,10 @@ package_gcc() {
+@@ -252,15 +250,11 @@ package_gcc() {
    make -C $CHOST/libsanitizer/asan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
    make -C $CHOST/libsanitizer/tsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
    make -C $CHOST/libsanitizer/lsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
@@ -90,14 +90,16 @@
 -  make -C $CHOST/32/libsanitizer/asan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
  
    make -C gcc DESTDIR="$pkgdir" install-man install-info
--  rm "$pkgdir"/usr/share/man/man1/{gccgo,gfortran,lto-dump,gdc,gm2}.1
+-  rm "$pkgdir"/usr/share/man/man1/{gccgo,gfortran,lto-dump,gdc,gm2,gcobol}.1
+-  rm "$pkgdir"/usr/share/man/man3/gcobol-io.3
 -  rm "$pkgdir"/usr/share/info/{gccgo,gfortran,gnat-style,gnat_rm,gnat_ugn,gdc,m2}.info
-+  rm -f "$pkgdir"/usr/share/man/man1/{gccgo,gfortran,lto-dump,gdc,gm2}.1
++  rm -f "$pkgdir"/usr/share/man/man1/{gccgo,gfortran,lto-dump,gdc,gm2,gcobol}.1
++  rm -f "$pkgdir"/usr/share/man/man3/gcobol-io.3
 +  rm -f "$pkgdir"/usr/share/info/{gccgo,gfortran,gnat-style,gnat_rm,gnat_ugn,gdc,m2}.info
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -270,7 +264,7 @@ package_gcc() {
+@@ -271,7 +265,7 @@ package_gcc() {
    # create cc-rs compatible symlinks
    # https://github.com/rust-lang/cc-rs/blob/1.0.73/src/lib.rs#L2578-L2581
    for binary in {c++,g++,gcc,gcc-ar,gcc-nm,gcc-ranlib}; do
@@ -106,7 +108,7 @@
    done
  
    # POSIX conformance launcher scripts for c89 and c99
-@@ -302,8 +296,6 @@ package_gcc-fortran() {
+@@ -303,8 +297,6 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS,gfor_cHEADERS}
@@ -115,7 +117,7 @@
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_fincludeHEADERS
    make -C gcc DESTDIR="$pkgdir" fortran.install-{common,man,info}
    install -Dm755 gcc/f951 "$pkgdir/${_libdir}/f951"
-@@ -348,10 +340,6 @@ package_gcc-ada() {
+@@ -349,10 +341,6 @@ package_gcc-ada() {
    make DESTDIR="${pkgdir}" INSTALL="install" \
      INSTALL_DATA="install -m644" install-libada
  
@@ -126,7 +128,7 @@
    ln -s gcc "$pkgdir/usr/bin/gnatgcc"
  
    # insist on dynamic linking, but keep static libraries because gnatmake complains
-@@ -360,12 +348,6 @@ package_gcc-ada() {
+@@ -361,12 +349,6 @@ package_gcc-ada() {
    ln -s libgnat-${pkgver%%.*}.so "$pkgdir/usr/lib/libgnat.so"
    rm -f "$pkgdir"/${_libdir}/adalib/libgna{rl,t}.so
  
@@ -139,7 +141,7 @@
    # Install Runtime Library Exception
    install -d "$pkgdir/usr/share/licenses/$pkgname/"
    ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
-@@ -527,3 +509,9 @@ package_libgccjit() {
+@@ -528,3 +510,9 @@ package_libgccjit() {
    ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
      "$pkgdir/usr/share/licenses/$pkgname/"
  }
