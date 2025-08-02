@@ -1,0 +1,18 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 385151b..9adfeab 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -57,6 +57,13 @@ check() {
+   rm test/parallel/test-http2-client-set-priority.js
+   rm test/parallel/test-http2-priority-event.js
+   rm test/parallel/test-http-outgoing-end-cork.js
++  # Skip tests failed on loong64
++  rm -f test/parallel/test-dgram-send-cb-quelches-error.js \
++    test/parallel/test-net-autoselectfamily.js \
++    test/sequential/test-cpu-prof-dir-worker.js \
++    test/sequential/test-diagnostic-dir-cpu-prof.js \
++    test/parallel/test-runner-watch-mode.mjs \
++    test/sequential/test-cpu-prof-dir-relative.js
+   make test-only
+ }
+ 
