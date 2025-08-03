@@ -1,10 +1,10 @@
 # Maintainer: wszqkzqk <wszqkzqk@qq.com>
 
 _pkgver=1.4.0
-_patchver=1
+_patchver=2
 pkgname=devtools-loong64
 pkgver=${_pkgver}.patch${_patchver}
-pkgrel=2
+pkgrel=1
 pkgdesc='Tools for Arch Linux LoongArch package maintainers'
 arch=('loong64' 'x86_64' 'riscv64' 'aarch64')
 license=('GPL-3.0-or-later')
@@ -40,7 +40,7 @@ sha256sums=('7b9efdecfe9b770cedf9f8a7039aad31842454167caddb63315ec58949edaf24'
             '3e048911fb330cd92d88c330c91232d8e271c892aa239c82d979ffedc20c215c'
             '820cb7964fd724b88b3a4df87f3ca86b53c3d3e5c314024599dfc50afdcbc7a0'
             'a33135cf0adf39bc93076928eade0a9b2efb24d8bdc692d61bd1a00552c74d7a'
-            '0bd5e25fe219fd913e820e49f1de170089d641dafe7dc4167601d10efaaaab54'
+            '7615da05acd2dd0783ea7c63f287fca9e66bd3b2d8f945b512c214d1372733c8'
             '9510b27d5f3f360bc57d6911d061ac3a5cca24a824ed2c3f215da80ac05e528e'
             '0fa4957e6a2097a288036d18953969ff765912518f5b6a01f983a3d2f7f6a8e1')
 
