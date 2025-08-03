@@ -238,15 +238,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc b/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
 --- a/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -197,7 +197,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
-     return RestrictFcntlCommands();
- #endif
- 
--#if !defined(__aarch64__)
-+#if !defined(__aarch64__) && !defined(__loongarch__)
-   // fork() is never used as a system call (clone() is used instead), but we
-   // have seen it in fallback code on Android.
-   if (sysno == __NR_fork) {
 @@ -259,7 +259,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
    }
  
@@ -256,15 +247,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
    if (sysno == __NR_mmap)
      return RestrictMmapFlags();
  #endif
-@@ -280,7 +280,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
-     return RestrictPrctl();
- 
- #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
--    defined(__aarch64__)
-+    defined(__aarch64__) || defined(__loongarch__)
-   if (sysno == __NR_socketpair) {
-     // Only allow AF_UNIX, PF_UNIX. Crash if anything else is seen.
-     static_assert(AF_UNIX == PF_UNIX,
 @@ -306,6 +306,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
      return Allow();
    }
@@ -281,15 +263,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
  
    if (SyscallSets::IsFileSystem(sysno) ||
        SyscallSets::IsCurrentDirectory(sysno)) {
-@@ -370,7 +372,7 @@ ResultExpr EvaluateSyscallImpl(int fs_de
-   // Allow creating pipes, but don't allow weird flags to pipe2().
-   // O_NOTIFICATION_PIPE (== O_EXCL) can be used to create
-   // "notification pipes", which are rarely used.
--#if !defined(__aarch64__)
-+#if !defined(__aarch64__) && !defined(__loongarch__)
-   if (sysno == __NR_pipe) {
-     return Allow();
-   }
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc b/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
 --- a/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc	2000-01-01 00:00:00.000000000 +0800
