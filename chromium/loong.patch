@@ -1,58 +1,44 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index fc49567..32f814f 100644
+index bb9bce9..c246295 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -8,7 +8,7 @@ pkgname=chromium
- pkgver=138.0.7204.183
- pkgrel=1
- _launcher_ver=8
--_manual_clone=1
-+_manual_clone=0
- _system_clang=1
- pkgdesc="A web browser built for speed, simplicity, and security"
- arch=('x86_64')
-@@ -43,6 +43,8 @@ sha256sums=('720a1196410080056cd97a1f5ec34d68ba216a281d9b5157b7ea81ea018ec661'
- if (( _manual_clone )); then
-   source[0]=fetch-chromium-release
-   makedepends+=('python-httplib2' 'python-pyparsing' 'python-six' 'npm' 'rsync')
-+else
-+  sha256sums[0]="$(curl -sL "${source[0]}.hashes" | awk '$1 == "sha256" {print $2; exit}')"
- fi
- 
- # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -112,7 +114,13 @@ prepare() {
-   patch -Np1 -i ../chromium-138-nodejs-version-check.patch
- 
+@@ -114,6 +114,10 @@ prepare() {
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
--  patch -Np1 -i ../compiler-rt-adjust-paths.patch
-+  # Use another version to support loong64
-+  #patch -Np1 -i ../compiler-rt-adjust-paths.patch
-+  patch -Np1 -i "${srcdir}/compiler-rt-adjust-paths-loong64.patch"
-+
+   patch -Np1 -i ../compiler-rt-adjust-paths.patch
+ 
 +  # Patches for loong64
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
- 
++
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
-@@ -213,7 +221,7 @@ build() {
-       _flags+=('chrome_pgo_phase=0')
-     else
-       _flags+=(
--        #'chrome_pgo_phase=0' # needs newer clang to read the bundled PGO profile
-+        'chrome_pgo_phase=0' # Disable PGO since the data is not for loong64
-       )
-     fi
  
-@@ -331,4 +339,11 @@ package() {
+@@ -207,7 +211,7 @@ build() {
+       'clang_base_path="/usr"'
+       'clang_use_chrome_plugins=false'
+       "clang_version=\"$_clang_version\""
+-      #'chrome_pgo_phase=0' # needs newer clang to read the bundled PGO profile
++      'chrome_pgo_phase=0' # Disable PGO since the data is not for loong64
+     )
+ 
+     # Allow the use of nightly features with stable Rust compiler
+@@ -248,6 +252,9 @@ build() {
+   # https://crbug.com/957519#c122
+   CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
+ 
++  # Disable xnnpack on loong64
++  _flags+=('build_tflite_with_xnnpack=false')
++
+   gn gen out/Release --args="${_flags[*]}"
+   ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
+ }
+@@ -323,4 +330,9 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
-+         "compiler-rt-adjust-paths-loong64.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
-+sha256sums+=('aaff56e86f58731c788e31c21965f8aec7335abcb33a8290e40ec980d64c9f5a'
-+             '640ea1fa9cd6eac337afc41520184061fe60dd994613da7ba992e0e73f88057d'
++sha256sums+=('921aa54057d5b50f6de3a4dabacfafde2a07314d42057ca49a80693e7cf81699'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
 +
  # vim:set ts=2 sw=2 et:
