@@ -313,7 +313,7 @@ def main() -> None:
         os.chdir(pkgbase)
         if os.path.isfile(PATCH_FILE):
             print(f"Applying patch {PATCH_FILE}...")
-            subprocess.run(["patch", "-p1", "-i", PATCH_FILE])
+            subprocess.run(["patch", "-Np1", "-i", PATCH_FILE])
         else:
             print(f"No '{PATCH_FILE}' found.")
             sys.exit(1)
