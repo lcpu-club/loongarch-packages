@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 61ab361..36e22c3 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -9,7 +9,7 @@ url='https://git.kernel.org/pub/scm/fs/fsverity/fsverity-utils.git'
+ license=('MIT')
+ arch=('x86_64')
+ depends=('openssl')
+-makedepends=('pandoc')
++makedepends=()
+ source=("${url}/snapshot/${pkgname}-${pkgver}.tar.gz")
+ sha256sums=('c7aa6b17a8a069224321ff94e46fb91a6426828ca78170a879a52cef2597abb7')
+ 
