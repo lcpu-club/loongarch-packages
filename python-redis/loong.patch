@@ -1,0 +1,26 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b1ac11f..e27efd5 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -159,6 +159,21 @@ check() {
+     --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_client_setinfo
+     --deselect=tests/test_commands.py::TestRedisCommands::test_client_setinfo
+     --deselect=tests/test_commands.py::TestRedisCommands::test_xgroup_create_entriesread
++
++    # To build on loong64 (floating point precision issues)
++    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_geopos
++    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_georadius_with
++    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_georadius_store_dist
++    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_georadiusmember
++    --deselect=tests/test_commands.py::TestRedisCommands::test_geopos
++    --deselect=tests/test_commands.py::TestRedisCommands::test_georadius_with
++    --deselect=tests/test_commands.py::TestRedisCommands::test_georadius_store_dist
++    --deselect=tests/test_commands.py::TestRedisCommands::test_georadiusmember
++    --deselect=tests/test_commands.py::TestRedisCommands::test_geosearch_member
++    --deselect=tests/test_commands.py::TestRedisCommands::test_geosearch_with
++    --deselect=tests/test_commands.py::TestRedisCommands::test_geosearchstore_dist
++    --deselect=tests/test_cluster.py::TestClusterRedisCommands::test_geosearchstore_dist
++    --deselect=tests/test_cluster.py::TestClusterRedisCommands::test_cluster_georadius_store_dist
+   )
+ 
+   # Run standalone test suite - targets the Redis server running :6379 and the
