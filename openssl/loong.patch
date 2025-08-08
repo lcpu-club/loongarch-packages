@@ -1,11 +1,12 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -34,7 +34,7 @@ build() {
- 	cd "$srcdir/$pkgname-$pkgver"
+@@ -36,6 +36,9 @@ build() {
+ 	"riscv64")
+ 		_platform="linux64-$CARCH"
+ 		;;
++	"loong64")
++		_platform="linux64-loongarch64"
++		;;
+ 	esac
  
- 	./Configure --prefix=/usr --openssldir=/etc/ssl --libdir=lib \
--		shared enable-ktls enable-ec_nistp_64_gcc_128 linux-${CARCH}
-+		shared enable-ktls enable-ec_nistp_64_gcc_128 linux64-`uname -m`
  
- 	make depend
- 	make
