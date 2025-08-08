@@ -1,5 +1,3 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 06d4a2c..3dd9b31 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -25,6 +25,7 @@ build() {
@@ -7,6 +5,6 @@ index 06d4a2c..3dd9b31 100644
      -D CMAKE_BUILD_TYPE=None
      -D CMAKE_INSTALL_PREFIX=/usr
 +    -D SSE=OFF
+     -D CMAKE_POLICY_VERSION_MINIMUM=3.5
      -S $_pkgname-$pkgver
      -W no-dev
-   )
