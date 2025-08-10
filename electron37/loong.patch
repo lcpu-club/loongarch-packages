@@ -1,0 +1,136 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 098c56b..2fb1fb0 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -434,6 +434,11 @@ prepare() {
+   sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
+   sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
+ 
++  # Apply in advance to so that makepkg-source-roller.py will not throw error
++  patch -Np1 -d chromium-mirror_third_party_depot_tools -i "${srcdir}/depot_tools-loong64-support.patch"
++  # Get the binary from the npm package
++  npm install @esbuild/linux-loong64@0.24.0
++
+   cp -r chromium-mirror_third_party_depot_tools depot_tools
+   export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
+   #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
+@@ -441,6 +446,14 @@ prepare() {
+   echo "Putting together electron sources"
+   # Generate gclient gn args file and prepare-electron-source-tree.sh
+   python makepkg-source-roller.py generate electron/DEPS $pkgname
++  # Do not use the script to fetch esbuild since google doesn't distribute it
++  # The esbuild is added manually
++  sed -i '/esbuild/d' prepare-electron-source-tree.sh
++  # Add esbuild binary manually
++  npm install @esbuild/linux-loong64@0.24.0
++  mkdir -p src/third_party/devtools-frontend/src/third_party/esbuild
++  mv node_modules/@esbuild/linux-loong64/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
++  rm -r node_modules # Cleaning
+   rbash prepare-electron-source-tree.sh "$CARCH"
+   mv electron src/electron
+ 
+@@ -454,12 +467,48 @@ prepare() {
+     -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
+   src/build/util/lastchange.py \
+     -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
+-  src/tools/update_pgo_profiles.py --target=linux update \
+-    --gs-url-base=chromium-optimization-profiles/pgo_profiles
++  #src/tools/update_pgo_profiles.py --target=linux update \
++  #  --gs-url-base=chromium-optimization-profiles/pgo_profiles
++
++  # Link to system tools required by the build in advance
++  pushd src
++  mkdir -p third_party/node/linux/node-linux-x64/bin
++  ln -sfn /usr/bin/node third_party/node/linux/node-linux-x64/bin/
++  mkdir -p third_party/jdk/current/bin
++  ln -sfn /usr/bin/java third_party/jdk/current/bin/
++  ln -sfn /usr/bin/clang-format buildtools/linux64
++  popd
++
++  pushd src/third_party/node/
++  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
++  #local _rollup_ver="$(jq -r .dependencies.\"@rollup/wasm-node\" package.json)"
++  local _rollup_ver="4.32.0" # Known version that supports loong64
++  jq ".dependencies.rollup=\"$_rollup_ver\"" package.json > package.json.new
++  mv package.json{.new,}
++  popd
+ 
+   # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
+   src/third_party/node/update_npm_deps
+ 
++  pushd src/third_party/devtools-frontend/src
++  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" scripts/devtools_paths.py
++  #local _rollup_ver="$(jq -r .devDependencies.\"@rollup/wasm-node\" package.json)"
++  jq ".devDependencies.rollup=\"$_rollup_ver\" | .devDependencies.\"@rollup/rollup-linux-loongarch64-gnu\"=\"$_rollup_ver\""  package.json > package.json.new
++  mv package.json{.new,}
++  # Chromium hosts a custom registry at https://npm.skia.org/chrome-devtools/
++  # and rejects some packages:
++  # Package fs-extra with version 11.3.0 was created 108h0m0s time ago. This is less than 1 week and so failed the audit.
++  sed -i /registry/d .npmrc
++  # Replace direct invocation of wasm rollup
++  sed -i 's\@rollup/wasm-node\rollup\' \
++    inspector_overlay/BUILD.gn \
++    front_end/models/live-metrics/web-vitals-injected/BUILD.gn \
++    front_end/Images/BUILD.gn \
++    front_end/panels/recorder/injected/BUILD.gn \
++    scripts/build/ninja/bundle.gni
++  popd
++  python src/third_party/devtools-frontend/src/scripts/deps/manage_node_deps.py
++
+   src/electron/script/apply_all_patches.py \
+       src/electron/patches/config.json
+ 
+@@ -488,7 +537,9 @@ prepare() {
+   patch -Np1 -i ../chromium-138-nodejs-version-check.patch
+ 
+   # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
+-  patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  #patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  # Use modified version for loong64 support
++  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
+ 
+   # Fixes for building with libstdc++ instead of libc++
+   patch -Np1 -i ../chromium-patches-*/chromium-138-compiler.patch
+@@ -505,6 +556,12 @@ prepare() {
+   patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
+   # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
+ 
++  # Add loong64 support for chromium
++  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
++  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++  # Add loong64 support for electron
++  patch -Np1 -d electron -i "${srcdir}/electron_runtime_api_dalagate-add-loongarch64-support.patch"
++
+   # Allow building against system libraries in official builds
+   echo "Patching Chromium for using system libraries..."
+   sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
+@@ -566,9 +623,12 @@ build() {
+     'clang_base_path="/usr"'
+     'clang_use_chrome_plugins=false'
+     "clang_version=\"$_clang_version\""
+-    'chrome_pgo_phase=2'
++    'chrome_pgo_phase=0'
+   )
+ 
++  # Disable xnnpack on loong64
++  _flags+=('build_tflite_with_xnnpack=false')
++
+   # Allow the use of nightly features with stable Rust compiler
+   # https://github.com/ungoogled-software/ungoogled-chromium/pull/2696#issuecomment-1918173198
+   export RUSTC_BOOTSTRAP=1
+@@ -635,3 +695,15 @@ package() {
+   install -Dm644 src/electron/default_app/icon.png \
+           "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
+ }
++
++makedepends+=(jq)
++source+=("depot_tools-loong64-support.patch"
++         "compiler-rt-adjust-paths-loong64.patch"
++         "chromium-loong64-support.patch"
++         "electron_runtime_api_dalagate-add-loongarch64-support.patch"
++         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
++sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
++             '5eb62f142569bd6887396410ad174a4e9e932790361567df0fd9127003d6b2a0'
++             'f7ca729c50e16239de71e44c1b9c1f45a9801a46ec66be3f01aa254c56111057'
++             '516502491d2ed6d9bc8fbb40960a9f98cff4e7beadac4b7ac05a5579f9671733'
++             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
