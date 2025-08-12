@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index dcda765..3ad9a9e 100644
+index 6eeb939..5983aa2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -39,6 +39,8 @@ pkgver() {
@@ -19,7 +19,16 @@ index dcda765..3ad9a9e 100644
        --enable-stack-protector=strong
        --enable-systemtap
        --disable-nscd
-@@ -83,6 +84,7 @@ build() {
+@@ -75,7 +76,7 @@ build() {
+         --libdir=/usr/lib \
+         --libexecdir=/usr/lib \
+         --enable-cet \
+-        --enable-sframe \
++        --disable-sframe \
+         "${_configure_flags[@]}"
+ 
+     make -O
+@@ -84,6 +85,7 @@ build() {
      make info
    )
  
@@ -27,7 +36,7 @@ index dcda765..3ad9a9e 100644
    (
      cd lib32-glibc-build
      export CC="gcc -m32 -mstackrealign"
-@@ -105,6 +107,7 @@ build() {
+@@ -106,6 +108,7 @@ build() {
  
      make -O
    )
@@ -35,7 +44,7 @@ index dcda765..3ad9a9e 100644
  
    # pregenerate locales here instead of in package
    # functions because localedef does not like fakeroot
-@@ -224,3 +227,6 @@ package_glibc-locales() {
+@@ -225,3 +228,6 @@ package_glibc-locales() {
    # deduplicate locale data
    hardlink -c "${pkgdir}"/usr/lib/locale
  }
