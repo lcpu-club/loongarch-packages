@@ -1,17 +1,18 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0311257..f937370 100644
+index ab5dd31..115f83e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -77,6 +77,8 @@ prepare() {
-   # unsupported targets.  This allows the binutils to be built with
-   # BPF support enabled.
-   patch -Np1 -i "${srcdir}"/gold-warn-unsupported.patch
-+  # Back port fix for loong64
-+  git cherry-pick -n 3eede6b04a30243fdc4acece156be95b17c16f83
- }
+@@ -71,6 +71,9 @@ prepare() {
  
- build() {
-@@ -91,7 +93,7 @@ build() {
+   cd binutils-gdb
+ 
++  # Backport fix for loong64
++  git cherry-pick -n 3eede6b04a30243fdc4acece156be95b17c16f83
++
+   # Turn off development mode (-Werror, gas run-time checks, date in sonames)
+   sed -i '/^development=/s/true/false/' bfd/development.sh
+ 
+@@ -96,7 +99,7 @@ build() {
      --enable-colored-disassembly \
      --enable-default-execstack=no \
      --enable-deterministic-archives \
@@ -20,7 +21,7 @@ index 0311257..f937370 100644
      --enable-install-libiberty \
      --enable-jansson \
      --enable-ld=default \
-@@ -100,7 +102,6 @@ build() {
+@@ -105,7 +108,6 @@ build() {
      --enable-plugins \
      --enable-relro \
      --enable-shared \
