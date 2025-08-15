@@ -1,16 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 82533c8..4f5f2e5 100644
+index b506215..f0c6e99 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -16,6 +16,7 @@ options=('!lto')
- 
- prepare() {
-   cd "$pkgname-$pkgver"
-+  cp "${srcdir}/pixi-trampoline-loongarch64-unknown-linux-gnu.zst" "${srcdir}/$pkgname-$pkgver/trampoline/binaries/"
-   cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
-   mkdir -p completions/
- }
-@@ -31,7 +32,7 @@ build() {
+@@ -31,7 +31,7 @@ build() {
  
  check() {
    cd "$pkgname-$pkgver"
@@ -19,13 +11,3 @@ index 82533c8..4f5f2e5 100644
  }
  
  package() {
-@@ -44,4 +45,9 @@ package() {
-   install -Dm 664 "completions/_$pkgname" -t "$pkgdir/usr/share/zsh/site-functions/"
- }
- 
-+# Backport https://github.com/prefix-dev/pixi/pull/4163
-+source+=("pixi-trampoline-loongarch64-unknown-linux-gnu.zst::https://github.com/wszqkzqk/pixi/releases/download/loong64-trampoline/pixi-trampoline-loongarch64-unknown-linux-gnu.zst")
-+sha512sums+=('ce3de92a1efaa2ffd739099b81842ea731911e396586b035ad0831d8a433917f5db48bc06659d827fa119ce58eda5b6f476a57916097732de4d4e27cbfec4531')
-+noextract+=(pixi-trampoline-loongarch64-unknown-linux-gnu.zst)
-+
- # vim: ts=2 sw=2 et:
