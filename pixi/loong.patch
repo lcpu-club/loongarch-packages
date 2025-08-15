@@ -1,17 +1,16 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index cd73149..20148c3 100644
+index 82533c8..4f5f2e5 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -16,6 +16,8 @@ options=('!lto')
+@@ -16,6 +16,7 @@ options=('!lto')
  
  prepare() {
    cd "$pkgname-$pkgver"
-+  patch -Np1 -i "${srcdir}/support-for-loong64-linux.patch"
 +  cp "${srcdir}/pixi-trampoline-loongarch64-unknown-linux-gnu.zst" "${srcdir}/$pkgname-$pkgver/trampoline/binaries/"
    cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
    mkdir -p completions/
  }
-@@ -31,7 +33,7 @@ build() {
+@@ -31,7 +32,7 @@ build() {
  
  check() {
    cd "$pkgname-$pkgver"
@@ -20,19 +19,13 @@ index cd73149..20148c3 100644
  }
  
  package() {
-@@ -44,4 +46,15 @@ package() {
+@@ -44,4 +45,9 @@ package() {
    install -Dm 664 "completions/_$pkgname" -t "$pkgdir/usr/share/zsh/site-functions/"
  }
  
 +# Backport https://github.com/prefix-dev/pixi/pull/4163
-+source+=(
-+  "pixi-trampoline-loongarch64-unknown-linux-gnu.zst::https://github.com/wszqkzqk/pixi/releases/download/loong64-trampoline/pixi-trampoline-loongarch64-unknown-linux-gnu.zst"
-+  'support-for-loong64-linux.patch::https://patch-diff.githubusercontent.com/raw/prefix-dev/pixi/pull/4163.diff'
-+)
-+sha512sums+=(
-+  'ce3de92a1efaa2ffd739099b81842ea731911e396586b035ad0831d8a433917f5db48bc06659d827fa119ce58eda5b6f476a57916097732de4d4e27cbfec4531'
-+  'c8b8ff98dc2f03730d68cf23bc64b016143042817543df93b71ca43afb598bf58f311234a5ed4ac168f40124e2d3c34f50b4890b65b8c843efbdc9d4ff8fd2e3'
-+)
++source+=("pixi-trampoline-loongarch64-unknown-linux-gnu.zst::https://github.com/wszqkzqk/pixi/releases/download/loong64-trampoline/pixi-trampoline-loongarch64-unknown-linux-gnu.zst")
++sha512sums+=('ce3de92a1efaa2ffd739099b81842ea731911e396586b035ad0831d8a433917f5db48bc06659d827fa119ce58eda5b6f476a57916097732de4d4e27cbfec4531')
 +noextract+=(pixi-trampoline-loongarch64-unknown-linux-gnu.zst)
 +
  # vim: ts=2 sw=2 et:
