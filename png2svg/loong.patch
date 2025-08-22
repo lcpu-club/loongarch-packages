@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b579333..48818ad 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -13,7 +13,11 @@ b2sums=('21a7657e1c603abef4cf8b218a9614ca273d76b6a8c0cb07f617d1842d73b1403a7ea4b
+ 
+ build() {
+   cd $pkgname/cmd/$pkgname
+-  CGO_ENABLED=0 go build -v -mod=vendor -trimpath -buildmode=pie -ldflags="-s -w -extldflags '$LDFLAGS'"
++  export CGO_CPPFLAGS="${CPPFLAGS}"
++  export CGO_CFLAGS="${CFLAGS}"
++  export CGO_CXXFLAGS="${CXXFLAGS}"
++  export CGO_LDFLAGS="${LDFLAGS}"
++  go build -v -mod=vendor -trimpath -buildmode=pie -ldflags="-s -w -extldflags '$LDFLAGS'"
+ }
+ 
+ package() {
