@@ -2,19 +2,18 @@
 
 _target=x86_64-linux-gnu
 pkgname=$_target-binutils
-pkgver=2.43+r4+g7999dae6961
-_commit=7999dae69612295e1bbffe64aff87044372a0059
+pkgver=2.45
 pkgrel=1
 pkgdesc='A set of programs to assemble and manipulate binary and object files for 32-bit and 64-bit x86'
 arch=(loong64)
 url='https://www.gnu.org/software/binutils/'
 license=(GPL)
 depends=(zlib libelf)
-makedepends=(git)
 groups=(x86)
-source=(git+https://sourceware.org/git/binutils-gdb.git#commit=${_commit}
+source=(https://ftp.gnu.org/gnu/binutils/binutils-$pkgver.tar.bz2{,.sig}
         gold-warn-unsupported.patch)
-sha256sums=('4726efb1f887c659cfb6aa198f18ca638d405f58ee1eeda4df3eb201c1169a67'
+sha256sums=('1393f90db70c2ebd785fb434d6127f8888c559d5eeb9c006c354b203bab3473e'
+            'SKIP'
             '2d430b66f84a19c154725ec535280c493be1d34f1a90f95208dce02fecd0e4e4')
 validpgpkeys=('3A24BC1E8FB409FA9F14371813FCEF89DD9E3C4F') # Nick Clifton (Chief Binutils Maintainer) <nickc@redhat.com>
 
@@ -31,7 +30,7 @@ prepare() {
   # Change the gold configuration script to only warn about
   # unsupported targets.  This allows the binutils to be built with
   # BPF support enabled.
-  patch -Np1 -i "${srcdir}"/gold-warn-unsupported.patch
+  # patch -Np1 -i "${srcdir}"/gold-warn-unsupported.patch
 }
 
 build() {
