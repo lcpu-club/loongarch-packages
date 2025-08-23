@@ -2,8 +2,7 @@
 
 _target=x86_64-linux-gnu
 pkgname=$_target-glibc
-pkgver=2.40+r16+gaa533d58ff
-_commit=aa533d58ff12e27771d9c960a727d74992a3f2a3
+pkgver=2.41
 pkgrel=1
 pkgdesc='GNU C Library x86_64 target'
 arch=(any)
@@ -11,13 +10,14 @@ url='https://www.gnu.org/software/libc/'
 license=(GPL LGPL)
 depends=($_target-gcc $_target-linux-api-headers)
 groups=(x86)
-makedepends=(git python)
+makedepends=(python)
 options=(!buildflags !strip staticlibs)
-source=("git+https://sourceware.org/git/glibc.git#commit=${_commit}"
+source=(https://ftp.gnu.org/gnu/libc/glibc-$pkgver.tar.xz{,.sig}
         sdt.h sdt-config.h)
-b2sums=('74c4f1e1231834579d19c96cc60fc370c9c4468e254fe069aad6102c8678d163ab6e58ebf0a11de680483105ba02d362842a817d698e134731f70c2d5b383eed'
-        'a6a5e2f2a627cc0d13d11a82458cfd0aa75ec1c5a3c7647e5d5a3bb1d4c0770887a3909bfda1236803d5bc9801bfd6251e13483e9adf797e4725332cd0d91a0e'
-        '214e995e84b342fe7b2a7704ce011b7c7fc74c2971f98eeb3b4e677b99c860addc0a7d91b8dc0f0b8be7537782ee331999e02ba48f4ccc1c331b60f27d715678')
+sha256sums=('a5a26b22f545d6b7d7b3dd828e11e428f24f4fac43c934fb071b6a7d0828e901'
+            'SKIP'
+            '774061aff612a377714a509918a9e0e0aafce708b87d2d7e06b1bd1f6542fe70'
+            'cdc234959c6fdb43f000d3bb7d1080b0103f4080f5e67bcfe8ae1aaf477812f0')
 validpgpkeys=(7273542B39962DF7B299931416792B4EA25340F8  # "Carlos O'Donell <carlos@systemhalted.org>"
               BC7C7372637EC10C57D7AA6579C43DFBF1CF2187) # Siddhesh Poyarekar
 
@@ -67,7 +67,6 @@ build() {
     echo 'rtlddir=/lib' >> configparms
     echo 'sbindir=/bin' >> configparms
     echo 'rootsbindir=/bin' >> configparms
-    echo 'build-programs=no' >> configparms
 
     # Credits @allanmcrae
     # https://github.com/allanmcrae/toolchain/blob/f18604d70c5933c31b51a320978711e4e6791cf1/glibc/PKGBUILD
@@ -77,9 +76,10 @@ build() {
     "${srcdir}"/glibc/configure \
         --libdir=/lib \
         --libexecdir=/lib \
-        "${_configure_flags[@]}"
+        "${_configure_flags[@]}" || bash -i
 
-    make -O
+    echo 'build-programs=no' >> configparms
+    make
   )
 
 #  (
