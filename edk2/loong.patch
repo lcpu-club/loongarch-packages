@@ -1,21 +1,13 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 1986071..5e4310f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -199,14 +199,22 @@ build() {
-   cd $pkgbase
-   export GCC5_IA32_PREFIX="x86_64-linux-gnu-"
-   export GCC5_X64_PREFIX="x86_64-linux-gnu-"
-+  # Export the GCC5_BIN variable for x86
-+  # x86 uses the GCC5_BIN variable to define the prefix for the compiler
-+  # See: https://github.com/tianocore/edk2/blob/95972f966ebf4b61de8faf214809ef881f4ac129/BaseTools/Conf/tools_def.template#L98
-+  export GCC5_BIN="x86_64-linux-gnu-"
-   export GCC5_AARCH64_PREFIX="aarch64-linux-gnu-"
-   export GCC5_ARM_PREFIX="arm-none-eabi-"
-   echo "Building base tools (AARCH64)"
-   ARCH=AARCH64 make -C BaseTools
-   echo "Building base tools (ARM)"
-   ARCH=ARM make -C BaseTools
+@@ -200,11 +200,15 @@ build() {
+   # This is used as the prefix for both gcc and objcopy
+   # so it cannot be set to x86_64-linux-gnu-
+   # (binutils does not provide x86_64-linux-gnu-objcopy)
+-  export GCC_BIN=""
++  export GCC_BIN="x86_64-linux-gnu-"
+   export GCC_AARCH64_PREFIX="aarch64-linux-gnu-"
+   export GCC_ARM_PREFIX="arm-none-eabi-"
 -  echo "Building base tools"
 -  make -C BaseTools
 +  echo "Building base tools (IA32)"
@@ -27,7 +19,7 @@ index 1986071..5e4310f 100644
    # expose build tooling in PATH
    . edksetup.sh
  
-@@ -316,6 +324,20 @@ build() {
+@@ -314,6 +318,20 @@ build() {
        dd if=Build/ArmVirtQemu-$_arch/${_build_type}_$_build_plugin/FV/QEMU_EFI.fd of=Build/ArmVirtQemu-$_arch/${_build_type}_$_build_plugin/FV/QEMU_CODE.fd conv=notrunc
        dd if=/dev/zero of=Build/ArmVirtQemu-$_arch/${_build_type}_$_build_plugin/FV/QEMU_VARS.fd bs=1M count=64
        ;;
@@ -48,7 +40,7 @@ index 1986071..5e4310f 100644
      esac
    done
  }
-@@ -365,6 +387,21 @@ package_edk2-arm() {
+@@ -363,6 +381,21 @@ package_edk2-arm() {
    install -vDm 644 License.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
  
@@ -70,7 +62,7 @@ index 1986071..5e4310f 100644
  package_edk2-shell() {
    local _arch
    # minimal UEFI shell, as defined in ShellPkg/Application/Shell/ShellPkg.inf
-@@ -427,3 +464,11 @@ package_edk2-ovmf() {
+@@ -424,3 +457,11 @@ package_edk2-ovmf() {
    # docs
    install -vDm 644 {OvmfPkg/README,ReadMe.rst,Maintainers.txt} -t "$pkgdir/usr/share/doc/$pkgname/"
  }
