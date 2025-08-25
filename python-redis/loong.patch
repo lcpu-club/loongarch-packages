@@ -1,11 +1,9 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index b1ac11f..e27efd5 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -159,6 +159,21 @@ check() {
-     --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_client_setinfo
-     --deselect=tests/test_commands.py::TestRedisCommands::test_client_setinfo
-     --deselect=tests/test_commands.py::TestRedisCommands::test_xgroup_create_entriesread
+@@ -166,6 +166,21 @@ check() {
+     --deselect=tests/test_sentinel.py::test_get_sentinels
+     --deselect=tests/test_sentinel.py::test_get_master_addr_by_name
+     --deselect=tests/test_sentinel.py::test_redis_master_usage
 +
 +    # To build on loong64 (floating point precision issues)
 +    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_geopos
