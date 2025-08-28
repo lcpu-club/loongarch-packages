@@ -1,8 +1,26 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index bb9bce9..c246295 100644
+index 0f85663..3064019 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -114,6 +114,10 @@ prepare() {
+@@ -8,7 +8,7 @@ pkgname=chromium
+ pkgver=139.0.7258.154
+ pkgrel=1
+ _launcher_ver=8
+-_manual_clone=1
++_manual_clone=0
+ _system_clang=1
+ pkgdesc="A web browser built for speed, simplicity, and security"
+ arch=('x86_64')
+@@ -45,6 +45,8 @@ sha256sums=('720a1196410080056cd97a1f5ec34d68ba216a281d9b5157b7ea81ea018ec661'
+ if (( _manual_clone )); then
+   source[0]=fetch-chromium-release
+   makedepends+=('python-httplib2' 'python-pyparsing' 'python-six' 'npm' 'rsync')
++else
++  sha256sums[0]="$(curl -sL "${source[0]}.hashes" | awk '$1 == "sha256" {print $2; exit}')"
+ fi
+ 
+ # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
+@@ -119,6 +121,10 @@ prepare() {
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
    patch -Np1 -i ../compiler-rt-adjust-paths.patch
  
@@ -13,16 +31,7 @@ index bb9bce9..c246295 100644
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
  
-@@ -207,7 +211,7 @@ build() {
-       'clang_base_path="/usr"'
-       'clang_use_chrome_plugins=false'
-       "clang_version=\"$_clang_version\""
--      #'chrome_pgo_phase=0' # needs newer clang to read the bundled PGO profile
-+      'chrome_pgo_phase=0' # Disable PGO since the data is not for loong64
-     )
- 
-     # Allow the use of nightly features with stable Rust compiler
-@@ -248,6 +252,9 @@ build() {
+@@ -253,6 +259,9 @@ build() {
    # https://crbug.com/957519#c122
    CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
  
@@ -32,7 +41,7 @@ index bb9bce9..c246295 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -323,4 +330,9 @@ package() {
+@@ -328,4 +337,9 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
