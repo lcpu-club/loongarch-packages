@@ -1,18 +1,16 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index a6e86e3..3788d1c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -60,6 +60,9 @@ prepare() {
-   sed -i s/SELFAUTOPARENT/TEXMFROOT/ texk/tex4htk/t4ht.c
- # remove spurious ptex "guessed encoding" print
+@@ -63,6 +63,9 @@ prepare() {
    patch -p1 -i ../ptex-debug-print.patch
+ # Fix LUA_ROOT define
+   patch -p1 -i ../lua-root.patch
 +# loong64-specific patches
 +  patch -p1 -i $srcdir/texlive-bin-loong64.patch
 +  patch -p1 -d libs/luajit/LuaJIT-src -i $srcdir/texlive-luajit-loong.patch
  }
  
  build() {
-@@ -194,3 +197,8 @@ package_texlive-bin() {
+@@ -197,3 +200,8 @@ package_texlive-bin() {
    rm "$pkgdir"/usr/lib/libsynctex.*
    rm "$pkgdir"/usr/lib/pkgconfig/synctex.pc
  }
