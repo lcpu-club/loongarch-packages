@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index d3ff448..c45274a 100644
+index 5d4d1fd..981583a 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -55,6 +55,10 @@ case "$CARCH" in
@@ -13,23 +13,16 @@ index d3ff448..c45274a 100644
    *)
      # Needed for mksrcinfo
      _vscode_arch=DUMMY
-@@ -83,7 +87,8 @@ prepare() {
+@@ -83,7 +87,11 @@ prepare() {
    patch -p0 -i ../product_json.diff
  
    # OpenVSX signature verification
 -  patch -p1 -i ../0009-openvsx-extension-signature.patch
 +  # Not supported on loong64
 +  #patch -p1 -i ../0009-openvsx-extension-signature.patch
- 
-   # Set the commit and build date
-   sed -e "s/@COMMIT@/$(git rev-parse HEAD)/" -e "s/@DATE@/$(date -u -Is | sed 's/\+00:00/Z/')/" -i product.json
-@@ -125,6 +130,9 @@ prepare() {
-   local _electron_zip="electron-v$_electronver-linux-$_electron_arch.zip"
-   zip -q "$_cache_dir/$_electron_zip" . -i .
-   echo "$(sha256sum "$_cache_dir/$_electron_zip" | cut -d " " -f 1) *$_electron_zip" > build/checksums/electron.txt
 +
 +  # Add missing loong64 definition
 +  sed -i "/BUILD_TARGETS = \[/a { platform: 'linux', arch: 'loong64' }," build/gulpfile.vscode.js
- }
  
- build() {
+   # Set the commit and build date
+   sed -e "s/@COMMIT@/$(git rev-parse HEAD)/" -e "s/@DATE@/$(date -u -Is | sed 's/\+00:00/Z/')/" -i product.json
