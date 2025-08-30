@@ -1,14 +1,14 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -30,6 +30,7 @@ prepare() {
+@@ -37,6 +37,7 @@ prepare() {
  
-   # Fix compilation with gcc 15
-   git cherry-pick -n e9c78dc4712fa6362b0c839ad57b6b46dce1ba83
+   # Fix compilation with abseil-cpp 20250814.0
+   git apply -3 ../0001-Fix-build-with-abseil-cpp-202508.patch
 +  patch -Np1 -i ../webrtc-audio-processing-loong64.patch
  }
  
  build() {
-@@ -53,5 +54,6 @@ package() {
+@@ -60,5 +61,6 @@ package() {
    install -Dm644 webrtc-audio-processing/COPYING \
      -t "$pkgdir/usr/share/licenses/$pkgname"
  }
