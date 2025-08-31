@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 48c0104..3522872 100644
+index 6fbd6c4..96f7f11 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -75,8 +75,19 @@ prepare() {
@@ -64,21 +64,24 @@ index 48c0104..3522872 100644
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -380,4 +404,17 @@ for _p in "${pkgname[@]}"; do
+@@ -380,4 +404,20 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
 +source+=('loong-addition.config'
 +         '0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch'
 +         '0002-LOONGARCH-drm-xe-fix-build-on-non-4K-kernels.patch'
-+         '0003-LOONGARCH-from-AOSCOS-more-fixes-for-Xe-on-LoongArch.patch')
++         '0003-LOONGARCH-from-AOSCOS-more-fixes-for-Xe-on-LoongArch.patch'
++         'Guard-dml21_map_dc_state_into_dml_display_cfg-with-DC_FP_START.patch::https://github.com/xry111/linux/commit/be01a9befb952decacc6cdca55f98dcf43ea1e7d.diff')
 +sha256sums+=('77eba2e995872642d763af67747228ef2e27b9d0a7958e8db0a12c4cdcc9acc1'
 +             '7fb7c79fcc055990a77e2aba686edacfbc1a3ee68098797a93c2db0ed3aff6e1'
 +             '5f6c9983e49c16941b2ede98e25deb860259f371d9ab89dddb5ebf4968d91be3'
-+             '5c4ccb967efcd79f8ea5f63836cd424b2e22255ffd89deaeeac6b6fcd40ea88a')
++             '5c4ccb967efcd79f8ea5f63836cd424b2e22255ffd89deaeeac6b6fcd40ea88a'
++             '62ceff5a09de397e39cdbea579b1b8f84a4b292f364be82a32a7dba4b8160b52')
 +b2sums+=('652069e50060a3d84530f004f7064d98d6ac9bb02e690a3510d092d0df17598c9b3d564ae07fdb0dbbecc68d2d12d58c4c78c02cc08fbcbb8c01ba6e6256d922'
 +         '1fc07a8aa13618d9f24803adc84ef21b4427d97b860f16a7f9ce348c19f03d2bcfec4f7ee3e1cbd1f5015918b3e48be97a4d4a992be5d0b74127e392f9867dc6'
 +         'd7cefaedcf5226c6d8fb54437098798f9512e80ffb033274799e90c655d6659912ed5e9dc81bfaf0b47b3ebbabf7bf1efb48817759cf272d0cfaaf7446548f99'
-+         '5dca610d93e67f096b87d0679cdb4bcf439ede2d527630842784ca2c00c4e363ee9fcbfc72c2f92ae2469a3a46ddf449f350e48c5a8a6459d1adfb3881b48ebe')
++         '5dca610d93e67f096b87d0679cdb4bcf439ede2d527630842784ca2c00c4e363ee9fcbfc72c2f92ae2469a3a46ddf449f350e48c5a8a6459d1adfb3881b48ebe'
++         '2b2f07682843c071b4f1582a05a40343cb43ded3554eac117c4b73798b3c3bf238e2c0ea51e7668e7cd6fba784cf9bedebf73888a5326d1dfcd02080c49fec41')
 +
  # vim:set ts=8 sts=2 sw=2 et:
