@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -66,7 +66,7 @@ makedepends=(
+@@ -67,7 +67,7 @@ makedepends=(
    gl2ps                   # libvtkRenderingGL2PSOpenGL2.so, libvtkIOExportGL2PS.so (2 direct libs, 4 total libs)
    proj                    # libvtkGeovisCore.so, libvtkIOCesium3DTiles.so (2 direct libs, 4 total libs)
    alembic                 # libvtkIOAlembic.so (1 direct lib, 2 total libs)
@@ -9,7 +9,7 @@
    ffmpeg                  # libvtkIOFFMPEG.so (1 direct lib, 2 total libs)
    imath                   # libvtkIOOpenVDB.so (1 direct lib, 2 total libs)
    libharu                 # libvtkIOExportPDF.so (1 direct lib, 2 total libs)
-@@ -75,11 +75,11 @@ makedepends=(
+@@ -76,11 +76,11 @@ makedepends=(
    libtheora               # libvtkIOOggTheora.so (1 direct lib, 2 total libs)
    mariadb-libs            # libvtkIOMySQL.so (1 direct lib, 2 total libs)
    opencascade             # libvtkIOOCCT.so (1 direct lib, 2 total libs)
@@ -23,25 +23,18 @@
    pdal                    # libvtkIOPDAL.so (1 direct lib, 2 total libs)
    postgresql-libs         # libvtkIOPostgreSQL.so (1 direct lib, 2 total libs)
    unixodbc                # libvtkIOODBC.so (1 direct lib, 2 total libs)
-@@ -186,7 +186,8 @@ build() {
+@@ -189,7 +189,9 @@ build() {
      -DVTK_VERSIONED_INSTALL=OFF \
      -DVTK_WRAP_JAVA=ON \
      -DVTK_WRAP_PYTHON=ON \
 -    -DVTKOSPRAY_ENABLE_DENOISER=ON \
 +    -DVTKOSPRAY_ENABLE_DENOISER=OFF \
 +    -DVTK_ENABLE_OSPRAY=OFF \
++    -DVTK_MODULE_ENABLE_VTK_RenderingAnari=NO \
      -DVTK_USE_EXTERNAL=ON \
      -DVTK_MODULE_USE_EXTERNAL_VTK_exprtk=OFF \
      -DVTK_MODULE_USE_EXTERNAL_VTK_ioss=OFF \
-@@ -195,6 +196,7 @@ build() {
-     -DVTK_MODULE_USE_EXTERNAL_VTK_token=OFF \
-     -DVTK_MODULE_ENABLE_VTK_DomainsMicroscopy=NO \
-     -DVTK_MODULE_ENABLE_VTK_FiltersOpenTURNS=NO \
-+    -DVTK_MODULE_ENABLE_VTK_RenderingAnari=NO \
-     -DHDF5_NO_FIND_PACKAGE_CONFIG_FILE=ON \
-     -DHDF5_C_COMPILER_EXECUTABLE=h5hlcc \
-     -DHDF5_CXX_COMPILER_EXECUTABLE=h5hlc++ \
-@@ -210,8 +212,8 @@ package() {
+@@ -214,8 +216,8 @@ package() {
    install -dv "${pkgdir}"/usr/share/java/vtk
    mv -v "${pkgdir}"/usr/lib/java/vtk.jar "${pkgdir}"/usr/share/java/vtk
    # …and the libs to the proper place
