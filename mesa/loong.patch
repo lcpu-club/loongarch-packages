@@ -1,26 +1,29 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 4906798..e3283d2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -185,7 +185,7 @@ build() {
+@@ -231,19 +231,19 @@ build() {
    local meson_options=(
      -D android-libbacktrace=disabled
      -D b_ndebug=true
--    -D gallium-drivers=r300,r600,radeonsi,nouveau,virgl,svga,llvmpipe,softpipe,iris,crocus,i915,zink,d3d12
-+    -D gallium-drivers=r300,r600,radeonsi,nouveau,virgl,svga,llvmpipe,softpipe,iris,zink,d3d12
+-    -D gallium-drivers=r300,r600,radeonsi,nouveau,virgl,svga,llvmpipe,softpipe,iris,crocus,i915,zink,d3d12,asahi,freedreno
++    -D gallium-drivers=r300,r600,radeonsi,nouveau,virgl,svga,llvmpipe,softpipe,iris,zink,d3d12,asahi,freedreno
      -D gallium-extra-hud=true
+     -D gallium-mediafoundation=disabled
      -D gallium-rusticl=true
-     -D gallium-xa=disabled
-@@ -196,7 +196,7 @@ build() {
+     -D gles1=disabled
+     -D html-docs=enabled
+-    -D intel-rt=enabled
++    -D intel-rt=disabled
+     -D libunwind=disabled
      -D microsoft-clc=disabled
+     -D sysprof=true
      -D valgrind=enabled
      -D video-codecs=all
--    -D vulkan-drivers=amd,gfxstream,intel,intel_hasvk,nouveau,swrast,virtio,microsoft-experimental
-+    -D vulkan-drivers=amd,gfxstream,intel,nouveau,swrast,virtio,microsoft-experimental
+-    -D vulkan-drivers=amd,gfxstream,intel,intel_hasvk,nouveau,swrast,virtio,microsoft-experimental,asahi,freedreno
++    -D vulkan-drivers=amd,gfxstream,intel,nouveau,swrast,virtio,microsoft-experimental,asahi,freedreno
      -D vulkan-layers=device-select,intel-nullhw,overlay,screenshot,vram-report-limit
    )
  
-@@ -279,8 +279,8 @@ package_mesa() {
+@@ -332,8 +332,8 @@ package_mesa() {
      _pick vkgfxstr $icddir/gfxstream_vk_icd.*.json
      _pick vkgfxstr $libdir/libvulkan_gfxstream.so
  
