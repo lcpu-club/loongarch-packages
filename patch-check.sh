@@ -13,7 +13,9 @@ for _dir in $(git diff --merge-base --name-only upstream/master | cut -d / -f 1 
     # Check if PKGBUILD exists for direct checksum verification
     if [[ -e "$_dir"/PKGBUILD ]]; then
       echo "No loong.patch found but PKGBUILD exists, checking checksums for $_dir..."
-      pushd $_dir
+      _tmp=$(sudo -u nobody mktemp -d)
+      cp -r $_dir/* $_tmp/
+      pushd $_tmp
       sudo -u nobody makepkg --verifysource --skippgpcheck || exit 1
       popd
       continue
