@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -167,6 +167,11 @@ prepare() {
+@@ -169,6 +169,11 @@ prepare() {
  
    git -c protocol.file.allow=always submodule update --init --recursive
  
@@ -12,7 +12,7 @@
    # Fix cmake prefix path (FS#78665)
    patch -Np1 -i "${srcdir}"/fix_cmake_prefix_path.patch
  
-@@ -210,7 +215,6 @@ _prepare() {
+@@ -217,7 +222,6 @@ _prepare() {
  
    # Check tools/setup_helpers/cmake.py, setup.py and CMakeLists.txt for a list of flags that can be set via env vars.
    export ATEN_NO_TEST=ON  # do not build ATen tests
@@ -20,7 +20,7 @@
    export BUILD_CUSTOM_PROTOBUF=OFF
    export USE_GFLAGS=ON
    export USE_GLOG=ON
-@@ -218,10 +222,9 @@ _prepare() {
+@@ -225,10 +229,9 @@ _prepare() {
    export USE_OBSERVERS=ON
    export USE_MAGMA=ON
    # export USE_SYSTEM_LIBS=ON  # experimental, not all libs present in repos
@@ -32,7 +32,7 @@
    export USE_GOLD_LINKER=ON
    export NCCL_VERSION=$(pkg-config nccl --modversion)
    export NCCL_VER_CODE=$(sed -n 's/^#define NCCL_VERSION_CODE\s*\(.*\).*/\1/p' /usr/include/nccl.h)
-@@ -241,6 +244,10 @@ _prepare() {
+@@ -248,6 +251,10 @@ _prepare() {
  
    # This list is from ./Dockerfile
    export TORCH_CUDA_ARCH_LIST="6.1 7.0 7.2 7.5 8.0 8.6 8.7 8.9 9.0 9.0a 12.0"
@@ -43,7 +43,7 @@
  
    export ROCM_PATH=/opt/rocm
    export HIP_ROOT_DIR=/opt/rocm
-@@ -266,23 +273,24 @@ _prepare() {
+@@ -271,23 +278,24 @@ _prepare() {
  
  build() {
    cd "${srcdir}/${_pkgname}"
@@ -72,7 +72,7 @@
    cd "${srcdir}/${_pkgname}-cuda"
    echo "Building with cuda and without non-x86-64 optimizations"
    _prepare
-@@ -303,9 +311,10 @@ build() {
+@@ -308,9 +316,10 @@ build() {
    _prepare
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python setup.py build
@@ -84,11 +84,12 @@
    # -fcf-protection is not supported by HIP, see
    # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
    CXXFLAGS+=" -fcf-protection=none"
-@@ -314,20 +323,20 @@ build() {
+@@ -319,20 +328,22 @@ build() {
    export USE_CUDNN=0
    export USE_ROCM=1
    export MAGMA_HOME=/opt/rocm
 -  echo "add_definitions(-march=x86-64)" >> cmake/MiscCheck.cmake
++  export MAX_JOBS=16
 +  echo "add_definitions(-march=loongarch64)" >> cmake/MiscCheck.cmake
    # Conversion of CUDA to ROCm source files
    python tools/amd_build/build_amd.py
@@ -104,11 +105,12 @@
    export USE_ROCM=1
    export MAGMA_HOME=/opt/rocm
 -  echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
++  export MAX_JOBS=16
 +  echo "add_definitions(-march=la464)" >> cmake/MiscCheck.cmake
    # Conversion of CUDA to ROCm source files
    python tools/amd_build/build_amd.py
    patch -Np1 -i "$srcdir/pytorch-rocm-jit.patch"
-@@ -372,7 +381,7 @@ package_python-pytorch() {
+@@ -377,7 +388,7 @@ package_python-pytorch() {
  }
  
  package_python-pytorch-opt() {
@@ -117,16 +119,27 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -411,7 +420,7 @@ package_python-pytorch-rocm() {
+@@ -407,7 +418,7 @@ package_python-pytorch-opt-cuda() {
+ 
+ package_python-pytorch-rocm() {
+   pkgdesc="${_pkgdesc} (with ROCm)"
+-  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn python-triton python-aotriton)
++  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn)
+   conflicts=(python-pytorch)
+   provides=(python-pytorch=${pkgver})
+ 
+@@ -416,8 +427,8 @@ package_python-pytorch-rocm() {
  }
  
  package_python-pytorch-opt-rocm() {
 -  pkgdesc="${_pkgdesc} (with ROCm and AVX2 CPU optimizations)"
+-  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn python-triton python-aotriton)
 +  pkgdesc="${_pkgdesc} (with ROCm and LASX CPU optimizations)"
-   depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn)
++  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn)
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver} python-pytorch-rocm=${pkgver})
-@@ -420,4 +429,18 @@ package_python-pytorch-opt-rocm() {
+ 
+@@ -425,4 +436,20 @@ package_python-pytorch-opt-rocm() {
    _package
  }
  
@@ -135,6 +148,8 @@
 +makedepends=(${makedepends[@]/cuda})
 +makedepends=(${makedepends[@]/nccl})
 +makedepends=(${makedepends[@]/cudnn})
++makedepends=(${makedepends[@]/python-triton})
++makedepends=(${makedepends[@]/python-aotriton})
 +pkgname=(${pkgname[@]/"${pkgbase}-cuda"})
 +pkgname=(${pkgname[@]/"${pkgbase}-opt-cuda"})
 +source+=("disable-aotriton.patch::https://github.com/pytorch/pytorch/commit/856bbf193dca30e4782acf5c350e5925a5716b98.diff"
