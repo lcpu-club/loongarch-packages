@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7207dd2..b70190f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,6 +22,8 @@ prepare() {
+   cd "${pkgname}"
+   mkdir -p build/
+   go get ./...
++  go mod edit -replace=github.com/cronokirby/saferith=github.com/cronokirby/saferith@1f11f94ce4880e030f853dcdd85d7f115626f00b
++  go mod tidy
+ }
+ 
+ build() {
