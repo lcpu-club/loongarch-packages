@@ -1,51 +1,16 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -4,16 +4,19 @@
- # Contributor: Keshav Amburay <(the ddoott ridikulus ddoott rat) (aatt) (gemmaeiil) (ddoott) (ccoomm)>
- 
- ## "1" to enable IA32-EFI build in Arch x86_64, "0" to disable
--_IA32_EFI_IN_ARCH_X64="1"
-+_IA32_EFI_IN_ARCH_X64="0"
- 
- ## "1" to enable EMU build, "0" to disable
- _GRUB_EMU_BUILD="0"
-+SKIPCONFIG=1
- 
- [[ "${CARCH}" == 'x86_64' ]] && _EFI_ARCH='x86_64'
- [[ "${CARCH}" == 'i686' ]] && _EFI_ARCH='i386'
-+[[ "${CARCH}" == 'loong64' ]] && _EFI_ARCH='loongarch64'
- 
- [[ "${CARCH}" == 'x86_64' ]] && _EMU_ARCH='x86_64'
- [[ "${CARCH}" == 'i686' ]] && _EMU_ARCH='i386'
-+[[ "${CARCH}" == 'loong64' ]] && _EMU_ARCH=''
- 
- pkgname='grub'
- pkgdesc='GNU GRand Unified Bootloader (2)'
-@@ -285,9 +288,10 @@ _build_grub-emu() {
- 
- build() {
-   cd "${srcdir}/grub/"
--
--  echo "Build grub bios stuff..."
--  _build_grub-common_and_bios
-+  if [[ "${CARCH}" != "loong64" ]]; then
-+      echo "Build grub bios stuff..."
-+      _build_grub-common_and_bios
-+  fi
- 
-   echo "Build grub ${_EFI_ARCH} efi stuff..."
-   _build_grub-efi
-@@ -360,6 +364,11 @@ package() {
-     _package_grub-emu
-   fi
- 
--  echo "Package grub bios stuff..."
--  _package_grub-common_and_bios
-+  if [[ "${CARCH}" != "loong64" ]]; then
-+      echo "Package grub bios stuff..."
-+      _package_grub-common_and_bios
-+  fi
-+
-+  echo "Install /etc/default/grub (used by grub-mkconfig)..."
-+  install -D -m0644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
+@@ -191,6 +191,7 @@ build() {
+     [[ "${i}" == "i386-pc" ]] && _configure_options+=(--enable-efiemu --with-platform="pc" --target="i386")
+     [[ "${i}" == "i386-efi" ]] && _configure_options+=(--disable-efiemu --with-platform="efi" --target="i386")
+     [[ "${i}" == "x86_64-efi" ]] && _configure_options+=(--with-platform="efi" --target="x86_64")
++    [[ "${i}" == "loong64-efi" ]] && _configure_options+=(--with-platform="efi" --target="loongarch64")
+     ./configure PACKAGE_VERSION="${epoch}:${pkgver}-${pkgrel}" \
+                 ${_configure_options[@]}
+     echo "Build language and doc files only for most common variant..."
+@@ -223,3 +224,5 @@ package() {
+   install -D -m0644 "${srcdir}/grub.default" "${pkgdir}/etc/default/grub"
+   sed -e "s/%PKGVER%/${epoch}:${pkgver}-${pkgrel}/" < "${srcdir}/sbat.csv" > "${pkgdir}/usr/share/grub/sbat.csv"
  }
++
++_platform=(loong64-efi)
