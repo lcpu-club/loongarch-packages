@@ -1,11 +1,8 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -17,7 +17,7 @@ arch=('x86_64')
- license=('MIT')
- depends=('bash' 'cairo' 'gdk-pixbuf2' 'glib2' 'glibc' 'hicolor-icon-theme' 'libxcb' 'libxkbcommon' 'libxkbcommon-x11'
-          'pango' 'startup-notification' 'xcb-imdkit' 'xcb-util' 'xcb-util-cursor' 'xcb-util-keysyms' 'xcb-util-wm')
--makedepends=('check' 'git' 'meson' 'pandoc')
-+makedepends=('check' 'git' 'meson')
- source=("git+https://github.com/davatorium/rofi.git#tag=${pkgver}"
-         'git+https://github.com/sardemff7/libgwater.git'
-         'git+https://github.com/sardemff7/libnkutils.git'
+@@ -57,3 +57,5 @@ package() {
+ 	install -Dm 644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
+ 	install -Dm 755 Examples/*.sh -t "${pkgdir}/usr/share/doc/${pkgname}/examples"
+ }
++
++makedepends=(${makedepends[@]/pandoc})
