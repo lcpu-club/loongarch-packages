@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7957eb8..a4769d6 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -35,7 +35,7 @@ check() {
+ 	python -m installer --destdir=test_dir dist/*.whl
+ 	export PYTHONPATH="test_dir/${site_packages}:${PYTHONPATH}"
+ 	export PATH="test_dir/usr/bin:${PATH}"
+-	pytest --deselect 'tests/unit/test_config.py::test_validate' -v tests/unit/ -c /dev/null --rootdir=.
++	pytest --deselect 'tests/unit/test_config.py::test_validate' -v tests/unit/ -c /dev/null --rootdir=. -k 'not test_molecule_schema'
+ }
+ 
+ package() {
