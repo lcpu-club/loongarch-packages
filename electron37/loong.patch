@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 098c56b..2fb1fb0 100644
+index af3d388..17b1cbc 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -434,6 +434,11 @@ prepare() {
+@@ -438,6 +438,11 @@ prepare() {
    sed -i "s|@ELECTRON@|${pkgname}|" electron.desktop
    sed -i "s|@ELECTRON_NAME@|Electron ${_major_ver}|" electron.desktop
  
@@ -14,7 +14,7 @@ index 098c56b..2fb1fb0 100644
    cp -r chromium-mirror_third_party_depot_tools depot_tools
    export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
    #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
-@@ -441,6 +446,14 @@ prepare() {
+@@ -445,6 +450,14 @@ prepare() {
    echo "Putting together electron sources"
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
@@ -29,7 +29,7 @@ index 098c56b..2fb1fb0 100644
    rbash prepare-electron-source-tree.sh "$CARCH"
    mv electron src/electron
  
-@@ -454,12 +467,48 @@ prepare() {
+@@ -458,12 +471,48 @@ prepare() {
      -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
    src/build/util/lastchange.py \
      -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
@@ -80,18 +80,7 @@ index 098c56b..2fb1fb0 100644
    src/electron/script/apply_all_patches.py \
        src/electron/patches/config.json
  
-@@ -488,7 +537,9 @@ prepare() {
-   patch -Np1 -i ../chromium-138-nodejs-version-check.patch
- 
-   # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
--  patch -Np1 -i ../compiler-rt-adjust-paths.patch
-+  #patch -Np1 -i ../compiler-rt-adjust-paths.patch
-+  # Use modified version for loong64 support
-+  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
- 
-   # Fixes for building with libstdc++ instead of libc++
-   patch -Np1 -i ../chromium-patches-*/chromium-138-compiler.patch
-@@ -505,6 +556,12 @@ prepare() {
+@@ -513,6 +562,12 @@ prepare() {
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
    # patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
  
@@ -104,33 +93,31 @@ index 098c56b..2fb1fb0 100644
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -566,9 +623,12 @@ build() {
-     'clang_base_path="/usr"'
-     'clang_use_chrome_plugins=false'
-     "clang_version=\"$_clang_version\""
--    'chrome_pgo_phase=2'
-+    'chrome_pgo_phase=0'
-   )
+@@ -615,6 +670,13 @@ build() {
+   # https://crbug.com/957519#c122
+   CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
  
 +  # Disable xnnpack on loong64
-+  _flags+=('build_tflite_with_xnnpack=false')
++  # Make sure PGO is disabled on loong64
++  _flags+=(
++    'build_tflite_with_xnnpack=false'
++    'chrome_pgo_phase=0'
++  )
 +
-   # Allow the use of nightly features with stable Rust compiler
-   # https://github.com/ungoogled-software/ungoogled-chromium/pull/2696#issuecomment-1918173198
-   export RUSTC_BOOTSTRAP=1
-@@ -635,3 +695,15 @@ package() {
+   export CHROMIUM_BUILDTOOLS_PATH="${PWD}/buildtools"
+   gn gen out/Release \
+       --args="import(\"//electron/build/args/release.gn\") ${_flags[*]}"
+@@ -641,3 +703,13 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
 +
 +makedepends+=(jq)
 +source+=("depot_tools-loong64-support.patch"
-+         "compiler-rt-adjust-paths-loong64.patch"
 +         "chromium-loong64-support.patch"
 +         "electron_runtime_api_dalagate-add-loongarch64-support.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
 +sha256sums+=('731ce1a98a181d0c22eb4a6f2e1dbb5417471a6ee17049603b3201ef5e931bd3'
-+             '5eb62f142569bd6887396410ad174a4e9e932790361567df0fd9127003d6b2a0'
 +             'f7ca729c50e16239de71e44c1b9c1f45a9801a46ec66be3f01aa254c56111057'
 +             '516502491d2ed6d9bc8fbb40960a9f98cff4e7beadac4b7ac05a5579f9671733'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
