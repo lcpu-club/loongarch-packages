@@ -1,14 +1,14 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 19eceef..fbf3556 100644
+index 2c1c30d..f8cb3d4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -28,3 +28,9 @@ package() {
-   cd BaiduPCS-Go-$pkgver
+   cd BaiduPCS-Go
    install -Dm755 baidupcs-go "$pkgdir"/usr/bin/baidupcs
  }
 +
 +prepare() {
-+  cd BaiduPCS-Go-$pkgver
++  cd BaiduPCS-Go
 +  go mod edit -replace=golang.org/x/sys=golang.org/x/sys@v0.26.0
 +  go mod tidy
 +}
