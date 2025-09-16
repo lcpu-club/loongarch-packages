@@ -1,6 +1,8 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 55aff4f..5378f87 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -231,19 +231,19 @@ build() {
+@@ -234,7 +234,7 @@ build() {
    local meson_options=(
      -D android-libbacktrace=disabled
      -D b_ndebug=true
@@ -9,12 +11,7 @@
      -D gallium-extra-hud=true
      -D gallium-mediafoundation=disabled
      -D gallium-rusticl=true
-     -D gles1=disabled
-     -D html-docs=enabled
--    -D intel-rt=enabled
-+    -D intel-rt=disabled
-     -D libunwind=disabled
-     -D microsoft-clc=disabled
+@@ -246,7 +246,7 @@ build() {
      -D sysprof=true
      -D valgrind=enabled
      -D video-codecs=all
@@ -23,7 +20,7 @@
      -D vulkan-layers=device-select,intel-nullhw,overlay,screenshot,vram-report-limit
    )
  
-@@ -332,8 +332,8 @@ package_mesa() {
+@@ -335,8 +335,8 @@ package_mesa() {
      _pick vkgfxstr $icddir/gfxstream_vk_icd.*.json
      _pick vkgfxstr $libdir/libvulkan_gfxstream.so
  
@@ -34,3 +31,12 @@
  
      _pick vknvidia $icddir/nouveau_icd.*.json
      _pick vknvidia $libdir/libvulkan_nouveau.so
+@@ -660,4 +660,8 @@ package_mesa-docs() {
+   install -Dm644 mesa-$pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+ }
+ 
++source+=("enable-build-on-other-64bit-processors.patch::https://gitlab.freedesktop.org/mesa/mesa/-/commit/d5443c59c1cf9b8730a02f5a6092bb62900119b2.diff")
++b2sums+=('e6cfdebbb9fde5e2eb394101ab30603cc1a613eaf06b447dba2e2a7b810c548bc25762f2827551079b41947c4e80775f33188ba4988036ac6f9e3637793f008a')
++sha256sums+=('004b920a0520b8e2b5abd51ad4ed89ecab49281ec91d7f3918136511a47be496')
++
+ # vim:set sw=2 sts=-1 et:
