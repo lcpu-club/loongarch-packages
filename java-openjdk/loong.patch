@@ -1,25 +1,23 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 8d20fe4..565012b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -38,6 +38,7 @@ sha256sums=('1fb3cebfeeedc83f94442e25d8f321e28da34c09fc0fe21b4b700bcdb2ed0ee4'
- case "${CARCH}" in
+@@ -70,6 +70,7 @@ case "${CARCH}" in
    x86_64) _JARCH='x86_64';;
    i686)   _JARCH='x86';;
+   riscv64)_JARCH='riscv64';;
 +  loong64) _JARCH='loongarch64';;
  esac
  
  _jvmdir=/usr/lib/jvm/java-${_majorver}-openjdk
-@@ -120,7 +121,7 @@ build() {
-     ${NUM_PROC_OPT}
-     #--disable-javac-server
+@@ -160,7 +161,7 @@ build() {
+     --disable-warnings-as-errors \
+     --with-vendor-name="Arch Linux"
  
 -  make images legacy-jre-image docs
 +  make images legacy-jre-image # docs
  
    # https://bugs.openjdk.java.net/browse/JDK-8173610
    find "${srcdir}/${_imgdir}" -iname '*.so' -exec chmod +x {} \;
-@@ -351,10 +352,21 @@ package_openjdk-doc() {
+@@ -451,10 +452,21 @@ package_openjdk-doc() {
    provides=("openjdk${_majorver}-doc=${pkgver}-${pkgrel}")
  
    install -dm 755 "${pkgdir}/usr/share/doc"
@@ -32,13 +30,13 @@ index 8d20fe4..565012b 100644
  
 +# We cannot use upstream's version control
 +# Reset some versions
-+_loongfixver=27
++_loongfixver=26
 +pkgver=${_majorver}.${_minorver}.ls.${_loongfixver}.0
 +_jdkdir=jdk-jdk-${_majorver}-${_loongfixver}-ls-0
 +_imgdir=${_jdkdir}/build/linux-${_JARCH}-server-release/images
 +
 +source+=("https://github.com/loongson/jdk/archive//refs/tags/jdk-${_majorver}+${_loongfixver}-ls-0.tar.gz")
-+sha256sums+=('5d9e4a83c6c72fb1fd721db4f550a326fa3b49b4328c6a8d088c1e1d38f7b4f9')
++sha256sums+=('e1f0e9d3d20d8559b208a3b6d62028c84e46763036e8876ac7fb5365f2f7ada4')
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(pandoc)$'))
 +
  # vim: ts=2 sw=2 et:
