@@ -1,17 +1,16 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 0f85663..3064019 100644
+index 632c907..e336c8b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -8,7 +8,7 @@ pkgname=chromium
- pkgver=139.0.7258.154
- pkgrel=1
- _launcher_ver=8
--_manual_clone=1
+@@ -27,6 +27,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
+             'kwallet: support for storing passwords in KWallet on Plasma'
+             'upower: Battery Status API support')
+ options=('!lto') # Chromium adds its own flags for ThinLTO
 +_manual_clone=0
- _system_clang=1
- pkgdesc="A web browser built for speed, simplicity, and security"
- arch=('x86_64')
-@@ -45,6 +45,8 @@ sha256sums=('720a1196410080056cd97a1f5ec34d68ba216a281d9b5157b7ea81ea018ec661'
+ source=(https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$pkgver-lite.tar.xz
+         https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver/chromium-launcher-$_launcher_ver.tar.gz
+         chromium-138-nodejs-version-check.patch
+@@ -47,6 +48,8 @@ sha256sums=('02a0d17f811bb780e5b81bb457200bf1c95a49a78ce7e023d0367c30c38fda7c'
  if (( _manual_clone )); then
    source[0]=fetch-chromium-release
    makedepends+=('python-httplib2' 'python-pyparsing' 'python-six' 'npm' 'rsync')
@@ -20,7 +19,7 @@ index 0f85663..3064019 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -119,6 +121,10 @@ prepare() {
+@@ -122,6 +125,10 @@ prepare() {
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
    patch -Np1 -i ../compiler-rt-adjust-paths.patch
  
@@ -31,7 +30,7 @@ index 0f85663..3064019 100644
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
  
-@@ -253,6 +259,9 @@ build() {
+@@ -256,6 +263,9 @@ build() {
    # https://crbug.com/957519#c122
    CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
  
@@ -41,13 +40,13 @@ index 0f85663..3064019 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -328,4 +337,9 @@ package() {
+@@ -331,4 +341,9 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
-+sha256sums+=('921aa54057d5b50f6de3a4dabacfafde2a07314d42057ca49a80693e7cf81699'
++sha256sums+=('25756af6b3d96f5b2a74e1b53fd79d4e6afe1a855050aee3987cf5118e8c13ea'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
 +
  # vim:set ts=2 sw=2 et:
