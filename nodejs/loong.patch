@@ -1,16 +1,31 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index fb227e2..cbfe567 100644
+index 0f1d08c..b0d34d1 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -85,6 +85,11 @@ check() {
-   rm test/parallel/test-http2-client-set-priority.js
-   rm test/parallel/test-http2-priority-event.js
-   rm test/parallel/test-http-outgoing-end-cork.js
-+  rm -f test/parallel/test-dgram-send-cb-quelches-error.js \
-+    test/parallel/test-net-autoselectfamily.js \
-+    test/sequential/test-cpu-prof-dir-worker.js \
-+    test/sequential/test-cpu-prof-exit.js \
-+    test/sequential/test-cpu-prof-kill.js
+@@ -58,6 +58,8 @@ build() {
+   _set_flags
+   cd node
+ 
++  patch -Np1 -d deps/v8 -i "${srcdir}/v8-use-a-zone-to-track-unresolved-branches.patch"
++
+   ./configure \
+     --prefix=/usr \
+     --without-npm \
+@@ -93,6 +95,9 @@ check() {
+   rm test/parallel/test-http2-max-invalid-frames.js
+   rm test/parallel/test-http2-misbehaving-flow-control-paused.js
+   rm test/client-proxy/test-http-proxy-request-no-proxy-port-specific.mjs
++  # Ignore tests failed on loong64
++  rm -f test/parallel/test-dgram-send-cb-quelches-error.js
++  rm -f test/parallel/test-net-autoselectfamily.js
    make test-only
  }
  
+@@ -103,4 +108,7 @@ package() {
+   install -Dm644 LICENSE -t "$pkgdir"/usr/share/licenses/nodejs/
+ }
+ 
++source+=("v8-use-a-zone-to-track-unresolved-branches.patch::https://github.com/v8/v8/commit/144ebfdb3e25331a67aee40f58970bf0050b7b2d.diff")
++sha512sums+=('76b9a065ba2c82dee0eeb4b6f45b841804d3ea47a0b0a05de27b09272e7e10ef6dc7ae837e874145ab3c14f555af9fb180edd0a695a99a1f3ce5ccdd03de61c1')
++
+ # vim:set ts=2 sw=2 et:
