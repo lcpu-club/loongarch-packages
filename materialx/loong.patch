@@ -1,16 +1,15 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -51,7 +51,8 @@ prepare() {
+@@ -49,6 +49,8 @@ prepare() {
    sed -i 's|"libraries"|"/usr/share/materialx/libraries"|g' source/MaterialXGenShader/GenOptions.h
  
    dos2unix python/Scripts/*
--
 +  dos2unix source/MaterialXView/NanoGUI/CMakeLists.txt
 +  patch -Np1 -i "$srcdir"/nanogui-do-not-fallback-to-nehalem.patch -d source/MaterialXView/NanoGUI
-   patch -Np1 -i "$srcdir"/materialx-2338.patch
  }
  
-@@ -108,3 +109,6 @@ package() {
+ build() {
+@@ -104,3 +106,6 @@ package() {
    # Remove empty dirs
    find ${pkgdir}/usr -empty -type d -delete
  }
