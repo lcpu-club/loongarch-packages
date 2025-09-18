@@ -25,21 +25,12 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc
 --- a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -346,6 +346,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
-     info->arch = extensions::api::runtime::PlatformArch::kMips;
-   } else if (strcmp(arch, "mips64el") == 0) {
+@@ -378,6 +378,8 @@
      info->arch = extensions::api::runtime::PlatformArch::kMips64;
+   } else if (strcmp(arch, "riscv64") == 0) {
+     info->arch = extensions::api::runtime::PlatformArch::kRiscv64;
 +  } else if (strcmp(arch, "loongarch64") == 0) {
 +    info->arch = extensions::api::runtime::PlatformArch::kLoongarch64;
-   } else {
-     NOTREACHED();
-   }
-@@ -361,6 +363,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatfo
-     info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kMips;
-   } else if (strcmp(nacl_arch, "mips64") == 0) {
-     info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kMips64;
-+  } else if (strcmp(nacl_arch, "loongarch64") == 0) {
-+    info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kLoongarch64;
    } else {
      NOTREACHED();
    }
@@ -101,32 +92,32 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/co
  
    // Enum to pass as optional bool.
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/components/variations/service/variations_field_trial_creator_base.cc b/components/variations/service/variations_field_trial_creator_base.cc
---- a/components/variations/service/variations_field_trial_creator_base.cc	2000-01-01 00:00:00.000000000 +0800
-+++ b/components/variations/service/variations_field_trial_creator_base.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -114,6 +114,9 @@ Study::CpuArchitecture GetCurrentCpuArch
-   if (process_arch == "ARM") {
-     return Study::ARM32;
+--- a/components/variations/service/variations_field_trial_creator.cc	2000-01-01 00:00:00.000000000 +0800
++++ b/components/variations/service/variations_field_trial_creator.cc	2000-01-01 00:00:00.000000000 +0800
+@@ -116,6 +116,9 @@
+     }
+     return Study::X86_64;
    }
 +  if (process_arch == "LOONGARCH_64") {
 +    return Study::LOONGARCH64;
 +  }
-   if (process_arch == "x86") {
-     return Study::X86_32;
-   }
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+   NOTREACHED();
+ #else
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/extensions/common/api/runtime.json b/extensions/common/api/runtime.json
 --- a/extensions/common/api/runtime.json	2000-01-01 00:00:00.000000000 +0800
 +++ b/extensions/common/api/runtime.json	2000-01-01 00:00:00.000000000 +0800
-@@ -98,7 +98,8 @@
-             {"name": "x86-32", "description": "Specifies the processer architecture as x86-32."},
+@@ -99,7 +99,8 @@
              {"name": "x86-64", "description": "Specifies the processer architecture as x86-64."},
              {"name": "mips", "description": "Specifies the processer architecture as mips."},
--            {"name": "mips64", "description": "Specifies the processer architecture as mips64."}
-+            {"name": "mips64", "description": "Specifies the processer architecture as mips64."},
+             {"name": "mips64", "description": "Specifies the processer architecture as mips64."},
+-            {"name": "riscv64", "description": "Specifies the processer architecture as riscv64."}
++            {"name": "riscv64", "description": "Specifies the processer architecture as riscv64."},
 +            {"name": "loongarch64", "description": "Specifies the processer architecture as loongarch64."}
           ],
          "description": "The machine's processor architecture."
        },
-@@ -111,7 +112,8 @@
+@@ -112,7 +113,8 @@
            {"name": "x86-32", "description": "Specifies the native client architecture as x86-32."},
            {"name": "x86-64", "description": "Specifies the native client architecture as x86-64."},
            {"name": "mips", "description": "Specifies the native client architecture as mips."},
@@ -3497,7 +3488,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h b/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h
 --- a/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h	2000-01-01 00:00:00.000000000 +0800
 +++ b/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config.h	2000-01-01 00:00:00.000000000 +0800
-@@ -0,0 +1,772 @@
+@@ -0,0 +1,773 @@
 +/* Automatically generated by configure - do not modify! */
 +#ifndef FFMPEG_CONFIG_H
 +#define FFMPEG_CONFIG_H
@@ -4110,6 +4101,7 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
 +#define CONFIG_VDPAU 0
 +#define CONFIG_VIDEOTOOLBOX 0
 +#define CONFIG_VULKAN 0
++#define CONFIG_VVC_SEI 0
 +#define CONFIG_V4L2_M2M 0
 +#define CONFIG_FTRAPV 0
 +#define CONFIG_GRAY 0
@@ -9956,214 +9948,3 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/th
  #include "llvm/Support/Alignment.h"
  #include "llvm/Support/Compiler.h"
  #include "llvm/Support/MathExtras.h"
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/xnnpack/BUILD.gn b/third_party/xnnpack/BUILD.gn
---- a/third_party/xnnpack/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/xnnpack/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
-@@ -1494,6 +1494,16 @@ if (current_cpu == "x64" || current_cpu
-     ":xx-pad_arm64_standalone",
-     ":xx-transposev_arm64_standalone",
-   ]
-+} else if (current_cpu == "loong64") {
-+  xnnpack_deps = [
-+    ":configs_loong64",
-+    ":enums_loong64",
-+  ]
-+
-+  xnnpack_standalone_deps = [
-+    ":configs_loong64_standalone",
-+    ":enums_loong64_standalone",
-+  ]
- } else {
-   xnnpack_deps = []
-   xnnpack_standalone_deps = []
-@@ -42035,6 +42045,160 @@ if (current_cpu == "arm64") {
-     ]
- 
-     configs -= [ "//build/config/compiler:chromium_code" ]
-+    configs += [ "//build/config/compiler:no_chromium_code" ]
-+    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
-+
-+    deps = [
-+      "//third_party/cpuinfo",
-+      "//third_party/fp16",
-+      "//third_party/fxdiv",
-+      "//third_party/pthreadpool:pthreadpool_standalone",
-+    ]
-+
-+    public_configs = [ ":xnnpack_config" ]
-+
-+    if (!(is_android && use_order_profiling)) {
-+      assert_no_deps = [ "//base" ]
-+    }
-+  }
-+}
-+
-+if (current_cpu == "loong64") {
-+  source_set("configs_loong64") {
-+    cflags = []
-+
-+    sources = [
-+      "src/include/xnnpack.h",
-+      "src/src/configs/argmaxpool-config.c",
-+      "src/src/configs/avgpool-config.c",
-+      "src/src/configs/binary-elementwise-config.c",
-+      "src/src/configs/cmul-config.c",
-+      "src/src/configs/conv-hwc2chw-config.c",
-+      "src/src/configs/dwconv-config.c",
-+      "src/src/configs/dwconv2d-chw-config.c",
-+      "src/src/configs/gemm-config.c",
-+      "src/src/configs/hardware-config.c",
-+      "src/src/configs/ibilinear-chw-config.c",
-+      "src/src/configs/ibilinear-config.c",
-+      "src/src/configs/lut32norm-config.c",
-+      "src/src/configs/maxpool-config.c",
-+      "src/src/configs/pack-lh-config.c",
-+      "src/src/configs/raddstoreexpminusmax-config.c",
-+      "src/src/configs/reduce-config.c",
-+      "src/src/configs/spmm-config.c",
-+      "src/src/configs/transpose-config.c",
-+      "src/src/configs/unary-elementwise-config.c",
-+      "src/src/configs/unpool-config.c",
-+      "src/src/configs/vmulcaddc-config.c",
-+      "src/src/configs/x8-lut-config.c",
-+      "src/src/configs/xx-fill-config.c",
-+      "src/src/configs/xx-pad-config.c",
-+    ]
-+
-+    configs -= [ "//build/config/compiler:chromium_code" ]
-+    configs += [ "//build/config/compiler:no_chromium_code" ]
-+    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
-+
-+    deps = [
-+      "//third_party/cpuinfo",
-+      "//third_party/fp16",
-+      "//third_party/fxdiv",
-+      "//third_party/pthreadpool",
-+    ]
-+
-+    public_configs = [ ":xnnpack_config" ]
-+  }
-+
-+  # This is a target that cannot depend on //base.
-+  source_set("configs_loong64_standalone") {
-+    cflags = []
-+
-+    sources = [
-+      "src/include/xnnpack.h",
-+      "src/src/configs/argmaxpool-config.c",
-+      "src/src/configs/avgpool-config.c",
-+      "src/src/configs/binary-elementwise-config.c",
-+      "src/src/configs/cmul-config.c",
-+      "src/src/configs/conv-hwc2chw-config.c",
-+      "src/src/configs/dwconv-config.c",
-+      "src/src/configs/dwconv2d-chw-config.c",
-+      "src/src/configs/gemm-config.c",
-+      "src/src/configs/hardware-config.c",
-+      "src/src/configs/ibilinear-chw-config.c",
-+      "src/src/configs/ibilinear-config.c",
-+      "src/src/configs/lut32norm-config.c",
-+      "src/src/configs/maxpool-config.c",
-+      "src/src/configs/pack-lh-config.c",
-+      "src/src/configs/raddstoreexpminusmax-config.c",
-+      "src/src/configs/reduce-config.c",
-+      "src/src/configs/spmm-config.c",
-+      "src/src/configs/transpose-config.c",
-+      "src/src/configs/unary-elementwise-config.c",
-+      "src/src/configs/unpool-config.c",
-+      "src/src/configs/vmulcaddc-config.c",
-+      "src/src/configs/x8-lut-config.c",
-+      "src/src/configs/xx-fill-config.c",
-+      "src/src/configs/xx-pad-config.c",
-+    ]
-+
-+    configs -= [ "//build/config/compiler:chromium_code" ]
-+    configs += [ "//build/config/compiler:no_chromium_code" ]
-+    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
-+
-+    deps = [
-+      "//third_party/cpuinfo",
-+      "//third_party/fp16",
-+      "//third_party/fxdiv",
-+      "//third_party/pthreadpool:pthreadpool_standalone",
-+    ]
-+
-+    public_configs = [ ":xnnpack_config" ]
-+
-+    if (!(is_android && use_order_profiling)) {
-+      assert_no_deps = [ "//base" ]
-+    }
-+  }
-+
-+  source_set("enums_loong64") {
-+    cflags = []
-+
-+    sources = [
-+      "src/include/xnnpack.h",
-+      "src/src/enums/allocation-type.c",
-+      "src/src/enums/datatype-strings.c",
-+      "src/src/enums/microkernel-type.c",
-+      "src/src/enums/node-type.c",
-+      "src/src/enums/operator-type.c",
-+    ]
-+
-+    configs -= [ "//build/config/compiler:chromium_code" ]
-+    configs += [ "//build/config/compiler:no_chromium_code" ]
-+    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
-+
-+    deps = [
-+      "//third_party/cpuinfo",
-+      "//third_party/fp16",
-+      "//third_party/fxdiv",
-+      "//third_party/pthreadpool",
-+    ]
-+
-+    public_configs = [ ":xnnpack_config" ]
-+  }
-+
-+  # This is a target that cannot depend on //base.
-+  source_set("enums_loong64_standalone") {
-+    cflags = []
-+
-+    sources = [
-+      "src/include/xnnpack.h",
-+      "src/src/enums/allocation-type.c",
-+      "src/src/enums/datatype-strings.c",
-+      "src/src/enums/microkernel-type.c",
-+      "src/src/enums/node-type.c",
-+      "src/src/enums/operator-type.c",
-+    ]
-+
-+    configs -= [ "//build/config/compiler:chromium_code" ]
-     configs += [ "//build/config/compiler:no_chromium_code" ]
-     configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
- 
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/xnnpack/src/src/xnnpack/common.h b/third_party/xnnpack/src/src/xnnpack/common.h
---- a/third_party/xnnpack/src/src/xnnpack/common.h	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/xnnpack/src/src/xnnpack/common.h	2000-01-01 00:00:00.000000000 +0800
-@@ -79,6 +79,12 @@
- #define XNN_ARCH_WASMRELAXEDSIMD 0
- #endif
- 
-+#if defined(__loongarch__)
-+#define XNN_ARCH_LOONGARCH 1
-+#else
-+#define XNN_ARCH_LOONGARCH 0
-+#endif
-+
- // Define platform identification macros
- 
- #if defined(__ANDROID__)
-diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/third_party/xnnpack/src/src/xnnpack/hardware-config.h b/third_party/xnnpack/src/src/xnnpack/hardware-config.h
---- a/third_party/xnnpack/src/src/xnnpack/hardware-config.h	2000-01-01 00:00:00.000000000 +0800
-+++ b/third_party/xnnpack/src/src/xnnpack/hardware-config.h	2000-01-01 00:00:00.000000000 +0800
-@@ -77,6 +77,10 @@ enum xnn_arch_flags {
- #if XNN_ARCH_HEXAGON
-   xnn_arch_hvx = 1 << 0,
- #endif  // XNN_ARCH_HEXAGON
-+#if XNN_ARCH_LOONGARCH
-+  xnn_arch_lsx = 1 << 0,
-+  xnn_arch_lasx = 1 << 1,
-+#endif  // XNN_ARCH_LOONGARCH
- };
- 
- struct xnn_hardware_config {
