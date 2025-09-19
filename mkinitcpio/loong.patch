@@ -1,16 +1,16 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -36,6 +36,9 @@ validpgpkeys=('ECCAC84C1BA08A6CC8E63FBBF22FB1D78A77AEAB'    # Giancarlo Razzolin
- prepare() {
-   cd "$pkgname-$pkgver"
+@@ -45,6 +45,9 @@ prepare() {
    patch -Np1 < ../0001-trigger.patch
+   patch -Np1 < ../0002-systemd-258.patch
+   patch -Np1 < ../0003-fix-tpmfiles.patch
 +  patch -Np1 < ../mkinitcpio-loong64.patch
 +  patch -Np1 < ../mkinitcpio-fix-error.patch
 +  patch -Np1 < ../0001-test-cases-zsh-completion-Sync-Linux-banner-fix-from.patch
  }
  
  check() {
-@@ -45,3 +48,12 @@ check() {
+@@ -54,3 +57,12 @@ check() {
  package() {
    make -C "$pkgname-$pkgver" DESTDIR="$pkgdir" install
  }
