@@ -1,0 +1,27 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5469997..1c86227 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -315,3 +315,22 @@ package_opensearch-store-smb-plugin() {
+   depends=("opensearch=${pkgver}")
+   _package_plugin store-smb
+ }
++
++prepare() {
++  cd "protobuf-${_protobuf_ver}"
++  cmake . -DCMAKE_CXX_STANDARD=17 -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_ABSL_PROVIDER=package
++  make $MAKEFLAGS
++
++  cd "${srcdir}/OpenSearch-${pkgver}"
++  patch -Np1 -i "${srcdir}/Add-support-for-linux-loong64-platform.patch"
++  sed -i -e '/artifact = "com.google.protobuf:protoc/d' \
++    -e "\|protoc {|apath = '$(realpath ${srcdir}/protobuf-${_protobuf_ver}/protoc)'" \
++    server/build.gradle
++}
++
++_protobuf_ver=3.25.5
++makedepends+=('cmake' 'abseil-cpp')
++source+=("Add-support-for-linux-loong64-platform.patch::https://github.com/wszqkzqk/OpenSearch/commit/58d140eeff435d9f5a203e059658188d68e46d21.diff"
++         "protobuf-${_protobuf_ver}.tar.gz::https://github.com/protocolbuffers/protobuf/archive/v${_protobuf_ver}.tar.gz")
++sha256sums+=('de017fd8fb9f556f325f290c5ffc7c97a53fd3a8f324a9987ddd3025bbc75e28'
++             '4356e78744dfb2df3890282386c8568c85868116317d9b3ad80eb11c2aecf2ff')
