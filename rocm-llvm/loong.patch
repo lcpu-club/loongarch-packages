@@ -1,21 +1,21 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index ff5b5c5..843e537 100644
+index a3e4b61..3de584c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -37,6 +37,12 @@ prepare() {
-   # Add fix for missing function overload (openat)
-   # https://github.com/llvm/llvm-project/issues/100754
-   git cherry-pick -n 155b7a12820ec45095988b6aa6e057afaf2bc892
-+
+@@ -30,6 +30,12 @@ prepare() {
+       7e44305041d96b064c197216b931ae3917a34ac1 \
+       8f39502b85d34998752193e85f36c408d3c99248
+ 
 +  # Fix llvm-mc abi
 +  git cherry-pick -n 3acb0e9e600cbe3668b7db3956238a592ebadc0a
 +
 +  # Fix libraries_sha.inc:1:42: error: narrowing conversion of ‘-30’ from ‘int’ to ‘char’
 +  git cherry-pick -n 74c3df6cb5540c937ad8b58f95275901efae8669
- }
++
+   # Add fix for build failure in the gold plugin
+   patch -Np1 < ../rocm-llvm-6.4-llvm-gold-plugin-fix-ModuleName.patch
  
- build() {
-@@ -65,7 +71,7 @@ build() {
+@@ -70,7 +76,7 @@ build() {
          -D LIBCXXABI_ENABLE_SHARED=OFF
          -D LIBCXXABI_ENABLE_STATIC=ON
          -D LIBCXXABI_INSTALL_STATIC_LIBRARY=OFF
