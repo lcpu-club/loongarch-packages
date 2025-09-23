@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -89,3 +89,9 @@ build() {
+ package() {
+   DESTDIR="$pkgdir" cmake --install build
+ }
++
++prepare() {
++  cd $pkgname-$pkgver
++  sed -i 's/url=" h/url="h/g' po/ca/docs/kcontrol/windowspecific-x11/index.docbook
++  sed -i 's/url=" h/url="h/g' po/nl/docs/kcontrol/windowspecific-x11/index.docbook
++}
