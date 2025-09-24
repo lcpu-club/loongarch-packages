@@ -1,16 +1,9 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 80fe085..e831e11 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -31,10 +31,9 @@ makedepends=('evince'
-              'vim'
-              # for the docs
-              'doxygen' 'yelp-tools' 'graphviz'
--             'pandoc-cli'
-              #'fop' - for pdf format but 'pdfoutline' is missing
- )
--checkdepends=('xorg-server-xvfb' 'shellcheck')
-+checkdepends=('xorg-server-xvfb')
- optdepends=('librsvg: SVG rendering'
-             'fbida: for jpeg rotation'
-             'gawk: to use the geo-decode function'
+@@ -102,3 +102,6 @@ package(){
+   # add missing html doc
+   cp -arv build/doc/html "${pkgdir}/usr/share/doc/${pkgname}/"
+ }
++
++makedepends=(${makedepends[@]/pandoc-cli})
++checkdepends=(${checkdepends[@]/shellcheck})
