@@ -1,18 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -41,11 +41,8 @@ depends=(abseil-cpp
-          zlib)
- makedepends=(ant
-              cmake
--             cuda
--             cudnn
-              eigen
-              fmt
--             gcc14
-              git
-              glew
-              hdf5
-@@ -111,7 +108,6 @@ build() {
+@@ -121,7 +121,6 @@ build() {
      -DINSTALL_PYTHON_EXAMPLES=ON
      -DCMAKE_INSTALL_PREFIX=/usr
      -DCPU_BASELINE_DISABLE=SSE3
@@ -20,7 +8,7 @@
      -DOPENCV_EXTRA_MODULES_PATH="$srcdir"/opencv_contrib/modules
      -DOPENCV_SKIP_PYTHON_LOADER=ON
      # cmake's FindLAPACK doesn't add cblas to LAPACK_LIBRARIES, so we need to specify them manually
-@@ -130,7 +126,8 @@ build() {
+@@ -140,7 +139,8 @@ build() {
    cmake -B build -S $pkgname "${cmake_options[@]}" \
      -DBUILD_WITH_DEBUG_INFO=ON
    cmake --build build
@@ -29,8 +17,8 @@
 +  : <<'COMMENT_SEPARATOR'
    # In general, we want to list all real archs (sm_XX) and the latest virtual arch (compute_XX) for future PTX compatibility.
    # Valid values can be discovered from nvcc --help
-   # NOTE: thrust v2.8.2 (bundled in CUDA 12.9) is broken for archs 50 and 52, although they are still only "deprecated"
-@@ -148,6 +145,7 @@ build() {
+   local cuda_archs="75;80;86;87;88;89;90;100;103;110;120;121;121-virtual"
+@@ -155,6 +155,7 @@ build() {
      -DENABLE_CUDA_FIRST_CLASS_LANGUAGE=ON \
      -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
    cmake --build build-cuda --verbose
@@ -38,7 +26,7 @@
  }
  
  package_opencv() {
-@@ -228,3 +226,9 @@ package_python-opencv-cuda() {
+@@ -235,3 +236,11 @@ package_python-opencv-cuda() {
  
    DESTDIR="$pkgdir" cmake --install build-cuda/modules/python3
  }
@@ -48,3 +36,5 @@
 +    unset 'pkgname[$i]'
 +  fi
 +done
++makedepends=(${makedepends[@]/cuda})
++makedepends=(${makedepends[@]/cudnn})
