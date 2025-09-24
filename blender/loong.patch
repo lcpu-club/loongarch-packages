@@ -1,16 +1,15 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index a5d4e16..a225787 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -149,7 +149,6 @@ build() {
+@@ -157,8 +157,6 @@ build() {
      -D CMAKE_BUILD_TYPE=Release
      -D CMAKE_INSTALL_PREFIX=/usr
      -D WITH_LINKER_MOLD=ON
 -    -D CUDA_HOST_COMPILER="$NVCC_CCBIN"
+-    -D CYCLES_CUDA_BINARIES_ARCH="$cuda_archs"
      -D HIP_ROOT_DIR=/opt/rocm
      -D HIPRT_INCLUDE_DIR=/opt/rocm/include
-     -D OCLOC_INSTALL_DIR=/usr
-@@ -162,6 +161,11 @@ build() {
+     -D HIPRT_COMPILER_PARALLEL_JOBS=8
+@@ -172,6 +170,11 @@ build() {
      -D WITH_CYCLES_OSL=ON
      -D WITH_INSTALL_PORTABLE=OFF
      -D WITH_PYTHON_INSTALL=OFF
@@ -22,7 +21,7 @@ index a5d4e16..a225787 100644
      -G Ninja
      -S "$pkgname"
      -W no-dev
-@@ -183,7 +187,11 @@ package() {
+@@ -193,7 +196,11 @@ package() {
  
    # Move OneAPI AOT lib to proper place
    mkdir "${pkgdir}"/usr/lib/
