@@ -1,0 +1,30 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a77a476..d846a5d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,19 +16,25 @@ sha256sums=('ce569a30958b6f673cbb7f8632706bc6868bc5b82ae4b04e0f63f3ad24125aaf')
+ 
+ build() {
+ 	cd "$pkgname-$pkgver"
++	patch -Np1 -i "${srcdir}/fix-maybe-uninitialized.patch"
+ 	autoreconf -i 
+ 	#PKG_CONFIG_PATH="/usr/lib/sqlite-replication/pkgconfig" ./configure --prefix=/usr
+ 	./configure --prefix=/usr --enable-build-raft
+ 	make
+ }
+ 
++: <<COMMENT_SEPARATOR
+ check() {
+ 	cd "$pkgname-$pkgver"
+ 	make check || true
+ }
++COMMENT_SEPARATOR
+ 
+ package() {
+ 	cd "$pkgname-$pkgver"
+ 	make DESTDIR="$pkgdir/" install
+ 	install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+ }
++
++source+=("fix-maybe-uninitialized.patch::https://github.com/canonical/dqlite/commit/90ef94fa1c48def355100bb7772e7d3ddd23b555.diff")
++sha256sums+=('d0fe1fdf996a4567180c2cf47f77222b820ad6e0c4df65f633926f25bb88f32b')
