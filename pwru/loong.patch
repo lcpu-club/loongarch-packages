@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5809056..bdc7ad6 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,7 +21,7 @@ prepare() {
+ 	export CGO_LDFLAGS="${LDFLAGS}"
+ 	export GOPATH="${srcdir}"
+ 	export GOFLAGS="-buildmode=pie -mod=vendor -modcacherw"
+-	export TARGET_GOARCH=amd64
++	export TARGET_GOARCH=loong64
+ 	go generate
+ }
+ 
