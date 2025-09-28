@@ -12,7 +12,7 @@
    # Fix cmake prefix path (FS#78665)
    patch -Np1 -i "${srcdir}"/fix_cmake_prefix_path.patch
  
-@@ -217,7 +222,6 @@ _prepare() {
+@@ -244,7 +249,6 @@ _prepare() {
  
    # Check tools/setup_helpers/cmake.py, setup.py and CMakeLists.txt for a list of flags that can be set via env vars.
    export ATEN_NO_TEST=ON  # do not build ATen tests
@@ -20,7 +20,7 @@
    export BUILD_CUSTOM_PROTOBUF=OFF
    export USE_GFLAGS=ON
    export USE_GLOG=ON
-@@ -225,10 +229,9 @@ _prepare() {
+@@ -252,10 +256,9 @@ _prepare() {
    export USE_OBSERVERS=ON
    export USE_MAGMA=ON
    # export USE_SYSTEM_LIBS=ON  # experimental, not all libs present in repos
@@ -32,10 +32,10 @@
    export USE_GOLD_LINKER=ON
    export NCCL_VERSION=$(pkg-config nccl --modversion)
    export NCCL_VER_CODE=$(sed -n 's/^#define NCCL_VERSION_CODE\s*\(.*\).*/\1/p' /usr/include/nccl.h)
-@@ -248,6 +251,10 @@ _prepare() {
- 
-   # This list is from ./Dockerfile
-   export TORCH_CUDA_ARCH_LIST="6.1 7.0 7.2 7.5 8.0 8.6 8.7 8.9 9.0 9.0a 12.0"
+@@ -273,6 +276,10 @@ _prepare() {
+   export CUDNN_INCLUDE_DIR=/usr/include
+   export TORCH_NVCC_FLAGS="-Xfatbin -compress-all"
+   export TORCH_CUDA_ARCH_LIST="7.5 8.0 8.6 8.7 8.8 8.9 9.0 10.0 10.3 11.0 12.0 12.1"
 +COMMENT_SEPARATOR
 +  export CC=/usr/bin/gcc-14
 +  export CXX=/usr/bin/g++-14
@@ -43,7 +43,7 @@
  
    export ROCM_PATH=/opt/rocm
    export HIP_ROOT_DIR=/opt/rocm
-@@ -271,23 +278,24 @@ _prepare() {
+@@ -296,23 +303,24 @@ _prepare() {
  
  build() {
    cd "${srcdir}/${_pkgname}"
@@ -72,7 +72,7 @@
    cd "${srcdir}/${_pkgname}-cuda"
    echo "Building with cuda and without non-x86-64 optimizations"
    _prepare
-@@ -308,9 +316,10 @@ build() {
+@@ -333,9 +341,10 @@ build() {
    _prepare
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python setup.py build
@@ -84,7 +84,7 @@
    # -fcf-protection is not supported by HIP, see
    # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
    CXXFLAGS+=" -fcf-protection=none"
-@@ -319,20 +328,22 @@ build() {
+@@ -344,20 +353,22 @@ build() {
    export USE_CUDNN=0
    export USE_ROCM=1
    export MAGMA_HOME=/opt/rocm
@@ -110,7 +110,7 @@
    # Conversion of CUDA to ROCm source files
    python tools/amd_build/build_amd.py
    patch -Np1 -i "$srcdir/pytorch-rocm-jit.patch"
-@@ -377,7 +388,7 @@ package_python-pytorch() {
+@@ -402,7 +413,7 @@ package_python-pytorch() {
  }
  
  package_python-pytorch-opt() {
@@ -119,7 +119,7 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -407,7 +418,7 @@ package_python-pytorch-opt-cuda() {
+@@ -432,7 +443,7 @@ package_python-pytorch-opt-cuda() {
  
  package_python-pytorch-rocm() {
    pkgdesc="${_pkgdesc} (with ROCm)"
@@ -128,7 +128,7 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -416,8 +427,8 @@ package_python-pytorch-rocm() {
+@@ -441,8 +452,8 @@ package_python-pytorch-rocm() {
  }
  
  package_python-pytorch-opt-rocm() {
@@ -139,7 +139,7 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver} python-pytorch-rocm=${pkgver})
  
-@@ -425,4 +436,20 @@ package_python-pytorch-opt-rocm() {
+@@ -450,4 +461,20 @@ package_python-pytorch-opt-rocm() {
    _package
  }
  
