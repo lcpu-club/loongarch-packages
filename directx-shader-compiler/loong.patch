@@ -1,20 +1,18 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index c4150bf..63692cd 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -38,6 +38,8 @@ prepare() {
-   git config submodule."external/re2".url "${srcdir}/${pkgname}"-re2
- 
-   git -c protocol.file.allow=always submodule update
-+  
+@@ -39,6 +39,7 @@ prepare() {
+   git submodule set-url external/SPIRV-Headers "$srcdir/SPIRV-Headers"
+   git submodule set-url external/SPIRV-Tools "$srcdir/SPIRV-Tools"
+   git -c protocol.file.allow=always -c protocol.allow=never submodule update
 +  patch -p1 -i "${srcdir}/add-loong64-support.patch"
  }
  
  build() {
-@@ -66,3 +68,6 @@ package() {
-   install LICENSE.TXT "${pkgdir}"/usr/share/licenses/${pkgname}/
-   install ThirdPartyNotices.txt "${pkgdir}"/usr/share/licenses/${pkgname}
+@@ -62,5 +63,6 @@ package() {
+   DESTDIR="$pkgdir" cmake --build build --target install-distribution
+   install -Dm644 $pkgname/LICENSE.TXT -t "$pkgdir/usr/share/licenses/$pkgname"
  }
-+
+-
 +source+=("add-loong64-support.patch::https://github.com/microsoft/DirectXShaderCompiler/commit/8c6cc722918c4337e48167735aeb022cb141ac15.patch")
-+sha256sums+=('804ec9fd3be5118abee90c9b0c25ca3fcf805c3221adb1cf26804aebc96f974e')
++b2sums+=('3b1112b11d4ce91285fdb68a64658ee0bf10d97e29c6f5ed3f4d5b579cfb09c650a97149fab60e50f87745f8f38f01fed21c391473f856b2ab2b6c8a87ecb942')
+ # vim:set sw=2 sts=-1 et:
