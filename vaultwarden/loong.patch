@@ -1,6 +1,8 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 505359b..ba6f4bb 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -46,6 +46,8 @@ b2sums=('cc82f8ca695ed6152d8a99c178fda9a250c0ac233062dc0574ecfc26fa587eded894ed8
+@@ -52,6 +52,8 @@ b2sums=('547e757cb3ecfaa3a43d403f0bbed8d890dc6a8d9be59be1e4105d450a4ffc5892117ac
  
  prepare() {
    cd $pkgname
@@ -9,9 +11,14 @@
    # download dependencies
    cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
  
-@@ -90,3 +92,5 @@ package() {
+@@ -96,3 +98,10 @@ package() {
    # binary
    install -vDm755 -t "$pkgdir/usr/bin" target/release*/$pkgname
  }
 +
-+depends_loong64=(mariadb-libs clang)
++depends_loong64=(
++  mariadb-libs
++  clang
++  mariadb-libs
++  postgresql-libs
++)
