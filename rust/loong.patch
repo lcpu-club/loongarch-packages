@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 8daf8c8..be83008 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -119,9 +119,8 @@ link-shared = true
+@@ -133,9 +133,8 @@ link-shared = true
  [build]
  description = "Arch Linux $pkgbase $epoch:$pkgver-$pkgrel"
  target = [
@@ -14,7 +12,7 @@ index 8daf8c8..be83008 100644
    "aarch64-unknown-linux-gnu",
    "aarch64-unknown-linux-musl",
    "wasm32-unknown-unknown",
-@@ -172,24 +171,20 @@ jemalloc = true
+@@ -188,24 +187,20 @@ lto = "fat"
  compression-formats = ["gz"]
  compression-profile = "fast"
  
@@ -43,7 +41,7 @@ index 8daf8c8..be83008 100644
  sanitizers = false
  musl-root = "/usr/lib/musl"
  
-@@ -304,12 +299,9 @@ build() {
+@@ -320,18 +315,15 @@ build() {
  
    # rustbuild always installs copies of the shared libraries to /usr/lib,
    # overwrite them with symlinks to the per-architecture versions
@@ -52,13 +50,23 @@ index 8daf8c8..be83008 100644
 -  ln -srvft usr/lib32 usr/lib/rustlib/i686-unknown-linux-gnu/lib/*.so
 +  ln -srvft usr/lib   usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/lib/*.so
  
+   # Symlink the "self-contained" linker to our system lld
+-  mkdir -pv usr/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld
+-  ln -srvf  usr/bin/lld          usr/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld
+-  ln -srvf  usr/bin/llvm-objcopy usr/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-objcopy
+-  ln -srvft usr/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld usr/bin/{ld.lld,ld64.lld,lld-link,wasm-ld}
++  mkdir -pv usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/bin/gcc-ld
++  ln -srvf  usr/bin/lld          usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/bin/rust-lld
++  ln -srvf  usr/bin/llvm-objcopy usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/bin/rust-objcopy
++  ln -srvft usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/bin/gcc-ld usr/bin/{ld.lld,ld64.lld,lld-link,wasm-ld}
+ 
 -  _pick dest-i686 usr/lib/rustlib/i686-unknown-linux-gnu usr/lib32
 -  _pick dest-musl usr/lib/rustlib/x86_64-unknown-linux-musl
 +  _pick dest-musl usr/lib/rustlib/$(uname -m)-unknown-linux-musl
    _pick dest-aarch64-gnu usr/lib/rustlib/aarch64-unknown-linux-gnu
    _pick dest-aarch64-musl usr/lib/rustlib/aarch64-unknown-linux-musl
    _pick dest-wasm usr/lib/rustlib/wasm32{,v1}-*
-@@ -418,4 +410,7 @@ package_rust-src() {
+@@ -439,4 +431,7 @@ package_rust-src() {
      rustc-$pkgver-src/{COPYRIGHT,LICENSE-MIT}
  }
  
