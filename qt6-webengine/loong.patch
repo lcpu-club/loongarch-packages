@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e4826ef..e439fe8 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -98,6 +98,12 @@ prepare() {
@@ -6,7 +8,7 @@
    [[ -n $_chromium ]] && git checkout $_chromium || true
 +  pushd "${srcdir}/${_pkgfn}"
 +  # Fix build for loong64 (Chen Jiajie's patch)
-+  patch -p2 -i "$srcdir/add-loong64-support.patch"
++  patch -Np2 -i "$srcdir/add-loong64-support.patch"
 +  # Temporarily switch to mold to workaround with binutils's bfd's bug
 +  export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
 +  popd
@@ -19,6 +21,6 @@
  }
 +
 +source+=("add-loong64-support.patch")
-+sha256sums+=("b879f16cb6721eec3367c991a5ba6efa7db69f18e690c0c3275e8d8a6ba36378")
++sha256sums+=('1dcdb5421df854cfc1dbbd977ae718ddfe58a5375fe20223b9a0f900682b52bf')
 +# Temporarily switch to mold to workaround with binutils's bfd's bug
 +makedepends+=(mold)
