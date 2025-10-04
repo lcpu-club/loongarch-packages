@@ -1,22 +1,22 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index f8064f6..4cb52ca 100644
+index 247b88c..073711b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -30,6 +30,8 @@ sha256sums=('39695adb39b0284a4fc4b184d764772d886121bf30378f9614a3abfbdc5ff11a'
+@@ -30,6 +30,10 @@ sha256sums=('7e44ad8c82e96a934eb2d280465f25fc6613922fb8d81d01dfe2c4ebe9423d85'
  prepare() {
    mkdir -p src/github.com/opencontainers
    cp -r runc-${pkgver} src/github.com/opencontainers/runc
-+  patch -Np1 -d "src/github.com/opencontainers/runc" -i "${srcdir}/runc-update-libseccomp-golang-to-support-loong64.patch"
-+  patch -Np1 -d "src/github.com/opencontainers/runc" -i "${srcdir}/runc-add-loong64-support.patch"
++  cd "src/github.com/opencontainers/runc"
++  patch -Np1 -i "${srcdir}/runc-add-loong64-support.patch"
++  go mod edit -replace=github.com/seccomp/libseccomp-golang=github.com/seccomp/libseccomp-golang@v0.11.1
++  go mod tidy
  }
  
  build() {
-@@ -54,3 +56,8 @@ package() {
+@@ -54,3 +58,6 @@ package() {
    install -d "$pkgdir/usr/share/man/man8"
    install -m644 man/man8/*.8 "$pkgdir/usr/share/man/man8"
  }
 +
-+source+=("runc-update-libseccomp-golang-to-support-loong64.patch"
-+         "runc-add-loong64-support.patch::https://raw.githubusercontent.com/loong64/containerd-packaging/cf63b409783d871271293a483e569ae7c99c9b91/runc.patch")
-+sha256sums+=('1e6b305d9061f39585708a4af040f141d45a59ee9356b14c6a5808c51bfb0b54'
-+             '66e3182fe01d241b55e4dd1011f10b1ad99d26fdefb7af535d342f848a3ceef8')
++source+=("runc-add-loong64-support.patch::https://raw.githubusercontent.com/loong64/containerd-packaging/cf63b409783d871271293a483e569ae7c99c9b91/runc.patch")
++sha256sums+=('66e3182fe01d241b55e4dd1011f10b1ad99d26fdefb7af535d342f848a3ceef8')
