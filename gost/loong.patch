@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d5d505e..7dd1d38 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,6 +20,8 @@ build() {
+   export GOFLAGS="-buildmode=pie -trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw"
+ 
+   cd gost/cmd/gost
++  go mod edit -replace=github.com/templexxx/cpu=github.com/templexxx/cpu@v0.1.1
++  go mod tidy
+   go build
+ }
+ 
