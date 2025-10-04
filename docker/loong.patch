@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index e43b0ec..d00689f 100644
+index 3f1bcb5..31b5ab5 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -74,6 +74,7 @@ build() {
+@@ -73,6 +73,7 @@ build() {
    export LDFLAGS=''
    export GOFLAGS='-buildmode=pie -trimpath -mod=readonly -modcacherw -ldflags=-linkmode=external -ldflags=-compressdwarf=false -ldflags=-B=gobuildid'
    export GO111MODULE=off
@@ -10,3 +10,16 @@ index e43b0ec..d00689f 100644
    export DISABLE_WARN_OUTSIDE_CONTAINER=1
  
    ### cli
+@@ -126,4 +127,12 @@ package() {
+   cp -r man/man* "$pkgdir/usr/share/man"
+ }
+ 
++prepare() {
++  patch -Np1 -d moby -i "${srcdir}/moby-add-support-for-loong64-seccomp.patch"
++}
++
++# https://github.com/moby/moby/pull/45302
++source+=("moby-add-support-for-loong64-seccomp.patch")
++sha256sums+=('b23660637531b49842cf0955c24ffe8c3042dcd5f563299beefb48ef62e48eab')
++
+ # vim:set ts=2 sw=2 et:
