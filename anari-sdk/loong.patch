@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 43888a1..eb0b9d2 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,6 +17,7 @@ sha256sums=('cbcbe8a3ead5fb88b9a91d629316d334f284fb7efdf9c83b1b09bfde3738f419')
+ 
+ build() {
+   cmake -B build -S ANARI-SDK \
++    -DBUILD_HELIDE_DEVICE=OFF \
+     -DCMAKE_INSTALL_PREFIX=/usr
+   cmake --build build
+ }
