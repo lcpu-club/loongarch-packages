@@ -1,0 +1,12 @@
+--- a/subprojects/luajit.wrap
++++ b/subprojects/luajit.wrap
+@@ -1,7 +1,7 @@
+ [wrap-git]
+ directory = luajit
+-url = https://github.com/LuaJIT/LuaJIT.git
+-revision = v2.1
++url = https://github.com/yetist/LuaJIT.git
++revision = 653b14db641a1d792d14f50c164681478f577624
+ patch_directory = luajit
+ 
+ [provide]

@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 713098d..f82879e 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -43,6 +43,7 @@ b2sums=('9d46d4c296e1d52ffb1abbd2e3ac48b3329618706fad4e76928e733b15d61e3d352b50d
+ 
+ prepare() {
+   cd Aegisub
++  patch -Np1 -i ${srcdir}/use-supported-luajit-fork.patch
+   meson subprojects download luajit
+   meson subprojects packagefiles --apply luajit
+   sed "/subdir('tests')/d" -i meson.build
+@@ -74,4 +75,7 @@ package() {
+   install -Dm 644 Aegisub/LICENCE -t "${pkgdir}"/usr/share/licenses/aegisub/
+ }
+ 
++source+=("use-supported-luajit-fork.patch")
++b2sums+=('9b1fafe33c9cb5df824fb6a18c5565603fe73e0821075ec06b796e00e8c0f7e42a86067d8f3765c69cad6e5c3aa0f22602dd3f0bf3f7201505813c806f48ccba')
++
+ # vim: ts=2 sw=2 et:
