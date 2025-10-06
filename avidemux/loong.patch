@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -34,6 +34,12 @@ prepare() {
+   sed -i 's|../avidemux/qt4|../avidemux/qt4 -DLRELEASE_EXECUTABLE=/usr/bin/lrelease-qt5|' bootStrap.bash
    sed -e 's|0.19|1.0|' -i avidemux_plugins/ADM_videoFilters6/ass/CMakeLists.txt
    mv "$srcdir"/effadce6.patch avidemux_core/ffmpeg_package/patches/upstream # Fix build with binutils 2.41
-   patch -p1 -i ../x265-4.0.patch # Fix build with x265 4.0
 +  #add loong64 support
 +  dos2unix -F -n ../LoongArchSupport.patch ../LoongArchSupport_LF.patch
 +  dos2unix -o avidemux_plugins/ADM_audioDecoders/ADM_ad_mad/CMakeLists.txt
@@ -13,7 +13,7 @@
  }
  
  build() {
-@@ -81,4 +87,8 @@ package_avidemux-qt() {
+@@ -82,4 +88,8 @@ package_avidemux-qt() {
    make -C buildPluginsQt5 DESTDIR="${pkgdir}" install
  }
  
