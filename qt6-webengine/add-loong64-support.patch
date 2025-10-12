@@ -74,13 +74,13 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 --- a/qtwebengine/src/3rdparty/chromium/extensions/browser/api/declarative_net_request/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/extensions/browser/api/declarative_net_request/BUILD.gn	2000-01-01 00:00:00.000000000 +0800
 @@ -19,6 +19,7 @@ source_set("declarative_net_request") {
-   deps = [
+   public_deps = [
      "//base",
      "//content/public/browser",
 +    "//components/web_cache/public/mojom",
+     "//extensions/browser:browser_sources",
      "//extensions/common",
      "//extensions/common/api",
-     "//services/preferences/public/cpp",
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/sandbox/features.gni b/qtwebengine/src/3rdparty/chromium/sandbox/features.gni
 --- a/qtwebengine/src/3rdparty/chromium/sandbox/features.gni	2000-01-01 00:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/sandbox/features.gni	2000-01-01 00:00:00.000000000 +0800
@@ -3401,9 +3401,9 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
  #else
  #error Port
  #endif
-diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js b/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js
---- a/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js	2000-01-01 00:00:00.000000000 +0800
-+++ b/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.js	2000-01-01 00:00:00.000000000 +0800
+diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.,js b/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.mjs
+--- a/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.mjs	2000-01-01 00:00:00.000000000 +0800
++++ b/qtwebengine/src/3rdparty/chromium/third_party/devtools-frontend/src/scripts/build/rollup.config.mjs	2000-01-01 00:00:00.000000000 +0800
 @@ -19,7 +19,7 @@ export default commandLineArgs => ({
      sourcemap: Boolean(commandLineArgs.configSourcemaps),
    }],
