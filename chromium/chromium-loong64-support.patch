@@ -668,15 +668,15 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/services/credentials.cc b/sandbox/linux/services/credentials.cc
 --- a/sandbox/linux/services/credentials.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/services/credentials.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -90,7 +90,7 @@ bool ChrootToSafeEmptyDir() {
-   alignas(16) char stack_buf[PTHREAD_STACK_MIN_CONST];
+@@ -85,7 +85,7 @@
+   alignas(16) std::array<char, PTHREAD_STACK_MIN_CONST> stack_buf;
  
  #if defined(ARCH_CPU_X86_FAMILY) || defined(ARCH_CPU_ARM_FAMILY) || \
 -    defined(ARCH_CPU_MIPS_FAMILY)
 +    defined(ARCH_CPU_MIPS_FAMILY) || defined(ARCH_CPU_LOONGARCH_FAMILY)
-   // The stack grows downward.
-   void* stack = stack_buf + sizeof(stack_buf);
- #else
+   // SAFETY: This is the `stack` argument of `clone(2)`. Because the stack grows
+   // downward on these architectures, this is the topmost address of the memory
+   // space for the stack, and the address will not be dereferenced.
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/services/syscall_wrappers.cc b/sandbox/linux/services/syscall_wrappers.cc
 --- a/sandbox/linux/services/syscall_wrappers.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/services/syscall_wrappers.cc	2000-01-01 00:00:00.000000000 +0800
