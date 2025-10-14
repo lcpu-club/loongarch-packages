@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index dcc082d..fc136c6 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -27,6 +27,8 @@ validpgpkeys=(991F6E3F0765CF6295888586139B09DA5BF0D338)  # David Runge <dvzrv@ar
+ 
+ prepare() {
+   cd $_name
++  export CFLAGS=${CFLAGS/-Wp,-D_FORTIFY_SOURCE=3/}
++  export CXXFLAGS=${CXXFLAGS/-Wp,-D_FORTIFY_SOURCE=3/}
+   export RUSTUP_TOOLCHAIN=stable
+   cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+ }
+@@ -55,3 +57,5 @@ package() {
+   install -vDm 644 $_name/target/shell_completions/_$pkgname -t "$pkgdir/usr/share/zsh/site-functions/"
+   install -vDm 644 $_name/target/shell_completions/$pkgname.fish -t "$pkgdir/usr/share/fish/vendor_completions.d/"
+ }
++
++makedepends+=(clang cmake)
