@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 05aacdf..ad07c69 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,6 +31,7 @@ validpgpkeys=('0917A7EE58A9308B13D3963338AD602EC7454C8B') # Brian Carrier <carri
+ 
+ build() {
+   cd ${pkgname}-${pkgver}
++  export CFLAGS="${CFLAGS} -std=gnu17"
+   # From upstream's bootstrap script
+   aclocal \
+     && (libtoolize --force || glibtoolize --force) \
