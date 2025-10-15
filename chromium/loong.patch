@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 33ab151..73baef9 100644
+index ab35f2b..01dd70d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -27,6 +27,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
@@ -19,22 +19,18 @@ index 33ab151..73baef9 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -120,7 +123,13 @@ prepare() {
-   patch -Np1 -i ../chromium-138-rust-1.86-mismatched_lifetime_syntaxes.patch
- 
+@@ -122,6 +125,10 @@ prepare() {
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
--  patch -Np1 -i ../compiler-rt-adjust-paths.patch
-+  #patch -Np1 -i ../compiler-rt-adjust-paths.patch
-+  # Arch Linux upstream's patch failed on loong64
-+  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
-+
+   patch -Np1 -i ../compiler-rt-adjust-paths.patch
+ 
 +  # Patches for loong64
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
- 
++
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
-@@ -256,6 +265,9 @@ build() {
+ 
+@@ -256,6 +263,9 @@ build() {
    # https://crbug.com/957519#c122
    CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
  
@@ -44,15 +40,13 @@ index 33ab151..73baef9 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -331,4 +343,11 @@ package() {
+@@ -331,4 +341,9 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
-+         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
-+         "compiler-rt-adjust-paths-loong64.patch")
++         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
 +sha256sums+=('66347afbeb8cab166adec404b7671ddba566cfa589670e51db3d027a18dd8c25'
-+             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
-+             '71f996db9d83c851b64db968e7883af46102d0cd7593db7d3fdf037a2c010c8b')
++             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
 +
  # vim:set ts=2 sw=2 et:
