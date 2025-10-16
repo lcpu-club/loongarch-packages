@@ -1,0 +1,346 @@
+diff --git a/src/cmd/internal/obj/fips140.go b/src/cmd/internal/obj/fips140.go
+index ea36849a21..a7a12a21ed 100644
+--- a/src/cmd/internal/obj/fips140.go
++++ b/src/cmd/internal/obj/fips140.go
+@@ -358,10 +358,12 @@ func (s *LSym) checkFIPSReloc(ctxt *Link, rel Reloc) {
+ 		objabi.R_CALLARM64,
+ 		objabi.R_CALLIND,
+ 		objabi.R_CALLLOONG64,
++		objabi.R_CALL36LOONG64,
+ 		objabi.R_CALLPOWER,
+ 		objabi.R_GOTPCREL,
+-		objabi.R_LOONG64_ADDR_LO, // used with PC-relative load
+-		objabi.R_LOONG64_ADDR_HI, // used with PC-relative load
++		objabi.R_LOONG64_ADDR_LO,         // used with PC-relative load
++		objabi.R_LOONG64_ADDR_HI,         // used with PC-relative load
++		objabi.R_LOONG64_ADDR_PCREL20_S2, // used with PC-relative load
+ 		objabi.R_LOONG64_TLS_LE_HI,
+ 		objabi.R_LOONG64_TLS_LE_LO,
+ 		objabi.R_LOONG64_TLS_IE_HI,
+diff --git a/src/cmd/internal/objabi/reloctype.go b/src/cmd/internal/objabi/reloctype.go
+index 9b9b4b7ee3..64fe745643 100644
+--- a/src/cmd/internal/objabi/reloctype.go
++++ b/src/cmd/internal/objabi/reloctype.go
+@@ -326,6 +326,10 @@ const (
+ 	R_LOONG64_ADDR_HI
+ 	R_LOONG64_ADDR_LO
+ 
++	// R_LOONG64_ADDR_PCREL20_S2 resolves to the 22-bit, 4-byte aligned offset of an
++	// external address, by encoding it into a PCADDI instruction.
++	R_LOONG64_ADDR_PCREL20_S2
++
+ 	// R_LOONG64_TLS_LE_HI resolves to the high 20 bits of a TLS address (offset from
+ 	// thread pointer), by encoding it into the instruction.
+ 	// R_LOONG64_TLS_LE_LO resolves to the low 12 bits of a TLS address (offset from
+@@ -337,6 +341,10 @@ const (
+ 	// instruction, by encoding the address into the instruction.
+ 	R_CALLLOONG64
+ 
++	// R_CALL36LOONG64 resolves to the 38-bit 4-byte aligned PC-relative target
++	// address of a PCADDU18I + JIRL pair, by encoding it into the instructions.
++	R_CALL36LOONG64
++
+ 	// R_LOONG64_TLS_IE_HI and R_LOONG64_TLS_IE_LO relocates a pcalau12i, ld.d
+ 	// pair to compute the address of the GOT slot of the tls symbol.
+ 	R_LOONG64_TLS_IE_HI
+diff --git a/src/cmd/internal/objabi/reloctype_string.go b/src/cmd/internal/objabi/reloctype_string.go
+index ae7941c441..11bab65039 100644
+--- a/src/cmd/internal/objabi/reloctype_string.go
++++ b/src/cmd/internal/objabi/reloctype_string.go
+@@ -84,34 +84,36 @@ func _() {
+ 	_ = x[R_PCRELDBL-74]
+ 	_ = x[R_LOONG64_ADDR_HI-75]
+ 	_ = x[R_LOONG64_ADDR_LO-76]
+-	_ = x[R_LOONG64_TLS_LE_HI-77]
+-	_ = x[R_LOONG64_TLS_LE_LO-78]
+-	_ = x[R_CALLLOONG64-79]
+-	_ = x[R_LOONG64_TLS_IE_HI-80]
+-	_ = x[R_LOONG64_TLS_IE_LO-81]
+-	_ = x[R_LOONG64_GOT_HI-82]
+-	_ = x[R_LOONG64_GOT_LO-83]
+-	_ = x[R_LOONG64_ADD64-84]
+-	_ = x[R_LOONG64_SUB64-85]
+-	_ = x[R_JMP16LOONG64-86]
+-	_ = x[R_JMP21LOONG64-87]
+-	_ = x[R_JMPLOONG64-88]
+-	_ = x[R_ADDRMIPSU-89]
+-	_ = x[R_ADDRMIPSTLS-90]
+-	_ = x[R_ADDRCUOFF-91]
+-	_ = x[R_WASMIMPORT-92]
+-	_ = x[R_XCOFFREF-93]
+-	_ = x[R_PEIMAGEOFF-94]
+-	_ = x[R_INITORDER-95]
+-	_ = x[R_DWTXTADDR_U1-96]
+-	_ = x[R_DWTXTADDR_U2-97]
+-	_ = x[R_DWTXTADDR_U3-98]
+-	_ = x[R_DWTXTADDR_U4-99]
++	_ = x[R_LOONG64_ADDR_PCREL20_S2-77]
++	_ = x[R_LOONG64_TLS_LE_HI-78]
++	_ = x[R_LOONG64_TLS_LE_LO-79]
++	_ = x[R_CALLLOONG64-80]
++	_ = x[R_CALL36LOONG64-81]
++	_ = x[R_LOONG64_TLS_IE_HI-82]
++	_ = x[R_LOONG64_TLS_IE_LO-83]
++	_ = x[R_LOONG64_GOT_HI-84]
++	_ = x[R_LOONG64_GOT_LO-85]
++	_ = x[R_LOONG64_ADD64-86]
++	_ = x[R_LOONG64_SUB64-87]
++	_ = x[R_JMP16LOONG64-88]
++	_ = x[R_JMP21LOONG64-89]
++	_ = x[R_JMPLOONG64-90]
++	_ = x[R_ADDRMIPSU-91]
++	_ = x[R_ADDRMIPSTLS-92]
++	_ = x[R_ADDRCUOFF-93]
++	_ = x[R_WASMIMPORT-94]
++	_ = x[R_XCOFFREF-95]
++	_ = x[R_PEIMAGEOFF-96]
++	_ = x[R_INITORDER-97]
++	_ = x[R_DWTXTADDR_U1-98]
++	_ = x[R_DWTXTADDR_U2-99]
++	_ = x[R_DWTXTADDR_U3-100]
++	_ = x[R_DWTXTADDR_U4-101]
+ }
+ 
+-const _RelocType_name = "R_ADDRR_ADDRPOWERR_ADDRARM64R_ADDRMIPSR_ADDROFFR_SIZER_CALLR_CALLARMR_CALLARM64R_CALLINDR_CALLPOWERR_CALLMIPSR_CONSTR_PCRELR_TLS_LER_TLS_IER_GOTOFFR_PLT0R_PLT1R_PLT2R_USEFIELDR_USETYPER_USEIFACER_USEIFACEMETHODR_USENAMEDMETHODR_METHODOFFR_KEEPR_POWER_TOCR_GOTPCRELR_JMPMIPSR_DWARFSECREFR_ARM64_TLS_LER_ARM64_TLS_IER_ARM64_GOTPCRELR_ARM64_GOTR_ARM64_PCRELR_ARM64_PCREL_LDST8R_ARM64_PCREL_LDST16R_ARM64_PCREL_LDST32R_ARM64_PCREL_LDST64R_ARM64_LDST8R_ARM64_LDST16R_ARM64_LDST32R_ARM64_LDST64R_ARM64_LDST128R_POWER_TLS_LER_POWER_TLS_IER_POWER_TLSR_POWER_TLS_IE_PCREL34R_POWER_TLS_LE_TPREL34R_ADDRPOWER_DSR_ADDRPOWER_GOTR_ADDRPOWER_GOT_PCREL34R_ADDRPOWER_PCRELR_ADDRPOWER_TOCRELR_ADDRPOWER_TOCREL_DSR_ADDRPOWER_D34R_ADDRPOWER_PCREL34R_RISCV_JALR_RISCV_JAL_TRAMPR_RISCV_CALLR_RISCV_PCREL_ITYPER_RISCV_PCREL_STYPER_RISCV_TLS_IER_RISCV_TLS_LER_RISCV_GOT_HI20R_RISCV_GOT_PCREL_ITYPER_RISCV_PCREL_HI20R_RISCV_PCREL_LO12_IR_RISCV_PCREL_LO12_SR_RISCV_BRANCHR_RISCV_RVC_BRANCHR_RISCV_RVC_JUMPR_PCRELDBLR_LOONG64_ADDR_HIR_LOONG64_ADDR_LOR_LOONG64_TLS_LE_HIR_LOONG64_TLS_LE_LOR_CALLLOONG64R_LOONG64_TLS_IE_HIR_LOONG64_TLS_IE_LOR_LOONG64_GOT_HIR_LOONG64_GOT_LOR_LOONG64_ADD64R_LOONG64_SUB64R_JMP16LOONG64R_JMP21LOONG64R_JMPLOONG64R_ADDRMIPSUR_ADDRMIPSTLSR_ADDRCUOFFR_WASMIMPORTR_XCOFFREFR_PEIMAGEOFFR_INITORDERR_DWTXTADDR_U1R_DWTXTADDR_U2R_DWTXTADDR_U3R_DWTXTADDR_U4"
++const _RelocType_name = "R_ADDRR_ADDRPOWERR_ADDRARM64R_ADDRMIPSR_ADDROFFR_SIZER_CALLR_CALLARMR_CALLARM64R_CALLINDR_CALLPOWERR_CALLMIPSR_CONSTR_PCRELR_TLS_LER_TLS_IER_GOTOFFR_PLT0R_PLT1R_PLT2R_USEFIELDR_USETYPER_USEIFACER_USEIFACEMETHODR_USENAMEDMETHODR_METHODOFFR_KEEPR_POWER_TOCR_GOTPCRELR_JMPMIPSR_DWARFSECREFR_ARM64_TLS_LER_ARM64_TLS_IER_ARM64_GOTPCRELR_ARM64_GOTR_ARM64_PCRELR_ARM64_PCREL_LDST8R_ARM64_PCREL_LDST16R_ARM64_PCREL_LDST32R_ARM64_PCREL_LDST64R_ARM64_LDST8R_ARM64_LDST16R_ARM64_LDST32R_ARM64_LDST64R_ARM64_LDST128R_POWER_TLS_LER_POWER_TLS_IER_POWER_TLSR_POWER_TLS_IE_PCREL34R_POWER_TLS_LE_TPREL34R_ADDRPOWER_DSR_ADDRPOWER_GOTR_ADDRPOWER_GOT_PCREL34R_ADDRPOWER_PCRELR_ADDRPOWER_TOCRELR_ADDRPOWER_TOCREL_DSR_ADDRPOWER_D34R_ADDRPOWER_PCREL34R_RISCV_JALR_RISCV_JAL_TRAMPR_RISCV_CALLR_RISCV_PCREL_ITYPER_RISCV_PCREL_STYPER_RISCV_TLS_IER_RISCV_TLS_LER_RISCV_GOT_HI20R_RISCV_GOT_PCREL_ITYPER_RISCV_PCREL_HI20R_RISCV_PCREL_LO12_IR_RISCV_PCREL_LO12_SR_RISCV_BRANCHR_RISCV_RVC_BRANCHR_RISCV_RVC_JUMPR_PCRELDBLR_LOONG64_ADDR_HIR_LOONG64_ADDR_LOR_LOONG64_ADDR_PCREL20_S2R_LOONG64_TLS_LE_HIR_LOONG64_TLS_LE_LOR_CALLLOONG64R_CALL36LOONG64R_LOONG64_TLS_IE_HIR_LOONG64_TLS_IE_LOR_LOONG64_GOT_HIR_LOONG64_GOT_LOR_LOONG64_ADD64R_LOONG64_SUB64R_JMP16LOONG64R_JMP21LOONG64R_JMPLOONG64R_ADDRMIPSUR_ADDRMIPSTLSR_ADDRCUOFFR_WASMIMPORTR_XCOFFREFR_PEIMAGEOFFR_INITORDERR_DWTXTADDR_U1R_DWTXTADDR_U2R_DWTXTADDR_U3R_DWTXTADDR_U4"
+ 
+-var _RelocType_index = [...]uint16{0, 6, 17, 28, 38, 47, 53, 59, 68, 79, 88, 99, 109, 116, 123, 131, 139, 147, 153, 159, 165, 175, 184, 194, 210, 226, 237, 243, 254, 264, 273, 286, 300, 314, 330, 341, 354, 373, 393, 413, 433, 446, 460, 474, 488, 503, 517, 531, 542, 564, 586, 600, 615, 638, 655, 673, 694, 709, 728, 739, 756, 768, 787, 806, 820, 834, 850, 873, 891, 911, 931, 945, 963, 979, 989, 1006, 1023, 1042, 1061, 1074, 1093, 1112, 1128, 1144, 1159, 1174, 1188, 1202, 1214, 1225, 1238, 1249, 1261, 1271, 1283, 1294, 1308, 1322, 1336, 1350}
++var _RelocType_index = [...]uint16{0, 6, 17, 28, 38, 47, 53, 59, 68, 79, 88, 99, 109, 116, 123, 131, 139, 147, 153, 159, 165, 175, 184, 194, 210, 226, 237, 243, 254, 264, 273, 286, 300, 314, 330, 341, 354, 373, 393, 413, 433, 446, 460, 474, 488, 503, 517, 531, 542, 564, 586, 600, 615, 638, 655, 673, 694, 709, 728, 739, 756, 768, 787, 806, 820, 834, 850, 873, 891, 911, 931, 945, 963, 979, 995, 1014, 1033, 1049, 1068, 1087, 1103, 1119, 1134, 1149, 1163, 1177, 1189, 1200, 1213, 1224, 1236, 1246, 1258, 1269, 1283, 1297, 1311, 1325}
+ 
+ func (i RelocType) String() string {
+ 	i -= 1
+diff --git a/src/cmd/link/internal/loadelf/ldelf.go b/src/cmd/link/internal/loadelf/ldelf.go
+index 22c5dbc007..dd41d605d5 100644
+--- a/src/cmd/link/internal/loadelf/ldelf.go
++++ b/src/cmd/link/internal/loadelf/ldelf.go
+@@ -1065,13 +1065,15 @@ func relSize(arch *sys.Arch, pn string, elftype uint32) (uint8, uint8, error) {
+ 		LOONG64 | uint32(elf.R_LARCH_PCALA_LO12)<<16,
+ 		LOONG64 | uint32(elf.R_LARCH_GOT_PC_HI20)<<16,
+ 		LOONG64 | uint32(elf.R_LARCH_GOT_PC_LO12)<<16,
+-		LOONG64 | uint32(elf.R_LARCH_32_PCREL)<<16:
++		LOONG64 | uint32(elf.R_LARCH_32_PCREL)<<16,
++		LOONG64 | uint32(elf.R_LARCH_PCREL20_S2)<<16:
+ 		return 4, 4, nil
+ 
+ 	case LOONG64 | uint32(elf.R_LARCH_64)<<16,
+ 		LOONG64 | uint32(elf.R_LARCH_ADD64)<<16,
+ 		LOONG64 | uint32(elf.R_LARCH_SUB64)<<16,
+-		LOONG64 | uint32(elf.R_LARCH_64_PCREL)<<16:
++		LOONG64 | uint32(elf.R_LARCH_64_PCREL)<<16,
++		LOONG64 | uint32(elf.R_LARCH_CALL36)<<16:
+ 		return 8, 8, nil
+ 
+ 	case S390X | uint32(elf.R_390_8)<<16:
+diff --git a/src/cmd/link/internal/loong64/asm.go b/src/cmd/link/internal/loong64/asm.go
+index 6adafd38fc..41cc14a560 100644
+--- a/src/cmd/link/internal/loong64/asm.go
++++ b/src/cmd/link/internal/loong64/asm.go
+@@ -85,7 +85,8 @@ func adddynrel(target *ld.Target, ldr *loader.Loader, syms *ld.ArchSyms, s loade
+ 		}
+ 		return true
+ 
+-	case objabi.ElfRelocOffset + objabi.RelocType(elf.R_LARCH_B26):
++	case objabi.ElfRelocOffset + objabi.RelocType(elf.R_LARCH_B26),
++		objabi.ElfRelocOffset + objabi.RelocType(elf.R_LARCH_CALL36):
+ 		if targType == sym.SDYNIMPORT {
+ 			addpltsym(target, ldr, syms, targ)
+ 			su := ldr.MakeSymbolUpdater(s)
+@@ -95,8 +96,12 @@ func adddynrel(target *ld.Target, ldr *loader.Loader, syms *ld.ArchSyms, s loade
+ 		if targType == 0 || targType == sym.SXREF {
+ 			ldr.Errorf(s, "unknown symbol %s in callloong64", ldr.SymName(targ))
+ 		}
++		relocType := objabi.R_CALLLOONG64
++		if r.Type() == objabi.ElfRelocOffset+objabi.RelocType(elf.R_LARCH_CALL36) {
++			relocType = objabi.R_CALL36LOONG64
++		}
+ 		su := ldr.MakeSymbolUpdater(s)
+-		su.SetRelocType(rIdx, objabi.R_CALLLOONG64)
++		su.SetRelocType(rIdx, relocType)
+ 		return true
+ 
+ 	case objabi.ElfRelocOffset + objabi.RelocType(elf.R_LARCH_GOT_PC_HI20),
+@@ -117,7 +122,8 @@ func adddynrel(target *ld.Target, ldr *loader.Loader, syms *ld.ArchSyms, s loade
+ 		return true
+ 
+ 	case objabi.ElfRelocOffset + objabi.RelocType(elf.R_LARCH_PCALA_HI20),
+-		objabi.ElfRelocOffset + objabi.RelocType(elf.R_LARCH_PCALA_LO12):
++		objabi.ElfRelocOffset + objabi.RelocType(elf.R_LARCH_PCALA_LO12),
++		objabi.ElfRelocOffset + objabi.RelocType(elf.R_LARCH_PCREL20_S2):
+ 		if targType == sym.SDYNIMPORT {
+ 			ldr.Errorf(s, "unexpected relocation for dynamic symbol %s", ldr.SymName(targ))
+ 		}
+@@ -125,12 +131,17 @@ func adddynrel(target *ld.Target, ldr *loader.Loader, syms *ld.ArchSyms, s loade
+ 			ldr.Errorf(s, "unknown symbol %s", ldr.SymName(targ))
+ 		}
+ 
+-		su := ldr.MakeSymbolUpdater(s)
+-		if r.Type() == objabi.ElfRelocOffset+objabi.RelocType(elf.R_LARCH_PCALA_HI20) {
+-			su.SetRelocType(rIdx, objabi.R_LOONG64_ADDR_HI)
+-		} else {
+-			su.SetRelocType(rIdx, objabi.R_LOONG64_ADDR_LO)
++		var relocType objabi.RelocType
++		switch r.Type() - objabi.ElfRelocOffset {
++		case objabi.RelocType(elf.R_LARCH_PCALA_HI20):
++			relocType = objabi.R_LOONG64_ADDR_HI
++		case objabi.RelocType(elf.R_LARCH_PCALA_LO12):
++			relocType = objabi.R_LOONG64_ADDR_LO
++		case objabi.RelocType(elf.R_LARCH_PCREL20_S2):
++			relocType = objabi.R_LOONG64_ADDR_PCREL20_S2
+ 		}
++		su := ldr.MakeSymbolUpdater(s)
++		su.SetRelocType(rIdx, relocType)
+ 		return true
+ 
+ 	case objabi.ElfRelocOffset + objabi.RelocType(elf.R_LARCH_ADD64),
+@@ -418,6 +429,11 @@ func elfreloc1(ctxt *ld.Link, out *ld.OutBuf, ldr *loader.Loader, s loader.Sym,
+ 		out.Write64(uint64(elf.R_LARCH_B26) | uint64(elfsym)<<32)
+ 		out.Write64(uint64(r.Xadd))
+ 
++	case objabi.R_CALL36LOONG64:
++		out.Write64(uint64(sectoff))
++		out.Write64(uint64(elf.R_LARCH_CALL36) | uint64(elfsym)<<32)
++		out.Write64(uint64(r.Xadd))
++
+ 	case objabi.R_LOONG64_TLS_IE_HI:
+ 		out.Write64(uint64(sectoff))
+ 		out.Write64(uint64(elf.R_LARCH_TLS_IE_PC_HI20) | uint64(elfsym)<<32)
+@@ -438,6 +454,11 @@ func elfreloc1(ctxt *ld.Link, out *ld.OutBuf, ldr *loader.Loader, s loader.Sym,
+ 		out.Write64(uint64(elf.R_LARCH_PCALA_HI20) | uint64(elfsym)<<32)
+ 		out.Write64(uint64(r.Xadd))
+ 
++	case objabi.R_LOONG64_ADDR_PCREL20_S2:
++		out.Write64(uint64(sectoff))
++		out.Write64(uint64(elf.R_LARCH_PCREL20_S2) | uint64(elfsym)<<32)
++		out.Write64(uint64(r.Xadd))
++
+ 	case objabi.R_LOONG64_GOT_HI:
+ 		out.Write64(uint64(sectoff))
+ 		out.Write64(uint64(elf.R_LARCH_GOT_PC_HI20) | uint64(elfsym)<<32)
+@@ -463,7 +484,8 @@ func archreloc(target *ld.Target, ldr *loader.Loader, syms *ld.ArchSyms, r loade
+ 		default:
+ 			return val, 0, false
+ 		case objabi.R_LOONG64_ADDR_HI,
+-			objabi.R_LOONG64_ADDR_LO:
++			objabi.R_LOONG64_ADDR_LO,
++			objabi.R_LOONG64_ADDR_PCREL20_S2:
+ 			// set up addend for eventual relocation via outer symbol.
+ 			rs, _ := ld.FoldSubSymbolOffset(ldr, rs)
+ 			rst := ldr.SymType(rs)
+@@ -474,6 +496,7 @@ func archreloc(target *ld.Target, ldr *loader.Loader, syms *ld.ArchSyms, r loade
+ 		case objabi.R_LOONG64_TLS_LE_HI,
+ 			objabi.R_LOONG64_TLS_LE_LO,
+ 			objabi.R_CALLLOONG64,
++			objabi.R_CALL36LOONG64,
+ 			objabi.R_JMPLOONG64,
+ 			objabi.R_LOONG64_TLS_IE_HI,
+ 			objabi.R_LOONG64_TLS_IE_LO,
+@@ -499,6 +522,10 @@ func archreloc(target *ld.Target, ldr *loader.Loader, syms *ld.ArchSyms, r loade
+ 			return int64(val&0xffc003ff | (t << 10)), noExtReloc, isOk
+ 		}
+ 		return int64(val&0xfe00001f | (t << 5)), noExtReloc, isOk
++	case objabi.R_LOONG64_ADDR_PCREL20_S2:
++		pc := ldr.SymValue(s) + int64(r.Off())
++		t := (ldr.SymAddr(rs) + r.Add() - pc) >> 2
++		return int64(val&0xfe00001f | ((t & 0xfffff) << 5)), noExtReloc, isOk
+ 	case objabi.R_LOONG64_TLS_LE_HI,
+ 		objabi.R_LOONG64_TLS_LE_LO:
+ 		t := ldr.SymAddr(rs) + r.Add()
+@@ -507,9 +534,16 @@ func archreloc(target *ld.Target, ldr *loader.Loader, syms *ld.ArchSyms, r loade
+ 		}
+ 		return int64(val&0xfe00001f | (((t) >> 12 << 5) & 0x1ffffe0)), noExtReloc, isOk
+ 	case objabi.R_CALLLOONG64,
++		objabi.R_CALL36LOONG64,
+ 		objabi.R_JMPLOONG64:
+ 		pc := ldr.SymValue(s) + int64(r.Off())
+ 		t := ldr.SymAddr(rs) + r.Add() - pc
++		if r.Type() == objabi.R_CALL36LOONG64 {
++			// val is pcaddu18i (lower half) + jirl (upper half)
++			pcaddu18i := (val & 0xfe00001f) | (((t + 0x8000) >> 16) << 5)
++			jirl := ((val >> 32) & 0xfc0003ff) | ((t & 0xffff) << 10)
++			return pcaddu18i | (jirl << 32), noExtReloc, isOk
++		}
+ 		return int64(val&0xfc000000 | (((t >> 2) & 0xffff) << 10) | (((t >> 2) & 0x3ff0000) >> 16)), noExtReloc, isOk
+ 
+ 	case objabi.R_JMP16LOONG64,
+diff --git a/src/debug/elf/elf.go b/src/debug/elf/elf.go
+index 58e37daed2..557648ece9 100644
+--- a/src/debug/elf/elf.go
++++ b/src/debug/elf/elf.go
+@@ -2305,6 +2305,8 @@ const (
+ 	R_LARCH_TLS_TPREL32                R_LARCH = 10
+ 	R_LARCH_TLS_TPREL64                R_LARCH = 11
+ 	R_LARCH_IRELATIVE                  R_LARCH = 12
++	R_LARCH_TLS_DESC32                 R_LARCH = 13
++	R_LARCH_TLS_DESC64                 R_LARCH = 14
+ 	R_LARCH_MARK_LA                    R_LARCH = 20
+ 	R_LARCH_MARK_PCREL                 R_LARCH = 21
+ 	R_LARCH_SOP_PUSH_PCREL             R_LARCH = 22
+@@ -2390,6 +2392,23 @@ const (
+ 	R_LARCH_ADD_ULEB128                R_LARCH = 107
+ 	R_LARCH_SUB_ULEB128                R_LARCH = 108
+ 	R_LARCH_64_PCREL                   R_LARCH = 109
++	R_LARCH_CALL36                     R_LARCH = 110
++	R_LARCH_TLS_DESC_PC_HI20           R_LARCH = 111
++	R_LARCH_TLS_DESC_PC_LO12           R_LARCH = 112
++	R_LARCH_TLS_DESC64_PC_LO20         R_LARCH = 113
++	R_LARCH_TLS_DESC64_PC_HI12         R_LARCH = 114
++	R_LARCH_TLS_DESC_HI20              R_LARCH = 115
++	R_LARCH_TLS_DESC_LO12              R_LARCH = 116
++	R_LARCH_TLS_DESC64_LO20            R_LARCH = 117
++	R_LARCH_TLS_DESC64_HI12            R_LARCH = 118
++	R_LARCH_TLS_DESC_LD                R_LARCH = 119
++	R_LARCH_TLS_DESC_CALL              R_LARCH = 120
++	R_LARCH_TLS_LE_HI20_R              R_LARCH = 121
++	R_LARCH_TLS_LE_ADD_R               R_LARCH = 122
++	R_LARCH_TLS_LE_LO12_R              R_LARCH = 123
++	R_LARCH_TLS_LD_PCREL20_S2          R_LARCH = 124
++	R_LARCH_TLS_GD_PCREL20_S2          R_LARCH = 125
++	R_LARCH_TLS_DESC_PCREL20_S2        R_LARCH = 126
+ )
+ 
+ var rlarchStrings = []intName{
+@@ -2406,6 +2425,8 @@ var rlarchStrings = []intName{
+ 	{10, "R_LARCH_TLS_TPREL32"},
+ 	{11, "R_LARCH_TLS_TPREL64"},
+ 	{12, "R_LARCH_IRELATIVE"},
++	{13, "R_LARCH_TLS_DESC32"},
++	{14, "R_LARCH_TLS_DESC64"},
+ 	{20, "R_LARCH_MARK_LA"},
+ 	{21, "R_LARCH_MARK_PCREL"},
+ 	{22, "R_LARCH_SOP_PUSH_PCREL"},
+@@ -2491,6 +2512,23 @@ var rlarchStrings = []intName{
+ 	{107, "R_LARCH_ADD_ULEB128"},
+ 	{108, "R_LARCH_SUB_ULEB128"},
+ 	{109, "R_LARCH_64_PCREL"},
++	{110, "R_LARCH_CALL36"},
++	{111, "R_LARCH_TLS_DESC_PC_HI20"},
++	{112, "R_LARCH_TLS_DESC_PC_LO12"},
++	{113, "R_LARCH_TLS_DESC64_PC_LO20"},
++	{114, "R_LARCH_TLS_DESC64_PC_HI12"},
++	{115, "R_LARCH_TLS_DESC_HI20"},
++	{116, "R_LARCH_TLS_DESC_LO12"},
++	{117, "R_LARCH_TLS_DESC64_LO20"},
++	{118, "R_LARCH_TLS_DESC64_HI12"},
++	{119, "R_LARCH_TLS_DESC_LD"},
++	{120, "R_LARCH_TLS_DESC_CALL"},
++	{121, "R_LARCH_TLS_LE_HI20_R"},
++	{122, "R_LARCH_TLS_LE_ADD_R"},
++	{123, "R_LARCH_TLS_LE_LO12_R"},
++	{124, "R_LARCH_TLS_LD_PCREL20_S2"},
++	{125, "R_LARCH_TLS_GD_PCREL20_S2"},
++	{126, "R_LARCH_TLS_DESC_PCREL20_S2"},
+ }
+ 
+ func (i R_LARCH) String() string   { return stringName(uint32(i), rlarchStrings, false) }
+diff --git a/src/debug/elf/elf_test.go b/src/debug/elf/elf_test.go
+index 0350d53050..256f850f96 100644
+--- a/src/debug/elf/elf_test.go
++++ b/src/debug/elf/elf_test.go
+@@ -34,6 +34,7 @@ var nameTests = []nameTest{
+ 	{R_ALPHA_OP_PUSH, "R_ALPHA_OP_PUSH"},
+ 	{R_ARM_THM_ABS5, "R_ARM_THM_ABS5"},
+ 	{R_386_GOT32, "R_386_GOT32"},
++	{R_LARCH_CALL36, "R_LARCH_CALL36"},
+ 	{R_PPC_GOT16_HI, "R_PPC_GOT16_HI"},
+ 	{R_SPARC_GOT22, "R_SPARC_GOT22"},
+ 	{ET_LOOS + 5, "ET_LOOS+5"},

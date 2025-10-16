@@ -1,7 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 05ce427..b8de197 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -30,8 +30,7 @@ sha256sums=('42b7a8e80d805daa03022ed3fde4321d4c3bf2c990a144165d01eeecd6f699c6'
-             'SKIP')
+@@ -34,13 +34,13 @@ sha256sums=('d010c109cee94d80efe681eab46bdea491ac906bf46583c32e9f0dbb0bd1a594'
+ 
+ prepare() {
+   cd $pkgname
++  patch -Np1 -i "${srcdir}/backport-go-internal-linker-fix-for-CALL36.patch"
+   # It leaves some traces...
+   rm -vf src/runtime/{os_plan9.go.orig,os_windows.go.orig,proc.go.orig,vgetrandom_linux.go.orig}
+ }
  
  build() {
 -  export GOARCH=amd64
@@ -10,7 +18,7 @@
    export GOROOT_FINAL=/usr/lib/go
    export GOROOT_BOOTSTRAP=/usr/lib/go
  
-@@ -50,7 +49,7 @@ package() {
+@@ -64,7 +64,7 @@ package() {
    cd "$pkgname"
  
    install -d "$pkgdir/usr/bin" "$pkgdir/usr/lib/go" "$pkgdir/usr/share/doc/go" \
@@ -19,3 +27,11 @@
  
    cp -a bin pkg src lib misc api test "$pkgdir/usr/lib/go"
    # We can't strip all binaries and libraries,
+@@ -91,4 +91,7 @@ package() {
+   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
+ 
++source+=("backport-go-internal-linker-fix-for-CALL36.patch")
++sha256sums+=('c796f4cea29101473cd5da245924932582e28f4658715762cb353af520f7e457')
++
+ # vim: ts=2 sw=2 et
