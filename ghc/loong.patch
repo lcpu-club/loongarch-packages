@@ -1,0 +1,57 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 69700b6..967eaf8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -40,6 +40,13 @@ prepare() {
+ 
+   # detects GCC correctly
+   sed -i 's/grep -q gcc/grep -qi gcc/' m4/fp_gcc_version.m4
++
++  # Bump max LLVM version
++  patch -Np1 -i "${srcdir}/llvm-new-pass-manager.patch"
++  sed -i 's/LlvmMaxVersion=[0-9]\+ \(# not inclusive\)/LlvmMaxVersion=19 \1/' configure.ac
++  # Enable GHCi on all platforms
++  patch -Np1 -i "${srcdir}/hadrian-enable-interpreter.patch"
++  autoreconf -fiv
+ }
+ 
+ build() {
+@@ -79,7 +86,7 @@ package_ghc-static() {
+ 
+ package_ghc() {
+   pkgdesc='The Glasgow Haskell Compiler'
+-  depends=('gcc' 'ghc-libs')
++  depends=('gcc' 'ghc-libs' 'llvm18')
+   provides=('haskell-haddock=2.29.2'
+             'haskell-hp2ps=0.1'
+             'haskell-hpc-bin=0.68'
+@@ -102,7 +109,7 @@ package_ghc() {
+   rm "$pkgdir"/usr/lib/ghc-$pkgver/bin/ghc-pkg*
+   rm "$pkgdir"/usr/bin/ghc-pkg*
+   (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib; rm -r package.conf.d)
+-  (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib/$CARCH-linux-ghc-$pkgver; rm -r !(ghc-$pkgver|libHSghc-$pkgver-ghc$pkgver.so))
++  (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib/$(uname -m)-linux-ghc-$pkgver; rm -r !(ghc-$pkgver|libHSghc-$pkgver-ghc$pkgver.so))
+ 
+   # docs moved to ghc-static
+   rm -r "$pkgdir"/usr/share/doc
+@@ -195,9 +202,9 @@ package_ghc-libs() {
+   find "$pkgdir"/usr/lib \( -name "*.a" -o -name "*.o" -o -name "*.p_o" -o -name "*.p_hi" -o -name "*.hi" \) -delete
+ 
+   # ghc library, headers, and other exes are in the ghc package
+-  rm -r "$pkgdir"/usr/lib/ghc-$pkgver/lib/$CARCH-linux-ghc-$pkgver/{ghc-$pkgver,libHSghc-$pkgver-ghc$pkgver.so}
++  rm -r "$pkgdir"/usr/lib/ghc-$pkgver/lib/$(uname -m)-linux-ghc-$pkgver/{ghc-$pkgver,libHSghc-$pkgver-ghc$pkgver.so}
+   (cd "$pkgdir"/usr/lib/ghc-$pkgver/bin; rm !(ghc-pkg*))
+-  (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib; rm -r !(package.conf.d|$CARCH-linux-ghc-$pkgver))
++  (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib; rm -r !(package.conf.d|$(uname -m)-linux-ghc-$pkgver))
+   rm "$pkgdir"/usr/lib/ghc-$pkgver/lib/package.conf.d/*.copy
+   (cd "$pkgdir"/usr/bin; rm !(ghc-pkg*))
+ 
+@@ -211,3 +218,8 @@ package_ghc-libs() {
+ 
+   install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+ }
++
++source+=("llvm-new-pass-manager.patch"
++         "hadrian-enable-interpreter.patch")
++sha512sums+=('4d749221c73884669d71eb68e30da93da7e8238accdba372b0d5df9f60e916aed755aef77e9b14303dd9e6b944b8f26630c4f12d56ab5de0303ec8caf8bef478'
++             '6e7c9d3e4844bfd63ec3b28efce6d99c753edf3ffd84023bb15fe3374fc3ccae99bb8999ac3980f234ae1bc5072f8f81a3ca215c2daa19ac3eae1da6d34eebb7')
