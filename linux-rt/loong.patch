@@ -1,0 +1,104 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b66bd68..5d73fe4 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -91,8 +91,21 @@ prepare() {
+     patch -Np1 < "../$src"
+   done
+ 
++  # Ensure amdkfd is avaliable
++  sed -i '/^[[:space:]]*depends on DRM_AMDGPU && (/ {
++    /LOONGARCH/! {
++        s/)[[:space:]]*$/ || LOONGARCH)/
++    }
++  }' drivers/gpu/drm/amd/amdkfd/Kconfig
++
+   echo "Setting config..."
+   cp ../config .config
++
++  if [ $CARCH == loong64 ]; then
++    make savedefconfig
++    cat defconfig ../loong-addition.config > .config
++  fi
++
+   make olddefconfig
+   # make nconfig
+   diff -u ../config .config || :
+@@ -241,7 +254,11 @@ _package-headers() {
+   install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
+     localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
+   install -Dt "$builddir/kernel" -m644 kernel/Makefile
+-  install -Dt "$builddir/arch/x86" -m644 arch/x86/Makefile
++  if [ $CARCH == x86_64 ]; then
++    install -Dt "$builddir/arch/x86" -m644 arch/x86/Makefile
++  elif [ $CARCH == loong64 ]; then
++    install -Dt "$builddir/arch/loongarch" -m644 arch/loongarch/Makefile
++  fi
+   cp -t "$builddir" -a scripts
+   ln -srt "$builddir" "$builddir/scripts/gdb/vmlinux-gdb.py"
+ 
+@@ -253,8 +270,13 @@ _package-headers() {
+ 
+   echo "Installing headers..."
+   cp -t "$builddir" -a include
+-  cp -t "$builddir/arch/x86" -a arch/x86/include
+-  install -Dt "$builddir/arch/x86/kernel" -m644 arch/x86/kernel/asm-offsets.s
++  if [ $CARCH == x86_64 ]; then
++    cp -t "$builddir/arch/x86" -a arch/x86/include
++    install -Dt "$builddir/arch/x86/kernel" -m644 arch/x86/kernel/asm-offsets.s
++  elif [ $CARCH == loong64 ]; then
++    cp -t "$builddir/arch/loongarch" -a arch/loongarch/include
++    install -Dt "$builddir/arch/loongarch/kernel" -m644 arch/loongarch/kernel/asm-offsets.s
++  fi
+ 
+   install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
+   install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
+@@ -280,7 +302,11 @@ _package-headers() {
+   echo "Removing unneeded architectures..."
+   local arch
+   for arch in "$builddir"/arch/*/; do
+-    [[ $arch = */x86/ ]] && continue
++    if [ $CARCH == x86_64 ]; then
++      [[ $arch = */x86/ ]] && continue
++    elif [ $CARCH == loong64 ]; then
++      [[ $arch = */loongarch/ ]] && continue
++    fi
+     echo "Removing $(basename "$arch")"
+     rm -r "$arch"
+   done
+@@ -374,4 +400,35 @@ for _p in "${pkgname[@]}"; do
+   }"
+ done
+ 
++source+=("loong-addition.config"
++         "0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch"
++         "Guard-dml21_map_dc_state_into_dml_display_cfg-with-DC_FP_START.patch::https://github.com/xry111/linux/commit/be01a9befb952decacc6cdca55f98dcf43ea1e7d.diff"
++         "0017-BACKPORT-FROMLIST-drm-xe-bo-fix-alignment-with-non-4.patch"
++         "0018-BACKPORT-FROMLIST-drm-xe-guc-use-SZ_4K-for-alignment.patch"
++         "0019-BACKPORT-FROMLIST-drm-xe-regs-fix-RING_CTL_SIZE-size.patch"
++         "0020-FROMLIST-drm-xe-use-4K-alignment-for-cursor-jumps.patch"
++         "0021-FROMLIST-drm-xe-query-use-PAGE_SIZE-as-the-minimum-p.patch"
++)
++sha512sums+=(
++    '1b68c3b4d12eecffeae1322a431d9b5aa3b19387c2276472390c38863e472185afff20aacaedd77bf1ca0f6a8108188db44603968e0b4fd509d51010e01026f2'
++    '98a749b23aad98b16f7bd29cd745bb21eb0f42d492540853a69b12d84054f0413ee08d056668fe8738e21b8bb33b0dc9878fde7ea21af1838fc3b27fc0a17aaf'
++    '4735dec99177008893e53527910f52d484de655cba15e566aa25b0519ffbacc531850e5c0ba09002fb6adfc3c8e1b19593ead1083bda6eb8f29cbb9b7ae06876'
++    '887ed95bb8d4ac368fedd8b13287e5b3734c4d94b09726a9b1f95fb587c0ab18bc31141c8b19f6060206908ae39085d54365cc1b3029c3b3ec9e7de41b86fcc3'
++    'a36d3a82203aca0a3d844da1c3e187d6e771323e93b93ef0b2488995ba3f9565234aac17f905d632cb7febb7ab9e04cf21ac5aca57f3add9c5d674431404b191'
++    '758bbc95f70d86229ad6b169bced912c76f24a5bad687e7b73846861e2d98f5184a95a5efbf9875983dc3703473cd97f871d9098bb6f5fdb2d7a8d42aa9775ef'
++    '130401c9ac5a984206a3d83fd7029bc779ba07327231602b3de4d462a423d089bcd8ea3b6173798a9018cc06bc7b2ce6754d8228ab5fe76956a08cc9d521796e'
++    'ce0331835341b3710dd55906f96017f648eba46ee871df4dcbfb9ff20f34f77a9a4d6bcf1684bddb760f1ffa347d773391da923f4a37d7fb1e8e2ef18d29af63'
++)
++b2sums+=(
++    '652069e50060a3d84530f004f7064d98d6ac9bb02e690a3510d092d0df17598c9b3d564ae07fdb0dbbecc68d2d12d58c4c78c02cc08fbcbb8c01ba6e6256d922'
++    '4a0b268f1a28d4bfa37d9b644477c75a5215083414fe5cc5d637e2edc4895aace9e42b3b33ac0b3e2a15a18340bec651511fa3c347c1c3e347ed3418c033582c'
++    '2b2f07682843c071b4f1582a05a40343cb43ded3554eac117c4b73798b3c3bf238e2c0ea51e7668e7cd6fba784cf9bedebf73888a5326d1dfcd02080c49fec41'
++    '9b349d174549daa31177f2f65971c2c6e8f691882c77f3ba2ff95d55592b22d49b5caf549847ba21fc776f7f29508f10a96bf57f9b04d93956340579e01c8266'
++    '620e3ddb2df94ae13e85f67cae656bafe38982e145075c337231705698675bfbc9436cfeef6614b671a8d6655acbd8cfb014232540ffb662071b9c4e23dbc170'
++    '6b00b56e99f3c534f51b3991a051c3a158a155c19de1e1d4f344965c56f84ea95b8d2c6fb91b96930847a8c68699a46393235777d6176dfd1c2946b11ea4857e'
++    '4513616d06073e36675511be5375e64be7cc2bcff0fecbf959fae4485875d5c0f2428ac8df9492052cce9cf1cc99d44e94cbbd49364146a491d97716d8ca7595'
++    'e9e60112c0b5e0d57db30b2dc7b7c0d093d5df846daaaccc7df4f1a8cdbc1e445542132d9db06d87210bacf495d9a95d655f4f227869d38d312234a654a233f1'
++)
++
++
+ # vim:set ts=8 sts=2 sw=2 et:
