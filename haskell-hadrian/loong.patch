@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3c6a835..b009133 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,7 +20,9 @@ sha256sums=('008f7a04d89ad10baae6486c96645d7d726aaac7e1476199f6dd86c6bd9977ad'
+ prepare() {
+   cd ghc-$_ghcver
+   # apply patch to enable ghci for riscv64
+-  patch -p1 < "$srcdir"/ghc-enable-ghci-for-riscv64.patch
++  #patch -p1 < "$srcdir"/ghc-enable-ghci-for-riscv64.patch
++  # Always enable ghci like Debian
++  patch -p1 < "$srcdir"/hadrian-enable-interpreter.patch
+   uusi -u Cabal -u QuickCheck hadrian/hadrian.cabal
+ }
+ 
+@@ -44,3 +46,6 @@ package() {
+   install -D -m644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
+   rm -f "$pkgdir"/usr/share/doc/$pkgname/LICENSE
+ }
++
++source+=("hadrian-enable-interpreter.patch")
++sha256sums+=('2e07b656f46f00c2d60a4c447bc47c9a6012ba98d98d6d830a7c51afbda2695a')
