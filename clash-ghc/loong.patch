@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4686c63..925cdb7 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,6 +21,8 @@ sha512sums=('52ac875434a3c7bc3de2a6ed3619a61419f2e1c7d1abf9f9c2c2619d1d93d2fba16
+ build() {
+   cd $pkgname-$pkgver
+ 
++  sed -i '/Opt_PedanticBottoms/,/Opt_CmmSink/s/, Opt_LlvmTBAA -- Don.*/-- &/' src-ghc/Clash/GHC/LoadModules.hs
++
+   runhaskell Setup configure -O --enable-shared --enable-debug-info --enable-executable-dynamic --disable-library-vanilla \
+     --prefix=/usr --docdir=/usr/share/doc/$pkgname --datasubdir=$pkgname --enable-tests \
+     --dynlibdir=/usr/lib --libsubdir=\$compiler/site-local/\$pkgid \
