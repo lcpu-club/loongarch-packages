@@ -16,6 +16,6 @@ index 6eb2f7f..94207ae 100644
  
 +makedepends+=('nodejs' 'npm' 'pnpm')
 +source+=(use-system-node.patch)
-+sha512sums+=('444c7b4b729abbfb11d18a3b12de51afdc67c2fb405be55d4de8e99fe33a8dab93b2c02773ecd4bef9a392696fd1a5169712faffae75d09095452844f70db757')
++sha512sums+=('dc8df0c48091dd9e5cc57b6e0d2b4ad4d608274390734d4ba125ce3a5d5307d64da5da9b942a514231a86a530c148a348780313f864f1ae92a6a0fe75f16fe8b')
 +
  # vim: ts=2 sw=2 et:
