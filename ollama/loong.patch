@@ -1,18 +1,21 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4c6549b..81ea438 100644
+index d38bf25..4195bca 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -26,6 +26,9 @@ b2sums=('0bae800496db6ffd0a9b24b356df86627a8049ff75e9f8a38d8594182f80f24a98d59d9
+@@ -27,6 +27,12 @@ b2sums=('f78c0b17ceed062361b24345aa7547daf639a123a2f30d8ac961c92b86cf107c66a88d2
          'e8f2b19e2474f30a4f984b45787950012668bf0acb5ad1ebb25cd9776925ab4a6aa927f8131ed53e35b1c71b32c504c700fe5b5145ecd25c7a8284373bb951ed')
  
  build() {
++  # Apply patch to fix GGML build on loong64
++  patch -Np1 -d ollama -i "${srcdir}/cmake-restrict-GGML_CPU_ALL_VARIANTS-to-supported-architectures.patch"
++  install -Dm644 "${srcdir}/loongarch-quants.c" ollama/ml/backend/ggml/ggml/src/ggml-cpu/arch/loongarch/quants.c
 +  # Enable LASX to workaround the compile error with LSX
 +  export CFLAGS="${CFLAGS} -mlasx"
 +  export CXXFLAGS="${CXXFLAGS} -mlasx"
    export CGO_CPPFLAGS="${CPPFLAGS}"
    export CGO_CFLAGS="${CFLAGS}"
    export CGO_CXXFLAGS="${CXXFLAGS}"
-@@ -89,3 +92,7 @@ package_ollama-docs() {
+@@ -101,3 +107,11 @@ package_ollama-docs() {
    cp -r ollama/docs "$pkgdir/usr/share/doc/ollama"
    install -Dm644 ollama/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
@@ -20,3 +23,7 @@ index 4c6549b..81ea438 100644
 +# Remove cuda
 +pkgname=(${pkgname[@]/ollama-cuda})
 +makedepends=(${makedepends[@]/cuda})
++source+=("cmake-restrict-GGML_CPU_ALL_VARIANTS-to-supported-architectures.patch::https://github.com/ollama/ollama/commit/2c293787be2fd6a5419ab5483cf9a63c397a4ad2.diff"
++         "loongarch-quants.c::https://raw.githubusercontent.com/ggml-org/ggml/78eea5534d0fa207671d4aeeb1dd99ea2fc4cf0a/src/ggml-cpu/arch/loongarch/quants.c")
++b2sums+=('4ed1a7900a09bc0fcdc0dd1e0ce6a8928993257dce33875d0b71ebb940b8e96b3c914488b08ca95234b6f5c8ac6068b81f0147fc823608e58110421596611f98'
++         '8bddd627a647598b54dc0157e455eb500c36fe22be2197a6a26defa03a82982fc7b7b8c9c2b206714e02cc7663e0bf9e719671b556eb8734f1d85b6556b1a539')
