@@ -1,18 +1,14 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 81cc60f..6403960 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -41,6 +41,13 @@ b2sums=('fc2f00c864b5d1594a7f2b263ea723131d24f831a5ac6395c46445c7c430bcae6aea594
- # (due to unwanted mixture of optimization flags during link time).
+@@ -46,6 +46,11 @@ b2sums=('da9218e50c21cab8aaa51708a1c2b721ee28db26f2a781fe9c96352135902f0c2e8efaf
  options=(!lto)
  
-+prepare() {
+ prepare() {
 +  cd graph-tool-$pkgver
 +
 +  sed -i 's/ppc64le/ppc64le|loongarch64/' m4/ax_boost_base.m4
-+  autoreconf
-+}
-+
- build() {
-   cd graph-tool-$pkgver
- 
++  autoreconf -ifv
++  cd ..
+   # copy the source tree for -opt build
+   cp -ar graph-tool-$pkgver graph-tool-$pkgver-opt
+ }
