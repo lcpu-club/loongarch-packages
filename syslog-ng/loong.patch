@@ -1,17 +1,17 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -174,7 +174,7 @@ build() {
+@@ -155,7 +155,7 @@ build() {
  
  check() {
-   cd $pkgname
+   cd $pkgbase
 -  make check
 +  make check || echo "Watch out for failed tests!"
  }
  
- package() {
-@@ -184,3 +184,5 @@ package() {
-   install -vdm755 "$pkgdir/var/lib/$pkgname"
-   install -vDm644 "$srcdir/$pkgname.logrotate" "$pkgdir/etc/logrotate.d/$pkgname"
+ _pick() {
+@@ -343,3 +343,5 @@ package_syslog-ng-sql() {
+ 
+   cp -va -t "$pkgdir" "$pkgname/"*
  }
 +
 +makedepends+=(gperf)
