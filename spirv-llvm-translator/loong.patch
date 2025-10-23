@@ -1,11 +1,11 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -37,7 +37,7 @@ build() {
- }
+@@ -63,7 +63,7 @@ build() {
  
  check() {
--  make -C build test
-+  make -C build test || echo "Watch out for failed tests!"
+   # Does not use ctest-compatible targets
+-  cmake --build build --target test
++  cmake --build build --target test || echo "Watch out for failed tests!"
  }
  
  package() {
