@@ -1,15 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -13,7 +13,7 @@ license=('MIT')
- source=("git+https://github.com/pocl/pocl#tag=v$pkgver"
-         "pocl-link-cudart.patch::https://github.com/pocl/pocl/pull/1804.patch")
- depends=('clang' 'hwloc' 'opencl-icd-loader')
--makedepends=('llvm' 'cmake' 'opencl-headers' 'ocl-icd' 'ninja' 'python' 'git' 'nvidia-utils' 'cuda' 'cudnn')
-+makedepends=('llvm' 'cmake' 'opencl-headers' 'ocl-icd' 'ninja' 'python' 'git' 'nvidia-utils')
- optdepends=('cuda: CUDA driver'
-             'cudnn: CUDA driver')
- sha512sums=('afbb59125990b02339da6f16f0a8989c8ae62ffea7c66a3cd7dafe36212dc33b96967ed682b520dda72f1fc8b4d346dab24a789dc629c0c5a3ebffc156110015'
-@@ -31,9 +31,6 @@ build() {
+@@ -29,9 +29,6 @@ build() {
        -DKERNELLIB_HOST_CPU_VARIANTS=distro
        # Should be provided by opencl-headers, avoid conflict
        -DINSTALL_OPENCL_HEADERS=OFF
@@ -19,3 +10,9 @@
    )
    cmake "${cmake_options[@]}"
    ninja -C build
+@@ -49,3 +46,5 @@ package() {
+   DESTDIR="$pkgdir"/ ninja -C build install
+   install -v -Dm 644 -t "$pkgdir"/usr/share/licenses/"$pkgname" LICENSE
+ }
++makedepends=(${makedepends[@]/cuda})
++makedepends=(${makedepends[@]/cudnn})
