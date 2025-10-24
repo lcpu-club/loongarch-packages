@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,14 @@ depends=("opencv" "libvips" "glib2" "libxcb" "xcb-util-image" "libsixel" "openss
+ source=("${pkgname}-${pkgver}.tar.gz::https://github.com/jstkdng/${pkgname}/archive/v${pkgver}.tar.gz")
+ sha256sums=('fcf4b35e2a38a42a9ea6665f2168a1f778008424b14817bcd381dbb7b5cc54b7')
+ 
++source+=("cli11-change.patch::https://github.com/jstkdng/ueberzugpp/pull/268/commits/31f98e5422165ed3c40a6e933c713c581efd1535.patch")
++sha256sums+=('4f7df77a73c9c13b8888f99d8ead2125399c587fe8659e6446358cf8b84e51eb')
++
++prepare() {
++  cd "$pkgname-$pkgver"
++  patch -Np1 < ../cli11-change.patch
++}
++
+ build() {
+   # -DENABLE_TURBOBASE64=ON \
+   cmake -B build -S "$pkgname-$pkgver" \
