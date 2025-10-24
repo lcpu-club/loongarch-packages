@@ -1,16 +1,17 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 2f003e4..2361490 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -56,4 +56,11 @@ package() {
+@@ -36,6 +36,8 @@ sha512sums=('e7aed4f39d50ac2ea300b08192d1f0000e91c6985111418c24551252243ca883551
+ prepare() {
+   cd "${srcdir}/${pkgname}"
+   patch -Np1 < ../99e64815bacaf3baa28ad89d022e33ebede94fa9.patch
++  # Fix missing header `vmlinux.h`
++  install -Dm644 /usr/lib/modules/*.*-arch*-*/build/vmlinux.h -t "${srcdir}/${pkgname}/libananicycpp_bpf/loongarch"
+ }
+ build() {
+   cd "${srcdir}/${pkgname}"
+@@ -62,4 +64,5 @@ package() {
    install -m755 -d "${pkgdir}/etc/ananicy.d"
  }
  
-+prepare() {
-+  # Fix missing header `vmlinux.h`
-+  install -Dm644 /usr/lib/modules/*.*-arch*-*/build/vmlinux.h -t "${srcdir}/${pkgname}/libananicycpp_bpf/loongarch"
-+}
-+
 +makedepends+=(linux-headers)
-+
  # vim:set sw=2 sts=2 et:
