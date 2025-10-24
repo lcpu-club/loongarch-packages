@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,6 +22,7 @@ prepare() {
+   sed -i '/^LDFLAGS=/d' Makefile # use LDFLAGS from makepkg
+   sed -i 's/^DSO_LDFLAGS=.*$/DSO_LDFLAGS=$(LDFLAGS)/' Makefile # use LDFLAGS from makepkg
+   cat Makefile
++  patch -Np1 < ../fix-function-define.patch
+ }
+ 
+ build() {
+@@ -37,3 +38,6 @@ package() {
+   install -Dm755 scripts/tokssh "$pkgdir/usr/bin/tokssh"
+   install -Dm644 scripts/tuntox.service "$pkgdir/usr/lib/systemd/system/tuntox.service"
+ }
++
++source+=("fix-function-define.patch")
++sha512sums+=('2b49df71bd7c6c967a4fd14149736986c7e6750e9dbc1bfa19ec1c72c2126a8ea61d18f3280e6d4a63a6d2ea7e338e379097342f41ff2a432d561bd640bae66b')

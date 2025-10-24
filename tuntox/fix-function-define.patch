@@ -1,0 +1,37 @@
+From ae082f6205ec8593d2984da3cf6540a3246b46ca Mon Sep 17 00:00:00 2001
+From: GDR! <gdr@gdr.name>
+Date: Wed, 25 Jun 2025 09:51:45 +0200
+Subject: [PATCH] Make handle_pong_frame function definition consistent
+
+---
+ client.c     | 2 +-
+ client.h     | 2 +-
+ gitversion.h | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/client.c b/client.c
+index 9f2f74a..8f48f9d 100644
+--- a/client.c
++++ b/client.c
+@@ -18,7 +18,7 @@ struct timespec ping_sent_time;
+ fd_set client_master_fdset;
+ int client_select_nfds;
+ 
+-int handle_pong_frame()
++int handle_pong_frame(protocol_frame *rcvd_frame)
+ {
+     struct timespec pong_rcvd_time;
+     double secs1, secs2;
+diff --git a/client.h b/client.h
+index be68f25..589078c 100644
+--- a/client.h
++++ b/client.h
+@@ -15,7 +15,7 @@
+ #define CLIENT_STATE_SETUP_PIPE 13
+ #define CLIENT_STATE_CONNECTION_LOST 14
+ 
+-int handle_pong_frame();
++int handle_pong_frame(protocol_frame *rcvd_frame);
+ int handle_acktunnel_frame(protocol_frame *rcvd_frame);
+ int handle_server_tcp_frame(protocol_frame *rcvd_frame);
+ int handle_server_tcp_fin_frame(protocol_frame *rcvd_frame);
