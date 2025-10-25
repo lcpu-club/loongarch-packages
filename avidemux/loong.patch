@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -34,6 +34,12 @@ prepare() {
+@@ -34,6 +34,14 @@ prepare() {
    sed -i 's|../avidemux/qt4|../avidemux/qt4 -DLRELEASE_EXECUTABLE=/usr/bin/lrelease-qt5|' bootStrap.bash
    sed -e 's|0.19|1.0|' -i avidemux_plugins/ADM_videoFilters6/ass/CMakeLists.txt
    mv "$srcdir"/effadce6.patch avidemux_core/ffmpeg_package/patches/upstream # Fix build with binutils 2.41
@@ -9,16 +9,21 @@
 +  dos2unix -o avidemux_plugins/ADM_audioDecoders/ADM_ad_mad/CMakeLists.txt
 +  dos2unix -o cmake/ADM_coreConfig.h.cmake
 +  dos2unix -o cmake/admDetermineSystem.cmake
++  dos2unix -o cmake/cmake_compile_check/cpu_*.cpp
 +  patch -p1 -i ../LoongArchSupport_LF.patch
++  patch -lp2 -i ../ImproveCpuDetect.patch
  }
  
  build() {
-@@ -82,4 +88,8 @@ package_avidemux-qt() {
+@@ -82,4 +90,11 @@ package_avidemux-qt() {
    make -C buildPluginsQt5 DESTDIR="${pkgdir}" install
  }
  
 +makedepends+=('libmp4v2' 'dos2unix')
-+source+=(LoongArchSupport.patch::https://github.com/mean00/avidemux2/commit/43e378a9191bf40311f1986dd1569482a550c072.diff)
-+sha256sums+=('a9894420704e27849be45ff74bcc66e151517a3cdf608290bb6549a2ba083efc')
-+sha512sums+=('6afe91eef2c3ab24ceca0b30369d1eaa70e94e9886e89fd13e30b1584df01ee8bf78328d4b9b15b0531302e33d67ced425f6dbf4f8ea6481a11d0d9eaa2cf48e')
++source+=(LoongArchSupport.patch::https://github.com/mean00/avidemux2/commit/43e378a9191bf40311f1986dd1569482a550c072.diff
++         ImproveCpuDetect.patch)
++sha256sums+=('a9894420704e27849be45ff74bcc66e151517a3cdf608290bb6549a2ba083efc'
++             '9b081b777e71a04df9fad221575c200ccc277d0b18db41c7bccdb135b7e74751')
++sha512sums+=('6afe91eef2c3ab24ceca0b30369d1eaa70e94e9886e89fd13e30b1584df01ee8bf78328d4b9b15b0531302e33d67ced425f6dbf4f8ea6481a11d0d9eaa2cf48e'
++             '72d4c6ca7d18010457e90b53cb2aff7f962b677545a19c3762fe26160b3e16d6758d15968e12255446341e14b5fb110850116131bfb3a8b678629d4d070ceeb1')
  # vim: ts=2 sw=2 et:
