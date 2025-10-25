@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 63a5c94..369559b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,6 +15,7 @@ sha256sums=('ea123532a46d24925e7364470ac899d521a9d6a00bb80c505b3696b0e21354cf')
+ 
+ prepare() {
+   cd $_hkgname-$pkgver
++  sed -i 's/arch(ppc64)/arch(ppc64) || arch(loongarch64)/' $_hkgname.cabal
+   uusi -u primitive
+ }
+ 
