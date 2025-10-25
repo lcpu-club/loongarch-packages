@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 6ed2b43..c002184 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -116,7 +116,7 @@ build() {
+@@ -124,7 +124,7 @@ build() {
  check() (
    cd meson
    export LC_CTYPE=en_US.UTF-8 CPPFLAGS= CFLAGS= CXXFLAGS= LDFLAGS=
@@ -11,10 +9,10 @@ index 6ed2b43..c002184 100644
  )
  
  package() {
-@@ -138,4 +138,6 @@ package() {
+@@ -146,4 +146,6 @@ package() {
    install -Dm644 ../native-clang "$pkgdir/usr/share/meson/native/clang"
  }
  
-+checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^(cuda|gtk-sharp-2|mono|pypy3)$'))
++checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^(cuda|gtk-sharp-3|mono|pypy3)$'))
 +
  # vim:set sw=2 sts=-1 et:
