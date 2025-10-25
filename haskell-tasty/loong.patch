@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index ac36a6f..6b013fd 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,7 +17,7 @@ sha512sums=('c9c04c02de568378fe22f57d484ac4da6f4710addb46e451c750afbf9d6fff10003
+ 
+ build() {
+     cd $_hkgname-$pkgver
+-
++    sed -i 's/!arch(riscv64))/!arch(riscv64) \&\& !arch(loongarch64))/' tasty.cabal
+     runhaskell Setup configure -O --enable-shared --enable-debug-info --enable-executable-dynamic --disable-library-vanilla \
+         --prefix=/usr --docdir=/usr/share/doc/$pkgname --datasubdir=$pkgname --enable-tests \
+         --dynlibdir=/usr/lib --libsubdir=\$compiler/site-local/\$pkgid \
