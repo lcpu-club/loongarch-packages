@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 2dd759e..552abf3 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,11 +18,13 @@ sha512sums=('519120263fb7c2b9f910e48cf43feaca07f7e705ea70c578da362dafa637b654cab
+ build() {
+     cd $_hkgname-$pkgver
+     
++    local SSE_FLAG
++    [[ $CARCH == "x86_64" ]] && SSE_FLAG="-fsupport_sse"
+     runhaskell Setup configure -O --enable-shared --enable-debug-info --enable-executable-dynamic --disable-library-vanilla \
+         --prefix=/usr --docdir=/usr/share/doc/$pkgname --datasubdir=$pkgname --enable-tests \
+         --dynlibdir=/usr/lib --libsubdir=\$compiler/site-local/\$pkgid \
+             -fsupport_deepseq -finteger-gmp -f-support_pclmuldq -fsupport_rdrand \
+-            -fsupport_aesni -f-old_toolchain_inliner -f-check_alignment -fsupport_sse
++            -fsupport_aesni -f-old_toolchain_inliner -f-check_alignment ${SSE_FLAG}
+     runhaskell Setup build $MAKEFLAGS
+     runhaskell Setup register --gen-script
+     runhaskell Setup unregister --gen-script
