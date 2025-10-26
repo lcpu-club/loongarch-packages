@@ -1,22 +1,27 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -14,8 +14,18 @@ depends=(gcc-libs sh)
- source=(https://download.oracle.com/berkeley-db/db-${pkgver}.tar.gz)
- b2sums=('d3254fba1300d6c7dda5d872c5fa349e8704d71be9c4d37ccf3357782adeb879ce30e066cf083bd97554405c2e94071a96cee16090ad9f797a4fa657ff7e8c46')
+@@ -21,13 +21,16 @@ prepare() {
  
-+source+=('add_cstddef.patch')
-+b2sums+=('3246b3155a251a9a4fce43a9b75be7e8120673a15c7edebe60ec0d942daa1a9f0adff04e324232385a08b351300c61eefbf71253f801577d905f27e8b9ae320b')
-+
-+prepare() {
-+  cd ${pkgname}-${pkgver}
+   # fix dbstl_container build error
+   patch -Np1 -i ../db-4.8.30-tls-configure.patch
 +  patch -Np1 -i ../add_cstddef.patch
-+}
-+
+ 
+   cd dist
+   ./s_config
+ }
+ 
  build() {
 -  cd ${pkgname}-${pkgver}/build_unix
 +  cd ${pkgname}-${pkgver}
 +  cp /usr/share/autoconf/build-aux/config.{guess,sub} dist/
 +  cd build_unix
+   export CFLAGS+=" -std=gnu99"
    ../dist/configure \
      --prefix=/usr \
-     --enable-compat185 \
+@@ -44,3 +47,6 @@ package() {
+   make -C ${pkgname}-${pkgver}/build_unix DESTDIR="${pkgdir}" install
+   rm -r "${pkgdir}"/usr/docs
+ }
++
++source+=('add_cstddef.patch')
++b2sums+=('3246b3155a251a9a4fce43a9b75be7e8120673a15c7edebe60ec0d942daa1a9f0adff04e324232385a08b351300c61eefbf71253f801577d905f27e8b9ae320b')
