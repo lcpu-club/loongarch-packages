@@ -1,14 +1,8 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f773396..feb8578 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -55,7 +55,6 @@ makedepends=(
-   meson
-   noto-fonts
-   noto-fonts-cjk
--  pandoc
-   python-cairo
-   python-dbus
-   python-dbusmock
-@@ -88,7 +87,7 @@ build() {
+@@ -96,7 +96,7 @@ build() {
  }
  
  check() {
@@ -17,12 +11,12 @@
  }
  
  _pick() {
-@@ -135,7 +134,7 @@ package_fwupd() {
+@@ -143,7 +143,7 @@ package_fwupd() {
    mv "${pkgdir}"/usr/bin/{,fwupd-}dbxtool
    mv "${pkgdir}"/usr/share/man/man1/{,fwupd-}dbxtool.1
    # Remove msr module-load config as it is built-in
 -  rm "${pkgdir}"/usr/lib/modules-load.d/fwupd-msr.conf
-+  rm -rf "${pkgdir}"/usr/lib/modules-load.d
++  rm -f "${pkgdir}"/usr/lib/modules-load.d/fwupd-msr.conf
  
    _pick docs "${pkgdir}"/usr/share/doc/{,fwupd/}{libfwupdplugin,libfwupd}
  }
