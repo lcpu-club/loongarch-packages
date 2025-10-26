@@ -1,8 +1,0 @@
---- a/PKGBUILD
-+++ b/PKGBUILD
-@@ -57,3 +57,5 @@ package() {
- 	install -Dm 644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
- 	install -Dm 755 Examples/*.sh -t "${pkgdir}/usr/share/doc/${pkgname}/examples"
- }
-+
-+makedepends=(${makedepends[@]/pandoc})
