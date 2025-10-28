@@ -1,30 +1,15 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index bd63230..9e1b2c4 100644
+index 88538e1..76cc6b0 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -14,16 +14,6 @@ depends=(
-   zlib
-   zstd
- )
--makedepends=(
--  rdma-core
--  cuda
--  rocm-language-runtime
--)
--optdepends=(
--  'rdma-core: for InfiniBand and RDMA support'
--  'cuda: for CUDA support'
--  'rocm-language-runtime: for ROCm support'
--)
- provides=(
-   libucm.so
-   libucp.so
-@@ -35,10 +25,11 @@ source=("$pkgname-$pkgver.tar.gz::https://github.com/openucx/$_name/archive/refs
- sha256sums=('36db6b00b0939d746e86f9e0d32dc445faaa109e46dc643fb5ad779492abfaef')
+@@ -44,13 +44,13 @@ prepare() {
+ 
+   # Do not hijack SIGHUP https://gitlab.archlinux.org/archlinux/packaging/packages/openucx/-/issues/3
+   patch -Np1 -i ../ucx-conf.patch
++  patch -Np1 -i ../LoongArch64-support.patch
+ }
  
  build() {
-+  patch -p1 -d $_name-$pkgver -i "${srcdir}/Introduce-non-temporal-buffer-transfer.patch"
-+  patch -p1 -d $_name-$pkgver -i "${srcdir}/Add-LoongArch64.patch"
    local configure_options=(
      --prefix=/usr
      --sysconfdir=/etc
@@ -32,12 +17,15 @@ index bd63230..9e1b2c4 100644
      --with-rocm=/opt/rocm
      --with-verbs
      --with-rc
-@@ -73,3 +64,8 @@ package() {
+@@ -85,3 +85,11 @@ package() {
    # install the license
    install -vDm 644 $_name-$pkgver/LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
 +
-+source+=( "Introduce-non-temporal-buffer-transfer.patch::https://github.com/openucx/ucx/commit/a86933eb32646381b6c637395ee9756f59ca2a9f.patch"
-+          "Add-LoongArch64.patch::https://github.com/openucx/ucx/pull/9899/commits/4462aa94599ee6eb56eb1a751867445a779c995e.patch")
-+sha256sums+=( 'cecb16dc59e5d5b5ac2b1eafa687772da7ce496c734ff697f17b8453031dcef8'
-+              'cede74a55c78fbf41c8542c55f3717b11e26f91ba83f642831fd04b0ab3a2b04')
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda)$'))
++source+=(
++  'LoongArch64-support.patch::https://github.com/enkerewpo/ucx/commit/71a2fef6448a1dad37d5ca397cc18efe697853f5.patch'
++)
++b2sums+=(
++  'a46f4241ea82f87802c1f8cef08ad0fb1261127769c6f0811f30dffdc6c1532923d78cdc7f8637dfe7a9dfd8876effed384af4af67b31d994ddf097743f69e10'
++)
