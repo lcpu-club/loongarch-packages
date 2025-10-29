@@ -1,0 +1,40 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,11 +20,13 @@ sha512sums=('1d32fc828a6cab878374a19c5b63e934214ae2101116d27854bd3b19ebfcd27dac4
+             '926f5a7ef54e706c977bc03ca66a9e5ec3aa5ca119359c6e6bfdf83834ff5097689b312032cdf7661afab6baa04867e25792f27dd665fc89a061f2a9e39cf97e')
+ 
+ build() {
+-  cd "memtest86plus"/build64
++  cd "memtest86plus"/build64/la64
++  sed -i 's/-part_like_isohybrid//g' Makefile
+   make
+   make iso
+ }
+ 
++  : <<COMMENT_SEPARATOR
+ # Do not remove the space before the () or commitpkg will
+ # accidentally to run this function on the system (!!!) 
+ # see devtools gitlab issue #87
+@@ -35,18 +37,20 @@ package_memtest86+ () {
+   install -Dm644 memtest.bin "$pkgdir"/boot/memtest86+/memtest.bin
+   install -Dm 755 "${srcdir}/60_memtest86+" "${pkgdir}/etc/grub.d/60_memtest86+"
+ }
++COMMENT_SEPARATOR
+ package_memtest86+-efi() {
+   pkgdesc+=" EFI version"
+ 
+-  cd "memtest86plus"/build64
++  cd "memtest86plus"/build64/la64
+   install -Dm644 memtest.efi "$pkgdir"/boot/memtest86+/memtest.efi
+   install -Dm 755 "${srcdir}/60_memtest86+-efi" "${pkgdir}/etc/grub.d/60_memtest86+-efi"
+ }
+ package_memtest86+-iso() {
+   pkgdesc+=" ISO image"
+ 
+-  cd "memtest86plus"/build64
++  cd "memtest86plus"/build64/la64
+   install -Dm644 memtest.iso "$pkgdir"/usr/share/memtest86+/memtest.iso
+ }
+ 
++pkgname=(${pkgname[@]:1})
+ # vim: ts=2 sw=2 et:
