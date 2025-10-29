@@ -1,14 +1,5 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -4,7 +4,7 @@
- pkgname=zip
- pkgver=3.0
- _pkgver=${pkgver/./}
--pkgrel=11
-+pkgrel=11.1
- pkgdesc='Compressor/archiver for creating and modifying zipfiles'
- url='http://www.info-zip.org/Zip.html'
- arch=('x86_64')
 @@ -23,6 +23,9 @@ sha256sums=('f0e8bb1f9b7eb0b01285495a2699df3a4b766784c1765a8f1aeedf63c0806369'
  
  options=('!makeflags')
