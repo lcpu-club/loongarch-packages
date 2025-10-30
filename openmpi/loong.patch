@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c1c08b5..d64c663 100644
+index 71ea10a..58cdb6b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -71,12 +71,7 @@ build() {
@@ -7,31 +7,30 @@ index c1c08b5..d64c663 100644
      --with-prrte=external
      --with-valgrind
 -    --with-ucc=/usr
--    --with-ucx=/usr
+     --with-ucx=/usr
 -    --with-cuda=/opt/cuda
 -    # this tricks the configure script to look for /usr/lib/pkgconfig/cuda.pc
 -    # instead of /opt/cuda/lib/pkgconfig/cuda.pc
 -    --with-cuda-libdir=/usr/lib
-+    #--with-ucx=/usr
      --with-rocm=/opt/rocm
      # all components that link to libraries provided by optdepends must be run-time loadable
      --enable-mca-dso=accelerator_cuda,accelerator_rocm,btl_smcuda,rcache_gpusm,rcache_rgpusm,coll_ucc,scoll_ucc
-@@ -115,11 +110,8 @@ package_openmpi() {
+@@ -115,11 +110,9 @@ package_openmpi() {
      zlib
    )
    optdepends=(
 -    'cuda: cuda support'
--    'hip-runtime-amd: ROCm support'
+     'hip-runtime-amd: ROCm support'
      'gcc-fortran: fortran support'
      'openssh: for execution on remote hosts via plm_ssh_agent'
 -    'openucc: for UCC accelerated collectives'
    )
    provides=(
      libmpi.so
-@@ -146,4 +138,6 @@ package_openmpi-docs() {
+@@ -146,4 +139,6 @@ package_openmpi-docs() {
    install -vDm 644 $pkgbase-$pkgver/LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
  
-+makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|nvidia-utils|openucc|openucx)$'))
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|nvidia-utils|openucc)$'))
 +
  # vim: ts=2 sw=2 et:
