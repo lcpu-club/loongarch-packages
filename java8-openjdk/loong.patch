@@ -1,14 +1,15 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -33,14 +33,15 @@ optdepends=(
-   'gvfs: open links e.g. hyperlinks'
+@@ -42,15 +42,16 @@ options=(
+   !lto
  )
- options=(!lto)
--source=(https://github.com/openjdk/jdk${_majorver}u/archive/refs/tags/jdk${_majorver}u${_minorver}-b${_updatever}.tar.gz
-+source=(https://github.com/loongson/jdk${_majorver}u/archive/refs/tags/jdk${_majorver}u${_minorver}-b${_updatever}-ls-0.tar.gz
-         gcc11.patch)
--b2sums=('78fdd9d59d9f9f5bf3d65901fa8cf44d42ffedf3bd48552575febeb3a35d24567b209e234988a071fe68c6d26737c69719c6c0fa861fa4d1ebb69337cb9d7d8b'
-+b2sums=('bf6d2cd5ecffdb830ee6cb973ec563423b1b4324994cfecccd9dc03d2d27f2206df21284486d7414e0f9fcb9b34d9934e20162b90fe1ad4238dd3113d845e7dc'
+ source=(
+-  https://github.com/openjdk/jdk${_majorver}u/archive/refs/tags/jdk${_majorver}u${_minorver}-b${_updatever}.tar.gz
++  https://github.com/loongson/jdk${_majorver}u/archive/refs/tags/jdk${_majorver}u${_minorver}-b${_updatever}-ls-0.tar.gz
+   gcc11.patch
+ )
+-b2sums=('4ce86687b29882a3e1add166c9f31818e3253f58f198f17d076acda3b15523baec7c51540aefe14ca237191656472f841eeb09cb69e59548ebc4cd5a267c04ec'
++b2sums=('b2ba7bb9a9cdfab36798b57967607f84b2a91ceffb977de66bf121f53083dc544f60d207da885b93f42c08448cb6ddbcdbf0359b672ec4010bf539931a366275'
          '9679e4dfb6027a87376081489c09810812d6849573afac4ea96abe3a3e00ca5b6af7d0ffb010c43b93cfa913f9e97fbb9f11e19fcc86a89b4548442671c32da1')
  
  case "${CARCH}" in
@@ -18,8 +19,8 @@
  esac
  
  _jdkname=openjdk8
-@@ -53,14 +54,14 @@ _nonheadless=(bin/policytool
-               lib/${_JARCH}/libsplashscreen.so)
+@@ -65,7 +66,7 @@ _nonheadless=(
+ )
  
  prepare() {
 -  cd jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}
@@ -27,6 +28,7 @@
  
    # Fix build with C++17 (Fedora)
    patch -Np1 -i "${srcdir}"/gcc11.patch
+@@ -82,7 +83,7 @@ prepare() {
  }
  
  build() {
@@ -34,8 +36,8 @@
 +  cd jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}-ls-0
  
    unset JAVA_HOME
-   # http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=1346
-@@ -108,7 +109,7 @@ build() {
+ 
+@@ -137,7 +138,7 @@ build() {
  }
  
  check() {
@@ -44,7 +46,7 @@
    #make -k test
  }
  
-@@ -279,7 +280,7 @@ package_openjdk8-doc() {
+@@ -338,7 +339,7 @@ package_openjdk8-doc() {
    pkgdesc='OpenJDK Java 8 documentation'
  
    install -d -m 755 "${pkgdir}/usr/share/doc/${pkgbase}/"
