@@ -1,53 +1,34 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 0b6d844..89460f5 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -18,14 +18,14 @@ arch=('x86_64')
+@@ -19,7 +19,7 @@ _securityver=9
+ _updatever=10
+ pkgver=${_majorver}.${_minorver}.${_securityver}.u${_updatever}
+ pkgrel=1
+- _git_tag=jdk-${_majorver}.${_minorver}.${_securityver}+${_updatever}
++ _git_tag=jdk-${_majorver}.${_minorver}.${_securityver}+${_updatever}-ls-0
+ arch=('x86_64')
  url='https://openjdk.java.net/'
  license=('LicenseRef-Java')
- makedepends=('java-environment=21' 'cpio' 'unzip' 'zip' 'libelf' 'libcups' 'libx11'
--             'libxrender' 'libxtst' 'libxt' 'libxext' 'libxrandr' 'alsa-lib' 'pandoc'
-+             'libxrender' 'libxtst' 'libxt' 'libxext' 'libxrandr' 'alsa-lib'
-              'graphviz' 'freetype2' 'libjpeg-turbo' 'giflib' 'libpng' 'lcms2'
-              'libnet' 'bash' 'harfbuzz' 'gcc-libs' 'glibc')
--source=(https://github.com/openjdk/jdk${_majorver}u/archive/${_git_tag}.tar.gz
-+source=(https://github.com/loongson/jdk${_majorver}u/archive/${_git_tag}-ls-0.tar.gz
-         freedesktop-java.desktop
-         freedesktop-jconsole.desktop
-         freedesktop-jshell.desktop)
--sha256sums=('260e81ac93d66845c7debcf3b4a1f53b0fcf639124cc3899765f57700539259c'
-+sha256sums=('1bd4bca4e70aade085c85a69841570cfa81d9818b8dc2e525c8358ab59f4e562'
+@@ -55,12 +55,12 @@ options=(
+   !lto
+ )
+ source=(
+-  https://github.com/openjdk/jdk${_majorver}u/archive/${_git_tag}.tar.gz
++  https://github.com/loongson/jdk${_majorver}u/archive/${_git_tag}.tar.gz
+   freedesktop-java.desktop
+   freedesktop-jconsole.desktop
+   freedesktop-jshell.desktop
+ )
+-sha256sums=('f2f9a21fd61ab3f63dac7e3d8747e849c9e0a1f14ed617c239ef9911755c756b'
++sha256sums=('747d5b6d8e965269ed09797a873aff894b77ceca08305596b93eee39ad64f977'
              '72111743ab6ab36854b0c85a504172983715d0798fce10bc4e35689b7d15fd93'
              '8ecdf5c1605bafa58b3f7da615e6d8d3d943e3a2d3831930d6efa7815aacce07'
              '50fc0d677489b73d549df2f08d759d5f057f200adbbab83ea5e87456152ee03e')
-@@ -33,10 +33,11 @@ sha256sums=('260e81ac93d66845c7debcf3b4a1f53b0fcf639124cc3899765f57700539259c'
- case "${CARCH}" in
-   x86_64) _JARCH='x86_64';;
+@@ -70,6 +70,7 @@ case "${CARCH}" in
    i686)   _JARCH='x86';;
-+  loong64) _JARCH='loongarch64';;
+   riscv64)_JARCH='riscv64';;
+   aarch64)_JARCH='aarch64';;
++  loong64)_JARCH='loongarch64';;
  esac
  
  _jvmdir=/usr/lib/jvm/java-${_majorver}-openjdk
--_jdkdir=jdk${_majorver}u-${_git_tag//+/-}
-+_jdkdir=jdk${_majorver}u-${_git_tag//+/-}-ls-0
- _imgdir=${_jdkdir}/build/linux-${_JARCH}-server-release/images
- 
- _nonheadless=(lib/libawt_xawt.so
-@@ -117,7 +118,7 @@ build() {
-     ${NUM_PROC_OPT}
-     #--disable-javac-server
- 
--  make images legacy-jre-image docs
-+  make images legacy-jre-image # docs
- 
-   # https://bugs.openjdk.java.net/browse/JDK-8173610
-   find "${srcdir}/${_imgdir}" -iname '*.so' -exec chmod +x {} \;
-@@ -348,7 +349,7 @@ package_openjdk21-doc() {
-   provides=("openjdk${_majorver}-doc=${pkgver}-${pkgrel}")
- 
-   install -dm 755 "${pkgdir}/usr/share/doc"
--  cp -r ${_imgdir}/docs "${pkgdir}/usr/share/doc/${pkgbase}"
-+  #cp -r ${_imgdir}/docs "${pkgdir}/usr/share/doc/${pkgbase}"
- 
-   install -dm 755 "${pkgdir}/usr/share/licenses"
-   ln -s ${pkgbase} "${pkgdir}/usr/share/licenses/${pkgname}"
