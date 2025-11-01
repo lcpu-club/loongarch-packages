@@ -1,52 +1,36 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -23,7 +23,6 @@ depends=(
-   'libldap'
-   'libxml2'
-   'libxslt'
--  'llvm-libs'
-   'lz4'
-   'openssl'
-   'pam'
-@@ -34,10 +33,8 @@ depends=(
-   'zstd'
- )
- makedepends=(
--  'clang'
-   'docbook-xml'
-   'docbook-xsl'
--  'llvm'
-   'perl'
-   'perl-ipc-run'
-   'python'
-@@ -100,6 +97,7 @@ prepare() {
+@@ -98,6 +98,7 @@ prepare() {
+   patch -Np1 < ../0001-Set-DEFAULT_PGSOCKET_DIR-to-run-postgresql.patch
    patch -Np1 < ../0002-Force-RPATH-to-be-used-for-the-PL-Perl-plugin.patch
    patch -Np1 < ../0003-doc-Remove-stray-trailing-whitespace-in-xref-linkend.patch
-   patch -Np1 < ../0004-jit-fix-build-with-LLVM-21.patch
 +  patch -p1 < ../add-loongarch-support.patch
  }
  
  build() {
-@@ -117,7 +115,6 @@ build() {
-     --with-ldap
+@@ -117,7 +118,6 @@ build() {
+     --with-liburing
      --with-libxml
      --with-libxslt
 -    --with-llvm
      --with-lz4
      --with-openssl
      --with-pam
-@@ -148,6 +145,7 @@ _postgres_check() {
+@@ -142,6 +142,7 @@ build() {
  
- check() {
+ check() (
    export LANG=C LC_ALL=C
 +  export PGTZ="America/Los_Angeles"
-   cd postgresql-${pkgver}
-   _postgres_check check
-   _postgres_check check-world
-@@ -284,4 +282,8 @@ package_postgresql-docs() {
-   install -Dm 644 COPYRIGHT -t "${pkgdir}/usr/share/licenses/${pkgname}"
+   if ! make -C build check-world; then
+     find . -name regression.diffs | while read -r line; do
+       echo "make check-world failure: ${line}"
+@@ -257,4 +258,11 @@ package_postgresql-docs() {
+   install -Dm644 postgresql-${pkgver}/COPYRIGHT -t "${pkgdir}/usr/share/licenses/${pkgname}"
  }
  
++makedepends=(${makedepends[@]/clang})
++makedepends=(${makedepends[@]/llvm})
++depends=(${makedepends[@]/llvm-libs})
 +source+=('add-loongarch-support.patch')
 +md5sums+=('49336e9f0512a980cbb661be0bb4a509')
 +sha256sums+=('da98a27c64c2d41c48ab039fe134076fe70fe6e2316dff487e405463f8007121')
