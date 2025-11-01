@@ -30,7 +30,7 @@
  
 +makedepends=(${makedepends[@]/clang})
 +makedepends=(${makedepends[@]/llvm})
-+depends=(${makedepends[@]/llvm-libs})
++depends=(${depends[@]/llvm-libs})
 +source+=('add-loongarch-support.patch')
 +md5sums+=('49336e9f0512a980cbb661be0bb4a509')
 +sha256sums+=('da98a27c64c2d41c48ab039fe134076fe70fe6e2316dff487e405463f8007121')
