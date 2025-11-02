@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index ab35f2b..01dd70d 100644
+index b3db102..5366a0e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -27,6 +27,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
@@ -19,7 +19,7 @@ index ab35f2b..01dd70d 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -122,6 +125,10 @@ prepare() {
+@@ -124,6 +127,10 @@ prepare() {
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
    patch -Np1 -i ../compiler-rt-adjust-paths.patch
  
@@ -30,7 +30,7 @@ index ab35f2b..01dd70d 100644
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
  
-@@ -256,6 +263,9 @@ build() {
+@@ -263,6 +270,9 @@ build() {
    # https://crbug.com/957519#c122
    CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
  
@@ -40,13 +40,13 @@ index ab35f2b..01dd70d 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -331,4 +341,9 @@ package() {
+@@ -338,4 +348,9 @@ package() {
    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
-+sha256sums+=('66347afbeb8cab166adec404b7671ddba566cfa589670e51db3d027a18dd8c25'
++sha256sums+=('65da85f63d4554958fd6166a4b0cb7fbeea91ab6253c4f016249efec0ddda4cd'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
 +
  # vim:set ts=2 sw=2 et:
