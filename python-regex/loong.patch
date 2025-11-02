@@ -5,7 +5,7 @@
  
    local _pyver=cpython-$(python -c 'import sys; print("".join(map(str, sys.version_info[:2])))')
 -  cd "$PWD/build/lib.linux-$CARCH-$_pyver"
-+  cd "$PWD/build/lib.linux-`uname -m`-$_pyver"
-   python -m unittest regex/test_regex.py
++  cd "$PWD/build/lib.linux-$(uname -m)-$_pyver"
+   python -m unittest regex/tests/test_regex.py
  }
  
