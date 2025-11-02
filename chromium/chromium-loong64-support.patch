@@ -25,11 +25,11 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/bu
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc
 --- a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -378,6 +378,8 @@
+@@ -383,6 +383,8 @@
      info->arch = extensions::api::runtime::PlatformArch::kMips64;
-   } else if (strcmp(arch, "riscv64") == 0) {
+   } else if (arch == "riscv64") {
      info->arch = extensions::api::runtime::PlatformArch::kRiscv64;
-+  } else if (strcmp(arch, "loongarch64") == 0) {
++  } else if (arch == "loongarch64") {
 +    info->arch = extensions::api::runtime::PlatformArch::kLoongarch64;
    } else {
      NOTREACHED();
