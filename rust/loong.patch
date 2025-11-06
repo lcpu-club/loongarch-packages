@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -133,9 +133,8 @@ link-shared = true
+@@ -128,9 +128,8 @@ link-shared = true
  [build]
  description = "Arch Linux $pkgbase $epoch:$pkgver-$pkgrel"
  target = [
@@ -12,7 +12,7 @@
    "aarch64-unknown-linux-gnu",
    "aarch64-unknown-linux-musl",
    "wasm32-unknown-unknown",
-@@ -188,24 +187,20 @@ lto = "fat"
+@@ -182,26 +181,21 @@ lto = "fat"
  compression-formats = ["gz"]
  compression-profile = "fast"
  
@@ -23,6 +23,8 @@
  ar = "/usr/bin/gcc-ar"
  ranlib = "/usr/bin/gcc-ranlib"
  llvm-config = "/usr/bin/llvm-config"
+-optimized-compiler-builtins = "$clangdir/lib/linux/libclang_rt.builtins-x86_64.a"
++optimized-compiler-builtins = "$clangdir/lib/linux/libclang_rt.builtins-$(uname -m).a"
  
 -[target.i686-unknown-linux-gnu]
 +# Failed with musl-gcc: ld.lld: error: unable to find library -lgcc_s
@@ -32,6 +34,7 @@
  cxx = "/usr/bin/g++"
  ar = "/usr/bin/gcc-ar"
  ranlib = "/usr/bin/gcc-ranlib"
+-optimized-compiler-builtins = "$clangdir/lib/linux/libclang_rt.builtins-i386.a"
 -
 -[target.x86_64-unknown-linux-musl]
 -cc = "/usr/bin/musl-gcc"
@@ -41,7 +44,7 @@
  sanitizers = false
  musl-root = "/usr/lib/musl"
  
-@@ -320,18 +315,15 @@ build() {
+@@ -317,18 +311,15 @@ build() {
  
    # rustbuild always installs copies of the shared libraries to /usr/lib,
    # overwrite them with symlinks to the per-architecture versions
@@ -66,7 +69,7 @@
    _pick dest-aarch64-gnu usr/lib/rustlib/aarch64-unknown-linux-gnu
    _pick dest-aarch64-musl usr/lib/rustlib/aarch64-unknown-linux-musl
    _pick dest-wasm usr/lib/rustlib/wasm32{,v1}-*
-@@ -439,4 +431,7 @@ package_rust-src() {
+@@ -436,4 +427,7 @@ package_rust-src() {
      rustc-$pkgver-src/{COPYRIGHT,LICENSE-MIT}
  }
  
