@@ -1,11 +1,11 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -123,7 +123,7 @@ build() {
- check() {
+@@ -148,7 +148,7 @@ check() {
+   )
    PARQUET_TEST_DATA="$srcdir"/parquet-testing/data \
    ARROW_TEST_DATA="$srcdir"/arrow-testing/data \
--  ctest --test-dir build --output-on-failure
-+  ctest --test-dir build --output-on-failure || echo "Watch out for failed tests!"
+-  ctest "${ctest_options[@]}"
++  ctest "${ctest_options[@]}" || echo "Watch out for failed tests!"
  }
  
  package() {
