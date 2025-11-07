@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -169,6 +169,11 @@ prepare() {
+@@ -218,6 +218,11 @@ prepare() {
  
    git -c protocol.file.allow=always submodule update --init --recursive
  
@@ -12,38 +12,39 @@
    # Fix cmake prefix path (FS#78665)
    patch -Np1 -i "${srcdir}"/fix_cmake_prefix_path.patch
  
-@@ -244,7 +249,6 @@ _prepare() {
- 
+@@ -270,7 +275,7 @@ _prepare() {
    # Check tools/setup_helpers/cmake.py, setup.py and CMakeLists.txt for a list of flags that can be set via env vars.
+   export BUILD_TEST=OFF  # do not build tests
    export ATEN_NO_TEST=ON  # do not build ATen tests
 -  export USE_MKLDNN=ON
++  # export USE_MKLDNN=ON
    export BUILD_CUSTOM_PROTOBUF=OFF
    export USE_GFLAGS=ON
    export USE_GLOG=ON
-@@ -252,10 +256,9 @@ _prepare() {
-   export USE_OBSERVERS=ON
+@@ -279,10 +284,11 @@ _prepare() {
    export USE_MAGMA=ON
    # export USE_SYSTEM_LIBS=ON  # experimental, not all libs present in repos
+   # USE_SYSTEM_ONNX=ON does not work and onnx itself should be removed from pytorch: https://github.com/pytorch/pytorch/issues/166546#issuecomment-3463370459
 -  export USE_NCCL=ON
 -  export USE_SYSTEM_NCCL=ON
++  # export USE_NCCL=ON
++  # export USE_SYSTEM_NCCL=ON
    export USE_SYSTEM_PYBIND11=ON
    export USE_SYSTEM_EIGEN_INSTALL=ON
 +  : <<COMMENT_SEPARATOR
    export USE_GOLD_LINKER=ON
    export NCCL_VERSION=$(pkg-config nccl --modversion)
    export NCCL_VER_CODE=$(sed -n 's/^#define NCCL_VERSION_CODE\s*\(.*\).*/\1/p' /usr/include/nccl.h)
-@@ -273,6 +276,10 @@ _prepare() {
-   export CUDNN_INCLUDE_DIR=/usr/include
-   export TORCH_NVCC_FLAGS="-Xfatbin -compress-all"
-   export TORCH_CUDA_ARCH_LIST="7.5 8.0 8.6 8.7 8.8 8.9 9.0 10.0 10.3 11.0 12.0 12.1"
+@@ -303,7 +309,7 @@ _prepare() {
+   # https://github.com/pytorch/pytorch/blob/f9074c7332c3dfd43fe39e8733ec98f7f29b3e61/torch/utils/cpp_extension.py#L2417-L2420
+   # (note that 8.8 is not supported)
+   export TORCH_CUDA_ARCH_LIST="7.5 8.0 8.6 8.7 8.9 9.0 10.0 10.3 11.0 12.0 12.1"
+-
 +COMMENT_SEPARATOR
-+  export CC=/usr/bin/gcc-14
-+  export CXX=/usr/bin/g++-14
-+  export CXXFLAGS+=" -Wno-error=maybe-uninitialized"
- 
    export ROCM_PATH=/opt/rocm
    export HIP_ROOT_DIR=/opt/rocm
-@@ -296,23 +303,24 @@ _prepare() {
+   # gfx950 lacks support for 128 bit atomics
+@@ -330,23 +336,24 @@ _prepare() {
  
  build() {
    cd "${srcdir}/${_pkgname}"
@@ -55,7 +56,7 @@
    export USE_ROCM=0
 -  echo "add_definitions(-march=x86-64)" >> cmake/MiscCheck.cmake
 +  echo "add_definitions(-march=loongarch64)" >> cmake/MiscCheck.cmake
-   python setup.py build
+   python -m build --wheel --no-isolation
  
    cd "${srcdir}/${_pkgname}-opt"
 -  echo "Building without cuda or rocm and with non-x86-64 optimizations"
@@ -66,16 +67,16 @@
    export USE_ROCM=0
 -  echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
 +  echo "add_definitions(-march=la464)" >> cmake/MiscCheck.cmake
-   python setup.py build
+   python -m build --wheel --no-isolation
  
 +  : <<COMMENT_SEPARATOR
    cd "${srcdir}/${_pkgname}-cuda"
    echo "Building with cuda and without non-x86-64 optimizations"
    _prepare
-@@ -333,9 +341,10 @@ build() {
+@@ -367,9 +374,10 @@ build() {
    _prepare
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
-   python setup.py build
+   python -m build --wheel --no-isolation
 +COMMENT_SEPARATOR
  
    cd "${srcdir}/${_pkgname}-rocm"
@@ -84,7 +85,7 @@
    # -fcf-protection is not supported by HIP, see
    # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
    CXXFLAGS+=" -fcf-protection=none"
-@@ -344,20 +353,22 @@ build() {
+@@ -378,20 +386,22 @@ build() {
    export USE_CUDNN=0
    export USE_ROCM=1
    export MAGMA_HOME=/opt/rocm
@@ -94,7 +95,7 @@
    # Conversion of CUDA to ROCm source files
    python tools/amd_build/build_amd.py
    patch -Np1 -i "$srcdir/pytorch-rocm-jit.patch"
-   python setup.py build
+   python -m build --wheel --no-isolation
  
    cd "${srcdir}/${_pkgname}-opt-rocm"
 -  echo "Building with rocm and with non-x86-64 optimizations"
@@ -110,7 +111,7 @@
    # Conversion of CUDA to ROCm source files
    python tools/amd_build/build_amd.py
    patch -Np1 -i "$srcdir/pytorch-rocm-jit.patch"
-@@ -402,7 +413,7 @@ package_python-pytorch() {
+@@ -433,7 +443,7 @@ package_python-pytorch() {
  }
  
  package_python-pytorch-opt() {
@@ -119,7 +120,7 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -432,7 +443,7 @@ package_python-pytorch-opt-cuda() {
+@@ -463,7 +473,7 @@ package_python-pytorch-opt-cuda() {
  
  package_python-pytorch-rocm() {
    pkgdesc="${_pkgdesc} (with ROCm)"
@@ -128,7 +129,7 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -441,8 +452,8 @@ package_python-pytorch-rocm() {
+@@ -472,8 +482,8 @@ package_python-pytorch-rocm() {
  }
  
  package_python-pytorch-opt-rocm() {
@@ -139,7 +140,7 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver} python-pytorch-rocm=${pkgver})
  
-@@ -450,4 +461,20 @@ package_python-pytorch-opt-rocm() {
+@@ -481,4 +491,20 @@ package_python-pytorch-opt-rocm() {
    _package
  }
  
