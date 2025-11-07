@@ -1,24 +1,15 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 6e2db03..231e3d5 100644
+index a202625..eb68cb8 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -22,7 +22,12 @@ validpgpkeys=('FFF3E01444FED7C316A3545A895F5BC123A02740')
- 
+@@ -23,6 +23,10 @@ validpgpkeys=('FFF3E01444FED7C316A3545A895F5BC123A02740')
  build() {
      cd "${srcdir}/${pkgname}_v${pkgver}_src-deps"
--
+ 
 +    # Update jacobsa-crypto to v1.1.0 to support loong64
 +    go mod edit -replace github.com/aperturerobotics/jacobsa-crypto=github.com/aperturerobotics/jacobsa-crypto@v1.1.0
 +    go mod tidy
 +    go mod vendor
-+    # Skip to make manpage (need pandoc, which is missing on loong64)
-+    sed -i '/MANPAGE-render.bash/s/^/#/' Makefile
      export CGO_LDFLAGS="$LDFLAGS"
      export GOFLAGS="-buildmode=pie -trimpath -mod=vendor"
      make build
-@@ -32,3 +37,5 @@ package() {
-     cd "${srcdir}/${pkgname}_v${pkgver}_src-deps"
-     make DESTDIR="${pkgdir}" install
- }
-+
-+makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(pandoc)$'))
