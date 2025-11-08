@@ -1,30 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b024df6..0cdbe63 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -70,6 +70,7 @@ case "${CARCH}" in
-   x86_64) _JARCH='x86_64';;
+@@ -71,6 +71,7 @@ case "${CARCH}" in
    i686)   _JARCH='x86';;
    riscv64)_JARCH='riscv64';;
+   aarch64) _JARCH='aarch64';;
 +  loong64) _JARCH='loongarch64';;
  esac
  
  _jvmdir=/usr/lib/jvm/java-${_majorver}-openjdk
-@@ -160,7 +161,7 @@ build() {
-     --disable-warnings-as-errors \
-     --with-vendor-name="Arch Linux"
- 
--  make images legacy-jre-image docs
-+  make images legacy-jre-image # docs
- 
-   # https://bugs.openjdk.java.net/browse/JDK-8173610
-   find "${srcdir}/${_imgdir}" -iname '*.so' -exec chmod +x {} \;
-@@ -451,10 +452,21 @@ package_openjdk-doc() {
-   provides=("openjdk${_majorver}-doc=${pkgver}-${pkgrel}")
- 
-   install -dm 755 "${pkgdir}/usr/share/doc"
--  cp -r ${_imgdir}/docs "${pkgdir}/usr/share/doc/${pkgbase}"
-+  #cp -r ${_imgdir}/docs "${pkgdir}/usr/share/doc/${pkgbase}"
- 
-   install -dm 755 "${pkgdir}/usr/share/licenses"
+@@ -458,4 +459,14 @@ package_openjdk-doc() {
    ln -s ${pkgbase} "${pkgdir}/usr/share/licenses/${pkgname}"
  }
  
@@ -37,6 +23,5 @@
 +
 +source+=("https://github.com/loongson/jdk/archive//refs/tags/jdk-${_majorver}+${_loongfixver}-ls-0.tar.gz")
 +sha256sums+=('e1f0e9d3d20d8559b208a3b6d62028c84e46763036e8876ac7fb5365f2f7ada4')
-+makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(pandoc)$'))
 +
  # vim: ts=2 sw=2 et:
