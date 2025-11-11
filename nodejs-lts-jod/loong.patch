@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -61,7 +61,7 @@ check() {
-   rm test/parallel/test-http2-priority-event.js
-   rm test/parallel/test-http2-reset-flood.js
-   rm test/parallel/test-tls-ocsp-callback.js
+@@ -66,7 +66,7 @@ check() {
+   rm test/parallel/test-datetime-change-notify.js
+   rm test/parallel/test-icu-env.js
+ 
 -  make test-only
 +  make test-only || echo "Watch out for failed tests!"
  }
