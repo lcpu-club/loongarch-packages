@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a55f087..c68ea09 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -30,6 +30,11 @@ b2sums=('539321405ca0204e2dbb654fbc17cdefe51cd9209d080f7231db97fa9db4920b5d2a01c
+ 
+ build() {
+   cd ${pkgname/python-/}
++  # Use system nodejs instead of downloading via nodeenv
++  export STB_USE_SYSTEM_NODE=1
++  # Dynamically match the node version to the one available in the build environment
++  local node_version=$(node --version | sed 's/v//')
++  sed -i "s/node-version = \"[^\"]*\"/node-version = \"$node_version\"/" pyproject.toml
+   python -m build --wheel --no-isolation
+ }
+ 
+@@ -37,3 +42,5 @@ package() {
+   install -D -m644 ${pkgname/python-/}/LICENSE -t "${pkgdir}/usr/share/licenses/${pkgname}"
+   python -m installer --destdir="${pkgdir}" ${pkgname/python-/}/dist/pydata_sphinx_theme-${pkgver}-py3-none-any.whl
+ }
++
++makedepends+=(nodejs-lts-jod npm)
