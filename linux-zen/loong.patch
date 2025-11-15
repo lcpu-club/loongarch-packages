@@ -62,14 +62,13 @@
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -256,4 +280,36 @@ for _p in "${pkgname[@]}"; do
+@@ -256,4 +280,33 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
 +source+=("loong-addition.config"
 +         "skip-c-flag.patch"
 +         "0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch"
-+         "Guard-dml21_map_dc_state_into_dml_display_cfg-with-DC_FP_START.patch::https://github.com/xry111/linux/commit/be01a9befb952decacc6cdca55f98dcf43ea1e7d.diff"
 +         "0016-REVERT-Revert-Mark-xe-driver-as-BROKEN-if-kernel-pag.patch"
 +         "0017-BACKPORT-FROMLIST-drm-xe-bo-fix-alignment-with-non-4.patch"
 +         "0018-BACKPORT-FROMLIST-drm-xe-guc-use-SZ_4K-for-alignment.patch"
@@ -80,7 +79,6 @@
 +sha256sums+=('77eba2e995872642d763af67747228ef2e27b9d0a7958e8db0a12c4cdcc9acc1'
 +             'b354f3e70dc60dc6bbc9e1c1f7140996e043cef6ba82c3da67b552936c6dc881'
 +             'd146728a3b3c722f433e310cad21e93c53e64a7afe948b5b43b077e962750941'
-+             '62ceff5a09de397e39cdbea579b1b8f84a4b292f364be82a32a7dba4b8160b52'
 +             'c16845f0e9ac9d592e6a8ed2276b96749a58c7a8d95b23f0126a4ee92ee1685b'
 +             'b82a5f954d688f2d21823a807141596713744f0458d2bac3439c8c203bd6b654'
 +             '9233ce0a04f6e6a18a634aa6259c1481469186c77a2829c964ade0ebd85ea1f5'
@@ -90,7 +88,6 @@
 +b2sums+=('652069e50060a3d84530f004f7064d98d6ac9bb02e690a3510d092d0df17598c9b3d564ae07fdb0dbbecc68d2d12d58c4c78c02cc08fbcbb8c01ba6e6256d922'
 +         '1312ff4524418853eea3d8c67f7ff44ef7d13d895189aadd461ab9f96b8309202ca01bab25947c295f5a12207dade11308119b05231254bf6dc14448f302307a'
 +         '4a0b268f1a28d4bfa37d9b644477c75a5215083414fe5cc5d637e2edc4895aace9e42b3b33ac0b3e2a15a18340bec651511fa3c347c1c3e347ed3418c033582c'
-+         '2b2f07682843c071b4f1582a05a40343cb43ded3554eac117c4b73798b3c3bf238e2c0ea51e7668e7cd6fba784cf9bedebf73888a5326d1dfcd02080c49fec41'
 +         'f4b5787523241762389a2ebbe391cc7f4fdef0408c254461f4a54d6f6577f6f7bb525552cd9ccc639da39f06b03f5061578c0c6b009acf9101f6ff17d63111b0'
 +         '9b349d174549daa31177f2f65971c2c6e8f691882c77f3ba2ff95d55592b22d49b5caf549847ba21fc776f7f29508f10a96bf57f9b04d93956340579e01c8266'
 +         '620e3ddb2df94ae13e85f67cae656bafe38982e145075c337231705698675bfbc9436cfeef6614b671a8d6655acbd8cfb014232540ffb662071b9c4e23dbc170'
