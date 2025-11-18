@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 0afa6dc..ff0b39d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -96,11 +96,13 @@ build() {
+@@ -77,11 +77,13 @@ build() {
    cmake "${_cpu_args[@]}"
    cmake --build build
  
@@ -16,28 +14,28 @@ index 0afa6dc..ff0b39d 100644
  
    # build python-torchvision
    echo "Building torchvision python bindings (CPU version)"
-@@ -111,6 +113,7 @@ build() {
-   python setup.py build
- 
+@@ -91,6 +93,7 @@ build() {
+   TORCHVISION_USE_NVJPEG=0 \
+   python -m build --wheel --no-isolation
  
 +  : <<COMMENT_SEPARATOR
    # build python-torchvision-cuda
+   echo "Building torchvision python bindings (GPU version with CUDA)"
    cd "${srcdir}/python-${_pkgname}-cuda-${pkgver}"
-   TORCHVISION_INCLUDE="${srcdir}" \
-@@ -118,6 +121,7 @@ build() {
+@@ -99,6 +102,7 @@ build() {
    FORCE_CUDA=1 \
    TORCH_CUDA_ARCH_LIST="${_CUDA_ARCH_LIST}" \
-   python setup.py build
+   python -m build --wheel --no-isolation
 +COMMENT_SEPARATOR
  }
  
- # TODO(gromit): re-enable the tests
-@@ -176,4 +180,8 @@ package_torchvision-cuda() {
-   install -m644 -Dt "$pkgdir/usr/share/licenses/$pkgname" LICENSE
+ package_python-torchvision() {
+@@ -158,4 +162,8 @@ package_torchvision-cuda() {
+   install -vDm 644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
  }
  
 +pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(torchvision-cuda|python-torchvision-cuda)$'))
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|cudnn|python-pytorch-opt-cuda)$'))
-+makedepends+=(python-pytorch)
++makedepends+=(python-pytorch-opt python-fsspec)
 +
  # vim:set ts=2 sw=2 et:
