@@ -1,14 +1,14 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -98,6 +98,7 @@ prepare() {
+@@ -93,6 +93,7 @@ prepare() {
+   cd postgresql-${pkgver}
    patch -Np1 < ../0001-Set-DEFAULT_PGSOCKET_DIR-to-run-postgresql.patch
    patch -Np1 < ../0002-Force-RPATH-to-be-used-for-the-PL-Perl-plugin.patch
-   patch -Np1 < ../0003-doc-Remove-stray-trailing-whitespace-in-xref-linkend.patch
 +  patch -p1 < ../add-loongarch-support.patch
  }
  
  build() {
-@@ -117,7 +118,6 @@ build() {
+@@ -112,7 +113,6 @@ build() {
      --with-liburing
      --with-libxml
      --with-libxslt
@@ -16,7 +16,7 @@
      --with-lz4
      --with-openssl
      --with-pam
-@@ -142,6 +142,7 @@ build() {
+@@ -137,6 +137,7 @@ build() {
  
  check() (
    export LANG=C LC_ALL=C
@@ -24,7 +24,7 @@
    if ! make -C build check-world; then
      find . -name regression.diffs | while read -r line; do
        echo "make check-world failure: ${line}"
-@@ -257,4 +258,11 @@ package_postgresql-docs() {
+@@ -252,4 +253,11 @@ package_postgresql-docs() {
    install -Dm644 postgresql-${pkgver}/COPYRIGHT -t "${pkgdir}/usr/share/licenses/${pkgname}"
  }
  
