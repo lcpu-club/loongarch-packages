@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index acc8c7f..5503393 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -83,8 +83,19 @@ prepare() {
+@@ -80,8 +80,19 @@ prepare() {
      patch -Np1 < "../$src"
    done
  
@@ -22,7 +20,7 @@ index acc8c7f..5503393 100644
    make olddefconfig
    diff -u ../config .config || :
  
-@@ -155,7 +166,11 @@ _package-headers() {
+@@ -152,7 +163,11 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -35,7 +33,7 @@ index acc8c7f..5503393 100644
    cp -t "$builddir" -a scripts
    ln -srt "$builddir" "$builddir/scripts/gdb/vmlinux-gdb.py"
  
-@@ -167,8 +182,13 @@ _package-headers() {
+@@ -164,8 +179,13 @@ _package-headers() {
  
    echo "Installing headers..."
    cp -t "$builddir" -a include
@@ -51,7 +49,7 @@ index acc8c7f..5503393 100644
  
    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
-@@ -198,7 +218,11 @@ _package-headers() {
+@@ -195,7 +215,11 @@ _package-headers() {
    echo "Removing unneeded architectures..."
    local arch
    for arch in "$builddir"/arch/*/; do
@@ -64,27 +62,36 @@ index acc8c7f..5503393 100644
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -266,4 +290,23 @@ for _p in "${pkgname[@]}"; do
+@@ -263,4 +287,32 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
-+source+=('loong-addition.config'
-+         '0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch'
-+         '0002-LOONGARCH-drm-xe-fix-build-on-non-4K-kernels.patch'
-+         '0003-LOONGARCH-from-AOSCOS-more-fixes-for-Xe-on-LoongArch.patch'
-+         'Guard-dml21_map_dc_state_into_dml_display_cfg-with-DC_FP_START.patch::https://github.com/xry111/linux/commit/be01a9befb952decacc6cdca55f98dcf43ea1e7d.diff'
-+         'revert-mark-xe-driver-as-BROKEN-if-kernel-page-size-is-not-4kB.patch')
++source+=("loong-addition.config"
++         "skip-c-flag.patch"
++         "0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch"
++         "0016-REVERT-Revert-Mark-xe-driver-as-BROKEN-if-kernel-pag.patch"
++         "0017-BACKPORT-FROMLIST-drm-xe-bo-fix-alignment-with-non-4.patch"
++         "0018-BACKPORT-FROMLIST-drm-xe-guc-use-SZ_4K-for-alignment.patch"
++         "0019-BACKPORT-FROMLIST-drm-xe-regs-fix-RING_CTL_SIZE-size.patch"
++         "0020-FROMLIST-drm-xe-use-4K-alignment-for-cursor-jumps.patch"
++         "0021-FROMLIST-drm-xe-query-use-PAGE_SIZE-as-the-minimum-p.patch"
++)
 +sha256sums+=('77eba2e995872642d763af67747228ef2e27b9d0a7958e8db0a12c4cdcc9acc1'
++             'b354f3e70dc60dc6bbc9e1c1f7140996e043cef6ba82c3da67b552936c6dc881'
 +             'd146728a3b3c722f433e310cad21e93c53e64a7afe948b5b43b077e962750941'
-+             'c723e02bbeb42c2a99461b0390d1cbcbb6d998e1191d6621ed02680efb17a554'
-+             'fb058222b06a3cee7984c554a18ce4475f3d71f9ade030e3fe6e3841222fad1b'
-+             '62ceff5a09de397e39cdbea579b1b8f84a4b292f364be82a32a7dba4b8160b52'
-+             'a1bbc7c01dfd6b02e083c211d8aa6f211837dd973d27e8a99487b79984133cc9')
++             'c16845f0e9ac9d592e6a8ed2276b96749a58c7a8d95b23f0126a4ee92ee1685b'
++             'b82a5f954d688f2d21823a807141596713744f0458d2bac3439c8c203bd6b654'
++             '9233ce0a04f6e6a18a634aa6259c1481469186c77a2829c964ade0ebd85ea1f5'
++             'c46de055ed82702c20d3c70cc2a268ed48a6fa4ad2a546fd3b339a1366954618'
++             '30accab32bd0699304421ad347bd9866820a499b78d473d14e099600912717a8'
++             'e629cc73e44a63c4a332c8f77f8e4baa01227a9ed4390bf5ef978b02be9b6b0d')
 +b2sums+=('652069e50060a3d84530f004f7064d98d6ac9bb02e690a3510d092d0df17598c9b3d564ae07fdb0dbbecc68d2d12d58c4c78c02cc08fbcbb8c01ba6e6256d922'
++         '1312ff4524418853eea3d8c67f7ff44ef7d13d895189aadd461ab9f96b8309202ca01bab25947c295f5a12207dade11308119b05231254bf6dc14448f302307a'
 +         '4a0b268f1a28d4bfa37d9b644477c75a5215083414fe5cc5d637e2edc4895aace9e42b3b33ac0b3e2a15a18340bec651511fa3c347c1c3e347ed3418c033582c'
-+         'dc9528bb0aec946948273cd9d718db058440527439a81d488c8294f022d39bd626152eefb2e4310a60546a3e1d7d107e53a7833fecc5218924d201d065717add'
-+         '0c9d8e9814d29e30ae71f4301fb1b7d6cd3285edcdb5c18c43933b853332c1cba72adc70d1086c7087364ef5ce6b364e9e531d8f0a81b26aadd1777b781fa906'
-+         '2b2f07682843c071b4f1582a05a40343cb43ded3554eac117c4b73798b3c3bf238e2c0ea51e7668e7cd6fba784cf9bedebf73888a5326d1dfcd02080c49fec41'
-+         '41bb63b44c396e15292a1b11624d8e7b1213f5bdee25833eb5c2dd91f24fd3a7b83636c2896242392dc17e39f759acf818d9589b60b19050b957558e9ad63df8')
-+
++         'f4b5787523241762389a2ebbe391cc7f4fdef0408c254461f4a54d6f6577f6f7bb525552cd9ccc639da39f06b03f5061578c0c6b009acf9101f6ff17d63111b0'
++         '9b349d174549daa31177f2f65971c2c6e8f691882c77f3ba2ff95d55592b22d49b5caf549847ba21fc776f7f29508f10a96bf57f9b04d93956340579e01c8266'
++         '620e3ddb2df94ae13e85f67cae656bafe38982e145075c337231705698675bfbc9436cfeef6614b671a8d6655acbd8cfb014232540ffb662071b9c4e23dbc170'
++         '6b00b56e99f3c534f51b3991a051c3a158a155c19de1e1d4f344965c56f84ea95b8d2c6fb91b96930847a8c68699a46393235777d6176dfd1c2946b11ea4857e'
++         '4513616d06073e36675511be5375e64be7cc2bcff0fecbf959fae4485875d5c0f2428ac8df9492052cce9cf1cc99d44e94cbbd49364146a491d97716d8ca7595'
++         'e9e60112c0b5e0d57db30b2dc7b7c0d093d5df846daaaccc7df4f1a8cdbc1e445542132d9db06d87210bacf495d9a95d655f4f227869d38d312234a654a233f1')
  # vim:set ts=8 sts=2 sw=2 et:
