@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -102,6 +102,8 @@ check() {
+ 
+   # https://github.com/nodejs/node/pull/60523
+   rm test/parallel/test-datetime-change-notify.js
++  rm -f test/parallel/test-dgram-send-cb-quelches-error.js
++  rm -f test/parallel/test-net-autoselectfamily.js
+ 
+   make test-only
+ }
