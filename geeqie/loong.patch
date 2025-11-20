@@ -1,9 +1,0 @@
---- a/PKGBUILD
-+++ b/PKGBUILD
-@@ -102,3 +102,6 @@ package(){
-   # add missing html doc
-   cp -arv build/doc/html "${pkgdir}/usr/share/doc/${pkgname}/"
- }
-+
-+makedepends=(${makedepends[@]/pandoc-cli})
-+checkdepends=(${checkdepends[@]/shellcheck})
