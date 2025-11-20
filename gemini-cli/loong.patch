@@ -1,0 +1,10 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7a026ca..f055f12 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -30,3 +30,5 @@ package() {
+   rm "$pkgdir/usr/lib/node_modules/@google/gemini-cli/node_modules/shell-quote/print.py"
+   rm "$pkgdir/usr/lib/node_modules/@google/gemini-cli/node_modules/open/xdg-open"
+ }
++
++makedepends+=(python)
