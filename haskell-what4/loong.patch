@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,7 +21,7 @@ makedepends=('ghc' 'uusi' 'haskell-contravariant' 'haskell-hedgehog' 'haskell-lu
+              'haskell-quickcheck' 'haskell-tasty' 'haskell-tasty-checklist'
+              'haskell-tasty-expected-failure' 'haskell-tasty-hedgehog' 'haskell-tasty-hunit'
+              'haskell-tasty-quickcheck' 'haskell-tasty-sugar')
+-checkdepends=('cvc4' 'yices' 'z3')
++checkdepends=('yices' 'z3')
+ optdepends=('cvc4' 'yices' 'z3')
+ source=(https://hackage.haskell.org/packages/archive/${_hkgname}/${pkgver}/${_hkgname}-${pkgver}.tar.gz)
+ sha512sums=('c401ba7d2b29af2e0b85f3d29687308d47d687d231991ca00530df8ced4b2eaa1faa5ddf81a92527bd0400eee44e97eb2fe0452e35d3fcdfc18f5b5841c2dd59')
