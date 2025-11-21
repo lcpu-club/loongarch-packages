@@ -9,17 +9,19 @@
    gcc-fortran
    gtest
    ninja
-@@ -63,10 +63,11 @@ build() {
-   local cmake_flags=(
-     -B build -S ${pkgname^^}-${pkgver} -G Ninja
+@@ -64,12 +64,13 @@ build() {
+     -W no-dev
+     -DCMAKE_BUILD_TYPE=None
      -DCMAKE_INSTALL_PREFIX=/usr
 -    -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
-+#    -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
++    # -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
      # Compile source code for supported GPU archs in parallel
 -    -DCMAKE_CUDA_FLAGS="--threads $(nproc)"
++    # -DCMAKE_CUDA_FLAGS="--threads $(nproc)"
+     # CUB requires at least C++17 https://github.com/ornladios/ADIOS2/issues/4620
+     -DCMAKE_CXX_STANDARD=17
 -    -DADIOS2_USE_CUDA=ON
-+#    -DCMAKE_CUDA_FLAGS="--threads $(nproc)"
-+#    -DADIOS2_USE_CUDA=ON
++    #-DADIOS2_USE_CUDA=ON
 +    -DDILL_NATIVE_ONLY=OFF
      -DADIOS2_USE_EXTERNAL_DEPENDENCIES=ON
      #-DADIOS2_HAVE_HDF5_VOL needs hdf5-openmpi
