@@ -1,23 +1,23 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 9f7989e..c24a938 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -27,6 +27,8 @@ options=(!lto)
+@@ -24,6 +24,10 @@ sha256sums=('a700912d102b35c9336b7352d09d56b9d19e4957daf53779983c3d00ce744c9d')
+ _dirname="$(basename "$url")-rocm-$pkgver"/projects/rocr-runtime/
+ options=(!lto)
  
- prepare() {
-     patch -d "${_dirname}" -Np1 < "${srcdir}/hsa-rocr-6.4-fix-missing-include.patch"
++prepare() {
 +    patch -d "${_dirname}" -Np1 < "${srcdir}/rocr-unsupport.patch"
 +    export CC=clang CXX=clang++
- }
- 
++}
  build() {
-@@ -49,3 +51,9 @@ package() {
+   # Silence warnings on optional libraries with -DNDEBUG,
+   # https://github.com/RadeonOpenCompute/ROCR-Runtime/issues/89#issuecomment-613788944
+@@ -44,3 +48,9 @@ package() {
    DESTDIR="$pkgdir" cmake --install build
    install -Dm644 "$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
 +# Based on https://github.com/felixonmars/archriscv-packages/pull/4749
 +source+=("rocr-unsupport.patch")
-+sha256sums+=('8e22758297071f239929dd746d293d6b76744fc6e698644a2a9d4c8d63ad570d')
++sha256sums+=('a725b4bee0e9c6f5d7cd71fdf942b84703f5f9bb19333aad82ab97a3a3c9a7a4')
 +# gcc doesn't support `mm_malloc.h` on loong64
 +makedepends+=(clang)
