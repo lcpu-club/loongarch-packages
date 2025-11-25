@@ -5,19 +5,17 @@
  options=(!lto)
  
 +prepare() {
-+    patch -d "${_dirname}" -Np1 < "${srcdir}/rocr-unsupport.patch"
-+    export CC=clang CXX=clang++
++    patch -d "${_dirname}" -Np1 < "${srcdir}/0001-support-arm64-loongarch64-riscv64.patch"
 +}
++
  build() {
    # Silence warnings on optional libraries with -DNDEBUG,
    # https://github.com/RadeonOpenCompute/ROCR-Runtime/issues/89#issuecomment-613788944
-@@ -44,3 +48,9 @@ package() {
+@@ -44,3 +48,7 @@ package() {
    DESTDIR="$pkgdir" cmake --install build
    install -Dm644 "$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
-+# Based on https://github.com/felixonmars/archriscv-packages/pull/4749
-+source+=("rocr-unsupport.patch")
-+sha256sums+=('a725b4bee0e9c6f5d7cd71fdf942b84703f5f9bb19333aad82ab97a3a3c9a7a4')
-+# gcc doesn't support `mm_malloc.h` on loong64
-+makedepends+=(clang)
++# Patch borrowed from AOSC
++source+=("0001-support-arm64-loongarch64-riscv64.patch")
++sha256sums+=('a8a596818541f6c3ef1cbfec14998504efbab0705b4f8ae70baaeda625ef7957')
