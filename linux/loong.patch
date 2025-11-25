@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8b3c8e7..bf0de8e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -77,8 +77,19 @@ prepare() {
@@ -62,11 +64,12 @@
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -257,4 +281,33 @@ for _p in "${pkgname[@]}"; do
+@@ -257,4 +281,36 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
 +source+=("loong-addition.config"
++         "LoongArch-Add-CPU-HWMon-platform-driver.patch::https://github.com/chenhuacai/linux/commit/9367b1a79e9b7b2d09e330d1f4fc0cd195f82091.diff"
 +         "skip-c-flag.patch"
 +         "0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch"
 +         "0016-REVERT-Revert-Mark-xe-driver-as-BROKEN-if-kernel-pag.patch"
@@ -77,6 +80,7 @@
 +         "0021-FROMLIST-drm-xe-query-use-PAGE_SIZE-as-the-minimum-p.patch"
 +)
 +sha256sums+=('77eba2e995872642d763af67747228ef2e27b9d0a7958e8db0a12c4cdcc9acc1'
++             'cde52675c44a69282c5b0fd1c6de2affd8f8ddeb0436a2db8bb03f55a9a9ef42'
 +             'b354f3e70dc60dc6bbc9e1c1f7140996e043cef6ba82c3da67b552936c6dc881'
 +             'd146728a3b3c722f433e310cad21e93c53e64a7afe948b5b43b077e962750941'
 +             'c16845f0e9ac9d592e6a8ed2276b96749a58c7a8d95b23f0126a4ee92ee1685b'
@@ -86,6 +90,7 @@
 +             '30accab32bd0699304421ad347bd9866820a499b78d473d14e099600912717a8'
 +             'e629cc73e44a63c4a332c8f77f8e4baa01227a9ed4390bf5ef978b02be9b6b0d')
 +b2sums+=('652069e50060a3d84530f004f7064d98d6ac9bb02e690a3510d092d0df17598c9b3d564ae07fdb0dbbecc68d2d12d58c4c78c02cc08fbcbb8c01ba6e6256d922'
++         'f0f3a73bd953fe1c3ec3b06519ca2bdec70231de0470f217b166a9bba44168d27e826898913e38f8045f05dc5b7d84eed6074befab9563814663f1fd9b882873'
 +         '1312ff4524418853eea3d8c67f7ff44ef7d13d895189aadd461ab9f96b8309202ca01bab25947c295f5a12207dade11308119b05231254bf6dc14448f302307a'
 +         '4a0b268f1a28d4bfa37d9b644477c75a5215083414fe5cc5d637e2edc4895aace9e42b3b33ac0b3e2a15a18340bec651511fa3c347c1c3e347ed3418c033582c'
 +         'f4b5787523241762389a2ebbe391cc7f4fdef0408c254461f4a54d6f6577f6f7bb525552cd9ccc639da39f06b03f5061578c0c6b009acf9101f6ff17d63111b0'
