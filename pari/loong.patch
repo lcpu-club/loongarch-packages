@@ -1,20 +1,20 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -45,7 +45,7 @@ build() {
+@@ -42,7 +42,7 @@ build() {
      --mt=pthread \
      --with-gmp
    make all
--  make -C Olinux-x86_64 gp-sta
-+  make -C Olinux-loongarch64 gp-sta
+-  make -C Olinux-${CARCH} gp-sta
++  make -C Olinux-$(uname -m) gp-sta
  }
  
  check() {
-@@ -56,7 +56,7 @@ check() {
+@@ -53,7 +53,7 @@ check() {
  package() {
    cd $pkgname-$pkgver
    make DESTDIR="$pkgdir" install
--  make DESTDIR="$pkgdir" -C Olinux-x86_64 install-bin-sta
-+  make DESTDIR="$pkgdir" -C Olinux-loongarch64 install-bin-sta
+-  make DESTDIR="$pkgdir" -C Olinux-${CARCH} install-bin-sta
++  make DESTDIR="$pkgdir" -C Olinux-$(uname -m) install-bin-sta
    ln -sf gp.1.gz "$pkgdir"/usr/share/man/man1/pari.1
    chrpath -d "$pkgdir"/usr/bin/gp-*
  }
