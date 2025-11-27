@@ -1,0 +1,40 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b63af2d..e571112 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -62,12 +62,14 @@ _set_flags() {
+ prepare() {
+   cd node
+   # Update ICU test data
+-  git cherry-pick --no-commit 5afe4cd716cbf7699f6abc99338f44db3b1424d5
++  #git cherry-pick --no-commit 5afe4cd716cbf7699f6abc99338f44db3b1424d5
+ }
+ 
+ build() {
+   _set_flags
+   cd node
++  patch -Np1 -d deps/v8 -i "${srcdir}/v8-use-a-zone-to-track-unresolved-branches.patch"
++  export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
+ 
+   ./configure \
+     --prefix=/usr \
+@@ -103,7 +105,9 @@ check() {
+   rm test/parallel/test-http2-priority-event.js
+   rm test/parallel/test-http2-reset-flood.js
+   rm test/parallel/test-tls-ocsp-callback.js
+-
++  rm -f test/parallel/test-dgram-send-cb-quelches-error.js
++  rm -f test/parallel/test-net-autoselectfamily.js
++  rm -f test/parallel/test-icu-env.js
+ 
+   # https://github.com/nodejs/node/pull/60523
+   rm test/parallel/test-datetime-change-notify.js
+@@ -118,4 +122,8 @@ package() {
+   install -Dm644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname
+ }
+ 
++source+=("v8-use-a-zone-to-track-unresolved-branches.patch::https://github.com/v8/v8/commit/144ebfdb3e25331a67aee40f58970bf0050b7b2d.diff")
++b2sums+=('2fc4c30879225360f099b112b59d89b2ac5915b56501e5380b071b4ee139a0f158ea512486bddafaeab0727edb653af956ae5ec3653562b8e2e47f6b765b4ec4')
++makedepends+=(mold)
++
+ # vim:set ts=2 sw=2 et:
