@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 6a57ec6..9adaa83 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -27,3 +27,13 @@ package() {
+@@ -46,3 +46,14 @@ package() {
  
    make DESTDIR="${pkgdir}" install
  }
@@ -15,4 +13,5 @@ index 6a57ec6..9adaa83 100644
 +}
 +
 +source+=("add-loong64-support.patch")
-+sha256sums+=('031e50d41e1e6d80a5c7735bc00bc5c83958756d585931f5020a50aa5889ff85')
++sha512sums+=('fdeed54b83cb97d12fc5e00300f64c87485c5aecde1e2e14ffdfe53bbf934d8ab2ca9537c4678a269cd5c949803d0e0ee163bb74c89838f8e9e376361eaa76f9')
++b2sums+=('7de6918ba07147ab47ba9b2dce90868612099000311a40c9b079a6dd5fd9a4303e77f0225bf8d218aaa01838fad4745445f0c50524d0b779adb0b0a2620534eb')
