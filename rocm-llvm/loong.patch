@@ -1,26 +1,36 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index ff5b5c5..843e537 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -37,6 +37,12 @@ prepare() {
-   # Add fix for missing function overload (openat)
-   # https://github.com/llvm/llvm-project/issues/100754
-   git cherry-pick -n 155b7a12820ec45095988b6aa6e057afaf2bc892
+@@ -44,6 +44,11 @@ prepare() {
+ 
+   # Fix build with glibc 2.42: https://github.com/llvm/llvm-project/issues/137321
+   patch -Np1 < ../rocm-llvm-6.4-fix-glibc-2.42-termio-removal.patch
 +
-+  # Fix llvm-mc abi
-+  git cherry-pick -n 3acb0e9e600cbe3668b7db3956238a592ebadc0a
-+
-+  # Fix libraries_sha.inc:1:42: error: narrowing conversion of ‘-30’ from ‘int’ to ‘char’
-+  git cherry-pick -n 74c3df6cb5540c937ad8b58f95275901efae8669
++  patch -Np1 < ../0001-rocm-llvm-define-nansq.patch
++  patch -Np1 < ../0002-llvm-loongarch64-change-default-code-model.patch
++  patch -Np1 < ../0003-rocm-llvm-loongarch64-feature-support.patch
++  patch -Np1 < ../0004-flang-ignore-lto-arg.patch
  }
  
  build() {
-@@ -65,7 +71,7 @@ build() {
+@@ -73,7 +78,7 @@ build() {
          -D LIBCXXABI_ENABLE_SHARED=OFF
          -D LIBCXXABI_ENABLE_STATIC=ON
          -D LIBCXXABI_INSTALL_STATIC_LIBRARY=OFF
 -        -D LLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;X86'
 +        -D LLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;LoongArch'
          -D CLANG_DEFAULT_LINKER=lld
+         -D ENABLE_LINKER_BUILD_ID=ON
          -D CLANG_DEFAULT_RTLIB=compiler-rt
-         -D CLANG_DEFAULT_UNWINDLIB=libgcc
+@@ -179,3 +184,12 @@ package_comgr() {
+     cd "$pkgbase/amd/comgr"
+     install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++source+=('0001-rocm-llvm-define-nansq.patch'
++         '0002-llvm-loongarch64-change-default-code-model.patch'
++         '0003-rocm-llvm-loongarch64-feature-support.patch'
++         '0004-flang-ignore-lto-arg.patch')
++sha256sums+=('96f95ef214574db1f060c11a7949efcff8bd7221724d7b29e3637cf94ced2bec'
++             '33f23266f846064f863ff8f3688e41e894bb3010c6601963caa9dfe445a07d9c'
++             '51dc94776a1c93b0f571bc27f43828b2867e18386f7e1faee7950cb4cfda8308'
++             'f5d909684bfb7a4e83ef2b01871fb124cd32c3d41f44e13dedb100ecf7751dc7')
