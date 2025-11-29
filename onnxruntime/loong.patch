@@ -1,8 +1,8 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -86,8 +86,21 @@ prepare() {
-       -e '368aadd_library(nsync::nsync_cpp ALIAS nsync_cpp)' \
-       -i cmake/external/onnxruntime_external_deps.cmake
+@@ -80,8 +80,20 @@ prepare() {
+   sed 's|${DEP_SHA1_cxxopts}|&\n\ \ \ \ \FIND_PACKAGE_ARGS NAMES cxxopts|g' \
+     -i cmake/external/onnxruntime_external_deps.cmake
  
 +  # Find system nsync for loong64. The above sed command doesn't work for loong64.
 +  cat >> cmake/external/onnxruntime_external_deps.cmake << EOF
@@ -18,11 +18,10 @@
    patch -Np1 -i "${srcdir}/${pkgbase}-install-orttraining-files.patch"
    patch -Np1 -i "${srcdir}/${pkgbase}-system-flatbuffers.patch"
 +  patch -Np1 -i "${srcdir}/qgemm_kernel_lsx-add-S8U8-S8S8.patch"
-+  patch -Np1 -i "${srcdir}/fix-to-build-with-gcc-15.patch"
  
    # Fix build with abseil 20250814; see https://github.com/microsoft/onnxruntime/issues/25815
    sed -i '/^absl::low_level_hash$/d' cmake/external/abseil-cpp.cmake
-@@ -117,8 +130,8 @@ prepare() {
+@@ -104,8 +116,8 @@ prepare() {
  
    cd "${srcdir}"
    cp -r "${pkgbase}" "${pkgbase}-cpu"
@@ -33,7 +32,7 @@
    cp -r "${pkgbase}" "${pkgbase}-rocm"
    cp -r "${pkgbase}" "${pkgbase}-opt-rocm"
  }
-@@ -195,6 +208,7 @@ build() {
+@@ -182,6 +194,7 @@ build() {
    cp -r build/onnxruntime/* onnxruntime
    python -m build --wheel --no-isolation
  
@@ -41,7 +40,7 @@
    ##### onnxruntime-cuda
  
    echo "Build onnxruntime with CUDA without optimization"
-@@ -225,7 +239,7 @@ build() {
+@@ -212,7 +225,7 @@ build() {
    python setup.py --help # We have to call it like this once to generate the file we need.
    cp -r build/onnxruntime/* onnxruntime
    python -m build --wheel --no-isolation
@@ -50,7 +49,7 @@
  
    ##### onnxruntime-rocm
  
-@@ -243,11 +257,11 @@ build() {
+@@ -230,11 +243,11 @@ build() {
  
    ##### onnxruntime-opt-rocm
  
@@ -65,16 +64,16 @@
      >> cmake/adjust_global_compile_flags.cmake
    cmake "${_cmake_rocm_args[@]}"
    cmake --build build
-@@ -312,7 +326,7 @@ package_onnxruntime-rocm() {
+@@ -299,7 +312,7 @@ package_onnxruntime-rocm() {
  }
  
  package_onnxruntime-opt-rocm() {
 -  pkgdesc="$_pkgdesc (with ROCm and AVX2 CPU optimizations)"
 +  pkgdesc="$_pkgdesc (with ROCm and LASX CPU optimizations)"
-   depends+=('rocm-hip-sdk' 'roctracer' 'rccl')
+   depends+=('rocm-hip-sdk' 'roctracer' 'rccl' 'migraphx')
    provides=("${pkgbase}=${pkgver}")
    conflicts=("${pkgbase}")
-@@ -374,7 +388,7 @@ package_python-onnxruntime-rocm() {
+@@ -361,7 +374,7 @@ package_python-onnxruntime-rocm() {
  }
  
  package_python-onnxruntime-opt-rocm() {
@@ -83,15 +82,12 @@
    depends+=("${pkgbase}-opt-rocm" "${_pydepends[@]}")
    provides=("python-${pkgbase}=${pkgver}")
    conflicts=("python-${pkgbase}")
-@@ -384,3 +398,11 @@ package_python-onnxruntime-opt-rocm() {
+@@ -371,3 +384,8 @@ package_python-onnxruntime-opt-rocm() {
    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
    install -Dm644 ThirdPartyNotices.txt "${pkgdir}/usr/share/licenses/${pkgname}/ThirdPartyNotices.txt"
  }
 +
-+depends=($(printf "%s\n" "${depends[@]}" | grep -Ev '^(intel-oneapi-mkl)$'))
-+makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|cudnn|nccl|gcc14)$'))
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|cudnn|nccl)$'))
 +pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '(cuda)$'))
-+source+=("qgemm_kernel_lsx-add-S8U8-S8S8.patch::https://github.com/microsoft/onnxruntime/commit/641449fa23e89d6577582c903fe31d44f4d82a15.diff"
-+         "fix-to-build-with-gcc-15.patch::https://github.com/intel/onnxruntime/commit/911094fe0f1712bea686134431f0b5e55430265d.diff")
-+b2sums+=('ff3bda75bd08218a409fd1dbc0197e0a36fb6ecf8d75e673f8e86ea785bc7bed310a27049958049d4378e78fc91c2009b3aadc1d1e0989030a5cab989803d448'
-+         'ca347e568781e30de0693a79af457bce11f99cac9aa139ed6a35a96f18c7e090b876d6d14fa20407f3916e497444e747d47ae0202236e959c49cb425c738ff2f')
++source+=("qgemm_kernel_lsx-add-S8U8-S8S8.patch::https://github.com/microsoft/onnxruntime/commit/641449fa23e89d6577582c903fe31d44f4d82a15.diff")
++b2sums+=('ff3bda75bd08218a409fd1dbc0197e0a36fb6ecf8d75e673f8e86ea785bc7bed310a27049958049d4378e78fc91c2009b3aadc1d1e0989030a5cab989803d448')
