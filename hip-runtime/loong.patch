@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index bc30e54..acf75ca 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -10,7 +10,6 @@ url='https://rocm.docs.amd.com/projects/HIP/en/latest/'
+@@ -12,7 +12,6 @@ url='https://rocm.docs.amd.com/projects/HIP/en/latest/'
  license=('MIT')
  _amd_depends=('rocm-core' 'bash' 'perl' 'glibc' 'gcc-libs' 'numactl'
           'mesa' 'comgr' 'rocminfo' 'rocm-llvm' 'libelf' 'rocprofiler-register')
@@ -10,16 +8,16 @@ index bc30e54..acf75ca 100644
  makedepends=('git' 'cmake' 'python' 'python-cppheaderparser'
               "${_amd_depends[@]}" "${_nvidia_depends[@]}")
  _tag="tag=rocm-$pkgver"
-@@ -32,6 +31,8 @@ sha256sums=('2044f7736ea777e258c2956c89a65bea62102eb1db94edd9e0414d44a93e3c93'
-             '09f332aa964079647a9407406305f6159937c72c0bc2b675f841ba0ab1b63c43')
+@@ -27,6 +26,8 @@ _projectBaseDir="rocm-systems-rocm-$pkgver/projects"
+ options=(!lto)
  
  build() {
-+  patch -Np1 -d "$srcdir/$pkgbase-clr" -i "$srcdir/clr-loong64-support.patch"
-+  sed -i 's!x86_64-unknown-linux-gnu!loongarch64-unknown-linux-gnu!g' "$srcdir/$pkgbase-clr"/hipamd/src/hip_embed_pch.sh
++  patch -Np1 -d "$srcdir/$_projectBaseDir/clr" -i "$srcdir/0002-support-arm64-loongarch64-riscv64.patch"
++  patch -Np1 -d "$srcdir/$_projectBaseDir/clr" -i "$srcdir/0004-replace-llvm-mc.patch"
    local hipcc_common_args=(
      -Wno-dev
      -S "$srcdir/$pkgbase-hipcc/amd/hipcc"
-@@ -63,6 +64,8 @@ build() {
+@@ -58,6 +59,8 @@ build() {
    cmake "${hip_amd_args[@]}"
    cmake --build build-amd
  
@@ -28,7 +26,7 @@ index bc30e54..acf75ca 100644
    local hipcc_nvidia_args=(
      "${hipcc_common_args[@]}"
      -B build-nvidia-hipcc
-@@ -87,6 +90,7 @@ build() {
+@@ -82,6 +85,7 @@ build() {
    )
    cmake "${hip_nvidia_args[@]}"
    cmake --build build-nvidia
@@ -36,11 +34,13 @@ index bc30e54..acf75ca 100644
  }
  
  package_hip-runtime-amd() {
-@@ -106,3 +110,7 @@ package_hip-runtime-nvidia() {
+@@ -101,3 +105,9 @@ package_hip-runtime-nvidia() {
    DESTDIR="$pkgdir" cmake --install build-nvidia
-   install -Dm644 "$srcdir/$pkgbase/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+   install -Dm644 "$srcdir/$_projectBaseDir/hip/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
 +pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(hip-runtime-nvidia)$'))
-+source+=("clr-loong64-support.patch::https://raw.githubusercontent.com/loongarch-moe/rocm-loongarch/f3e08d630fb7151f22e54b8c8cf12bb99413d876/stage2/5.rocm-clr/clr.patch")
-+sha256sums+=('464f01d509d90574959d5e6e06f5da8636aa735402266cc0eb0ef0b3c41e77d3')
++source+=("0002-support-arm64-loongarch64-riscv64.patch"
++         "0004-replace-llvm-mc.patch")
++sha256sums+=('7bfa3814a41f3d6195664fe844e06cc208c9ccc7dea223e973eac88667aa1968'
++             '1779ab6d3128135fa3eb1fe8f24836ec019ccaf5f17bb91bf84824a671d83c30')
