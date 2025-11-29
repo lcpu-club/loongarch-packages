@@ -1,0 +1,73 @@
+diff --git a/hipamd/src/hip_graph_internal.cpp b/hipamd/src/hip_graph_internal.cpp
+index 20f60a4c3..f007460cf 100644
+--- a/hipamd/src/hip_graph_internal.cpp
++++ b/hipamd/src/hip_graph_internal.cpp
+@@ -21,6 +21,17 @@
+ #include "hip_graph_internal.hpp"
+ #include <queue>
+
++#if defined(__aarch64__)
++#define _mm_sfence(ptr) asm volatile("DMB ishst":::"memory")
++#define _mm_mfence(ptr) asm volatile("DMB ish":::"memory")
++#elif defined(__loongarch_lp64)
++#define _mm_sfence(ptr) asm volatile ("dbar 0":::"memory")
++#define _mm_mfence(ptr) asm volatile ("dbar 0":::"memory")
++#elif defined(__riscv) && __riscv_xlen == 64
++#define _mm_sfence(ptr) asm volatile("fence w,w":::"memory")
++#define _mm_mfence(ptr) asm volatile("fence rw,rw":::"memory")
++#endif
++
+ #define CASE_STRING(X, C)                                                                          \
+   case X:                                                                                          \
+     case_string = #C;                                                                              \
+diff --git a/rocclr/device/rocm/rocvirtual.cpp b/rocclr/device/rocm/rocvirtual.cpp
+index f4e5799af..46fa3fc53 100644
+--- a/rocclr/device/rocm/rocvirtual.cpp
++++ b/rocclr/device/rocm/rocvirtual.cpp
+@@ -51,6 +51,15 @@
+ #else
+ #include <immintrin.h>
+ #endif
++#elif defined(__aarch64__)
++#define _mm_sfence(ptr) asm volatile("DMB ishst":::"memory")
++#define _mm_mfence(ptr) asm volatile("DMB ish":::"memory")
++#elif defined(__loongarch_lp64)
++#define _mm_sfence(ptr) asm volatile ("dbar 0":::"memory")
++#define _mm_mfence(ptr) asm volatile ("dbar 0":::"memory")
++#elif defined(__riscv) && __riscv_xlen == 64
++#define _mm_sfence(ptr) asm volatile("fence w,w":::"memory")
++#define _mm_mfence(ptr) asm volatile("fence rw,rw":::"memory")
+ #endif
+
+ /**
+diff --git a/rocclr/include/top.hpp b/rocclr/include/top.hpp
+index d6aa00c8d..99b5ae96a 100644
+--- a/rocclr/include/top.hpp
++++ b/rocclr/include/top.hpp
+@@ -25,6 +25,8 @@
+ #define ATI_ARCH_ARM
+ #elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_M_IX86) || defined(__x86__) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
+ #define ATI_ARCH_X86
++#elif defined(__riscv)
++#define ATI_ARCH_RISCV
+ #endif
+ 
+ #if defined(ATI_ARCH_ARM)
+diff --git a/rocclr/os/os.hpp b/rocclr/os/os.hpp
+index 8509cc362..be3dd1f54 100644
+--- a/rocclr/os/os.hpp
++++ b/rocclr/os/os.hpp
+@@ -358,6 +358,13 @@ ALWAYSINLINE address Os::currentStackPtr() {
+ #elif defined(ATI_ARCH_ARM)
+       "mov %0,sp"
+       : "=r"(value)
++#elif defined(__loongarch_lp64)
++      "addi.d %0,$sp,0"
++      : "=r"(value)
++
++#elif defined(ATI_ARCH_RISCV)
++      "mv %0,sp"
++      : "=r"(value)
+ #else
+       ""
+ #endif

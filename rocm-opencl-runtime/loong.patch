@@ -1,16 +1,16 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index ceb19e5..2a68354 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -40,3 +40,11 @@ package() {
+@@ -49,3 +49,13 @@ package() {
      echo '/opt/rocm/lib/libamdocl64.so' > 'amdocl64.icd'
      install -Dm644 'amdocl64.icd' "$pkgdir/etc/OpenCL/vendors/amdocl64.icd"
  }
 +
 +prepare() {
-+  patch -Np1 -d "$_dirname" -i "$srcdir/clr-loong64-support.patch"
-+  sed -i 's!x86_64-unknown-linux-gnu!loongarch64-unknown-linux-gnu!g' "$srcdir/$_dirname"/hipamd/src/hip_embed_pch.sh
++  patch -Np1 -d "$_dir_name" -i "$srcdir/0002-support-arm64-loongarch64-riscv64.patch"
++  patch -Np1 -d "$_dir_name" -i "$srcdir/0004-replace-llvm-mc.patch"
 +}
 +
-+source+=("clr-loong64-support.patch::https://raw.githubusercontent.com/loongarch-moe/rocm-loongarch/refs/tags/6.3.1a3/stage2/5.rocm-clr/clr.patch")
-+sha256sums+=('8626dda69a2579f38b4e43895e73d02cd31d7bf33b731b6ad06218eb7584e811')
++source+=("0002-support-arm64-loongarch64-riscv64.patch"
++         "0004-replace-llvm-mc.patch")
++sha256sums+=('7bfa3814a41f3d6195664fe844e06cc208c9ccc7dea223e973eac88667aa1968'
++             '1779ab6d3128135fa3eb1fe8f24836ec019ccaf5f17bb91bf84824a671d83c30')

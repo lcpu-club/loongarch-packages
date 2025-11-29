@@ -1,0 +1,63 @@
+diff --git a/hipamd/src/hip_embed_pch.sh b/hipamd/src/hip_embed_pch.sh
+index 6c92d4388..2ebfc0b8d 100755
+--- a/hipamd/src/hip_embed_pch.sh
++++ b/hipamd/src/hip_embed_pch.sh
+@@ -43,6 +43,7 @@ HIP_AMD_INC_DIR="$3"
+ LLVM_DIR="$4"
+ # By default, generate pch
+ TARGET="generatepch"
++HOST_TRIPLE="$($LLVM_DIR/bin/clang --print-target-triple)"
+
+ while [ "$5" != "" ];
+ do
+@@ -148,15 +149,15 @@ EOF
+
+   cat $tmp/hip_macros.h >> $tmp/pch_wave32.cui &&
+
+-  $LLVM_DIR/bin/clang -cc1 -O3 -emit-pch -triple amdgcn-amd-amdhsa -aux-triple x86_64-unknown-linux-gnu -fcuda-is-device -std=c++17 -fgnuc-version=4.2.1 -o $tmp/hip_wave32.pch -x hip-cpp-output - <$tmp/pch_wave32.cui &&
++  $LLVM_DIR/bin/clang -cc1 -O3 -emit-pch -triple amdgcn-amd-amdhsa -aux-triple $HOST_TRIPLE -fcuda-is-device -std=c++17 -fgnuc-version=4.2.1 -o $tmp/hip_wave32.pch -x hip-cpp-output - <$tmp/pch_wave32.cui &&
+
+   $LLVM_DIR/bin/clang -O3 --hip-path=$HIP_INC_DIR/.. -std=c++17 -nogpulib -isystem $HIP_INC_DIR -isystem $HIP_BUILD_INC_DIR -isystem $HIP_AMD_INC_DIR --cuda-device-only -x hip $tmp/hip_pch.h -E >$tmp/pch_wave64.cui &&
+
+   cat $tmp/hip_macros.h >> $tmp/pch_wave64.cui &&
+
+-  $LLVM_DIR/bin/clang -cc1 -O3 -emit-pch -triple amdgcn-amd-amdhsa -aux-triple x86_64-unknown-linux-gnu -fcuda-is-device -std=c++17 -fgnuc-version=4.2.1 -o $tmp/hip_wave64.pch -x hip-cpp-output - <$tmp/pch_wave64.cui &&
++  $LLVM_DIR/bin/clang -cc1 -O3 -emit-pch -triple amdgcn-amd-amdhsa -aux-triple $HOST_TRIPLE -fcuda-is-device -std=c++17 -fgnuc-version=4.2.1 -o $tmp/hip_wave64.pch -x hip-cpp-output - <$tmp/pch_wave64.cui &&
+
+-  $LLVM_DIR/bin/llvm-mc -o hip_pch.o $tmp/hip_pch.mcin --filetype=obj &&
++  $LLVM_DIR/bin/clang -target $HOST_TRIPLE -o hip_pch.o -x assembler $tmp/hip_pch.mcin -c &&
+
+   rm -rf $tmp
+ }
+@@ -203,7 +204,7 @@ EOF
+   set -x
+   $LLVM_DIR/bin/clang -O3 --hip-path=$HIP_INC_DIR/.. -std=c++14 -nogpulib --hip-version=4.4 -isystem $HIP_INC_DIR -isystem $HIP_BUILD_INC_DIR -isystem $HIP_AMD_INC_DIR --cuda-device-only -D__HIPCC_RTC__ -x hip $tmp/hipRTC_header.h -E -P -o $tmp/hiprtc &&
+   cat $macroFile >> $tmp/hiprtc &&
+-  $LLVM_DIR/bin/llvm-mc -o $tmp/hiprtc_header.o $tmp/hipRTC_header.mcin --filetype=obj &&
++  $LLVM_DIR/bin/clang -target $HOST_TRIPLE -o $tmp/hiprtc_header.o -x assembler $tmp/hipRTC_header.mcin -c &&
+   $LLVM_DIR/bin/clang $tmp/hiprtc_header.o -o $rtc_shared_lib_out -shared &&
+   $LLVM_DIR/bin/clang -O3 --hip-path=$HIP_INC_DIR/.. -std=c++14 -nogpulib -nogpuinc -emit-llvm -c -o $tmp/tmp.bc --cuda-device-only -D__HIPCC_RTC__ --offload-arch=gfx906 -x hip-cpp-output $tmp/hiprtc &&
+   rm -rf $tmp
+diff --git a/hipamd/src/hiprtc/CMakeLists.txt b/hipamd/src/hiprtc/CMakeLists.txt
+index 675d587f6..6c2bbe95b 100644
+--- a/hipamd/src/hiprtc/CMakeLists.txt
++++ b/hipamd/src/hiprtc/CMakeLists.txt
+@@ -145,7 +145,6 @@ if(DEFINED Clang_ROOT)
+ endif()
+ # Requires clang and llvm-mc to create this library.
+ find_program(clang clang HINTS ${Clang_BIN} ${ENV_Clang_BIN} ${ROCM_PATH}/llvm/bin ${ROCM_PATH})
+-find_program(llvm-mc llvm-mc HINTS ${LLVM_BIN} ${ENV_LLVM_BIN} ${ROCM_PATH}/llvm/bin ${ROCM_PATH})
+ set(HIPRTC_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/hip_rtc_gen")
+ set(HIPRTC_GEN_HEADER "${HIPRTC_GEN_DIR}/hipRTC_header.h")
+ set(HIPRTC_GEN_MCIN "${HIPRTC_GEN_DIR}/hipRTC_header.mcin")
+@@ -195,8 +194,8 @@ add_custom_command(
+   DEPENDS ${clang} ${HIPRTC_GEN_HEADER})
+ add_custom_command(
+   OUTPUT ${HIPRTC_GEN_OBJ}
+-  COMMAND ${llvm-mc} -o ${HIPRTC_GEN_OBJ} ${HIPRTC_GEN_MCIN} --filetype=obj
+-  DEPENDS ${llvm-mc} ${HIPRTC_GEN_PREPROCESSED} ${HIPRTC_GEN_MCIN})
++  COMMAND ${clang} -target ${LLVM_TARGET_TRIPLE} -o ${HIPRTC_GEN_OBJ} -x assembler ${HIPRTC_GEN_MCIN} -c
++  DEPENDS ${clang} ${HIPRTC_GEN_PREPROCESSED} ${HIPRTC_GEN_MCIN})
+
+ # Create hiprtc-builtins library.
+ add_library(hiprtc-builtins ${HIPRTC_GEN_OBJ})
