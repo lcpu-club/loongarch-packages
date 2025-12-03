@@ -1,6 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 49a49f6..e516dba 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -157,8 +157,6 @@ build() {
+@@ -133,6 +133,11 @@ prepare() {
+ 
+   # Fix build with older oneapi (we really should upgrade soon!)
+   git revert -n 49414a72f607ccd15f8b71b81edc9aff040d581e
++  # Adding mia ssing include of the "state_util.h" header
++  git cherry-pick -n d0938c1cfba8868e58af27f8a4e16b3594d41765
++  # Headers removed in ROCm 7.0
++  sed -i -E '/hiprt.*impl.*(Geometry|Scene)\.h/d' intern/cycles/kernel/CMakeLists.txt
++  sed -i -E '/hiprt.*impl.*(Geometry|Scene)\.h/d' tools/check_source/check_cmake_consistency_config.py
+ }
+ 
+ _get_pyver() {
+@@ -154,8 +159,6 @@ build() {
      -D CMAKE_BUILD_TYPE=Release
      -D CMAKE_INSTALL_PREFIX=/usr
      -D WITH_LINKER_MOLD=ON
@@ -9,7 +23,7 @@
      -D HIP_ROOT_DIR=/opt/rocm
      -D HIPRT_INCLUDE_DIR=/opt/rocm/include
      -D HIPRT_COMPILER_PARALLEL_JOBS=8
-@@ -172,6 +170,11 @@ build() {
+@@ -169,6 +172,11 @@ build() {
      -D WITH_CYCLES_OSL=ON
      -D WITH_INSTALL_PORTABLE=OFF
      -D WITH_PYTHON_INSTALL=OFF
@@ -21,7 +35,7 @@
      -G Ninja
      -S "$pkgname"
      -W no-dev
-@@ -193,7 +196,11 @@ package() {
+@@ -190,7 +198,11 @@ package() {
  
    # Move OneAPI AOT lib to proper place
    mkdir "${pkgdir}"/usr/lib/
