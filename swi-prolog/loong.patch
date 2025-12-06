@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -26,6 +26,9 @@ source=("$pkgname-$pkgver.tar.gz::$url/download/stable/src/swipl-$pkgver.tar.gz"
+ b2sums=('b8c05f517d5f5963ef7fd2f1a1103f03226a803b3f641db5e224032b0e03e53ef8aeaf8defd1a243a2e3ec0a2121658d224cf0be10f44f3c2783f845ad2ce3a0')
+ 
+ build() {
++  # -flto=auto breaks check_type_size when setting CMAKE_TRY_COMPILE_TARGET_TYPE
++  # to STATIC_LIBRARY as swi-prolog does.
++  CFLAGS="$CFLAGS -ffat-lto-objects"
+   cmake \
+     -B build \
+     -D BDB_INCLUDE_DIR=/usr/include/db5.3 \
