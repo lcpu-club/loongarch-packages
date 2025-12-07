@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index b3db102..5366a0e 100644
+index b41b48d..0fc6915 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -27,6 +27,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
@@ -10,7 +10,7 @@ index b3db102..5366a0e 100644
  source=(https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$pkgver-lite.tar.xz
          https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver/chromium-launcher-$_launcher_ver.tar.gz
          chromium-138-nodejs-version-check.patch
-@@ -47,6 +48,8 @@ sha256sums=('720a1196410080056cd97a1f5ec34d68ba216a281d9b5157b7ea81ea018ec661'
+@@ -47,6 +48,8 @@ sha256sums=('2e2f36e3cd1ebc4ad57fd310774a5e5e9db77883d5f9374fedeaabd3c103b819'
  if (( _manual_clone )); then
    source[0]=fetch-chromium-release
    makedepends+=('python-httplib2' 'python-pyparsing' 'python-six' 'npm' 'rsync')
@@ -19,7 +19,7 @@ index b3db102..5366a0e 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -124,6 +127,10 @@ prepare() {
+@@ -124,13 +127,17 @@ prepare() {
    # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
    patch -Np1 -i ../compiler-rt-adjust-paths.patch
  
@@ -30,9 +30,17 @@ index b3db102..5366a0e 100644
    # Increase _FORTIFY_SOURCE level to match Arch's default flags
    patch -Np1 -i ../increase-fortify-level.patch
  
-@@ -263,6 +270,9 @@ build() {
-   # https://crbug.com/957519#c122
-   CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
+   # Fixes for building with libstdc++ instead of libc++
+ 
+   # Link to system tools required by the build
+-  mkdir third_party/node/linux/node-linux-x64/bin
++  mkdir -p third_party/node/linux/node-linux-x64/bin
+   ln -s /usr/bin/node third_party/node/linux/node-linux-x64/bin/
+   ln -s /usr/bin/java third_party/jdk/current/bin/
+ 
+@@ -270,6 +277,9 @@ build() {
+     CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
+   fi
  
 +  # Disable xnnpack on loong64
 +  _flags+=('build_tflite_with_xnnpack=false')
@@ -40,8 +48,8 @@ index b3db102..5366a0e 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -338,4 +348,9 @@ package() {
-   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
+@@ -345,4 +355,9 @@ package() {
+   install -Dvm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
