@@ -1,8 +1,18 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4575373..8e6bf01 100644
+index a1c634f..5d9455f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -148,7 +148,7 @@ ac_add_options --with-system-nss
+@@ -121,6 +121,9 @@ prepare() {
+ 
+   echo -n "$_google_api_key" >google-api-key
+ 
++  # Fix brotli build for loong64
++  patch -Np2 -d "modules/brotli" -i "${srcdir}/disable-BROTLI_MODEL-macro-for-some-targets.patch"
++
+   cat >../mozconfig <<END
+ ac_add_options --enable-application=browser
+ mk_add_options MOZ_OBJDIR=${PWD@Q}/obj
+@@ -155,7 +158,7 @@ ac_add_options --with-system-nss
  # Features
  ac_add_options --enable-alsa
  ac_add_options --enable-jack
@@ -11,3 +21,12 @@ index 4575373..8e6bf01 100644
  ac_add_options --disable-updater
  ac_add_options --disable-tests
  END
+@@ -288,4 +291,8 @@ Version=2
+ END
+ }
+ 
++source+=("disable-BROTLI_MODEL-macro-for-some-targets.patch::https://github.com/google/brotli/commit/e230f474b87134e8c6c85b630084c612057f253e.diff")
++sha256sums+=('097520302944048e0a769a3d437a3a3e46c20ba9df087a78a03999ecb5f8e03c')
++b2sums+=('07ef057eecccd096ab3570191e454c530a48a31e4cd2a0e8b13c4c022782a44f6fad3cdeccc6a387693fcd5ebbdb40dde5fc5f04c64b30d3c68aa62a668b6ec5')
++
+ # vim:set sw=2 sts=-1 et:
