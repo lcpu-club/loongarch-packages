@@ -1,4 +1,6 @@
-@@ -35,18 +35,17 @@
+--- makepkg.loong64.conf	2025-12-14 16:03:32.514831644 +0800
++++ k.conf	2025-12-14 16:03:16.467451576 +0800
+@@ -35,20 +35,19 @@
  # ARCHITECTURE, COMPILE FLAGS
  #########################################################################
  #
@@ -6,6 +8,8 @@
 -CHOST="x86_64-pc-linux-gnu"
 +CARCH="loong64"
 +CHOST="loongarch64-unknown-linux-gnu"
+ 
+ #NPROC=2
  
  #-- Compiler and Linker Flags
  #CPPFLAGS=""

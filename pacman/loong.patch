@@ -7,9 +7,9 @@
 -  pacman-mirrorlist
 +  pacman-mirrorlist-loong64
    systemd
+   libmakepkg-dropins
  )
- makedepends=(
-@@ -65,6 +65,15 @@ pkgver() {
+@@ -71,6 +71,15 @@ pkgver() {
  }
  
  prepare() {
@@ -25,14 +25,14 @@
    cd "$pkgname"
  
    # apply patch level commits on top of annotated tag
-@@ -139,4 +148,11 @@ package() {
+@@ -143,4 +152,11 @@ package() {
    done
  }
  
 +source+=(makepkg.loong64.diff
 +         pacman-use-loong64.patch
 +         pacman.loong64.diff)
-+sha256sums+=('7b9efdecfe9b770cedf9f8a7039aad31842454167caddb63315ec58949edaf24'
++sha256sums+=('008ca7e3b57a30b079318e9425d2440d5674aeddf7a9de2d18595411cd5e4ee2'
 +             '5ab2a0ae2747184e7a3b0d4f6f45f0a66b6ad85e853b78fb77102e4b32667cdc'
 +             'fadd0c5453aadfcb89cebb0bfc64674f68c7d988e512d8a4fca14718afa2cc62')
 +
