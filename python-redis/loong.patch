@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -166,6 +166,21 @@ check() {
-     --deselect=tests/test_sentinel.py::test_get_sentinels
-     --deselect=tests/test_sentinel.py::test_get_master_addr_by_name
-     --deselect=tests/test_sentinel.py::test_redis_master_usage
+@@ -182,6 +182,21 @@ check() {
+     --ignore=tests/test_asyncio/test_command_policies.py
+     --deselect=tests/test_asyncio/test_sentinel.py::test_sentinel_commands_with_strict_redis_client
+     --deselect=tests/test_sentinel.py::test_sentinel_commands_with_strict_redis_client
 +
 +    # To build on loong64 (floating point precision issues)
 +    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_geopos
