@@ -1,0 +1,8 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -59,3 +59,5 @@ package() {
+   install -vDm644 -t "$pkgdir/usr/share/doc/$pkgname" backend/README.md
+   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" backend/LICENSE.txt
+ }
++
++checkdepends+=(python-platformdirs)
