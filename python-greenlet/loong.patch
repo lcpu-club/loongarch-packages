@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,6 +18,8 @@ sha512sums=('633d207f9fe749074760e31302ca6b2f2a6c72f0161d9676c8c1047928a41081066
+ 
+ build() {
+     cd greenlet-$pkgver
++    export CFLAGS="${CFLAGS/-fno-omit-frame-pointer/}"
++    export CXXFLAGS="${CXXFLAGS/-fno-omit-frame-pointer/}"
+     # see https://github.com/python-greenlet/greenlet/issues/454
+     export CFLAGS="$CFLAGS -fcf-protection=none"
+     export CXXFLAGS="$CXXFLAGS -fcf-protection=none"
