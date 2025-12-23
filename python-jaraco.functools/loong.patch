@@ -1,0 +1,8 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -35,3 +35,5 @@ package() {
+   python -m installer --destdir="$pkgdir" dist/*.whl
+   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++checkdepends+=(python-jaraco.functools)
