@@ -1,0 +1,8 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -61,4 +61,5 @@ package() {
+   install -vDm 644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
+ }
+ 
++checkdepends+=(python-pbs-installer)
+ # vim:set ts=2 sw=2 et:
