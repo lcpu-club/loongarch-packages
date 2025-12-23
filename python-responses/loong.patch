@@ -1,0 +1,8 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -29,4 +29,5 @@ package() {
+   python -m installer -d "$pkgdir" dist/*.whl
+ }
+ 
++makedepends+=(python-wheel)
+ # vim:set ts=2 sw=2 et:
