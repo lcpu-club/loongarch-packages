@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -30,7 +30,7 @@ build() {
+   cd "$pkgname"
+ 
+   export RUSTUP_TOOLCHAIN=nightly
+-  rustup component add rust-src --toolchain "nightly-${CARCH}-unknown-linux-gnu"
++  rustup component add rust-src --toolchain "nightly-$(uname -m)-unknown-linux-gnu"
+ 
+   pushd mitmproxy-rs
+   maturin build --release --strip
