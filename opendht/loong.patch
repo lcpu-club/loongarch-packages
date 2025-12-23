@@ -1,0 +1,8 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -53,3 +53,5 @@ package() {
+   cd python
+   python -m installer --destdir="$pkgdir" dist/*.whl
+ }
++
++makedepends+=(python-wheel)
