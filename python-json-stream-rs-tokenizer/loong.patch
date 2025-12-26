@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,6 +25,7 @@ b2sums=('20af74125da5b69bd703a9e3d5f99401ea29c3abd9407c2161d0250b5d9f827cf92fb33
+ 
+ build() {
+   cd "py-${_pyname}-${pkgver}"
++  sed -i '/\[dependencies\]/a\target-lexicon = "0.12.16"' Cargo.toml
+   python -m build --wheel --no-isolation
+ }
+ 
