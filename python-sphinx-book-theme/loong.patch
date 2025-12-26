@@ -1,0 +1,20 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -29,6 +29,11 @@ sha512sums=('1fcc19f9080050b7ab7eba2b6fe0df9218ba87fe7ea2dd9bfa1cbd43d9fa777723a
+ 
+ build() {
+   cd ${pkgname#python-}-$pkgver
++  # Use system nodejs instead of downloading via nodeenv
++  export STB_USE_SYSTEM_NODE=1
++  # Dynamically match the node version to the one available in the build environment
++  local node_version=$(node --version | sed 's/v//')
++  sed -i "s/node-version = \"[^\"]*\"/node-version = \"$node_version\"/" pyproject.toml
+   python -m build --wheel --no-isolation
+ }
+ 
+@@ -45,3 +50,5 @@ package() {
+   python -m installer --destdir="$pkgdir" dist/*.whl
+   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
+ }
++
++makedepends+=(nodejs-lts-jod npm)
