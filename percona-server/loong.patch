@@ -1,14 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -39,6 +39,7 @@ prepare() {
- 		-i scripts/systemd/mysqlrouter.service.in
- 
- 	patch -p1 -i ../gcc-14.patch # Fix build with GCC 14
-+	patch -p1 -d extra/coredumper -i "$srcdir"/fix-missing-include.patch
- }
- 
- build() {
-@@ -47,8 +48,8 @@ build() {
+@@ -47,8 +47,8 @@ build() {
  	cd build
  
  	cmake "../$pkgbase-$_pkgver" \
@@ -19,10 +11,3 @@
  		-Wno-dev \
  		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
  		-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-@@ -188,3 +189,6 @@ package_percona-server() {
- 	# not needed
- 	rm -r usr/share/mysql-test
- }
-+
-+source+=("fix-missing-include.patch::https://github.com/Percona-Lab/coredumper/pull/8.diff")
-+sha256sums+=('81e3293d9b032d0dfed281067958e5f10306214dfac92a0b321f072bfc5f9910')
