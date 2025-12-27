@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -35,6 +35,9 @@ prepare() {
+   # Fix finding Eigen3 https://github.com/rdkit/rdkit/issues/8896
+   rm $pkgname-Release_${pkgver//./_}/Code/cmake/Modules/FindEigen3.cmake
+   sed -i 's|if(NOT EIGEN3_FOUND)|if(NOT TARGET Eigen3::Eigen)|' $pkgname-Release_${pkgver//./_}/CMakeLists.txt
++  cd $pkgname-Release_${pkgver//./_}
++  sed -i 's/ -mpopcnt//' CMakeLists.txt
++  sed -i 's/ -mpopcnt//' Code/PgSQL/rdkit/Makefile
+ }
+ 
+ build() {
