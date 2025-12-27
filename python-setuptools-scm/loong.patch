@@ -1,0 +1,10 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4c70395..3836bf3 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -60,3 +60,5 @@ package() {
+   cd $_name
+   python -m installer --destdir="$pkgdir" dist/*.whl
+ }
++
++checkdepends+=(libxml2 libxslt)
