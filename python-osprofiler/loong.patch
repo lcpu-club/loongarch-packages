@@ -1,0 +1,8 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -37,3 +37,5 @@ package() {
+   cd osprofiler
+   python setup.py install --root="$pkgdir" --optimize=1
+ }
++
++checkdepends+=(python-sniffio)
