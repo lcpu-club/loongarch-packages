@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e83d114..323f8fd 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,9 @@ sha256sums=('74d92c017e8beb41730a8be07c2c6e4ff6547660c84bf91f832d8f325dd0cf82')
+ 
+ build() {
+     cd "${pkgname}-${pkgver}"
++    sed -i 's/^.*#.*error Unknown CPU architecture!.*/#undef WORDS_BIGENDIAN\n#undef BITFIELDS_BIGENDIAN\n#undef ALLOW_UNALIGNED_ACCESS/' include/libEMF/wine/winnt.h
++    sed -i 's/^.*#.*error You need to define a CONTEXT.*/typedef struct _CONTEXT { DWORD ContextFlags; } CONTEXT;/' include/libEMF/wine/winnt.h
++    autoreconf -fiv
+     ./configure \
+         --prefix='/usr' \
+         --enable-static='no' \
