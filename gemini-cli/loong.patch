@@ -1,10 +1,20 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 7a026ca..f055f12 100644
+index 15e8c6f..1b6eea2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -30,3 +30,5 @@ package() {
-   rm "$pkgdir/usr/lib/node_modules/@google/gemini-cli/node_modules/shell-quote/print.py"
-   rm "$pkgdir/usr/lib/node_modules/@google/gemini-cli/node_modules/open/xdg-open"
+@@ -24,6 +24,7 @@ sha512sums=('cfa311bbebc060bc9aef96e4a92c860532246a59de60766dc030f4c913429e4b3a3
+ 
+ prepare() {
+   cd $pkgname
++  patch -Np1 -i "${srcdir}/increase-tests-timeout.patch"
+   npm clean-install --ignore-scripts
+ }
+ 
+@@ -52,3 +53,7 @@ package() {
+   install -vDm644 -t "$pkgdir/usr/share/doc/$pkgname" README.md
+   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
  }
 +
 +makedepends+=(python)
++source+=("increase-tests-timeout.patch::https://github.com/google-gemini/gemini-cli/commit/837629b2eed5cde59e73efa08ec8369cc7558333.diff")
++sha512sums+=('dfba336c70368677b853ec8062255fdce8913482ec5cede7525ca7f48af35c442bff044b80af9916c016584addeabd11088c9f1627356d4fe9314a0105105c6a')
