@@ -1,34 +1,25 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 16ddc0b..26826d2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -42,15 +42,16 @@ options=(
-   !lto
- )
- source=(
--  https://github.com/openjdk/jdk${_majorver}u/archive/refs/tags/jdk${_majorver}u${_minorver}-b${_updatever}.tar.gz
-+  https://github.com/loongson/jdk${_majorver}u/archive/refs/tags/jdk${_majorver}u${_minorver}-b${_updatever}-ls-0.tar.gz
-   gcc11.patch
- )
--b2sums=('4ce86687b29882a3e1add166c9f31818e3253f58f198f17d076acda3b15523baec7c51540aefe14ca237191656472f841eeb09cb69e59548ebc4cd5a267c04ec'
-+b2sums=('b2ba7bb9a9cdfab36798b57967607f84b2a91ceffb977de66bf121f53083dc544f60d207da885b93f42c08448cb6ddbcdbf0359b672ec4010bf539931a366275'
-         '9679e4dfb6027a87376081489c09810812d6849573afac4ea96abe3a3e00ca5b6af7d0ffb010c43b93cfa913f9e97fbb9f11e19fcc86a89b4548442671c32da1')
- 
- case "${CARCH}" in
-   'x86_64') _JARCH=amd64 ; _DOC_ARCH=x86_64 ;;
-   'i686'  ) _JARCH=i386  ; _DOC_ARCH=x86    ;;
+@@ -50,6 +50,7 @@ case "${CARCH}" in
+   'x86_64'  ) _JARCH=amd64   ; _DOC_ARCH=x86_64  ;;
+   'i686'    ) _JARCH=i386    ; _DOC_ARCH=x86     ;;
+   'aarch64' ) _JARCH=aarch64 ; _DOC_ARCH=aarch64 ;;
 +  'loong64') _JARCH=loongarch64; _DOC_ARCH=loongarch64 ;;
  esac
  
  _jdkname=openjdk8
-@@ -65,7 +66,7 @@ _nonheadless=(
+@@ -64,7 +65,7 @@ _nonheadless=(
  )
  
  prepare() {
 -  cd jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}
 +  cd jdk8u-jdk${_majorver}u${_minorver}-b${_updatever}-ls-0
  
-   # Fix build with C++17 (Fedora)
-   patch -Np1 -i "${srcdir}"/gcc11.patch
-@@ -82,7 +83,7 @@ prepare() {
+   # Do not treats warnings as errors
+   sed -E -i 's/(^WARNINGS_ARE_ERRORS = -W)(error)/\1no-\2/' \
+@@ -94,7 +95,7 @@ END
  }
  
  build() {
@@ -37,7 +28,7 @@
  
    unset JAVA_HOME
  
-@@ -137,7 +138,7 @@ build() {
+@@ -147,7 +148,7 @@ build() {
  }
  
  check() {
@@ -46,7 +37,7 @@
    #make -k test
  }
  
-@@ -338,7 +339,7 @@ package_openjdk8-doc() {
+@@ -348,8 +349,11 @@ package_openjdk8-doc() {
    pkgdesc='OpenJDK Java 8 documentation'
  
    install -d -m 755 "${pkgdir}/usr/share/doc/${pkgbase}/"
@@ -55,3 +46,7 @@
      "${pkgdir}/usr/share/doc/${pkgbase}/"
  }
  
+ # vim: ts=2 sw=2 et:
++
++source[0]="https://github.com/loongson/jdk${_majorver}u/archive/refs/tags/jdk${_majorver}u${_minorver}-b${_updatever}-ls-0.tar.gz"
++b2sums[0]='b2ba7bb9a9cdfab36798b57967607f84b2a91ceffb977de66bf121f53083dc544f60d207da885b93f42c08448cb6ddbcdbf0359b672ec4010bf539931a366275'
