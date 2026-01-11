@@ -1,12 +1,8 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 252bd0c..cd18ded 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -33,7 +33,6 @@ makedepends=(
- )
- # NOTE: we install all available OpenCL drivers so that tests don't fail on PLATFORM_NOT_FOUND_KHR
- checkdepends=(
--    'intel-compute-runtime'
-     'opencl-clover-mesa'
-     'opencl-nvidia'
-     'opencl-rusticl-mesa'
+@@ -110,3 +110,5 @@ package_pyopencl-headers() {
+     install -Dm644 $_name/cl/*.cl -t "${pkgdir}"/usr/include/$_name
+     install -vDm644 ../*.txt -t "${pkgdir}"/usr/share/licenses/${pkgname}/
+ }
++
++checkdepends=(${checkdepends[@]/intel-compute-runtime})
