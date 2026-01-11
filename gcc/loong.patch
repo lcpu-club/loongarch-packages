@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index aca1991..400871b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -21,8 +21,6 @@ makedepends=(
@@ -37,7 +39,7 @@
  
    "$srcdir/gcc/configure" \
 -    --enable-languages=ada,c,c++,d,fortran,go,lto,m2,objc,obj-c++,rust,cobol \
-+    --enable-languages=ada,c,c++,d,fortran,lto,m2,objc,obj-c++,rust \
++    --enable-languages=ada,c,c++,d,fortran,lto,m2,objc,obj-c++,rust,cobol \
      --enable-bootstrap \
      "${_confflags[@]:?_confflags unset}"
  
@@ -171,7 +173,7 @@
  
    # Install Runtime Library Exception
    install -d "$pkgdir/usr/share/licenses/$pkgname/"
-@@ -531,3 +519,9 @@ package_libgccjit() {
+@@ -531,3 +519,8 @@ package_libgccjit() {
    ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
      "$pkgdir/usr/share/licenses/$pkgname/"
  }
@@ -180,4 +182,3 @@
 +sha256sums+=('d09cbb949364442a78e886b8f55593f07ad17f1e5369ecc83d6c6826015ba22e')
 +pkgname=(${pkgname[@]/lib32-gcc-libs})
 +pkgname=(${pkgname[@]/gcc-go})
-+pkgname=(${pkgname[@]/gcc-gcobol})
