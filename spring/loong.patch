@@ -1,11 +1,9 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index c2b4e95..01b8365 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -26,6 +26,13 @@ prepare() {
- 
+@@ -29,6 +29,13 @@ prepare() {
    patch -Np1 -i ../spring-gcc12.patch
    patch -Np1 -i ../spring-gcc13.patch # missing includes
+   patch -Np1 -i ../spring-gcc15.patch # missing included
 +  patch -Np1 -i ../disable-streflop-for-cutils.patch
 +  patch -Np1 -i ../support-loong64-build.patch
 +  patch -Np1 -i ../use-simde.patch
@@ -16,7 +14,7 @@ index c2b4e95..01b8365 100644
    #remove bundled libraries
    rm -r tools/pr-downloader/src/lib/jsoncpp
    rm -r tools/pr-downloader/src/lib/minizip
-@@ -34,12 +41,18 @@ prepare() {
+@@ -37,12 +44,18 @@ prepare() {
  build() {
    cd spring_$pkgver
  
@@ -32,10 +30,10 @@ index c2b4e95..01b8365 100644
 +    -DPRD_JSONCPP_INTERNAL=OFF \
 +    -DENABLE_STREFLOP=OFF \
 +    -DMARCH_FLAG=loongarch64 \
+     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
      -DPRD_JSONCPP_INTERNAL=OFF
    make -C build
- }
-@@ -53,4 +66,12 @@ package() {
+@@ -57,4 +70,12 @@ package() {
    echo '$HOME/.spring' > "$pkgdir/etc/spring/datadir"
  }
  
