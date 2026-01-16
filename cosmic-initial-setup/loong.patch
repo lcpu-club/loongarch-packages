@@ -1,0 +1,8 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -46,3 +46,5 @@ package() {
+   cd "${pkgname}"
+   just rootdir="$pkgdir" install
+ }
++
++makedepends+=(cmake)
