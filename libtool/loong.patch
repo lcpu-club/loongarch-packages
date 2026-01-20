@@ -1,0 +1,25 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -64,10 +64,10 @@ build() {
+   make
+ 
+   #lib32
+-  cd "${srcdir}"/libtool32
+-  export CC="gcc -m32" CXX="g++ -m32"
+-  ./configure --prefix=/usr lt_cv_sys_lib_dlsearch_path_spec="/usr/lib /usr/lib32" --libdir=/usr/lib32
+-  make
++  #cd "${srcdir}"/libtool32
++  #export CC="gcc -m32" CXX="g++ -m32"
++  #./configure --prefix=/usr lt_cv_sys_lib_dlsearch_path_spec="/usr/lib /usr/lib32" --libdir=/usr/lib32
++  #make
+ }
+ 
+ check() {
+@@ -114,3 +114,7 @@ package_lib32-libltdl() {
+   cd libtool32
+   make DESTDIR="$pkgdir" install-libLTLIBRARIES
+ }
++
++pkgname=(${pkgname[@]/lib32-libltdl})
++makedepends=(${makedepends[@]/lib32-glibc})
++makedepends=(${makedepends[@]/lib32-gcc-libs})
