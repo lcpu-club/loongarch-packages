@@ -1,0 +1,11 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b3b261d..eddaaf9 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -339,3 +339,6 @@ sha512sums=('d04a135f23572123d5cca41c2611704aa06cb81e0226c89c267dc527f59fb0d9d5d
+             'fdd6f43f5467aec5c5e290c2088f63d42b88d31f138fece1d5893ef4bec9d9cc54339cf240f04fda9c6b033a5a47c39f09a4ac99dc2389daee1c28617aa233a4')
+ 
+ # vim:set sw=2 et:
++
++source+=("disable-BROTLI_MODEL-macro-for-some-targets.patch")
++sha512sums+=('4857bbdffdfdd49ef771dc558f862a0f7cc1b8a2a385bb2eae1159bb6a8c8b9509b031cb324353e71a1967a52286d6e8952643c5c38917eb69926108d97c9a0a')
