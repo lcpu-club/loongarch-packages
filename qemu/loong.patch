@@ -9,7 +9,7 @@
    qemu-hw-s390x-virtio-gpu-ccw
    qemu-hw-uefi-vars
    qemu-hw-usb-{host,redirect,smartcard}
-@@ -115,7 +115,6 @@ makedepends=(
+@@ -112,7 +112,6 @@ makedepends=(
    python-sphinx
    python-sphinx_rtd_theme
    rdma-core
@@ -17,7 +17,7 @@
    sdl2
    sdl2_image
    snappy
-@@ -246,13 +245,10 @@ _qemu_base_optdepends=(
+@@ -243,13 +242,10 @@ _qemu_base_optdepends=(
    'qemu-hw-display-qxl: for the QXL display device'
    'qemu-hw-display-virtio-vga: for the virtio-vga display device'
    'qemu-hw-display-virtio-vga-gl: for the virtio-vga-gl display device'
@@ -31,7 +31,7 @@
    'qemu-hw-uefi-vars: for UEFI variable support'
    'qemu-hw-usb-host: for host USB support'
    'qemu-hw-usb-redirect: for USB redirect support'
-@@ -326,7 +322,6 @@ build() {
+@@ -323,7 +319,6 @@ build() {
      --enable-sdl
      --enable-slirp
      --enable-tpm
@@ -39,7 +39,7 @@
      --smbd=/usr/bin/smbd
      --with-coroutine=ucontext
    )
-@@ -491,13 +486,10 @@ package_qemu-common() {
+@@ -488,13 +483,10 @@ package_qemu-common() {
      _pick qemu-hw-display-qxl usr/lib/qemu/hw-display-qxl.so
      _pick qemu-hw-display-virtio-gpu usr/lib/qemu/hw-display-virtio-gpu.so
      _pick qemu-hw-display-virtio-gpu-gl usr/lib/qemu/hw-display-virtio-gpu-gl.so
@@ -53,7 +53,7 @@
  
      _pick qemu-hw-usb-host usr/lib/qemu/hw-usb-host.so
      _pick qemu-hw-usb-redirect usr/lib/qemu/hw-usb-redirect.so
-@@ -901,7 +893,7 @@ package_qemu-system-hppa-firmware() {
+@@ -898,7 +890,7 @@ package_qemu-system-hppa-firmware() {
  
  package_qemu-system-loongarch64() {
    pkgdesc="QEMU system emulator for LoongArch64"
@@ -62,7 +62,7 @@
    mv -v $pkgname/* "$pkgdir"
    _install_licenses
  }
-@@ -1223,7 +1215,7 @@ package_qemu-base() {
+@@ -1222,7 +1214,7 @@ package_qemu-base() {
    depends=(
      qemu-common=$pkgver-$pkgrel
      qemu-img=$pkgver-$pkgrel
@@ -71,7 +71,7 @@
      virtiofsd
    )
    optdepends=("${_qemu_base_optdepends[@]}")
-@@ -1239,8 +1231,8 @@ package_qemu-desktop() {
+@@ -1238,8 +1230,8 @@ package_qemu-desktop() {
      qemu-audio-{alsa,dbus,jack,oss,pa,pipewire,sdl,spice}=$pkgver-$pkgrel
      qemu-block-{curl,dmg,nfs,ssh}=$pkgver-$pkgrel
      qemu-chardev-spice=$pkgver-$pkgrel
@@ -82,9 +82,10 @@
      qemu-hw-uefi-vars=$pkgver-$pkgrel
      qemu-hw-usb-{host,redirect,smartcard}=$pkgver-$pkgrel
      qemu-ui-{curses,dbus,egl-headless,gtk,opengl,sdl,spice-{app,core}}=$pkgver-$pkgrel
-@@ -1282,4 +1274,5 @@ package_qemu-full() {
+@@ -1281,4 +1273,6 @@ package_qemu-full() {
    _install_licenses
  }
  
 +_qemu_desktop_optdepends+=("qemu-system-x86: for x86 system emulator")
++pkgname=(${pkgname[@]/qemu-vmsr-helper})
  # vim:set ts=2 sw=2 et:
