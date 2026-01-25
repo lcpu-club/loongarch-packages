@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -61,7 +61,7 @@ check() {
- 	export GIT_CONFIG_GLOBAL="${PWD}/gitconfig"
- 	# This test assumes .gitconfig path
+@@ -63,7 +63,7 @@ check() {
  	rm -f modules/git/config_test.go
+ 	# Test failure if gitconfig exists
+ 	rm -f gitconfig
 -	make test
 +	make test || echo "Watch out for failed tests!"
  }
