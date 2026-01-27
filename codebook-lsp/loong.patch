@@ -1,0 +1,10 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5c27a15..a88aa4b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,3 +36,5 @@ package() {
+   install -Dt "$pkgdir"/usr/bin target/release/$pkgname
+   install -Dt "$pkgdir"/usr/share/licenses/$pkgname LICENSE
+ }
++
++makedepends+=(cmake)
