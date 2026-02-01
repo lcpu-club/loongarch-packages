@@ -32,7 +32,7 @@ git diff > "$PATCH_DIR/loong.patch"
 
 sed -i "s/pkgrel=[0-9]\+/$original_pkgrel/" "PKGBUILD"
 
-sources=$(. PKGBUILD && echo "${source[@]}")
+sources=$(. PKGBUILD && echo "${source[@]}" "${source_loong64[@]}")
 
 untracked_files=$(git ls-files --others --exclude-standard)
 
