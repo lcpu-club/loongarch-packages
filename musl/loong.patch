@@ -1,0 +1,36 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d6c2409..26bdd61 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -60,7 +60,7 @@ package_musl() {
+   cd $pkgname-$pkgver
+   make DESTDIR="$pkgdir" install
+ 
+-  ln -s ./musl-gcc "$pkgdir"/usr/bin/x86_64-linux-musl-gcc
++  ln -s ./musl-gcc "$pkgdir"/usr/bin/$(uname -m)-linux-musl-gcc
+ 
+   # configure syslibdir with /lib for PT_INTERP compat, but install to /usr/lib
+   mv "$pkgdir"/lib/ld-musl*.so* "$pkgdir"/usr/lib/
+@@ -99,3 +99,22 @@ package_musl-riscv64() {
+   install -Dm0644 README "$pkgdir"/usr/share/doc/musl-riscv64/README
+   install -Dm0644 COPYRIGHT "$pkgdir"/usr/share/licenses/musl-riscv64/COPYRIGHT
+ }
++
++package_musl-x86_64() {
++  cd "$pkgbase-$pkgver-x86_64"
++  make DESTDIR="$pkgdir" install
++
++  install -d "$pkgdir"/usr/bin
++  ln -s ../x86_64-linux-musl/bin/musl-gcc "$pkgdir"/usr/bin/x86_64-linux-musl-gcc
++
++  # configure syslibdir with /lib for PT_INTERP compat, but install to /usr/lib
++  mv "$pkgdir"/lib/ld-musl*.so* "$pkgdir"/usr/x86_64-linux-musl/lib/
++  rmdir "$pkgdir"/lib
++
++  install -Dm0644 README "$pkgdir"/usr/share/doc/musl-x86_64/README
++  install -Dm0644 COPYRIGHT "$pkgdir"/usr/share/licenses/musl-x86_64/COPYRIGHT
++}
++
++_archs+=("x86_64")
++makedepends+=("x86_64-linux-gnu-gcc")
++pkgname+=(musl-x86_64)
