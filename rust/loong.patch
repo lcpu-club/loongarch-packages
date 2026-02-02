@@ -1,79 +1,62 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b0454cc..e7be935 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -128,9 +128,8 @@ link-shared = true
- [build]
- description = "Arch Linux $pkgbase $epoch:$pkgver-$pkgrel"
- target = [
--  "x86_64-unknown-linux-gnu",
--  "i686-unknown-linux-gnu",
--  "x86_64-unknown-linux-musl",
-+  "$(uname -m)-unknown-linux-gnu",
-+  "$(uname -m)-unknown-linux-musl",
-   "aarch64-unknown-linux-gnu",
-   "aarch64-unknown-linux-musl",
-   "wasm32-unknown-unknown",
-@@ -182,26 +181,21 @@ lto = "fat"
- compression-formats = ["gz"]
- compression-profile = "fast"
+@@ -130,7 +130,7 @@ prepare() {
+   clangdir="$(clang -print-resource-dir)"
+   sed -e "s|%description%|Arch Linux $pkgbase $epoch:$pkgver-$pkgrel|g" \
+       -e "s|%clangdir%|$clangdir|g" \
+-      "$srcdir/bootstrap.${CARCH}.toml" > bootstrap.toml
++      "$srcdir/bootstrap.$(uname -m).toml" > bootstrap.toml
+ }
  
--[target.x86_64-unknown-linux-gnu]
-+[target.$(uname -m)-unknown-linux-gnu]
- cc = "/usr/bin/gcc"
- cxx = "/usr/bin/g++"
- ar = "/usr/bin/gcc-ar"
- ranlib = "/usr/bin/gcc-ranlib"
- llvm-config = "/usr/bin/llvm-config"
--optimized-compiler-builtins = "$clangdir/lib/linux/libclang_rt.builtins-x86_64.a"
-+optimized-compiler-builtins = "$clangdir/lib/linux/libclang_rt.builtins-$(uname -m).a"
- 
--[target.i686-unknown-linux-gnu]
-+# Failed with musl-gcc: ld.lld: error: unable to find library -lgcc_s
-+# Switch from musl-gcc to gcc
-+[target.$(uname -m)-unknown-linux-musl]
- cc = "/usr/bin/gcc"
- cxx = "/usr/bin/g++"
- ar = "/usr/bin/gcc-ar"
- ranlib = "/usr/bin/gcc-ranlib"
--optimized-compiler-builtins = "$clangdir/lib/linux/libclang_rt.builtins-i386.a"
--
--[target.x86_64-unknown-linux-musl]
--cc = "/usr/bin/musl-gcc"
--cxx = "/usr/bin/g++"
--ar = "/usr/bin/gcc-ar"
--ranlib = "/usr/bin/gcc-ranlib"
- sanitizers = false
- musl-root = "/usr/lib/musl"
- 
-@@ -317,18 +311,15 @@ build() {
+ _pick() {
+@@ -172,15 +172,15 @@ build() {
  
    # rustbuild always installs copies of the shared libraries to /usr/lib,
    # overwrite them with symlinks to the per-architecture versions
--  mkdir -pv usr/lib32
--  ln -srvft usr/lib   usr/lib/rustlib/x86_64-unknown-linux-gnu/lib/*.so
--  ln -srvft usr/lib32 usr/lib/rustlib/i686-unknown-linux-gnu/lib/*.so
-+  ln -srvft usr/lib   usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/lib/*.so
+-  ln -srvft usr/lib usr/lib/rustlib/${CARCH}-unknown-linux-gnu/lib/*.so
++  ln -srvft usr/lib usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/lib/*.so
  
    # Symlink the "self-contained" linker to our system lld
--  mkdir -pv usr/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld
--  ln -srvf  usr/bin/lld          usr/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld
--  ln -srvf  usr/bin/llvm-objcopy usr/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-objcopy
--  ln -srvft usr/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld usr/bin/{ld.lld,ld64.lld,lld-link,wasm-ld}
+-  mkdir -pv usr/lib/rustlib/${CARCH}-unknown-linux-gnu/bin/gcc-ld
+-  ln -srvf  usr/bin/lld          usr/lib/rustlib/${CARCH}-unknown-linux-gnu/bin/rust-lld
+-  ln -srvf  usr/bin/llvm-objcopy usr/lib/rustlib/${CARCH}-unknown-linux-gnu/bin/rust-objcopy
+-  ln -srvft usr/lib/rustlib/${CARCH}-unknown-linux-gnu/bin/gcc-ld usr/bin/{ld.lld,ld64.lld,lld-link,wasm-ld}
 +  mkdir -pv usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/bin/gcc-ld
 +  ln -srvf  usr/bin/lld          usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/bin/rust-lld
 +  ln -srvf  usr/bin/llvm-objcopy usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/bin/rust-objcopy
 +  ln -srvft usr/lib/rustlib/$(uname -m)-unknown-linux-gnu/bin/gcc-ld usr/bin/{ld.lld,ld64.lld,lld-link,wasm-ld}
  
--  _pick dest-i686 usr/lib/rustlib/i686-unknown-linux-gnu usr/lib32
--  _pick dest-musl usr/lib/rustlib/x86_64-unknown-linux-musl
+-  _pick dest-musl usr/lib/rustlib/${CARCH}-unknown-linux-musl
 +  _pick dest-musl usr/lib/rustlib/$(uname -m)-unknown-linux-musl
-   _pick dest-aarch64-gnu usr/lib/rustlib/aarch64-unknown-linux-gnu
-   _pick dest-aarch64-musl usr/lib/rustlib/aarch64-unknown-linux-musl
    _pick dest-wasm usr/lib/rustlib/wasm32{,v1}-*
-@@ -436,4 +427,7 @@ package_rust-src() {
-     rustc-$pkgver-src/{COPYRIGHT,LICENSE-MIT}
+   _pick dest-src  usr/lib/rustlib/src
+ 
+@@ -189,6 +189,11 @@ build() {
+     _pick dest-aarch64-gnu usr/lib/rustlib/aarch64-unknown-linux-gnu
+     _pick dest-aarch64-musl usr/lib/rustlib/aarch64-unknown-linux-musl
+   fi
++
++  if [[ $CARCH == loong64 ]]; then
++    _pick dest-aarch64-gnu usr/lib/rustlib/aarch64-unknown-linux-gnu
++    _pick dest-aarch64-musl usr/lib/rustlib/aarch64-unknown-linux-musl
++  fi
+ }
+ 
+ _install_licenses() {
+@@ -292,4 +297,14 @@ package_rust-aarch64-musl() {
+   _install_licenses
  }
  
 +pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(lib32-rust-libs)$'))
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(lib32-gcc-libs|lib32-glibc)$'))
++source_loong64=(bootstrap.loongarch64.toml)
++b2sums_loong64=('a497ca8556ad7586744395ae5c7aabe1380ab8886411da512ad49484d9fa693b4bd1b524722ef495b88deb07dfddab6ff28de04f9917283b21a93bea1cf9d675')
++makedepends_loong64=(
++  aarch64-linux-gnu-gcc
++  aarch64-linux-gnu-glibc
++  musl-aarch64
++)
 +
  # vim:set ts=2 sw=2 et:
