@@ -1,4 +1,4 @@
-@@ -35,18 +35,17 @@
+@@ -35,20 +35,19 @@
  # ARCHITECTURE, COMPILE FLAGS
  #########################################################################
  #
@@ -7,10 +7,12 @@
 +CARCH="loong64"
 +CHOST="loongarch64-unknown-linux-gnu"
  
+ #NPROC=2
+ 
  #-- Compiler and Linker Flags
  #CPPFLAGS=""
 -CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe -fno-plt -fexceptions \
-+CFLAGS="-mabi=lp64d -march=loongarch64 -mlsx -O2 -pipe -fexceptions -mcmodel=medium \
++CFLAGS="-mabi=lp64d -march=loongarch64 -mlsx -O2 -pipe -fno-plt -fexceptions -mcmodel=medium \
          -Wp,-D_FORTIFY_SOURCE=3 -Wformat -Werror=format-security \
 -        -fstack-clash-protection -fcf-protection \
 -        -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer"

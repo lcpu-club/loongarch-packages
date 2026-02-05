@@ -1,7 +1,7 @@
 # Maintainer: wszqkzqk <wszqkzqk@qq.com>
 
-_pkgver=1.4.0
-_patchver=3
+_pkgver=1.5.0
+_patchver=1
 pkgname=devtools-loong64
 pkgver=${_pkgver}.patch${_patchver}
 pkgrel=1
@@ -32,8 +32,8 @@ source=(makepkg-loong64.patch
         # Following items are unused in loong64
         mirrorlist-loong64
         z-qemu-loong64-static-for-archpkg.conf)
-sha256sums=('7b9efdecfe9b770cedf9f8a7039aad31842454167caddb63315ec58949edaf24'
-            'eece7a2beedfd9bf367d5930871296223b8f7ec09541d20719e9f52b61b88254'
+sha256sums=('04752e5a66331119e36065e7750eebf4d4d007cbc9c78d362609407a2b98e72f'
+            '291b58d55e9c3314a84b888fa0abb3024ffbdd5a2824e8902a94d89038f69352'
             '16bae6549b594284d1e08caa831f67f5aa251447449a40c846ad9ad4701ca252'
             '0bb9058a722971752ec714707eecca6af32f212069bbd2d138bbd4414eaf00c0'
             '4866d3086f6846c070d2aa2add4258baf7111b1fe3d249cdc6a0580fa7e8cc85'

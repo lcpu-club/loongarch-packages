@@ -1,6 +1,6 @@
 pkgbase = devtools-loong64
 	pkgdesc = Tools for Arch Linux LoongArch package maintainers
-	pkgver = 1.4.0.patch3
+	pkgver = 1.5.0.patch1
 	pkgrel = 1
 	url = https://gitlab.archlinux.org/archlinux/devtools
 	arch = loong64
@@ -10,7 +10,7 @@ pkgbase = devtools-loong64
 	license = GPL-3.0-or-later
 	depends = bash
 	depends = coreutils
-	depends = devtools>=1:1.4.0
+	depends = devtools>=1:1.5.0
 	depends = grep
 	depends = git
 	depends = patch
@@ -32,8 +32,8 @@ pkgbase = devtools-loong64
 	source = get-loong64-pkg
 	source = mirrorlist-loong64
 	source = z-qemu-loong64-static-for-archpkg.conf
-	sha256sums = 7b9efdecfe9b770cedf9f8a7039aad31842454167caddb63315ec58949edaf24
-	sha256sums = eece7a2beedfd9bf367d5930871296223b8f7ec09541d20719e9f52b61b88254
+	sha256sums = 04752e5a66331119e36065e7750eebf4d4d007cbc9c78d362609407a2b98e72f
+	sha256sums = 291b58d55e9c3314a84b888fa0abb3024ffbdd5a2824e8902a94d89038f69352
 	sha256sums = 16bae6549b594284d1e08caa831f67f5aa251447449a40c846ad9ad4701ca252
 	sha256sums = 0bb9058a722971752ec714707eecca6af32f212069bbd2d138bbd4414eaf00c0
 	sha256sums = 4866d3086f6846c070d2aa2add4258baf7111b1fe3d249cdc6a0580fa7e8cc85
