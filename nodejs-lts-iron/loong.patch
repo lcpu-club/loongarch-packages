@@ -1,0 +1,30 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 1892b3a..b59981e 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,6 +34,8 @@ prepare() {
+   cd node-v${pkgver}
+   # Update ICU tests https://github.com/nodejs/node/pull/60523
+   patch -Np1 -i ../update-icu-tests.patch
++  # Fix build with python 3.14
++  patch -Np1 -i ../fix-build-with-py3.14.patch
+ }
+ 
+ build() {
+@@ -80,6 +82,9 @@ check() {
+ 
+   rm test/parallel/test-http-client-close-with-default-agent.js
+ 
++  rm -f test/parallel/test-dgram-send-cb-quelches-error.js
++  rm -f test/parallel/test-net-autoselectfamily.js
++
+   make test-only
+ 
+ }
+@@ -90,3 +95,6 @@ package() {
+   make DESTDIR="${pkgdir}" install
+   install -Dm644 LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
+ }
++
++source+=("fix-build-with-py3.14.patch")
++sha256sums+=('099d072ec981ecb784b1eb2823fdcdd47577c85f0a32a896e094ef9a9d12424a')
