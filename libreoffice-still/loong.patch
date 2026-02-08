@@ -1,20 +1,19 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -127,6 +127,13 @@ prepare() {
+@@ -128,6 +128,12 @@ prepare() {
+     ln -s "${srcdir}"/$source .
      done
      popd
- 
 +    # Enable loong64 support in external/firebird
 +    # Copy `0001-firebird-la64-support.patch` to its patch dir
 +    cp "${srcdir}/0001-firebird-la64-support.patch" external/firebird
 +    # And then patch `UnpackedTarball_firebird.mk` to enable to
 +    # use `0001-firebird-la64-support.patch`
 +    patch external/firebird/UnpackedTarball_firebird.mk < "${srcdir}/0002-UnpackedTarball_firebird.mk-apply-la64-support.diff"
-+
-     # fix build with icu 76
-     patch -Np1 -i "${srcdir}"/libreoffice-24.8.4.2-icu76_fixes-1.patch
-     # update to mdds-3.0.0 / libixion-0.20 /liborcus-0.20
-@@ -412,3 +419,8 @@ package_libreoffice-still() {
+ 
+     # fix build with orcus 0.21.0
+     patch -Np1 -i "${srcdir}"/orcus-0.21.0.patch
+@@ -419,3 +425,8 @@ package_libreoffice-still() {
      'sid','sk','sl','sq','sv','ta','tg','tr','ug','uk','vi','zh-CN','zh-TW'])" \
          > "${pkgdir}"/usr/lib/libreoffice/help/languages.js
  }
