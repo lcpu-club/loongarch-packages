@@ -1,13 +1,11 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index b506215..f0c6e99 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -31,7 +31,7 @@ build() {
- 
- check() {
-   cd "$pkgname-$pkgver"
--  cargo test --frozen -- --skip "add_tests"
-+  cargo test --frozen -- --skip "add_tests" || echo "Watch out for failed tests!"
+@@ -39,7 +39,7 @@ check() {
+     tests::test_rust_is_in_build_requirements
+     tests::test_rust_is_not_added_if_already_present
+   )
+-  cargo test --frozen -- ${skipped[@]/#/--skip }
++  cargo test --frozen -- ${skipped[@]/#/--skip } || echo "Watch out for failed tests!"
  }
  
  package() {
