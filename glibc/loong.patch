@@ -17,23 +17,7 @@
        --enable-stack-protector=strong
        --enable-systemtap
        --disable-nscd
-@@ -90,6 +91,7 @@ build() {
-     make info
-   )
- 
-+  : <<COMMENT_SEPARATOR
-   (
-     cd lib32-glibc-build
-     export CC="gcc -m32 -mstackrealign"
-@@ -112,6 +114,7 @@ build() {
- 
-     make -O
-   )
-+COMMENT_SEPARATOR
- 
-   # pregenerate locales here instead of in package
-   # functions because localedef does not like fakeroot
-@@ -147,7 +150,7 @@ check() (
+@@ -155,7 +156,7 @@ check() (
    _skip_test tst-shstk-legacy-1g     sysdeps/x86_64/Makefile
    _skip_test tst-adjtime             time/Makefile
  
@@ -42,7 +26,7 @@
  )
  
  package_glibc() {
-@@ -231,3 +234,6 @@ package_glibc-locales() {
+@@ -240,3 +241,6 @@ package_glibc-locales() {
    # deduplicate locale data
    hardlink -c "${pkgdir}"/usr/lib/locale
  }
