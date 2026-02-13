@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index c75f289..a5cb25c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -68,6 +68,12 @@ prepare() {
+@@ -101,6 +101,12 @@ prepare() {
    # Reproducible gcc-ada
    patch -Np0 < "$srcdir/gcc-ada-repro.patch"
  
@@ -15,7 +13,7 @@ index c75f289..a5cb25c 100644
    mkdir -p "$srcdir/gcc-build"
    mkdir -p "$srcdir/libgccjit-build"
  }
-@@ -95,7 +101,8 @@ build() {
+@@ -128,7 +134,8 @@ build() {
        --enable-link-serialization=1
        --enable-linker-build-id
        --enable-lto
@@ -25,7 +23,7 @@ index c75f289..a5cb25c 100644
        --enable-plugin
        --enable-shared
        --enable-threads=posix
-@@ -113,7 +120,7 @@ build() {
+@@ -146,7 +153,7 @@ build() {
    CXXFLAGS=${CXXFLAGS/-Werror=format-security/}
  
    "$srcdir/gcc/configure" \
@@ -34,27 +32,8 @@ index c75f289..a5cb25c 100644
      --enable-bootstrap \
      "${_confflags[@]:?_confflags unset}"
  
-@@ -162,7 +169,7 @@ package_gcc-libs() {
-   pkgdesc='Runtime libraries shipped by GCC'
-   depends=('glibc>=2.27')
-   options=(!emptydirs !strip)
--  provides=($pkgname-multilib libgo.so libgfortran.so libgphobos.so
-+  provides=($pkgname-multilib libgfortran.so libgphobos.so
-             libubsan.so libasan.so libtsan.so liblsan.so)
-   replaces=($pkgname-multilib libgphobos)
- 
-@@ -171,9 +178,7 @@ package_gcc-libs() {
-   rm -f "$pkgdir/$_libdir/libgcc_eh.a"
- 
-   for lib in libatomic \
--             libgcobol \
-              libgfortran \
--             libgo \
-              libgomp \
-              libitm \
-              libquadmath \
-@@ -221,25 +226,20 @@ package_gcc() {
-   install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1}
+@@ -223,25 +230,20 @@ package_gcc() {
+   install -m755 -t "$pkgdir/$_libdir/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
 -  make -C $CHOST/32/libgcc DESTDIR="$pkgdir" install
@@ -82,7 +61,7 @@ index c75f289..a5cb25c 100644
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -256,15 +256,11 @@ package_gcc() {
+@@ -258,15 +260,11 @@ package_gcc() {
    make -C $CHOST/libsanitizer/asan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
    make -C $CHOST/libsanitizer/tsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
    make -C $CHOST/libsanitizer/lsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
@@ -101,16 +80,16 @@ index c75f289..a5cb25c 100644
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -275,7 +271,7 @@ package_gcc() {
+@@ -277,7 +275,7 @@ package_gcc() {
    # create cc-rs compatible symlinks
    # https://github.com/rust-lang/cc-rs/blob/1.0.73/src/lib.rs#L2578-L2581
    for binary in {c++,g++,gcc,gcc-ar,gcc-nm,gcc-ranlib}; do
--    ln -s /usr/bin/${binary} "${pkgdir}"/usr/bin/x86_64-linux-gnu-${binary}
-+    ln -s /usr/bin/${binary} "${pkgdir}"/usr/bin/$(uname -m)-linux-gnu-${binary}
+-    ln -s /usr/bin/$binary "$pkgdir"/usr/bin/x86_64-linux-gnu-$binary
++    ln -s /usr/bin/$binary "$pkgdir"/usr/bin/$(uname -m)-linux-gnu-$binary
    done
  
    # POSIX conformance launcher scripts for c89 and c99
-@@ -285,9 +281,6 @@ package_gcc() {
+@@ -287,9 +285,6 @@ package_gcc() {
    # install the libstdc++ man pages
    make -C $CHOST/libstdc++-v3/doc DESTDIR="$pkgdir" doc-install-man
  
@@ -120,7 +99,39 @@ index c75f289..a5cb25c 100644
    # byte-compile python libraries
    python -m compileall "$pkgdir/usr/share/gcc-${pkgver%%+*}/"
    python -O -m compileall "$pkgdir/usr/share/gcc-${pkgver%%+*}/"
-@@ -307,8 +300,6 @@ package_gcc-fortran() {
+@@ -325,10 +320,6 @@ package_gcc-ada() {
+   make DESTDIR="$pkgdir" INSTALL="install" \
+     INSTALL_DATA="install -m644" install-libada
+ 
+-  cd "$srcdir"/gcc-build/$CHOST/32/libada
+-  make DESTDIR="$pkgdir" INSTALL="install" \
+-    INSTALL_DATA="install -m644" install-libada
+-
+   ln -s gcc "$pkgdir/usr/bin/gnatgcc"
+ 
+   # insist on dynamic linking, but keep static libraries because gnatmake complains
+@@ -337,12 +328,6 @@ package_gcc-ada() {
+   ln -s libgnat-${pkgver%%.*}.so "$pkgdir/usr/lib/libgnat.so"
+   rm -f "$pkgdir"/$_libdir/adalib/libgna{rl,t}.so
+ 
+-  install -d "$pkgdir/usr/lib32/"
+-  mv "$pkgdir"/$_libdir/32/adalib/libgna{rl,t}-${pkgver%%.*}.so "$pkgdir/usr/lib32"
+-  ln -s libgnarl-${pkgver%%.*}.so "$pkgdir/usr/lib32/libgnarl.so"
+-  ln -s libgnat-${pkgver%%.*}.so "$pkgdir/usr/lib32/libgnat.so"
+-  rm -f "$pkgdir"/$_libdir/32/adalib/libgna{rl,t}.so
+-
+   # Install Runtime Library Exception
+   install -d "$pkgdir/usr/share/licenses/$pkgname/"
+   ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
+@@ -374,7 +359,6 @@ package_gcc-d() {
+ 
+   make -C $CHOST/libphobos DESTDIR="$pkgdir" install
+   rm -f "$pkgdir/usr/lib/"lib{gphobos,gdruntime}.so*
+-  rm -f "$pkgdir/usr/lib32/"lib{gphobos,gdruntime}.so*
+ 
+   # Install Runtime Library Exception
+   install -d "$pkgdir/usr/share/licenses/$pkgname/"
+@@ -399,8 +383,6 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS,gfor_cHEADERS}
@@ -128,41 +139,8 @@ index c75f289..a5cb25c 100644
 -    install-{toolexeclibDATA,nodist_fincludeHEADERS,gfor_cHEADERS}
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_fincludeHEADERS
    make -C gcc DESTDIR="$pkgdir" fortran.install-{common,man,info}
-   install -Dm755 gcc/f951 "$pkgdir/${_libdir}/f951"
-@@ -353,10 +344,6 @@ package_gcc-ada() {
-   make DESTDIR="${pkgdir}" INSTALL="install" \
-     INSTALL_DATA="install -m644" install-libada
- 
--  cd "$srcdir"/gcc-build/$CHOST/32/libada
--  make DESTDIR="${pkgdir}" INSTALL="install" \
--    INSTALL_DATA="install -m644" install-libada
--
-   ln -s gcc "$pkgdir/usr/bin/gnatgcc"
- 
-   # insist on dynamic linking, but keep static libraries because gnatmake complains
-@@ -365,12 +352,6 @@ package_gcc-ada() {
-   ln -s libgnat-${pkgver%%.*}.so "$pkgdir/usr/lib/libgnat.so"
-   rm -f "$pkgdir"/${_libdir}/adalib/libgna{rl,t}.so
- 
--  install -d "$pkgdir/usr/lib32/"
--  mv "$pkgdir"/${_libdir}/32/adalib/libgna{rl,t}-${pkgver%%.*}.so "$pkgdir/usr/lib32"
--  ln -s libgnarl-${pkgver%%.*}.so "$pkgdir/usr/lib32/libgnarl.so"
--  ln -s libgnat-${pkgver%%.*}.so "$pkgdir/usr/lib32/libgnat.so"
--  rm -f "$pkgdir"/${_libdir}/32/adalib/libgna{rl,t}.so
--
-   # Install Runtime Library Exception
-   install -d "$pkgdir/usr/share/licenses/$pkgname/"
-   ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
-@@ -450,7 +431,7 @@ package_gcc-d() {
- 
-   make -C $CHOST/libphobos DESTDIR="$pkgdir" install
-   rm -f "$pkgdir/usr/lib/"lib{gphobos,gdruntime}.so*
--  rm -f "$pkgdir/usr/lib32/"lib{gphobos,gdruntime}.so*
-+#  rm -f "$pkgdir/usr/lib32/"lib{gphobos,gdruntime}.so*
- 
-   # Install Runtime Library Exception
-   install -d "$pkgdir/usr/share/licenses/$pkgname/"
-@@ -501,8 +482,6 @@ package_gcc-gcobol() {
+   install -Dm755 gcc/f951 "$pkgdir/$_libdir/f951"
+@@ -426,8 +408,6 @@ package_gcc-gcobol() {
  
    install -Dm755 gcc/gcobol "$pkgdir"/usr/bin/gcobol
  
@@ -171,7 +149,71 @@ index c75f289..a5cb25c 100644
    # Install Runtime Library Exception
    install -d "$pkgdir/usr/share/licenses/$pkgname/"
    ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
-@@ -534,3 +513,8 @@ package_libgccjit() {
+@@ -454,11 +434,10 @@ package_gcc-go() {
+ 
+   cd gcc-build
+   make -C $CHOST/libgo DESTDIR="$pkgdir" install-exec-am
+-  make -C $CHOST/32/libgo DESTDIR="$pkgdir" install-exec-am
+   make DESTDIR="$pkgdir" install-gotools
+   make -C gcc DESTDIR="$pkgdir" go.install-{common,man,info}
+ 
+-  rm -f "$pkgdir"/usr/lib{,32}/libgo.so*
++  rm -f "$pkgdir"/usr/lib/libgo.so*
+   install -Dm755 gcc/go1 "$pkgdir/$_libdir/go1"
+ 
+   # Install Runtime Library Exception
+@@ -580,9 +559,7 @@ package_lib32-gcc-libs() {
+   rm -f "$pkgdir/$_libdir/32/libgcc_eh.a"
+ 
+   for lib in libatomic \
+-             libgcobol \
+              libgfortran \
+-             libgo \
+              libgomp \
+              libitm \
+              libquadmath \
+@@ -686,8 +663,8 @@ package_libgcobol() {
+     libgcobol.so
+   )
+ 
+-  cd gcc-build
+-  make -C $CHOST/libgcobol DESTDIR="$pkgdir" install-toolexeclibLTLIBRARIES
++#  cd gcc-build
++#  make -C $CHOST/libgcobol DESTDIR="$pkgdir" install-toolexeclibLTLIBRARIES
+ 
+   # Install Runtime Library Exception
+   install -Dm644 "$srcdir/gcc/COPYING.RUNTIME" \
+@@ -765,9 +742,6 @@ package_libgm2() {
+ 
+   make -C $CHOST/libgm2 DESTDIR="$pkgdir" install
+ 
+-  # remove files provided by lib32-gcc-libs
+-  rm -rf "$pkgdir"/usr/lib32/
+-
+   # Install Runtime Library Exception
+   install -Dm644 "$srcdir/gcc/COPYING.RUNTIME" \
+     "$pkgdir/usr/share/licenses/libgm2/RUNTIME.LIBRARY.EXCEPTION"
+@@ -789,9 +763,6 @@ package_libgphobos() {
+   rm -rf "$pkgdir"/$_libdir/include/d/
+   rm -f "$pkgdir"/usr/lib/libgphobos.spec
+ 
+-  # remove files provided by lib32-gcc-libs
+-  rm -rf "$pkgdir"/usr/lib32/
+-
+   # Install Runtime Library Exception
+   install -Dm644 "$srcdir/gcc/COPYING.RUNTIME" \
+     "$pkgdir/usr/share/licenses/libgphobos/RUNTIME.LIBRARY.EXCEPTION"
+@@ -846,9 +817,6 @@ package_libobjc() {
+   cd gcc-build
+   make -C $CHOST/libobjc DESTDIR="$pkgdir" install-libs
+ 
+-  # remove files provided by lib32-gcc-libs
+-  rm -rf "$pkgdir"/usr/lib32/
+-
+   # Install Runtime Library Exception
+   install -Dm644 "$srcdir/gcc/COPYING.RUNTIME" \
+     "$pkgdir/usr/share/licenses/libobjc/RUNTIME.LIBRARY.EXCEPTION"
+@@ -942,3 +910,8 @@ package_lto-dump() {
    ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
      "$pkgdir/usr/share/licenses/$pkgname/"
  }
@@ -179,4 +221,4 @@ index c75f289..a5cb25c 100644
 +source+=("gcc-lib64-lib.patch")
 +sha256sums+=('d09cbb949364442a78e886b8f55593f07ad17f1e5369ecc83d6c6826015ba22e')
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(lib32-glibc|lib32-gcc-libs)$'))
-+pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(lib32-gcc-libs|gcc-go)$'))
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(lib32-gcc-libs|gcc-go|libgo)$'))
