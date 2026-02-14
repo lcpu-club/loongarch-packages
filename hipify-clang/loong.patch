@@ -1,10 +1,16 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 2c24c71..5e5d043 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -35,3 +35,5 @@ package() {
+@@ -46,3 +46,13 @@ package() {
  
    install -Dm644 "$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
++prepare() {
++  cd HIPIFY-rocm-7.2.0
++  patch -Np1 < ../0000-fix-undefined-symbol.patch
++}
++
++source+=('0000-fix-undefined-symbol.patch')
++sha256sums+=('3567b1b60669033bcf15e4faab4d8c31464930ac1059cc59f587cbdb8a8c2126')
 +depends=(${depends[@]/cuda})
++
