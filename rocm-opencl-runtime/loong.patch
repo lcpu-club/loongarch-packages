@@ -12,5 +12,5 @@
 +
 +source+=("0002-support-arm64-loongarch64-riscv64.patch"
 +         "0004-replace-llvm-mc.patch")
-+sha256sums+=('7bfa3814a41f3d6195664fe844e06cc208c9ccc7dea223e973eac88667aa1968'
++sha256sums+=('cf57bc26ede388a55f645065f7c15cf8b994f8e9c9d9d0aedb65b7b3760d539f'
 +             '1779ab6d3128135fa3eb1fe8f24836ec019ccaf5f17bb91bf84824a671d83c30')
