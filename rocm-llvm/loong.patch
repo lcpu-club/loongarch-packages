@@ -1,36 +1,29 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -44,6 +44,11 @@ prepare() {
- 
-   # Fix build with glibc 2.42: https://github.com/llvm/llvm-project/issues/137321
-   patch -Np1 < ../rocm-llvm-6.4-fix-glibc-2.42-termio-removal.patch
-+
-+  patch -Np1 < ../0001-rocm-llvm-define-nansq.patch
-+  patch -Np1 < ../0002-llvm-loongarch64-change-default-code-model.patch
-+  patch -Np1 < ../0003-rocm-llvm-loongarch64-feature-support.patch
-+  patch -Np1 < ../0004-flang-ignore-lto-arg.patch
- }
- 
- build() {
-@@ -73,7 +78,7 @@ build() {
-         -D LIBCXXABI_ENABLE_SHARED=OFF
-         -D LIBCXXABI_ENABLE_STATIC=ON
-         -D LIBCXXABI_INSTALL_STATIC_LIBRARY=OFF
--        -D LLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;X86'
-+        -D LLVM_TARGETS_TO_BUILD='AMDGPU;NVPTX;LoongArch'
-         -D CLANG_DEFAULT_LINKER=lld
-         -D ENABLE_LINKER_BUILD_ID=ON
-         -D CLANG_DEFAULT_RTLIB=compiler-rt
-@@ -179,3 +184,12 @@ package_comgr() {
+@@ -147,3 +147,26 @@ package_comgr() {
      cd "$pkgbase/amd/comgr"
      install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
++prepare() {
++    cd $pkgbase
++    patch -Np1 < ../0001-rocm-llvm-define-nansq.patch
++    patch -Np1 < ../0003-rocm-llvm-loongarch64-feature-support.patch
++    patch -Np1 < ../0004-flang-ignore-lto-arg.patch
++    patch -Np1 < ../0005-llvm-linker-extra.patch
++    patch -Np1 < ../0006-llvm-fix-compile-fail.patch
++    patch -Np1 < ../0007-llvm-fix-flang-compile-fail.patch
++}
++
 +source+=('0001-rocm-llvm-define-nansq.patch'
-+         '0002-llvm-loongarch64-change-default-code-model.patch'
 +         '0003-rocm-llvm-loongarch64-feature-support.patch'
-+         '0004-flang-ignore-lto-arg.patch')
++         '0004-flang-ignore-lto-arg.patch'
++         '0005-llvm-linker-extra.patch'
++         '0006-llvm-fix-compile-fail.patch'
++         '0007-llvm-fix-flang-compile-fail.patch')
 +sha256sums+=('96f95ef214574db1f060c11a7949efcff8bd7221724d7b29e3637cf94ced2bec'
-+             '33f23266f846064f863ff8f3688e41e894bb3010c6601963caa9dfe445a07d9c'
-+             '51dc94776a1c93b0f571bc27f43828b2867e18386f7e1faee7950cb4cfda8308'
-+             'f5d909684bfb7a4e83ef2b01871fb124cd32c3d41f44e13dedb100ecf7751dc7')
++             '5cd3d4f5aba2ba3a394dbdf6016f8a92095c19a3bd35c5007682f11c8660c01b'
++             'f5d909684bfb7a4e83ef2b01871fb124cd32c3d41f44e13dedb100ecf7751dc7'
++             'cfc4160dbc276e511ed5a56d527dfb1d2159bb7b9f2308af883a45c98c71a277'
++             '3074cd1503e094788d51477a67bea22c30a82018486f1ae9c838817f0c421081'
++             '6227d518ed8242c4e2be4067bbdf495e2f6760d2596557ded039f464d191bc29')
