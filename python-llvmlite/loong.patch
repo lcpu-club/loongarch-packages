@@ -1,11 +1,9 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index c32ffd6..047f377 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -24,7 +24,7 @@ build() {
+@@ -44,7 +44,7 @@ build() {
  
  check() {
-     cd "${_name}-$pkgver"
+     cd $_name
 -    pytest -vv $_name/tests
 +    pytest -vv $_name/tests -k "not test_binding"
  }
