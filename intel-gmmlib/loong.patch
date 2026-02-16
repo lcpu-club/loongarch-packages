@@ -1,18 +1,16 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 25faac7..74a61a4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -18,6 +18,7 @@ source=(https://github.com/${pkgname/-//}/archive/${pkgname}-${pkgver}.tar.gz)
- sha256sums=('36f2ff2b59158d1253a33d735f4e35a1b5740c4751818bdaa222b8ddf96ee881')
+@@ -22,6 +22,7 @@ source=("https://github.com/intel/gmmlib/archive/intel-gmmlib-${pkgver}/${pkgnam
+ sha256sums=('6ae262b95540681ad5478c63affb880135f772c95410b092009a6f7dfc04a5ba')
  
  build() {
-+  patch -Np1 -d gmmlib-${pkgname}-${pkgver} -i "${srcdir}/add-loongarch64-build-support.patch"
-   cmake -B build -S gmmlib-${pkgname}-${pkgver} \
-     -G 'Unix Makefiles' \
-     -DCMAKE_BUILD_TYPE=Release \
-@@ -32,3 +33,7 @@ package() {
-   DESTDIR="${pkgdir}" cmake --install build
-   install -Dm644 gmmlib-${pkgname}-${pkgver}/LICENSE.md -t "${pkgdir}"/usr/share/licenses/${pkgname}/
++    patch -Np1 -d gmmlib-${pkgname}-${pkgver} -i "${srcdir}/add-loongarch64-build-support.patch"
+     cmake -B build -S "gmmlib-${pkgname}-${pkgver}" \
+         -G 'Unix Makefiles' \
+         -DCMAKE_BUILD_TYPE='Release' \
+@@ -35,3 +36,7 @@ package() {
+     DESTDIR="$pkgdir" cmake --install build
+     install -D -m644 "gmmlib-${pkgname}-${pkgver}/LICENSE.md" -t "${pkgdir}/usr/share/licenses/${pkgname}"
  }
 +
 +source+=("add-loongarch64-build-support.patch::https://patch-diff.githubusercontent.com/raw/intel/gmmlib/pull/133.diff")
