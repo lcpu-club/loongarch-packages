@@ -1,18 +1,16 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 9940606..9881be1 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -14,6 +14,7 @@ source=(${url}/archive/${pkgname%-*}-${pkgver}.tar.gz)
- sha256sums=('fa17a3266fa8ee2ef9b4b1fac9079bd7362a38e5ab4ab8d510c2a48a6cdd95e5')
+@@ -20,6 +20,7 @@ source=("https://github.com/intel/media-driver/archive/intel-media-${pkgver}/${p
+ sha256sums=('ef9a7a0881b250d23df7d4676341a3729b28887bcf404a74d48db5f44ffa0220')
  
  build() {
-+  patch -Np1 -d ${pkgname#*-}-${pkgname%-*}-${pkgver} -i "${srcdir}/add-loongarch64-build-support.patch"
-   cmake -B build -S ${pkgname#*-}-${pkgname%-*}-${pkgver} \
-     -G 'Unix Makefiles' \
-     -DCMAKE_INSTALL_PREFIX=/usr \
-@@ -29,3 +30,7 @@ package() {
-   DESTDIR="${pkgdir}" cmake --install build
-   install -Dm644 ${pkgname#*-}-${pkgname%-*}-${pkgver}/LICENSE.md -t "${pkgdir}"/usr/share/licenses/${pkgname}/
++    patch -Np1 -d media-driver-intel-media-${pkgver} -i "${srcdir}/add-loongarch64-build-support.patch"
+     cmake -B build -S "media-driver-intel-media-${pkgver}" \
+         -G 'Unix Makefiles' \
+         -DCMAKE_INSTALL_PREFIX:PATH='/usr' \
+@@ -35,3 +36,7 @@ package() {
+     DESTDIR="$pkgdir" cmake --install build
+     install -D -m644 "media-driver-intel-media-${pkgver}/LICENSE.md" -t "${pkgdir}/usr/share/licenses/${pkgname}"
  }
 +
 +source+=("add-loongarch64-build-support.patch::https://patch-diff.githubusercontent.com/raw/intel/media-driver/pull/1936.diff")
