@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 09413f6..ae2f662 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -179,7 +179,6 @@ makedepends=(
+@@ -181,7 +181,6 @@ makedepends=(
    speex
    srt
    svt-av1
@@ -10,8 +8,8 @@ index 09413f6..ae2f662 100644
    systemd-libs
    taglib
    twolame
-@@ -274,6 +273,14 @@ build() {
-     -D vaapi=enabled
+@@ -278,6 +277,14 @@ build() {
+     -D package-origin="https://www.archlinux.org/"
    )
  
 +  # To build on loong64
@@ -25,16 +23,16 @@ index 09413f6..ae2f662 100644
    # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/issues/3197
    export GI_SCANNER_DISABLE_CACHE=1
  
-@@ -293,7 +300,7 @@ check() (
+@@ -298,7 +305,7 @@ check() (
  
    # Flaky due to timeouts
    xvfb-run -s "-nolisten local" \
--    meson test -C build --print-errorlogs -t 5
-+    meson test -C build --print-errorlogs -t 5 || echo "Watch out for failed tests!"
+-    meson test -C build --print-errorlogs -t $CK_TIMEOUT_MULTIPLIER
++    meson test -C build --print-errorlogs -t $CK_TIMEOUT_MULTIPLIER || echo "Watch out for failed tests!"
  )
  
  _install() {
-@@ -768,7 +775,6 @@ package_gst-plugins-bad() {
+@@ -778,7 +785,6 @@ package_gst-plugins-bad() {
      spandsp
      srt
      svt-av1
@@ -42,7 +40,7 @@ index 09413f6..ae2f662 100644
      webrtc-audio-processing-1
      wildmidi
      x265
-@@ -832,7 +838,6 @@ package_gst-plugins-bad() {
+@@ -854,7 +860,6 @@ package_gst-plugins-bad() {
      usr/lib/gstreamer-1.0/libgstsrt.so
      usr/lib/gstreamer-1.0/libgstsrtp.so
      usr/lib/gstreamer-1.0/libgstsvtav1.so
@@ -50,7 +48,7 @@ index 09413f6..ae2f662 100644
      usr/lib/gstreamer-1.0/libgstteletext.so
      usr/lib/gstreamer-1.0/libgsttimecode.so
      usr/lib/gstreamer-1.0/libgstttmlsubs.so
-@@ -1122,7 +1127,9 @@ package_gst-devtools() {
+@@ -1195,7 +1200,9 @@ package_gst-devtools() {
      usr/share/icons/hicolor/*/apps/gst-debug-viewer.*
      usr/share/metainfo/org.freedesktop.GstDebugViewer.appdata.xml
  
