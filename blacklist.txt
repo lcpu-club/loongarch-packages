@@ -1,0 +1,39 @@
+# Only list `pkgbase` here
+
+# If only one or some of packages in `pkgname` array
+# cannot be built, just patch it and DO NOT add its
+# `pkgbase` here
+
+# Binary package that don't have loong64 support
+cuda
+cudnn
+discord
+hsa-amd-aqlprofile-bin
+nvidia
+nvidia-cg-toolkit
+nvidia-lts
+nvidia-utils
+obsidian
+reaper
+teamspeak3
+teamspeak3-server
+vivaldi
+
+# No hardware support
+dosemu
+i7z
+intel-gmmlib
+intel-gpu-tools
+intel-graphics-compiler
+intel-media-driver
+intel-media-sdk
+intel-metee
+intel-oneapi-mkl
+intel-ucode
+intel-undervolt
+libva-intel-driver
+throttled
+tp_smapi
+tp_smapi-lts
+tpacpi-bat
+xf86-video-intel
