@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -5,15 +5,10 @@ pkgname=(
+@@ -6,15 +6,10 @@ pkgname=(
    'bootconfig'
    'bpf'
    'cpupower'
@@ -14,55 +14,69 @@
    'usbip'
 -  'x86_energy_perf_policy'
  )
- pkgver=6.19
- pkgrel=2
-@@ -101,10 +96,13 @@ build() {
+ pkgver=6.19.3
+ pkgrel=1
+@@ -39,11 +34,11 @@ makedepends+=('ncurses')
+ # bpf deps
+ makedepends+=('readline' 'zlib' 'libelf' 'libcap' 'python-docutils')
+ # turbostat deps
+-makedepends+=('libcap')
++# makedepends+=('libcap')
+ # bpftool
+ makedepends+=('llvm' 'clang')
+ # intel-speed-select
+-makedepends+=('libnl')
++# makedepends+=('libnl')
+ groups=("$pkgbase")
+ source=(https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/${_srcname}.tar.{xz,sign}
+         'usbipd.service'
+@@ -104,10 +99,13 @@ build() {
    make VERSION=$pkgver-$pkgrel
    popd
  
 +  # Use a "multi-line comment" to keep patch from rotting
 +  : <<COMMENT_SEPARATOR
    echo ':: x86_energy_perf_policy'
-   pushd linux/tools/power/x86/x86_energy_perf_policy
+   pushd "$_srcname"/tools/power/x86/x86_energy_perf_policy
    make
    popd
 +COMMENT_SEPARATOR
  
    echo ':: usbip'
-   pushd linux/tools/usb/usbip
-@@ -120,6 +118,7 @@ build() {
+   pushd "$_srcname"/tools/usb/usbip
+@@ -123,6 +121,7 @@ build() {
    make
    popd
  
 +  : <<COMMENT_SEPARATOR
    echo ':: turbostat'
-   pushd linux/tools/power/x86/turbostat
+   pushd "$_srcname"/tools/power/x86/turbostat
    make
-@@ -129,6 +128,7 @@ build() {
-   pushd linux/tools/hv
+@@ -132,6 +131,7 @@ build() {
+   pushd "$_srcname"/tools/hv
    CFLAGS+=' -DKVP_SCRIPTS_PATH=\"/usr/lib/hypervkvpd/\"' make
    popd
 +COMMENT_SEPARATOR
  
    echo ':: bpf'
-   pushd linux/tools/bpf
-@@ -144,6 +144,7 @@ build() {
+   pushd "$_srcname"/tools/bpf
+@@ -147,6 +147,7 @@ build() {
    make
    popd
  
 +  : <<COMMENT_SEPARATOR
    echo ':: intel-speed-select'
-   pushd linux/tools/power/x86/intel-speed-select
+   pushd "$_srcname"/tools/power/x86/intel-speed-select
    make
-@@ -153,6 +154,7 @@ build() {
-   pushd linux/tools/arch/x86/kcpuid
+@@ -156,6 +157,7 @@ build() {
+   pushd "$_srcname"/tools/arch/x86/kcpuid
    make
    popd
 +COMMENT_SEPARATOR
  }
  
  package_linux-tools-meta() {
-@@ -162,14 +164,9 @@ package_linux-tools-meta() {
+@@ -165,14 +167,9 @@ package_linux-tools-meta() {
      'bootconfig'
      'bpf'
      'cpupower'
@@ -77,7 +91,7 @@
    )
    conflicts=(
      'acpidump'
-@@ -187,7 +184,7 @@ package_perf() {
+@@ -190,7 +187,7 @@ package_perf() {
      prefix=/usr \
      lib=lib/perf \
      perfexecdir=lib/perf \
