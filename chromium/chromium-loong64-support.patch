@@ -848,28 +848,6 @@ diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sa
 diff '--color=auto' -p -X ../chromium-loongarch64/chromium/exclude -N -u -r a/sandbox/linux/syscall_broker/broker_host.cc b/sandbox/linux/syscall_broker/broker_host.cc
 --- a/sandbox/linux/syscall_broker/broker_host.cc	2000-01-01 00:00:00.000000000 +0800
 +++ b/sandbox/linux/syscall_broker/broker_host.cc	2000-01-01 00:00:00.000000000 +0800
-@@ -302,6 +302,21 @@ void BrokerHost::StatFileForIPC(BrokerCo
-     RAW_CHECK(reply->AddIntToMessage(0));
-     RAW_CHECK(
-         reply->AddDataToMessage(reinterpret_cast<char*>(&sb), sizeof(sb)));
-+#elif defined(__loongarch__)
-+    // handle COMMAND_STATX
-+    DCHECK(command_type == COMMAND_STATX);
-+    struct kernel_statx sb;
-+
-+    int sts = sandbox::sys_statx(AT_FDCWD, file_to_access,
-+                                     follow_links ? 0 : AT_SYMLINK_NOFOLLOW,
-+				     STATX_BASIC_STATS, &sb);
-+    if (sts < 0) {
-+      RAW_CHECK(reply->AddIntToMessage(-errno));
-+      return;
-+    }
-+    RAW_CHECK(reply->AddIntToMessage(0));
-+    RAW_CHECK(
-+        reply->AddDataToMessage(reinterpret_cast<char*>(&sb), sizeof(sb)));
- #else  // defined(__NR_fstatat64)
-     // We should not reach here on 64-bit systems, as the *stat*64() are only
-     // necessary on 32-bit.
 @@ -441,7 +456,8 @@ bool BrokerHost::HandleRemoteCommand(Bro
        break;
      }
