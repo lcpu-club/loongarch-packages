@@ -1,7 +1,7 @@
 # Maintainer: Andreas Radke <andyrtr@archlinux.org>
 
 pkgbase=linux-4k
-pkgver=6.12.64
+pkgver=6.18.16
 pkgrel=1
 pkgdesc='LTS Linux'
 url='https://www.kernel.org'
@@ -14,6 +14,9 @@ makedepends=(
   pahole
   perl
   python
+  rust
+  rust-bindgen
+  rust-src
   tar
   xz
 
@@ -33,8 +36,8 @@ _srctag=v$pkgver
 source=(
   https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/${_srcname}.tar.{xz,sign}
   0001-ZEN-Add-sysctl-and-CONFIG-to-disallow-unprivileged-C.patch
-  0002-Default-to-maximum-amount-of-ASLR-bits.patch
-  0003-skip-simpledrm-if-nvidia-drm.modeset\=1-is.patch
+  0002-drm-amdgpu-avoid-memory-allocation-in-the-critical-code-path-v3.patch
+  0003-drm-amdgpu-use-GFP_ATOMIC-instead-of-NOWAIT-in-the-critical-path.patch
   config  # the main kernel config file
 )
 validpgpkeys=(
@@ -42,18 +45,18 @@ validpgpkeys=(
   647F28654894E3BD457199BE38DBBDC86092693E  # Greg Kroah-Hartman
 )
 # https://www.kernel.org/pub/linux/kernel/v6.x/sha256sums.asc
-sha256sums=('d1ad94a33681148efe884f4028970d69e332f2b003f0e8be53a1d25de38e49a2'
+sha256sums=('4f21c01f4d04c1d1b3ed794153f8900802c92497be620b07c4869530f2d28ee3'
             'SKIP'
-            '3cf389ced2b40e6457421cb27892bf126b73032fbf1de895ecc37b13d981a17c'
-            '423b2c6fbc8d6df79997550bef1b1e4f6f402b668007d150013623a83a12b49e'
-            '596f8e0aef1df72a84685e8f2b8a9dde7e33b513de555fae6069ba652cbd00c1'
-            '4498dafff3359a3a0b1838afa919d7ded7dd8d3fb96af33ed7a87263b524aeb0')
-b2sums=('0554c8ed42204ecec4e37623b6e48d02ce8b9c284a923f79118f0d1ade1db93c0c24bae0ee6eabcf27c944c27e92c5474407bf383c8afbcaba9abd3c696dd422'
+            'e5bda61fa4405571a0267cd8812329bb8a432a37efb50459461628d371849906'
+            'c31b8c0ace123f5c1a0012a1254272eea9ac9cdd0d3e5d538ca6b11830dd01b0'
+            '0f482368b62c3cece941e2d3ba497bf322db59315df5c2f72500fc1318e4768e'
+            'b364eae3a55fc2d3fd3029866b8f90430bc0c307cfa22a3e190ac1c13fcf8aa2')
+b2sums=('eaec61dd6db6047f345050e5daaaa76278fb9a56c49a3596a8d63d98060664fdabd5d742b91693cd724713e4381214141e8d3e81d989970d59831f71c8eca2a0'
         'SKIP'
-        'b2e1f3544470a0ded336a8d9097b879060530d795a9b60ef5d617d16c165f3ca27424529a7c464d249ab72abcaf48d65d66d96508a7b49622ab404739ae0a918'
-        '01f1a8249983b1a52437843ce3566242b3ed1df03fcab98ec092982be9a4dc947ab0f932a6bc9ac84f85248dca479ebe193a6032cfd2b574dc6f5ca31a0190c5'
-        '410dc8911051905c5c01b47890eeff817fc180434372864cfa9ee0d77e0ff43571b9fcc3c193d562c4dcd49511edf7c6c01dde12dd0778845d1868dc435531ea'
-        '48a6603f16ec2e4d4941ed14014eea91121bc7797f2707902d0fe40b5481743525ae100627b611fa0ad819e27f7b888c4545212963e18ba290ef6da145fa6408')
+        '5b3597cab8b174ff41b3f17aae6d1376a155356f781542e2e176d66c5a6dee53f7a1db8e2b9540ce8246efac4e27476c882fc8cc8063f0f514ae09230b5aef0a'
+        'a71f78bea42d158fc9383f2bbb985dafa71274d2032876b67f84602c8085b1c53f3d36965e54e5fdbab5c0d7537c98d917bd7743d3cf373c1dcb6da3bc19f4e7'
+        'c9d4ec8fac86a9b6f0567c57f6d5be04d56f8efbc9dc1b183981dad38387d750b53c17fcdd295cb68a874bf50f81d117cfe94bd3a8d9e08e1918644ae8daa3e5'
+        '05d8f2db31cf6bc81c8fd193a881d4bd8d3fa29cd5ff9e84aaaac53b99b43b28cd981b4d7d8172e379b6bf9b4365cfaa21e494816afe1e582b7918a56848b64e')
 export KBUILD_BUILD_HOST=archlinux
 export KBUILD_BUILD_USER=$pkgbase
 export KBUILD_BUILD_TIMESTAMP="$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})"
@@ -99,7 +102,7 @@ prepare() {
 build() {
   cd $_srcname
 
-  make htmldocs &
+  make htmldocs SPHINXOPTS=-QT &
   local pid_docs=$!
   make all
   make -C tools/bpf/bpftool vmlinux.h feature-clang-bpf-co-re=1
@@ -250,6 +253,7 @@ _package-headers() {
     Zlib
   )
   depends=(pahole)
+  provides=(LINUX-HEADERS)
 
   cd $_srcname
   local builddir="$pkgdir/usr/lib/modules/$(<version)/build"
@@ -298,6 +302,14 @@ _package-headers() {
 
   echo "Installing KConfig files..."
   find . -name 'Kconfig*' -exec install -Dm644 {} "$builddir/{}" \;
+
+  echo "Installing Rust files..."
+  install -Dt "$builddir/rust" -m644 rust/*.rmeta
+  install -Dt "$builddir/rust" rust/*.so
+
+  echo "Installing unstripped VDSO..."
+  make INSTALL_MOD_PATH="$pkgdir/usr" vdso_install \
+    link=  # Suppress build-id symlinks
 
   echo "Removing unneeded architectures..."
   local arch
@@ -405,20 +417,33 @@ for _p in "${pkgname[@]}"; do
   }"
 done
 
-source+=('loong-addition.config'
-         'LoongArch-Add-CPU-HWMon-platform-driver.patch::https://github.com/chenhuacai/linux/commit/9367b1a79e9b7b2d09e330d1f4fc0cd195f82091.diff'
-         '0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch'
-         '0002-LOONGARCH-drm-xe-fix-build-on-non-4K-kernels.patch'
-         '0003-LOONGARCH-from-AOSCOS-more-fixes-for-Xe-on-LoongArch.patch')
+source+=("loong-addition.config"
+         "LoongArch-Add-CPU-HWMon-platform-driver.patch::https://github.com/chenhuacai/linux/commit/9367b1a79e9b7b2d09e330d1f4fc0cd195f82091.diff"
+         "0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch"
+         "0016-REVERT-Revert-Mark-xe-driver-as-BROKEN-if-kernel-pag.patch"
+         "0017-BACKPORT-FROMLIST-drm-xe-bo-fix-alignment-with-non-4.patch"
+         "0018-BACKPORT-FROMLIST-drm-xe-guc-use-SZ_4K-for-alignment.patch"
+         "0019-BACKPORT-FROMLIST-drm-xe-regs-fix-RING_CTL_SIZE-size.patch"
+         "0020-FROMLIST-drm-xe-use-4K-alignment-for-cursor-jumps.patch"
+         "0021-FROMLIST-drm-xe-query-use-PAGE_SIZE-as-the-minimum-p.patch"
+)
 sha256sums+=('77eba2e995872642d763af67747228ef2e27b9d0a7958e8db0a12c4cdcc9acc1'
              'cde52675c44a69282c5b0fd1c6de2affd8f8ddeb0436a2db8bb03f55a9a9ef42'
-             '7fb7c79fcc055990a77e2aba686edacfbc1a3ee68098797a93c2db0ed3aff6e1'
-             '5f6c9983e49c16941b2ede98e25deb860259f371d9ab89dddb5ebf4968d91be3'
-             '5c4ccb967efcd79f8ea5f63836cd424b2e22255ffd89deaeeac6b6fcd40ea88a')
+             'd146728a3b3c722f433e310cad21e93c53e64a7afe948b5b43b077e962750941'
+             'c16845f0e9ac9d592e6a8ed2276b96749a58c7a8d95b23f0126a4ee92ee1685b'
+             'b82a5f954d688f2d21823a807141596713744f0458d2bac3439c8c203bd6b654'
+             '415aa6b21912dce689c11c6e2afcb6d2fb887f38a8c6da18b8f7727d3256d743'
+             'c46de055ed82702c20d3c70cc2a268ed48a6fa4ad2a546fd3b339a1366954618'
+             '30accab32bd0699304421ad347bd9866820a499b78d473d14e099600912717a8'
+             'e629cc73e44a63c4a332c8f77f8e4baa01227a9ed4390bf5ef978b02be9b6b0d')
 b2sums+=('652069e50060a3d84530f004f7064d98d6ac9bb02e690a3510d092d0df17598c9b3d564ae07fdb0dbbecc68d2d12d58c4c78c02cc08fbcbb8c01ba6e6256d922'
          'f0f3a73bd953fe1c3ec3b06519ca2bdec70231de0470f217b166a9bba44168d27e826898913e38f8045f05dc5b7d84eed6074befab9563814663f1fd9b882873'
-         '1fc07a8aa13618d9f24803adc84ef21b4427d97b860f16a7f9ce348c19f03d2bcfec4f7ee3e1cbd1f5015918b3e48be97a4d4a992be5d0b74127e392f9867dc6'
-         'd7cefaedcf5226c6d8fb54437098798f9512e80ffb033274799e90c655d6659912ed5e9dc81bfaf0b47b3ebbabf7bf1efb48817759cf272d0cfaaf7446548f99'
-         '5dca610d93e67f096b87d0679cdb4bcf439ede2d527630842784ca2c00c4e363ee9fcbfc72c2f92ae2469a3a46ddf449f350e48c5a8a6459d1adfb3881b48ebe')
+         '4a0b268f1a28d4bfa37d9b644477c75a5215083414fe5cc5d637e2edc4895aace9e42b3b33ac0b3e2a15a18340bec651511fa3c347c1c3e347ed3418c033582c'
+         'f4b5787523241762389a2ebbe391cc7f4fdef0408c254461f4a54d6f6577f6f7bb525552cd9ccc639da39f06b03f5061578c0c6b009acf9101f6ff17d63111b0'
+         '9b349d174549daa31177f2f65971c2c6e8f691882c77f3ba2ff95d55592b22d49b5caf549847ba21fc776f7f29508f10a96bf57f9b04d93956340579e01c8266'
+         'be8e7e21b4706e6d7c5ea314c080f6d50cd0fefde7a7694d424d82be6f85d5588fc683514d505f14f74c76b9b435d03281c0761cbb7d177222984f7c4710d70b'
+         '6b00b56e99f3c534f51b3991a051c3a158a155c19de1e1d4f344965c56f84ea95b8d2c6fb91b96930847a8c68699a46393235777d6176dfd1c2946b11ea4857e'
+         '4513616d06073e36675511be5375e64be7cc2bcff0fecbf959fae4485875d5c0f2428ac8df9492052cce9cf1cc99d44e94cbbd49364146a491d97716d8ca7595'
+         'e9e60112c0b5e0d57db30b2dc7b7c0d093d5df846daaaccc7df4f1a8cdbc1e445542132d9db06d87210bacf495d9a95d655f4f227869d38d312234a654a233f1')
 
 # vim:set ts=8 sts=2 sw=2 et:
