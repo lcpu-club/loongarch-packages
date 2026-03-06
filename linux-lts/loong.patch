@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index eeec77d..7011950 100644
+index 1aeb978..60bd0af 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -75,8 +75,19 @@ prepare() {
+@@ -78,8 +78,19 @@ prepare() {
      patch -Np1 < "../$src"
    done
  
@@ -22,7 +22,7 @@ index eeec77d..7011950 100644
    make olddefconfig
    diff -u ../config .config || :
  
-@@ -246,7 +257,11 @@ _package-headers() {
+@@ -250,7 +261,11 @@ _package-headers() {
    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
      localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
    install -Dt "$builddir/kernel" -m644 kernel/Makefile
@@ -35,7 +35,7 @@ index eeec77d..7011950 100644
    cp -t "$builddir" -a scripts
    ln -srt "$builddir" "$builddir/scripts/gdb/vmlinux-gdb.py"
  
-@@ -258,8 +273,13 @@ _package-headers() {
+@@ -262,8 +277,13 @@ _package-headers() {
  
    echo "Installing headers..."
    cp -t "$builddir" -a include
@@ -51,7 +51,7 @@ index eeec77d..7011950 100644
  
    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
-@@ -281,7 +301,11 @@ _package-headers() {
+@@ -293,7 +313,11 @@ _package-headers() {
    echo "Removing unneeded architectures..."
    local arch
    for arch in "$builddir"/arch/*/; do
@@ -64,24 +64,37 @@ index eeec77d..7011950 100644
      echo "Removing $(basename "$arch")"
      rm -r "$arch"
    done
-@@ -380,4 +404,20 @@ for _p in "${pkgname[@]}"; do
+@@ -392,4 +416,33 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
-+source+=('loong-addition.config'
-+         'LoongArch-Add-CPU-HWMon-platform-driver.patch::https://github.com/chenhuacai/linux/commit/9367b1a79e9b7b2d09e330d1f4fc0cd195f82091.diff'
-+         '0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch'
-+         '0002-LOONGARCH-drm-xe-fix-build-on-non-4K-kernels.patch'
-+         '0003-LOONGARCH-from-AOSCOS-more-fixes-for-Xe-on-LoongArch.patch')
++source+=("loong-addition.config"
++         "LoongArch-Add-CPU-HWMon-platform-driver.patch::https://github.com/chenhuacai/linux/commit/9367b1a79e9b7b2d09e330d1f4fc0cd195f82091.diff"
++         "0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch"
++         "0016-REVERT-Revert-Mark-xe-driver-as-BROKEN-if-kernel-pag.patch"
++         "0017-BACKPORT-FROMLIST-drm-xe-bo-fix-alignment-with-non-4.patch"
++         "0018-BACKPORT-FROMLIST-drm-xe-guc-use-SZ_4K-for-alignment.patch"
++         "0019-BACKPORT-FROMLIST-drm-xe-regs-fix-RING_CTL_SIZE-size.patch"
++         "0020-FROMLIST-drm-xe-use-4K-alignment-for-cursor-jumps.patch"
++         "0021-FROMLIST-drm-xe-query-use-PAGE_SIZE-as-the-minimum-p.patch"
++)
 +sha256sums+=('77eba2e995872642d763af67747228ef2e27b9d0a7958e8db0a12c4cdcc9acc1'
 +             'cde52675c44a69282c5b0fd1c6de2affd8f8ddeb0436a2db8bb03f55a9a9ef42'
-+             '7fb7c79fcc055990a77e2aba686edacfbc1a3ee68098797a93c2db0ed3aff6e1'
-+             '5f6c9983e49c16941b2ede98e25deb860259f371d9ab89dddb5ebf4968d91be3'
-+             '5c4ccb967efcd79f8ea5f63836cd424b2e22255ffd89deaeeac6b6fcd40ea88a')
++             'd146728a3b3c722f433e310cad21e93c53e64a7afe948b5b43b077e962750941'
++             'c16845f0e9ac9d592e6a8ed2276b96749a58c7a8d95b23f0126a4ee92ee1685b'
++             'b82a5f954d688f2d21823a807141596713744f0458d2bac3439c8c203bd6b654'
++             '415aa6b21912dce689c11c6e2afcb6d2fb887f38a8c6da18b8f7727d3256d743'
++             'c46de055ed82702c20d3c70cc2a268ed48a6fa4ad2a546fd3b339a1366954618'
++             '30accab32bd0699304421ad347bd9866820a499b78d473d14e099600912717a8'
++             'e629cc73e44a63c4a332c8f77f8e4baa01227a9ed4390bf5ef978b02be9b6b0d')
 +b2sums+=('652069e50060a3d84530f004f7064d98d6ac9bb02e690a3510d092d0df17598c9b3d564ae07fdb0dbbecc68d2d12d58c4c78c02cc08fbcbb8c01ba6e6256d922'
 +         'f0f3a73bd953fe1c3ec3b06519ca2bdec70231de0470f217b166a9bba44168d27e826898913e38f8045f05dc5b7d84eed6074befab9563814663f1fd9b882873'
-+         '1fc07a8aa13618d9f24803adc84ef21b4427d97b860f16a7f9ce348c19f03d2bcfec4f7ee3e1cbd1f5015918b3e48be97a4d4a992be5d0b74127e392f9867dc6'
-+         'd7cefaedcf5226c6d8fb54437098798f9512e80ffb033274799e90c655d6659912ed5e9dc81bfaf0b47b3ebbabf7bf1efb48817759cf272d0cfaaf7446548f99'
-+         '5dca610d93e67f096b87d0679cdb4bcf439ede2d527630842784ca2c00c4e363ee9fcbfc72c2f92ae2469a3a46ddf449f350e48c5a8a6459d1adfb3881b48ebe')
++         '4a0b268f1a28d4bfa37d9b644477c75a5215083414fe5cc5d637e2edc4895aace9e42b3b33ac0b3e2a15a18340bec651511fa3c347c1c3e347ed3418c033582c'
++         'f4b5787523241762389a2ebbe391cc7f4fdef0408c254461f4a54d6f6577f6f7bb525552cd9ccc639da39f06b03f5061578c0c6b009acf9101f6ff17d63111b0'
++         '9b349d174549daa31177f2f65971c2c6e8f691882c77f3ba2ff95d55592b22d49b5caf549847ba21fc776f7f29508f10a96bf57f9b04d93956340579e01c8266'
++         'be8e7e21b4706e6d7c5ea314c080f6d50cd0fefde7a7694d424d82be6f85d5588fc683514d505f14f74c76b9b435d03281c0761cbb7d177222984f7c4710d70b'
++         '6b00b56e99f3c534f51b3991a051c3a158a155c19de1e1d4f344965c56f84ea95b8d2c6fb91b96930847a8c68699a46393235777d6176dfd1c2946b11ea4857e'
++         '4513616d06073e36675511be5375e64be7cc2bcff0fecbf959fae4485875d5c0f2428ac8df9492052cce9cf1cc99d44e94cbbd49364146a491d97716d8ca7595'
++         'e9e60112c0b5e0d57db30b2dc7b7c0d093d5df846daaaccc7df4f1a8cdbc1e445542132d9db06d87210bacf495d9a95d655f4f227869d38d312234a654a233f1')
 +
  # vim:set ts=8 sts=2 sw=2 et:
