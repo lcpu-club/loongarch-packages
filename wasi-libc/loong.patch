@@ -1,0 +1,11 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index ca68cbd..06ac85f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -55,4 +55,6 @@ package() {
+   install -Dm644 ${pkgname}/LICENSE* -t "${pkgdir}"/usr/share/licenses/${pkgname}
+ }
+ 
++makedepends+=(wasm-tools wasm-component-ld)
++
+ # vim:set sw=2 sts=-1 et:
