@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 59f3698..b5a48b6 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,7 @@ build() {
+         -G 'Unix Makefiles' \
+         -DCMAKE_BUILD_TYPE:STRING='None' \
+         -DCMAKE_INSTALL_PREFIX:PATH='/usr' \
++        -DRKCOMMON_NO_SIMD=ON \
+         -Wno-dev
+     cmake --build build
+ }
