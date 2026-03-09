@@ -1,0 +1,10 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 38edc49..0ed04fd 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -70,3 +70,5 @@ package() {
+ 
+   install -Dm644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname
+ }
++
++checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^(python-playwright)$'))
