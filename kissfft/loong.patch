@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 894bbe8..73d8a80 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -27,6 +27,8 @@ sha256sums=('205a8f6a448ef12b091f8ac6a514b5091bb5f6b0b543431ed75f673116cf5cbf')
+ build() {
+ 	cd "${srcdir}/${pkgname}-${pkgver}"
+ 
++	patch -Np1 -i "${srcdir}/Add-SIMDE-support-for-portable-SIMD-on-non-x86-platforms.patch"
++
+ 	# Our makefile gets overwritten, save it so we can copy it back
+ 	cp Makefile Makefile.bak
+ 
+@@ -95,3 +97,7 @@ package() {
+ 		install -Dm644 "build/libkissfft-${_data_type}-openmp.so.131.1.0" "${pkgdir}/usr/lib/libkissfft-${_data_type}-openmp.so.131.1.0"
+ 	done
+ }
++
++source+=("Add-SIMDE-support-for-portable-SIMD-on-non-x86-platforms.patch::https://github.com/wszqkzqk/kissfft/commit/eacca73b275f2bb6994285e944a65aec9ccaf601.patch")
++sha256sums+=('fce7638e96d406d93f2aa01d437cee51998a709996f5ce07f1fdda0f8828a7cd')
++makedepends+=(simde)
