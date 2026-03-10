@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -69,7 +69,7 @@ check() {
-     --skip test_sort::test_help_colors_disabled \
-     --skip test_sort::test_help_colors_enabled \
-     --skip test_who::test_boot \
+@@ -60,7 +60,7 @@ check() {
+     --skip test_cp::test_cp_debug_reflink_never_with_hole \
+     --skip test_cp::test_cp_sparse_always_non_empty \
+     --skip test_logname::test_output_format \
 -    --skip test_stdbuf"
 +    --skip test_stdbuf" || echo "Watch out for failed tests!"
  }
