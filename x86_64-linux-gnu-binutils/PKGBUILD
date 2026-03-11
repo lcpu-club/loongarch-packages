@@ -3,7 +3,7 @@
 _target=x86_64-linux-gnu
 pkgname=$_target-binutils
 pkgver=2.45
-pkgrel=1
+pkgrel=2
 pkgdesc='A set of programs to assemble and manipulate binary and object files for 32-bit and 64-bit x86'
 arch=(loong64)
 url='https://www.gnu.org/software/binutils/'
@@ -90,7 +90,10 @@ package() {
 
   # Remove file conflicting with host binutils and manpages for MS Windows tools
   rm "$pkgdir"/usr/share/man/man1/$_target-{dlltool,windres,windmc}*
-  rm -rf "$pkgdir"/usr/lib
+  find "$pkgdir"/usr/lib -mindepth 1 \
+                         ! -name 'libsframe.so.2' \
+                         ! -name 'libsframe.so.2.0.0' \
+                         -delete
 
   rm -rf "$pkgdir"/usr/include
 
