@@ -1,99 +1,67 @@
-# Maintainer: Xiaotian Wu <yetist@gmail.com>
+# Maintainer: wszqkzqk <wszqkzqk@qq.com>
+# Contributor: Levi Zim <rsworktech@outlook.com>
+# Contributor: Anatol Pomozov <anatol.pomozov@gmail.com>
 
 _target=x86_64-linux-gnu
 pkgname=$_target-binutils
-pkgver=2.45
+pkgver=2.46.0
 pkgrel=1
-pkgdesc='A set of programs to assemble and manipulate binary and object files for 32-bit and 64-bit x86'
-arch=(loong64)
+pkgdesc='A set of programs to assemble and manipulate binary and object files for the x86_64 target'
+arch=(aarch64 riscv64 loong64)
 url='https://www.gnu.org/software/binutils/'
 license=(GPL)
+groups=('x86')
 depends=(zlib libelf)
-groups=(x86)
-source=(https://ftp.gnu.org/gnu/binutils/binutils-$pkgver.tar.bz2{,.sig}
-        gold-warn-unsupported.patch)
-sha256sums=('1393f90db70c2ebd785fb434d6127f8888c559d5eeb9c006c354b203bab3473e'
-            'SKIP'
-            '2d430b66f84a19c154725ec535280c493be1d34f1a90f95208dce02fecd0e4e4')
+source=(https://ftp.gnu.org/gnu/binutils/binutils-$pkgver.tar.zst{,.sig})
+sha1sums=('5f6c695a91e964425684ce4e71a9b50c9e38aab8'
+          'SKIP')
+sha256sums=('8ba6a3c4d29eae4dc1bdffb29d1e99b2a658c3f4c6a23ea1c507e9fa47db2898'
+            'SKIP')
 validpgpkeys=('3A24BC1E8FB409FA9F14371813FCEF89DD9E3C4F') # Nick Clifton (Chief Binutils Maintainer) <nickc@redhat.com>
 
 prepare() {
-  [[ ! -d binutils-gdb ]] && ln -s binutils-${pkgver} binutils-gdb
-  mkdir -p binutils-build
-
-  cd binutils-gdb
-
-  # Turn off development mode (-Werror, gas run-time checks, date in sonames)
-  sed -i '/^development=/s/true/false/' bfd/development.sh
-
-  # Creds @Fedora
-  # Change the gold configuration script to only warn about
-  # unsupported targets.  This allows the binutils to be built with
-  # BPF support enabled.
-  # patch -Np1 -i "${srcdir}"/gold-warn-unsupported.patch
+  cd binutils-$pkgver
+  sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" libiberty/configure
 }
 
 build() {
-  cd binutils-build
+  cd binutils-$pkgver
 
-  "${srcdir}"/binutils-gdb/configure --target=$_target \
-    --with-sysroot=/usr/$_target \
-    --prefix=/usr \
-    --enable-cet \
-    --enable-colored-disassembly \
-    --enable-default-execstack=no \
-    --enable-deterministic-archives \
-    --enable-gold \
-    --enable-install-libiberty \
-    --enable-jansson \
-    --enable-ld=default \
-    --enable-new-dtags \
-    --enable-plugins \
-    --enable-relro \
-    --enable-shared \
-    --enable-targets=x86_64-pep,bpf-unknown-none \
-    --enable-threads \
-    --disable-gdb \
-    --disable-gdbserver \
-    --disable-libdecnumber \
-    --disable-readline \
-    --disable-sim \
-    --disable-werror \
-    --with-pic \
-    --with-system-zlib
+  ./configure --target=$_target \
+              --with-sysroot=/usr/$_target \
+              --prefix=/usr \
+              --disable-gprofng \
+              --disable-multilib \
+              --with-gnu-as \
+              --with-gnu-ld \
+              --disable-nls \
+              --enable-gold \
+              --enable-ld=default \
+              --enable-plugins \
+              --enable-deterministic-archives \
+              --enable-new-dtags \
+              --disable-werror
 
-  make -O tooldir=/usr
-
-  # Extract the FSF All Permissive License
-  # <https://www.gnu.org/prep/maintain/html_node/License-Notices-for-Other-Files.html>
-  # used for some linker scripts.
-  tail -n 5 "${srcdir}"/binutils-gdb/ld/scripttempl/README > FSFAP
+  make
 }
 
 check() {
-  cd binutils-build
+  cd binutils-$pkgver
 
-  # Use minimal flags for testsuite
-  # ld testsuite uses CFLAGS_FOR_TARGET and requires -g
-  # gold testsuite requires CXXFLAGS/CFLAGS with default PIE/PIC disabled
-  make -O CFLAGS_FOR_TARGET="-O2 -g" \
-          CXXFLAGS="-O2 -no-pie -fno-PIC" \
-          CFLAGS="-O2 -no-pie" \
-          LDFLAGS="" \
-          check || true
+  # unset LDFLAGS as testsuite makes assumptions about which ones are active
+  # do not abort on errors - manually check log files
+  make -k LDFLAGS="" check || true
 }
 
 package() {
-  cd binutils-build
+  cd binutils-$pkgver
 
   make DESTDIR="$pkgdir" install
 
   # Remove file conflicting with host binutils and manpages for MS Windows tools
   rm "$pkgdir"/usr/share/man/man1/$_target-{dlltool,windres,windmc}*
-  rm -rf "$pkgdir"/usr/lib
-
-  rm -rf "$pkgdir"/usr/include
+  rm "$pkgdir"/usr/lib/bfd-plugins/libdep.so
 
   # Remove info documents that conflict with host version
-  rm -rf "$pkgdir"/usr/share/{info,locale}
+  rm -r "$pkgdir"/usr/share/info
 }
