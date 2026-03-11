@@ -16,7 +16,7 @@ for _dir in $(git diff --merge-base --name-only upstream/master | cut -d / -f 1 
       _tmp=$(sudo -u nobody mktemp -d)
       cp -r $_dir/* $_tmp/
       pushd $_tmp
-      sudo -u nobody makepkg --verifysource --skippgpcheck || exit 1
+      sudo -u nobody makepkg -A --verifysource --skippgpcheck || exit 1
       popd
       continue
     else
@@ -68,7 +68,7 @@ for _dir in $(git diff --merge-base --name-only upstream/master | cut -d / -f 1 
 
   sudo -u nobody patch -p1 -i ./loong.patch || exit 1
 
-  sudo -u nobody makepkg --verifysource --skippgpcheck || exit 1
+  sudo -u nobody makepkg -A --verifysource --skippgpcheck || exit 1
 
   popd
 done
