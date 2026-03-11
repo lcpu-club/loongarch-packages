@@ -7,7 +7,7 @@
 _target=x86_64-linux-gnu
 pkgname=$_target-gcc
 pkgver=15.2.0
-pkgrel=1.1
+pkgrel=1.2
 #_snapshot=8-20190111
 pkgdesc='The GNU Compiler Collection - cross compiler for x86_64 target'
 arch=(aarch64 loong64 riscv64)
