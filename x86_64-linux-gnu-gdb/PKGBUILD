@@ -1,19 +1,21 @@
-# Maintainer: Xiaotian Wu <yetist@gmail.com>
+# Maintainer: wszqkzqk <wszqkzqk@qq.com>
+# Contributor: Anatol Pomozov <anatol.pomozov@gmail.com>
 
 _target=x86_64-linux-gnu
 pkgname=$_target-gdb
-pkgver=16.2
+pkgver=17.1
 pkgrel=1
 pkgdesc='The GNU Debugger for the 32bit and 64bit x86 target'
-arch=(loong64)
+arch=(loong64 aarch64 riscv64)
 url='https://www.gnu.org/software/gdb/'
 license=(GPL3)
+groups=('x86')
 depends=(xz ncurses expat python guile gdb-common mpfr libelf source-highlight)
 makedepends=(boost)
 options=(!emptydirs)
 source=(https://ftp.gnu.org/gnu/gdb/gdb-$pkgver.tar.xz{,.sig})
 validpgpkeys=('F40ADB902B24264AA42E50BF92EDB04BFF325CF3') # Joel Brobecker
-sha256sums=('4002cb7f23f45c37c790536a13a720942ce4be0402d929c9085e92f10d480119'
+sha256sums=('14996f5f74c9f68f5a543fdc45bca7800207f91f92aeea6c2e791822c7c6d876'
             'SKIP')
 validpgpkeys=('F40ADB902B24264AA42E50BF92EDB04BFF325CF3') # Joel Brobecker <brobecker@adacore.com>
 
@@ -39,11 +41,11 @@ build() {
 package() {
   cd gdb-$pkgver/build
 
-  make -C gdb DESTDIR=$pkgdir install
+  make -C gdb DESTDIR="${pkgdir}" install
 
   # Following files conflict with 'gdb'/'gdb-common' packages
-  rm -r "$pkgdir"/usr/include/gdb/
-  rm -r "$pkgdir"/usr/share/gdb/
-  rm -r "$pkgdir"/usr/share/info/
-  rm -r "$pkgdir"/usr/share/man/man5/
+  rm -r "${pkgdir}"/usr/include/gdb/
+  rm -r "${pkgdir}"/usr/share/gdb/
+  rm -r "${pkgdir}"/usr/share/info/
+  rm -r "${pkgdir}"/usr/share/man/man5/
 }
