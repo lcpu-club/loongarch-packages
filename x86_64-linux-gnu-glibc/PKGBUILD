@@ -1,123 +1,78 @@
-# Maintainer: Xiaotian Wu <yetist@gmail.com>
+# Maintainer: wszqkzqk <wszqkzqk@qq.com>
+# Maintainer: Pluto Yang <yangyj.ee@gmail.com>
+# Contributor: Anatol Pomozov
+# Contributor: Eli Schwartz <eschwartz@archlinux.org>
 
 _target=x86_64-linux-gnu
 pkgname=$_target-glibc
-pkgver=2.41
+pkgver=2.43
 pkgrel=1
 pkgdesc='GNU C Library x86_64 target'
 arch=(any)
 url='https://www.gnu.org/software/libc/'
-license=(GPL LGPL)
+license=('GPL' 'LGPL')
+groups=('x86')
 depends=($_target-gcc $_target-linux-api-headers)
-groups=(x86)
 makedepends=(python)
 options=(!buildflags !strip staticlibs)
-source=(https://ftp.gnu.org/gnu/libc/glibc-$pkgver.tar.xz{,.sig}
-        sdt.h sdt-config.h)
-sha256sums=('a5a26b22f545d6b7d7b3dd828e11e428f24f4fac43c934fb071b6a7d0828e901'
-            'SKIP'
-            '774061aff612a377714a509918a9e0e0aafce708b87d2d7e06b1bd1f6542fe70'
-            'cdc234959c6fdb43f000d3bb7d1080b0103f4080f5e67bcfe8ae1aaf477812f0')
+source=(https://ftp.gnu.org/gnu/libc/glibc-$pkgver.tar.xz{,.sig})
+sha256sums=('d9c86c6b5dbddb43a3e08270c5844fc5177d19442cf5b8df4be7c07cd5fa3831'
+            'SKIP')
 validpgpkeys=(7273542B39962DF7B299931416792B4EA25340F8  # "Carlos O'Donell <carlos@systemhalted.org>"
-              BC7C7372637EC10C57D7AA6579C43DFBF1CF2187) # Siddhesh Poyarekar
+              BC7C7372637EC10C57D7AA6579C43DFBF1CF2187  # Siddhesh Poyarekar
+              35B17DF5752577CA0C541CEB94BFDF4484AD142F) # Andreas K. Huettel (at work) <mail@akhuettel.de>
 
 prepare() {
-  mkdir -p glibc-build lib32-glibc-build
-
-  [[ -d glibc-$pkgver ]] && ln -s glibc-$pkgver glibc
-  cd glibc
+  mkdir -p glibc-build
 }
 
 build() {
+  cd glibc-build
+
+  echo 'slibdir=/lib' >> configparms
+  echo 'rtlddir=/lib' >> configparms
+  echo 'sbindir=/bin' >> configparms
+  echo 'rootsbindir=/bin' >> configparms
+
   # remove hardening options for building libraries
   export CFLAGS="-U_FORTIFY_SOURCE -O2"
   export CPPFLAGS="-U_FORTIFY_SOURCE -O2"
   unset LD_LIBRARY_PATH
 
   export BUILD_CC=gcc
+  export CC=${_target}-gcc
+  export CXX=${_target}-g++
+  export AR=${_target}-ar
+  export RANLIB=${_target}-ranlib
 
-  local _configure_flags=(
-      --prefix=/usr
-      --target=$_target
-      --host=$_target
-      --build=$CHOST
-      --includedir=/include
-      --with-headers=/usr/$_target/include
-      --with-bugurl=https://bugs.archlinux.org/
-      --enable-bind-now
-      --enable-fortify-source
-      --enable-kernel=4.4
-      --enable-stack-protector=strong
-      --enable-multi-arch
-      --enable-systemtap
-      --enable-cet
-      --disable-nscd
-      --disable-profile
+  ../glibc-$pkgver/configure \
+      --prefix=/usr \
+      --target=$_target \
+      --host=$_target \
+      --build=$CHOST \
+      --includedir=/include \
+      --libdir=/lib \
+      --libexecdir=/lib \
+      --with-headers=/usr/$_target/include \
+      --with-bugurl=https://github.com/lcpu-club/loongarch-packages/issues \
+      --enable-add-ons \
+      --enable-obsolete-rpc \
+      --enable-kernel=2.6.32 \
+      --enable-bind-now \
+      --disable-profile \
+      --enable-stackguard-randomization \
+      --enable-lock-elision \
+      --enable-multi-arch \
       --disable-werror
-  )
 
-  (
-    cd glibc-build
-    export CC=${_target}-gcc
-    export CXX=${_target}-g++
-    export AR=${_target}-ar
-    export RANLIB=${_target}-ranlib
-
-    echo 'slibdir=/lib' >> configparms
-    echo 'rtlddir=/lib' >> configparms
-    echo 'sbindir=/bin' >> configparms
-    echo 'rootsbindir=/bin' >> configparms
-
-    # Credits @allanmcrae
-    # https://github.com/allanmcrae/toolchain/blob/f18604d70c5933c31b51a320978711e4e6791cf1/glibc/PKGBUILD
-    # remove fortify for building libraries
-    # CFLAGS=${CFLAGS/-Wp,-D_FORTIFY_SOURCE=2/}
-
-    "${srcdir}"/glibc/configure \
-        --libdir=/lib \
-        --libexecdir=/lib \
-        "${_configure_flags[@]}" || bash -i
-
-    echo 'build-programs=no' >> configparms
-    make
-  )
-
-#  (
-#    cd lib32-glibc-build
-#    export CC="${_target}-gcc -m32 -mstackrealign"
-#    export CXX="${_target}-g++ -m32 -mstackrealign"
-#
-#    echo "slibdir=/lib32" >> configparms
-#    echo "rtlddir=/lib32" >> configparms
-#    echo "sbindir=/bin" >> configparms
-#    echo "rootsbindir=/bin" >> configparms
-#    echo 'build-programs=no' >> configparms
-#
-#    "${srcdir}"/glibc-$pkgver/configure \
-#        --host=i686-pc-linux-gnu \
-#        --libdir=/lib32 \
-#        --libexecdir=/lib32 \
-#        "${_configure_flags[@]}"
-#
-#    make -O
-#  )
+  echo 'build-programs=no' >> configparms
+  make
 }
 
 package() {
   cd glibc-build
 
   make install_root="$pkgdir"/usr/$_target install
-#  make -C glibc-build DESTDIR="${pkgdir}" install
-  install -Dm644 "${srcdir}"/sdt.h "${pkgdir}"/usr/$_target/include/sys/sdt.h
-  install -Dm644 "${srcdir}"/sdt-config.h "${pkgdir}"/usr/$_target/include/sys/sdt-config.h
-#  cd lib32-glibc-build
-
-#  make install_root="$pkgdir"/usr/$_target install
-#  make DESTDIR="${pkgdir}" install
-
-#  # Dynamic linker
-#  install -d "${pkgdir}"/usr/lib
-#  ln -s ../lib32/ld-linux.so.2 "${pkgdir}"/usr/lib/
 
   rm -r "$pkgdir"/usr/$_target/{etc,usr/share,var}
 }
