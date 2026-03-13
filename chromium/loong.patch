@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index e9103ad..c4a5172 100644
+index 05021d8..95f5b06 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -27,6 +27,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
+@@ -55,6 +55,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
              'kwallet: support for storing passwords in KWallet on Plasma'
              'upower: Battery Status API support')
  options=('!lto') # Chromium adds its own flags for ThinLTO
@@ -10,7 +10,7 @@ index e9103ad..c4a5172 100644
  source=(https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$pkgver-lite.tar.xz
          https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver/chromium-launcher-$_launcher_ver.tar.gz
          chromium-138-nodejs-version-check.patch
-@@ -50,6 +51,8 @@ if (( _manual_clone )); then
+@@ -80,6 +81,8 @@ if (( _manual_clone )); then
    source[0]=fetch-chromium-release
    sha256sums[0]='2e2f36e3cd1ebc4ad57fd310774a5e5e9db77883d5f9374fedeaabd3c103b819'
    makedepends+=('python-httplib2' 'python-pyparsing' 'python-six' 'npm' 'rsync')
@@ -19,18 +19,55 @@ index e9103ad..c4a5172 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -122,6 +125,10 @@ prepare() {
-   # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
-   patch -Np1 -i ../compiler-rt-adjust-paths.patch
- 
+@@ -203,6 +206,47 @@ prepare() {
+   python3 build/util/lastchange.py -m DAWN_COMMIT_HASH \
+     -s third_party/dawn --revision gpu/webgpu/DAWN_VERSION \
+     --header gpu/webgpu/dawn_commit_hash.h
++
 +  # Patches for loong64
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++  patch -Np1 -i "${srcdir}/boringssl_urandom_loongarch.patch"
 +
-   # Increase _FORTIFY_SOURCE level to match Arch's default flags
-   patch -Np1 -i ../increase-fortify-level.patch
++  pushd third_party/node/
++  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
++  #local _rollup_ver="$(jq -r .dependencies.\"@rollup/wasm-node\" package.json)"
++  local _rollup_ver="4.32.0" # Known version that supports loong64
++  jq ".dependencies.rollup=\"$_rollup_ver\" | .dependencies.\"@rollup/rollup-linux-loongarch64-gnu\"=\"$_rollup_ver\"" package.json > package.json.new
++  mv package.json{.new,}
++  popd
++
++  # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
++  third_party/node/update_npm_deps
++
++  pushd third_party/devtools-frontend/src
++  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" scripts/devtools_paths.py
++  #local _rollup_ver="$(jq -r .devDependencies.\"@rollup/wasm-node\" package.json)"
++  jq ".devDependencies.rollup=\"$_rollup_ver\" | .devDependencies.\"@rollup/rollup-linux-loongarch64-gnu\"=\"$_rollup_ver\""  package.json > package.json.new
++  mv package.json{.new,}
++  # Chromium hosts a custom registry at https://npm.skia.org/chrome-devtools/
++  # and rejects some packages:
++  # Package fs-extra with version 11.3.0 was created 108h0m0s time ago. This is less than 1 week and so failed the audit.
++  sed -i /registry/d .npmrc
++  # Replace direct invocation of wasm rollup
++  sed -i 's\@rollup/wasm-node\rollup\' \
++    inspector_overlay/BUILD.gn \
++    front_end/models/live-metrics/web-vitals-injected/BUILD.gn \
++    front_end/Images/BUILD.gn \
++    front_end/panels/recorder/injected/BUILD.gn \
++    scripts/build/ninja/bundle.gni
++  popd
++  # Get the binary from the npm package
++  local _esbuild_ver=$(jq -r '.devDependencies.esbuild // .dependencies.esbuild' third_party/devtools-frontend/src/package.json | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
++  npm install "@esbuild/linux-loong64@${_esbuild_ver}"
++  mkdir -p third_party/devtools-frontend/src/third_party/esbuild/
++  mv node_modules/@esbuild/linux-loong64/bin/esbuild third_party/devtools-frontend/src/third_party/esbuild/esbuild
++  rm -r node_modules # Cleaning
++  python3 third_party/devtools-frontend/src/scripts/deps/manage_node_deps.py
+ }
  
-@@ -280,6 +287,9 @@ build() {
+ build() {
+@@ -310,6 +354,9 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -40,13 +77,16 @@ index e9103ad..c4a5172 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -357,4 +367,9 @@ package() {
+@@ -387,4 +434,12 @@ package() {
    install -Dvm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
-+         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
++         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++         "boringssl_urandom_loongarch.patch")
 +sha256sums+=('c498ad298917886739606cd8fac8f526fd05218a460997c0e9100db18b1996bb'
-+             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
++             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
++             '27d21b282d89b860120ec8ea509d5e15f542eaf18f20ab5212cbe05c36897699')
++makedepends+=(jq npm rsync)
 +
  # vim:set ts=2 sw=2 et:
