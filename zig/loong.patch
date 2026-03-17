@@ -2,13 +2,13 @@
 +++ b/PKGBUILD
 @@ -11,7 +11,6 @@ license=('MIT')
  options=('!lto')
- depends=('clang19' 'lld19' 'llvm19-libs')
- makedepends=('cmake' 'llvm19')
+ depends=('clang20' 'lld20' 'llvm20-libs')
+ makedepends=('cmake' 'llvm20')
 -checkdepends=('lib32-glibc')
  source=("https://ziglang.org/download/$pkgver/zig-$pkgver.tar.xz"
-         "skip-localhost-test.patch")
- sha256sums=('237f8abcc8c3fd68c70c66cdbf63dce4fb5ad4a2e6225ac925e3d5b4c388f203'
-@@ -45,6 +44,7 @@ build() {
+         "skip-localhost-test.patch"
+         "skip-futex2-test.patch")
+@@ -47,6 +46,7 @@ build() {
      cmake --build build
  }
  
@@ -16,7 +16,7 @@
  check() {
      cd "$pkgname-$pkgver"
      # ugly workaround until test target is provided
-@@ -55,6 +55,7 @@ check() {
+@@ -57,6 +57,7 @@ check() {
        -Denable-llvm=true \
        -Dskip-non-native=true
  }
