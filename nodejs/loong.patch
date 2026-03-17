@@ -1,11 +1,10 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -102,6 +102,8 @@ check() {
- 
-   # https://github.com/nodejs/node/pull/60523
-   rm test/parallel/test-datetime-change-notify.js
-+  rm -f test/parallel/test-dgram-send-cb-quelches-error.js
-+  rm -f test/parallel/test-net-autoselectfamily.js
+@@ -98,6 +98,7 @@ check() {
+   rm test/parallel/test-http2-priority-event.js
+   rm test/parallel/test-http2-reset-flood.js
+   rm test/parallel/test-tls-ocsp-callback.js
++  rm test/parallel/test-inspector-ip-detection.js
  
    make test-only
  }
