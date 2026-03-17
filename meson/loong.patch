@@ -1,18 +1,18 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -124,7 +124,7 @@ build() {
- check() (
+@@ -116,7 +116,7 @@ check() {
    cd meson
-   export LC_CTYPE=en_US.UTF-8 CPPFLAGS= CFLAGS= CXXFLAGS= LDFLAGS=
--  ./run_tests.py --failfast
-+  ./run_tests.py || echo "Watch out failed tests!"
- )
+   CMAKE_POLICY_VERSION_MINIMUM=3.5 LC_ALL=en_US.UTF-8 \
+     CPPFLAGS= CFLAGS= CXXFLAGS= LDFLAGS= FFLAGS=-I/usr/include \
+-    ./run_tests.py --failfast
++    ./run_tests.py || echo "Watch out failed tests!"
+ }
  
  package() {
-@@ -146,4 +146,6 @@ package() {
+@@ -138,4 +138,6 @@ package() {
    install -Dm644 ../native-clang "$pkgdir/usr/share/meson/native/clang"
  }
  
-+checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^(cuda|gtk-sharp-3|mono|pypy3)$'))
++checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^(cuda|gtk-sharp-3|mono|pypy3|dmd|intel-oneapi-mkl)$'))
 +
  # vim:set sw=2 sts=-1 et:
