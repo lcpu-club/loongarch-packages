@@ -1,0 +1,18 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 0edd66e..0555c13 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -41,6 +41,7 @@ build() {
+ 
+     mkdir -p build && cd build
+ 
++    export PATH="/usr/lib/llvm21/bin:$PATH"
+     cmake -GNinja \
+     -DCMAKE_INSTALL_PREFIX=/usr \
+     -DCMAKE_BUILD_TYPE=Release \
+@@ -101,3 +102,5 @@ package_liblphobos() {
+     # licenses
+     install -D -m644 "$srcdir/ldc/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++makedepends+=(lld21)
