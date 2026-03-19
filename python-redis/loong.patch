@@ -1,10 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -182,6 +182,21 @@ check() {
-     --ignore=tests/test_asyncio/test_command_policies.py
-     --deselect=tests/test_asyncio/test_sentinel.py::test_sentinel_commands_with_strict_redis_client
-     --deselect=tests/test_sentinel.py::test_sentinel_commands_with_strict_redis_client
-+
+@@ -189,6 +189,20 @@ check() {
+     --ignore=tests/test_asyncio/test_observability
+     # Requires a cluster on ports 15379-15384 which we don't set up
+     --ignore=tests/maint_notifications
 +    # To build on loong64 (floating point precision issues)
 +    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_geopos
 +    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_georadius_with
