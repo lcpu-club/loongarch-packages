@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index ff693f4..331acea 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,6 +32,7 @@ b2sums=('fd4bf76a7074e20b8256461d79be0ac72679c6d4432c038997383cf1dd2d38a83fe84c1
+ 
+ prepare() {
+   cd "${pkgname}-${pkgver}"
++  patch -Np1 -i "${srcdir}/test-Enable-some-libc-integration-variants.patch"
+   cp "${srcdir}/test-config.toml" .
+   cargo fetch --locked --target "$(rustc --print host-tuple)"
+ }
+@@ -53,4 +54,8 @@ package() {
+   install -Dm 644 LICENSE-* -t "${pkgdir}/usr/share/licenses/${pkgname}"
+ }
+ 
++source+=("test-Enable-some-libc-integration-variants.patch::https://github.com/wild-linker/wild/commit/ee3bd3f480d9b69eedc055c544f65903910684da.diff")
++sha256sums+=('af4a91d1feb92a8d7a620a977d11a4815f5eeb92ce031e8d373d96997caa854b')
++b2sums+=('fc458270c15a629ac11def4dd5f205ca868701c8a7ede080717b5eb5427dea7b263f6dd1c75162d187ac2dc236b127aa9777dcc947cf478f7db5973f22416bb5')
++
+ # vim: ts=2 sw=2 et:
