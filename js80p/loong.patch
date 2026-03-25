@@ -1,10 +1,8 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 83b1a3e..ce133a8 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -44,8 +44,8 @@ build() {
-   # supports AVX, but that's not in x86_64_v1
+@@ -45,8 +45,8 @@ build() {
    make \
+     CXX_WARNINGS='-Wno-error' \
      SYS_LIB_PATH=/usr/lib \
 -    TARGET_PLATFORM="$CARCH-gpp" \
 -    INSTRUCTION_SET=sse2 \
@@ -13,13 +11,13 @@ index 83b1a3e..ce133a8 100644
      VERSION_STR=$(git describe --tags) \
      VERSION_INT=$(git describe --tags | sed "s/[^0-9]//g") \
      vst3
-@@ -56,8 +56,8 @@ package() {
+@@ -57,8 +57,8 @@ package() {
  
    # vst3
    install -vDm644 \
--    "dist/js80p-dev-linux-$CARCH-sse2-vst3_single_file/js80p.vst3" \
+-    "dist/js80p-dev-linux-$CARCH-sse2-vst3_single/js80p.vst3" \
 -    "$pkgdir/usr/lib/vst3/$pkgname.vst3/Contents/$CARCH-linux/$pkgname.so"
-+    "dist/js80p-dev-linux-$(uname -m)-lsx-vst3_single_file/js80p.vst3" \
++    "dist/js80p-dev-linux-$(uname -m)-lsx-vst3_single/js80p.vst3" \
 +    "$pkgdir/usr/lib/vst3/$pkgname.vst3/Contents/$(uname -m)-linux/$pkgname.so"
  
    # presets
