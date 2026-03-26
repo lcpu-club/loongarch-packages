@@ -1,0 +1,23 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 9bd2de5..e693a57 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -62,6 +62,10 @@ prepare() {
+ 
+   # Remove CMake find module for zstd; breaks if out of sync with upstream zstd
+   rm cmake/modules/Findzstd.cmake
++
++  pushd "${srcdir}/llvm-project-$pkgver.src"
++  patch -Np1 -i "${srcdir}/Fix-incorrect-indexing-of-incoming-byval-arguments-in-tail-call-eligibility-check.patch"
++  popd
+ }
+ 
+ build() {
+@@ -158,4 +162,7 @@ package_llvm-libs() {
+     "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
+ 
++source+=("Fix-incorrect-indexing-of-incoming-byval-arguments-in-tail-call-eligibility-check.patch")
++sha256sums+=('fba4e230420ab9152419526906bbea6bb6a504f330aaf6d00bd1bde4cc23d5c9')
++
+ # vim:set ts=2 sw=2 et:
