@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index b024df6..0cdbe63 100644
+index ee3b38f..73319de 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -71,6 +71,7 @@ case "${CARCH}" in
+@@ -72,6 +72,7 @@ case "${CARCH}" in
    i686)   _JARCH='x86';;
    riscv64)_JARCH='riscv64';;
    aarch64) _JARCH='aarch64';;
@@ -10,18 +10,18 @@ index b024df6..0cdbe63 100644
  esac
  
  _jvmdir=/usr/lib/jvm/java-${_majorver}-openjdk
-@@ -458,4 +459,14 @@ package_openjdk-doc() {
+@@ -456,4 +457,14 @@ package_openjdk-doc() {
    ln -s ${pkgbase} "${pkgdir}/usr/share/licenses/${pkgname}"
  }
  
 +# We cannot use upstream's version control
 +# Reset some versions
-+_loongfixver=26
-+pkgver=${_majorver}.${_minorver}.ls.${_loongfixver}.0
++_loongfixver=27
++pkgver=${_majorver}.u${_loongfixver}ls0
 +_jdkdir=jdk-jdk-${_majorver}-${_loongfixver}-ls-0
 +_imgdir=${_jdkdir}/build/linux-${_JARCH}-server-release/images
 +
 +source+=("https://github.com/loongson/jdk/archive//refs/tags/jdk-${_majorver}+${_loongfixver}-ls-0.tar.gz")
-+sha256sums+=('e1f0e9d3d20d8559b208a3b6d62028c84e46763036e8876ac7fb5365f2f7ada4')
++sha256sums+=('50e6c172b66633b06fc2ce143ffc434bf1d44a53a9fe08eb1ff1a73fd423c345')
 +
  # vim: ts=2 sw=2 et:
