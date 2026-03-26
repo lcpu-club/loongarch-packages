@@ -1,0 +1,27 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 56aba21..38b2161 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -72,6 +72,7 @@ case "${CARCH}" in
+   i686)   _JARCH='x86';;
+   riscv64)_JARCH='riscv64';;
+   aarch64) _JARCH='aarch64';;
++  loong64) _JARCH='loongarch64';;
+ esac
+ 
+ _jvmdir=/usr/lib/jvm/java-${_majorver}-openjdk
+@@ -456,4 +457,14 @@ package_openjdk25-doc() {
+   ln -s ${pkgbase} "${pkgdir}/usr/share/licenses/${pkgname}"
+ }
+ 
++# We cannot use upstream's version control
++# Reset some versions
++_loongfixver=26
++pkgver=${_majorver}.u${_loongfixver}ls0
++_jdkdir=jdk-jdk-${_majorver}-${_loongfixver}-ls-0
++_imgdir=${_jdkdir}/build/linux-${_JARCH}-server-release/images
++
++source+=("https://github.com/loongson/jdk/archive//refs/tags/jdk-${_majorver}+${_loongfixver}-ls-0.tar.gz")
++sha256sums+=('e1f0e9d3d20d8559b208a3b6d62028c84e46763036e8876ac7fb5365f2f7ada4')
++
+ # vim: ts=2 sw=2 et:
