@@ -1,16 +1,14 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 62a9007..495d7a9 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -27,6 +27,7 @@ prepare() {
+@@ -77,6 +77,7 @@ prepare() {
  }
  
  build() {
 +  export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
-   CXXFLAGS+=' -ffat-lto-objects'
- 
-   # Turns out we're allowed to use the official API key that telegram uses for their snap builds:
-@@ -44,3 +45,5 @@ build() {
+   cmake -S td -B td/build \
+     -DCMAKE_BUILD_TYPE=None \
+     -DCMAKE_INSTALL_PREFIX="$PWD/td/install" \
+@@ -102,3 +103,5 @@ build() {
  package() {
    DESTDIR="$pkgdir" cmake --install build
  }
