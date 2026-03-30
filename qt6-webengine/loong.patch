@@ -1,9 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 2c839a6..6c3e5c4 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -96,6 +96,12 @@ prepare() {
-   cd src/3rdparty
+@@ -96,6 +96,13 @@ prepare() {
    [[ -n $_chromium ]] && git checkout $_chromium || true
-   git cherry-pick -n bf8bd5512920b28468d99b9ce550f0617e57d7f4 # Fix build with glibc 2.43
+ 
+   git cherry-pick -n c60cb063bc6884a47dd34337dd878b3656f855cf # Fix build with system openh264
++
 +  pushd "${srcdir}/${_pkgfn}"
 +  # Fix build for loong64 (Chen Jiajie's patch)
 +  patch -Np2 -i "$srcdir/add-loong64-support.patch"
@@ -13,12 +16,12 @@
  }
  
  build() {
-@@ -117,3 +123,8 @@ package() {
- 
-   install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
+@@ -119,3 +126,8 @@ package() {
+ # Remove cmake module that breaks corrosion
+   rm "$pkgdir"/usr/lib/cmake/Qt6/FindRust.cmake
  }
 +
 +source+=("add-loong64-support.patch")
-+sha256sums+=('7f1941b42851e568900a261eab8f15c1a743b987965e98c168d6298ef3b97a92')
++sha256sums+=('8592cef263fee7a8d806b2b16fb07e7296593b6a0b3c35174fd3a5f53f29bc94')
 +# Temporarily switch to mold to workaround with binutils's bfd's bug
 +makedepends+=(mold)
