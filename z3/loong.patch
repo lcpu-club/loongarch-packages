@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -35,6 +35,7 @@ b2sums=('c8c0458a0b2828f9c8a5909d8f5014e33e9b19923518e1f4bcb98d02da02ea9ef57391c
+ prepare() {
+   cd z3
+   patch -Np1 -i ../z3-python-do-not-rebuild.patch
++  sed -i "/('linux', \"riscv64\"): \"linux_riscv64\",/a \                (\"linux\", \"loongarch64\"): \"linux_loongarch64\","  src/api/python/setup.py
+ }
+ 
+ build() {
