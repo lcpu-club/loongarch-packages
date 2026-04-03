@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -217,6 +217,11 @@ prepare() {
+@@ -220,6 +220,11 @@ prepare() {
  
    git -c protocol.file.allow=always submodule update --init --recursive
  
@@ -12,7 +12,7 @@
    # Fix cmake prefix path (FS#78665)
    patch -Np1 -i "${srcdir}"/fix_cmake_prefix_path.patch
  
-@@ -269,7 +274,7 @@ _prepare() {
+@@ -270,7 +275,7 @@ _prepare() {
    # Check tools/setup_helpers/cmake.py, setup.py and CMakeLists.txt for a list of flags that can be set via env vars.
    export BUILD_TEST=OFF  # do not build tests
    export ATEN_NO_TEST=ON  # do not build ATen tests
@@ -21,7 +21,7 @@
    export BUILD_CUSTOM_PROTOBUF=OFF
    export USE_GFLAGS=ON
    export USE_GLOG=ON
-@@ -278,10 +283,11 @@ _prepare() {
+@@ -279,10 +284,11 @@ _prepare() {
    export USE_MAGMA=ON
    # export USE_SYSTEM_LIBS=ON  # experimental, not all libs present in repos
    # USE_SYSTEM_ONNX=ON does not work and onnx itself should be removed from pytorch: https://github.com/pytorch/pytorch/issues/166546#issuecomment-3463370459
@@ -35,7 +35,7 @@
    export USE_GOLD_LINKER=ON
    export NCCL_VERSION=$(pkg-config nccl --modversion)
    export NCCL_VER_CODE=$(sed -n 's/^#define NCCL_VERSION_CODE\s*\(.*\).*/\1/p' /usr/include/nccl.h)
-@@ -302,7 +308,7 @@ _prepare() {
+@@ -303,7 +309,7 @@ _prepare() {
    # https://github.com/pytorch/pytorch/blob/f9074c7332c3dfd43fe39e8733ec98f7f29b3e61/torch/utils/cpp_extension.py#L2417-L2420
    # (note that 8.8 is not supported)
    export TORCH_CUDA_ARCH_LIST="7.5 8.0 8.6 8.7 8.9 9.0 10.0 10.3 11.0 12.0 12.1"
@@ -44,7 +44,7 @@
    export ROCM_PATH=/opt/rocm
    export HIP_ROOT_DIR=/opt/rocm
    # gfx950 lacks support for 128 bit atomics
-@@ -314,7 +320,7 @@ _prepare() {
+@@ -315,7 +321,7 @@ _prepare() {
    export USE_FBGEMM_GENAI=OFF
  
    # Compile source code for supported GPU archs in parallel (but using too many jobs is not helpful)
@@ -53,7 +53,7 @@
    export HIPCC_LINK_FLAGS_APPEND="-parallel-jobs=4"
  
    export AOTRITON_INSTALLED_PREFIX=/usr
-@@ -329,23 +335,24 @@ _prepare() {
+@@ -331,23 +337,24 @@ _prepare() {
  
  build() {
    cd "${srcdir}/${_pkgname}"
@@ -82,7 +82,7 @@
    cd "${srcdir}/${_pkgname}-cuda"
    echo "Building with cuda and without non-x86-64 optimizations"
    _prepare
-@@ -366,9 +373,10 @@ build() {
+@@ -368,9 +375,10 @@ build() {
    _prepare
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
@@ -94,7 +94,7 @@
    # -fcf-protection is not supported by HIP, see
    # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
    CXXFLAGS+=" -fcf-protection=none"
-@@ -377,19 +385,21 @@ build() {
+@@ -379,19 +387,21 @@ build() {
    export USE_CUDNN=0
    export USE_ROCM=1
    export MAGMA_HOME=/opt/rocm
@@ -123,15 +123,15 @@
  }
  
  package_python-pytorch-opt() {
--  pkgdesc="${_pkgdesc} (with AVX2 CPU optimizations)"
-+  pkgdesc="${_pkgdesc} (with LASX CPU optimizations)"
+-  pkgdesc+=" (with AVX2 CPU optimizations)"
++  pkgdesc+=" (with LASX CPU optimizations)"
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
 @@ -460,7 +470,7 @@ package_python-pytorch-opt-cuda() {
  
  package_python-pytorch-rocm() {
-   pkgdesc="${_pkgdesc} (with ROCm)"
+   pkgdesc+=" (with ROCm)"
 -  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn python-triton python-aotriton)
 +  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn)
    conflicts=(python-pytorch)
@@ -141,9 +141,9 @@
  }
  
  package_python-pytorch-opt-rocm() {
--  pkgdesc="${_pkgdesc} (with ROCm and AVX2 CPU optimizations)"
+-  pkgdesc+=" (with ROCm and AVX2 CPU optimizations)"
 -  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn python-triton python-aotriton)
-+  pkgdesc="${_pkgdesc} (with ROCm and LASX CPU optimizations)"
++  pkgdesc+=" (with ROCm and LASX CPU optimizations)"
 +  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn)
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver} python-pytorch-rocm=${pkgver})
