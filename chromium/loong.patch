@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 44e4608..d69a97c 100644
+index 1978988..be2f595 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -54,6 +54,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
@@ -19,7 +19,7 @@ index 44e4608..d69a97c 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -211,6 +214,48 @@ prepare() {
+@@ -211,6 +214,47 @@ prepare() {
    python3 build/util/lastchange.py -m DAWN_COMMIT_HASH \
      -s third_party/dawn --revision gpu/webgpu/DAWN_VERSION \
      --header gpu/webgpu/dawn_commit_hash.h
@@ -28,7 +28,6 @@ index 44e4608..d69a97c 100644
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
 +  patch -Np1 -i "${srcdir}/boringssl_urandom_loongarch.patch"
-+  patch -Np1 -i "${srcdir}/fix-para-type-in-delay.cc.patch"
 +
 +  pushd third_party/node/
 +  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
@@ -68,7 +67,7 @@ index 44e4608..d69a97c 100644
  }
  
  build() {
-@@ -318,6 +363,9 @@ build() {
+@@ -318,6 +362,9 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -78,18 +77,16 @@ index 44e4608..d69a97c 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -395,4 +443,14 @@ package() {
+@@ -395,4 +442,12 @@ package() {
    install -Dvm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
-+         "boringssl_urandom_loongarch.patch"
-+         "fix-para-type-in-delay.cc.patch")
++         "boringssl_urandom_loongarch.patch")
 +sha256sums+=('c498ad298917886739606cd8fac8f526fd05218a460997c0e9100db18b1996bb'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
-+             '27d21b282d89b860120ec8ea509d5e15f542eaf18f20ab5212cbe05c36897699'
-+             '9dddd42413ce4a7b877f5778402e360cab3310a316f5209b0bcefa0d1d2d27fe')
++             '27d21b282d89b860120ec8ea509d5e15f542eaf18f20ab5212cbe05c36897699')
 +makedepends+=(jq npm rsync)
 +
  # vim:set ts=2 sw=2 et:
