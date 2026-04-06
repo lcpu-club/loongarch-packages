@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6d4b54c..26db838 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,7 +31,7 @@ b2sums=('baabd63921a1a09ff82c452c4d3ddcab021886be4c0790b0870946b9b2e24c7451c1027
+ 
+ prepare() {
+   cd "$pkgname"
+-
++  git cherry-pick -n 40f0e294489f299c8abafd4fc4ab28afde7ffece
+   # download dependencies
+   cargo fetch --locked --target host-tuple
+ }
