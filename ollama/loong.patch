@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4c6549b..81ea438 100644
+index 638c354..24015f7 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -26,6 +26,9 @@ b2sums=('0bae800496db6ffd0a9b24b356df86627a8049ff75e9f8a38d8594182f80f24a98d59d9
+@@ -37,6 +37,9 @@ b2sums=('66f20600aa5d0b3b5788f8f6b0b54591041fc6841bcadfefaea3e161add6aa70abb1e14
          'e8f2b19e2474f30a4f984b45787950012668bf0acb5ad1ebb25cd9776925ab4a6aa927f8131ed53e35b1c71b32c504c700fe5b5145ecd25c7a8284373bb951ed')
  
  build() {
@@ -12,11 +12,38 @@ index 4c6549b..81ea438 100644
    export CGO_CPPFLAGS="${CPPFLAGS}"
    export CGO_CFLAGS="${CFLAGS}"
    export CGO_CXXFLAGS="${CXXFLAGS}"
-@@ -89,3 +92,7 @@ package_ollama-docs() {
+@@ -65,6 +68,15 @@ build() {
+     -D CMAKE_CUDA_ARCHITECTURES="75;80;86;87;88;89;90;100;103;110;120;121;121-virtual"
+   )
+ 
++  # Must be applied beforce `make -f Makefile.sync clean checkout apply-patches sync`
++  patch -Np1 -i "${srcdir}/ggml-rsync-filter-loong64.patch"
++  make -f Makefile.sync clean checkout apply-patches sync
++  # Must be applied after `make -f Makefile.sync clean checkout apply-patches sync`
++  patch -Np1 -i "${srcdir}/enable-loong64-cpu-variants.patch"
++  patch -Np1 -i "${srcdir}/ggml-cpu-all-variants-loong64.patch"
++  install -Dm644 "${srcdir}/ggml-cpu-cpu_loongarch64.go" ml/backend/ggml/ggml/src/ggml-cpu/cpu_loongarch64.go
++  install -Dm644 "${srcdir}/ggml-cpu-arch-loongarch-loongarch.go" ml/backend/ggml/ggml/src/ggml-cpu/arch/loongarch/loongarch.go
++
+   cmake "${cmake_options[@]}"
+   cmake --build build
+   go build .
+@@ -118,3 +130,18 @@ package_ollama-docs() {
    cp -r ollama/docs "$pkgdir/usr/share/doc/ollama"
    install -Dm644 ollama/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
 +# Remove cuda
-+pkgname=(${pkgname[@]/ollama-cuda})
-+makedepends=(${makedepends[@]/cuda})
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(ollama-cuda)$'))
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda)$'))
++makedepends+=(rsync)
++source+=("ggml-rsync-filter-loong64.patch"
++         "enable-loong64-cpu-variants.patch"
++         "ggml-cpu-all-variants-loong64.patch"
++         "ggml-cpu-cpu_loongarch64.go"
++         "ggml-cpu-arch-loongarch-loongarch.go")
++b2sums+=('b9de2511df6908f4ab02421342ee1180db1cab209a95daebd08228b994bd87a17f0b23f21837c6d5111427d0c048bad8fc640fca66482b4f8df16c89fd03f8c4'
++         '4ff1e289d06da2ab586e8432f5ad97659677fb69b9e83227f0209238a5eb7613a5241c9e189eb88c487d8c3760108410dac471f15ba7f94b2da7cc463be85cbf'
++         'e7e2b7f73a5bbf01edccca404f18d245fbbbfbfbca9b8970dc198d4036b9e59d9587386aad616e030239f9fbaa3ab18b5c48d55396ce2cd4258693ec41bd83c0'
++         'b301ee36d80ada2cbe7a602ab57e2df962ad9d3f08874775f34e59325e91fe0b1ff70e7ee95b883ebf18e159e4f885d08e0c6d52d2a008e042472fa973e8dc2b'
++         '062f6d805f82de8ab68ded8bc245b662aceb524a930eaec59cd431a1c7207ec247dd0808d1493db5a196add3e5a80825899f3d4142392b47c7fcc0f42863d813')

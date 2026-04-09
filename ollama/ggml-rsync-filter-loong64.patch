@@ -1,0 +1,12 @@
+diff --git a/ml/backend/ggml/ggml/.rsync-filter b/ml/backend/ggml/ggml/.rsync-filter
+index 449ec9e..5c47998 100644
+--- a/ml/backend/ggml/ggml/.rsync-filter
++++ b/ml/backend/ggml/ggml/.rsync-filter
+@@ -14,6 +14,7 @@ include /src/ggml-cpu/amx/
+ include /src/ggml-cpu/arch/
+ include /src/ggml-cpu/arch/arm/
+ include /src/ggml-cpu/arch/x86/
++include /src/ggml-cpu/arch/loongarch/
+ include /src/ggml-cpu/llamafile/
+ include /src/ggml-cuda/
+ include /src/ggml-cuda/vendors/

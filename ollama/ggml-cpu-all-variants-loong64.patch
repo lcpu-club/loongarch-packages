@@ -1,0 +1,53 @@
+diff --git a/ml/backend/ggml/ggml/src/CMakeLists.txt b/ml/backend/ggml/ggml/src/CMakeLists.txt
+index 9a134b7..adef989 100644
+--- a/ml/backend/ggml/ggml/src/CMakeLists.txt
++++ b/ml/backend/ggml/ggml/src/CMakeLists.txt
+@@ -322,6 +322,14 @@ function(ggml_add_cpu_backend_variant tag_name)
+             set(GGML_${feat} ON)
+         endforeach()
+     elseif (GGML_SYSTEM_ARCH STREQUAL "ARM")
++        foreach (feat ${ARGN})
++            set(GGML_INTERNAL_${feat} ON)
++        endforeach()
++    elseif (GGML_SYSTEM_ARCH STREQUAL "loongarch64")
++        foreach (feat LSX LASX)
++            set(GGML_INTERNAL_${feat} OFF)
++        endforeach()
++
+         foreach (feat ${ARGN})
+             set(GGML_INTERNAL_${feat} ON)
+         endforeach()
+@@ -394,6 +402,14 @@ if (GGML_CPU_ALL_VARIANTS)
+         else()
+             message(FATAL_ERROR "Unsupported ARM target OS: ${CMAKE_SYSTEM_NAME}")
+         endif()
++    elseif (GGML_SYSTEM_ARCH STREQUAL "loongarch64")
++        if (CMAKE_SYSTEM_NAME MATCHES "Linux")
++            ggml_add_cpu_backend_variant(loongarch64)
++            ggml_add_cpu_backend_variant(la464          LSX LASX)
++            ggml_add_cpu_backend_variant(la664          LSX LASX)
++        else()
++            message(FATAL_ERROR "Unsupported LoongArch target OS: ${CMAKE_SYSTEM_NAME}")
++        endif()
+     elseif (GGML_SYSTEM_ARCH STREQUAL "PowerPC")
+         if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+             ggml_add_cpu_backend_variant(power0)
+diff --git a/ml/backend/ggml/ggml/src/ggml-cpu/CMakeLists.txt b/ml/backend/ggml/ggml/src/ggml-cpu/CMakeLists.txt
+index fc31089..eaeb4e4 100644
+--- a/ml/backend/ggml/ggml/src/ggml-cpu/CMakeLists.txt
++++ b/ml/backend/ggml/ggml/src/ggml-cpu/CMakeLists.txt
+@@ -431,7 +431,13 @@ function(ggml_add_cpu_backend_variant_impl tag_name)
+         message(STATUS "loongarch64 detected")
+         list(APPEND GGML_CPU_SOURCES ggml-cpu/arch/loongarch/quants.c)
+ 
+-        list(APPEND ARCH_FLAGS -march=loongarch64)
++        if (tag_name STREQUAL "la464")
++            list(APPEND ARCH_FLAGS -march=la464)
++        elseif (tag_name STREQUAL "la664")
++            list(APPEND ARCH_FLAGS -march=la664)
++        else()
++            list(APPEND ARCH_FLAGS -march=loongarch64)
++        endif()
+         if (GGML_LASX)
+             list(APPEND ARCH_FLAGS -mlasx)
+         endif()
