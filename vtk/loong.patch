@@ -1,10 +1,8 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 370bdf5..1a2561d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -76,11 +76,11 @@ makedepends=(
-   libtheora               # libvtkIOOggTheora.so (1 direct lib, 2 total libs)
+@@ -78,11 +78,11 @@ makedepends=(
    mariadb-libs            # libvtkIOMySQL.so (1 direct lib, 2 total libs)
+   onnxruntime             # libvtkFiltersONNX.so.1 (1 direct lib, 2 total libs)
    opencascade             # libvtkIOOCCT.so (1 direct lib, 2 total libs)
 -  openimagedenoise        # libvtkRenderingRayTracing.so (1 direct lib, 2 total libs)
 +#  openimagedenoise        # libvtkRenderingRayTracing.so (1 direct lib, 2 total libs)
@@ -16,16 +14,16 @@ index 370bdf5..1a2561d 100644
    pdal                    # libvtkIOPDAL.so (1 direct lib, 2 total libs)
    postgresql-libs         # libvtkIOPostgreSQL.so (1 direct lib, 2 total libs)
    unixodbc                # libvtkIOODBC.so (1 direct lib, 2 total libs)
-@@ -189,7 +189,7 @@ build() {
-     -DVTK_VERSIONED_INSTALL=OFF \
-     -DVTK_WRAP_JAVA=ON \
-     -DVTK_WRAP_PYTHON=ON \
--    -DVTKOSPRAY_ENABLE_DENOISER=ON \
+@@ -197,7 +197,7 @@ build() {
+     -DVTK_VERSIONED_INSTALL=OFF
+     -DVTK_WRAP_JAVA=ON
+     -DVTK_WRAP_PYTHON=ON
+-    -DVTKOSPRAY_ENABLE_DENOISER=ON
 +    -DVTK_ENABLE_OSPRAY=OFF \
-     -DVTK_USE_EXTERNAL=ON \
-     -DVTK_MODULE_USE_EXTERNAL_VTK_exprtk=OFF \
-     -DVTK_MODULE_USE_EXTERNAL_VTK_ioss=OFF \
-@@ -214,8 +214,8 @@ package() {
+     -DVTK_USE_EXTERNAL=ON
+     #-DFIDES_USE_EXTERNAL_RAPIDJSON=ON
+     -DVTK_MODULE_USE_EXTERNAL_VTK_exprtk=OFF
+@@ -225,8 +225,8 @@ package() {
    install -dv "${pkgdir}"/usr/share/java/vtk
    mv -v "${pkgdir}"/usr/lib/java/vtk.jar "${pkgdir}"/usr/share/java/vtk
    # …and the libs to the proper place
