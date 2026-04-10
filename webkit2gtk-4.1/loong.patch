@@ -1,16 +1,14 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 5a22552..35a9872 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -121,6 +121,7 @@ validpgpkeys=(
+@@ -130,6 +130,7 @@ prepare() {
  
- prepare() {
-   cd webkitgtk-$pkgver
+   # Fix build of GTK 3 port
+   patch -Np1 -i ../fix-build.patch
 +  patch -p1 -i "${srcdir}/loongarch-simde-use-a-portable-version-to-avoid-comp.patch"
  }
  
  build() {
-@@ -193,4 +194,8 @@ package_webkit2gtk-4.1-docs() {
+@@ -202,4 +203,8 @@ package_webkit2gtk-4.1-docs() {
    mv doc/* "$pkgdir"
  }
  
