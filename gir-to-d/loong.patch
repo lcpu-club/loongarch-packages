@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,7 @@ sha512sums=('2f35445f3f59c24990c1c76fd4e7cebe1c7bdbf6596d48d316507423af7234bbfd6
+ prepare() {
+   # https://github.com/gtkd-developers/gir-to-d/issues/46#issuecomment-2880529179
+   patch --directory="$pkgname-$pkgver" --forward --strip=1 --input "$srcdir"/add-main-context-pusher.patch
++  patch --directory="$pkgname-$pkgver" --forward --strip=1 --input "$srcdir"/girtod-0.23.4-ldc-1.42.0.patch
+ }
+ 
+ build() {
+@@ -41,3 +42,6 @@ package() {
+ 
+   DESTDIR="$pkgdir" ninja install
+ }
++
++source+=("girtod-0.23.4-ldc-1.42.0.patch::https://src.openmamba.org/rpms/gir-to-d/raw/commit/02c62d971be095c63982df2d76dbd9d168473863/girtod-0.23.4-ldc-1.42.0.patch")
++sha512sums+=('3d99590198458f8e2b230f9be856b8287cc03acbdadee0e27d25e36c5050fe01057793695ec9ff59b1763243b46a2aad77bf50c441312eb315459e4f8cb5299b')
