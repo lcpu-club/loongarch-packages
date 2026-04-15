@@ -1,12 +1,14 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 79f7039..4283a4e 100644
+index 970a6c9..cae5a4f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -25,6 +25,8 @@ prepare() {
+@@ -25,7 +25,10 @@ prepare() {
+   mkdir build
  
    # download dependencies
++  go mod edit -replace go.etcd.io/bbolt=go.etcd.io/bbolt@v1.3.7
++  go mod download go.etcd.io/bbolt
    go mod download
-+  go mod edit -replace=go.etcd.io/bbolt=go.etcd.io/bbolt@v1.3.7-0.20221114114133-eedea6cb26ef
 +  go mod tidy
  }
  
