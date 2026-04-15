@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index ad41ac9..29639a2 100644
+index 5103510..4d41912 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -133,6 +133,10 @@ prepare() {
+@@ -137,6 +137,10 @@ prepare() {
    git lfs fetch network-origin
    git lfs checkout
  
@@ -11,30 +11,23 @@ index ad41ac9..29639a2 100644
 +
 +
    # Fix build with older oneapi (we really should upgrade soon!)
-   git revert -n 49414a72f607ccd15f8b71b81edc9aff040d581e
+   git revert -n d4147c046e98d5996720cefd6e0b630e19c88e94 49414a72f607ccd15f8b71b81edc9aff040d581e
  
-@@ -158,8 +162,6 @@ build() {
+@@ -173,8 +177,11 @@ build() {
      -D CMAKE_BUILD_TYPE=Release
      -D CMAKE_INSTALL_PREFIX=/usr
      -D WITH_LINKER_MOLD=ON
 -    -D CUDA_HOST_COMPILER="$NVCC_CCBIN"
 -    -D CYCLES_CUDA_BINARIES_ARCH="$cuda_archs"
-     -D HIP_ROOT_DIR=/opt/rocm
-     -D HIPRT_INCLUDE_DIR=/opt/rocm/include
-     -D HIPRT_COMPILER_PARALLEL_JOBS=8
-@@ -173,6 +175,11 @@ build() {
-     -D WITH_CYCLES_OSL=ON
-     -D WITH_INSTALL_PORTABLE=OFF
-     -D WITH_PYTHON_INSTALL=OFF
 +    -D WITH_CYCLES_EMBREE=OFF
 +    -D WITH_CYCLES_DEVICE_CUDA=OFF
 +    -D WITH_CYCLES_DEVICE_OPTIX=OFF
 +    -D WITH_CYCLES_CUDA_BINARIES=OFF
 +    -D WITH_CUDA_DYNLOAD=OFF
-     -G Ninja
-     -S "$pkgname"
-     -W no-dev
-@@ -194,7 +201,11 @@ package() {
+     -D HIP_ROOT_DIR=/opt/rocm
+     -D HIPRT_INCLUDE_DIR=/opt/rocm/include
+     -D HIPRT_COMPILER_PARALLEL_JOBS=8
+@@ -212,7 +219,11 @@ package() {
  
    # Move OneAPI AOT lib to proper place
    mkdir "${pkgdir}"/usr/lib/
