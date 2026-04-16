@@ -1,13 +1,11 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 5bfe902..3004652 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -42,7 +42,7 @@ check() {
-   npm test -- \
+@@ -65,7 +65,7 @@ check() {
      --exclude='**/BuiltinCommandLoader.test.ts' \
      --exclude='**/config.integration.test.ts' \
--    --exclude='**/mcp-client.test.ts'
-+    --exclude='**/mcp-client.test.ts' || echo "Watch out for failed tests! (Timeouts caused by Loongson devices being slower are usually not a problem)"
+     --exclude='**/mcp-client.test.ts' \
+-    --exclude='**/sandboxManager.integration.test.ts'
++    --exclude='**/sandboxManager.integration.test.ts' || echo "Watch out for failed tests! (Timeouts caused by Loongson devices being slower are usually not a problem)"
+   npm run test:sea-launch
  }
  
- package() {
