@@ -7,7 +7,7 @@
 -  export GCC_BIN=""
 +  export GCC_BIN="x86_64-linux-gnu-"
    export GCC_AARCH64_PREFIX="aarch64-linux-gnu-"
-   export GCC_ARM_PREFIX="arm-none-eabi-"
+   export GCC_RISCV64_PREFIX="riscv64-linux-gnu-"
 -  echo "Building base tools"
 -  make -C BaseTools
 +  echo "Building base tools (IA32)"
@@ -19,9 +19,9 @@
    # expose build tooling in PATH
    . edksetup.sh
  
-@@ -314,6 +318,20 @@ build() {
-       dd if=Build/ArmVirtQemu-$_arch/${_build_type}_$_build_plugin/FV/QEMU_EFI.fd of=Build/ArmVirtQemu-$_arch/${_build_type}_$_build_plugin/FV/QEMU_CODE.fd conv=notrunc
-       dd if=/dev/zero of=Build/ArmVirtQemu-$_arch/${_build_type}_$_build_plugin/FV/QEMU_VARS.fd bs=1M count=64
+@@ -293,6 +297,20 @@ build() {
+       dd if=Build/RiscVVirtQemu/${_build_type}_$_build_plugin/FV/RISCV_VIRT_VARS.fd of=Build/RiscVVirtQemu/${_build_type}_$_build_plugin/FV/RISCV_VIRT_VARS.fd.tmp conv=notrunc
+       mv -v Build/RiscVVirtQemu/${_build_type}_$_build_plugin/FV/RISCV_VIRT_VARS.fd{.tmp,}
        ;;
 +      LOONGARCH64)
 +      echo "Building ovmf ($_arch) with secure boot"
@@ -40,7 +40,7 @@
      esac
    done
  }
-@@ -363,6 +381,21 @@ package_edk2-arm() {
+@@ -339,6 +357,21 @@ package_edk2-riscv64() {
    install -vDm 644 License.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
  
@@ -62,7 +62,7 @@
  package_edk2-shell() {
    local _arch
    # minimal UEFI shell, as defined in ShellPkg/Application/Shell/ShellPkg.inf
-@@ -424,3 +457,11 @@ package_edk2-ovmf() {
+@@ -397,3 +430,11 @@ package_edk2-ovmf() {
    # docs
    install -vDm 644 {OvmfPkg/README,ReadMe.rst,Maintainers.txt} -t "$pkgdir/usr/share/doc/$pkgname/"
  }
