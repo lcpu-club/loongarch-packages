@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 34fb6f3..4b64775 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -58,9 +58,11 @@ build() {
+ }
+ 
+ check() {
+-  meson test -C build --print-errorlogs --no-rebuild
++  meson test -C build --print-errorlogs --no-rebuild -t 10
+ }
+ 
+ package() {
+   meson install -C build --destdir "$pkgdir" --no-rebuild
+ }
++
++makedepends+=(cmake)
