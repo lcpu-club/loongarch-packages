@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b19f2b3..be0605f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -50,7 +50,7 @@ package() {
+   cp -r bin "${pkgdir}"/usr/share/${pkgname}
+   rm "${pkgdir}"/usr/share/${pkgname}/bin/*{.bat,.exe,-darwin}
+   chmod -x "${pkgdir}"/usr/share/${pkgname}/bin/*
+-  chmod +x "${pkgdir}"/usr/share/${pkgname}/bin/{sbt,sbtn-${CARCH}-pc-linux}
++  #chmod +x "${pkgdir}"/usr/share/${pkgname}/bin/{sbt,sbtn-${CARCH}-pc-linux}
+   mkdir -p "${pkgdir}"/usr/bin
+   ln -s /usr/share/${pkgname}/bin/sbt "${pkgdir}"/usr/bin/sbt
+ 
