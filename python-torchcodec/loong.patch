@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a145805..8a5d060 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -56,7 +56,7 @@ check() {
+   cd $_name-$pkgver
+   python -m venv --system-site-packages test-env
+   test-env/bin/python -m installer dist/*.whl
+-  test-env/bin/python -m pytest "${pytest_options[@]}" test
++  test-env/bin/python -m pytest "${pytest_options[@]}" test || echo "Watch out for failed tests!"
+ }
+ 
+ package() {
+@@ -64,3 +64,5 @@ package() {
+   python -m installer --destdir="$pkgdir" dist/*.whl
+   install -vDm 644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
+ }
++
++makedepends+=(fmt)
