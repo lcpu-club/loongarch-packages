@@ -17,6 +17,15 @@
        --enable-stack-protector=strong
        --enable-systemtap
        --disable-nscd
+@@ -88,7 +89,7 @@ build() {
+         --libdir=/usr/lib \
+         --libexecdir=/usr/lib \
+         --enable-cet \
+-        --enable-sframe \
++        --disable-sframe \
+         "${_configure_flags[@]}"
+ 
+     make -O
 @@ -155,7 +156,7 @@ check() (
    _skip_test tst-shstk-legacy-1g     sysdeps/x86_64/Makefile
    _skip_test tst-adjtime             time/Makefile
