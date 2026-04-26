@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -33,7 +33,7 @@ depends=(
+@@ -37,7 +37,7 @@ depends=(
  )
  makedepends=(
    cmake
@@ -9,20 +9,18 @@
    gcc-fortran
    gtest
    ninja
-@@ -64,12 +64,13 @@ build() {
+@@ -68,10 +68,11 @@ build() {
      -W no-dev
      -DCMAKE_BUILD_TYPE=None
      -DCMAKE_INSTALL_PREFIX=/usr
 -    -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
-+    # -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
++#    -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
      # Compile source code for supported GPU archs in parallel
 -    -DCMAKE_CUDA_FLAGS="--threads $(nproc)"
-+    # -DCMAKE_CUDA_FLAGS="--threads $(nproc)"
-     # CUB requires at least C++17 https://github.com/ornladios/ADIOS2/issues/4620
-     -DCMAKE_CXX_STANDARD=17
 -    -DADIOS2_USE_CUDA=ON
-+    #-DADIOS2_USE_CUDA=ON
++#    -DCMAKE_CUDA_FLAGS="--threads $(nproc)"
++#    -DADIOS2_USE_CUDA=ON
 +    -DDILL_NATIVE_ONLY=OFF
      -DADIOS2_USE_EXTERNAL_DEPENDENCIES=ON
-     #-DADIOS2_HAVE_HDF5_VOL needs hdf5-openmpi
-     -DADIOS2_HAVE_HDF5_VOL=OFF
+     -DADIOS2_USE_EXTERNAL_PERFSTUBS=OFF
+     # external nanobind does not work: https://gitlab.archlinux.org/archlinux/packaging/packages/nanobind/-/merge_requests/3
