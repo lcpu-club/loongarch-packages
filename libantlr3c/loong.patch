@@ -1,16 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -22,6 +22,9 @@ prepare() {
- #include <stdint.h>
- #include <stdarg.h>
- #include <stdlib.h>
-+#include <string.h>
-+#include <unistd.h>
-+#include <ctype.h>
- #include <netinet/in.h>
- #include <netinet/tcp.h>
- #include <sys/stat.h>
-@@ -37,7 +40,7 @@ EOF
+@@ -41,7 +41,7 @@ EOF
  build() {
    cd antlr3/runtime/C
  
