@@ -1,7 +1,7 @@
-From 1e70dec5d5ec6c02e2bdf492380c5b237693a3a6 Mon Sep 17 00:00:00 2001
+From a79629c9f02fc3109d65ce043ca1197b604272c0 Mon Sep 17 00:00:00 2001
 From: Mingcong Bai <jeffbai@aosc.io>
 Date: Wed, 26 Feb 2025 10:00:21 +0800
-Subject: [PATCH 020/341] FROMLIST: drm/xe: use 4K alignment for cursor jumps
+Subject: [PATCH 014/380] FROMLIST: drm/xe: use 4K alignment for cursor jumps
 
 It appears that the xe_res_cursor also assumes 4K alignment.
 
@@ -95,10 +95,10 @@ Signed-off-by: Mingcong Bai <jeffbai@aosc.io>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/gpu/drm/xe/xe_migrate.c b/drivers/gpu/drm/xe/xe_migrate.c
-index 84f412fd3c5d..47cfd67db6af 100644
+index e58b9b433654..853eda7665ca 100644
 --- a/drivers/gpu/drm/xe/xe_migrate.c
 +++ b/drivers/gpu/drm/xe/xe_migrate.c
-@@ -592,7 +592,7 @@ static void emit_pte(struct xe_migrate *m,
+@@ -634,7 +634,7 @@ static void emit_pte(struct xe_migrate *m,
  			u64 addr, flags = 0;
  			bool devmem = false;
  
@@ -107,7 +107,7 @@ index 84f412fd3c5d..47cfd67db6af 100644
  			if (is_vram) {
  				if (vm->flags & XE_VM_FLAG_64K) {
  					u64 va = cur_ofs * XE_PAGE_SIZE / 8;
-@@ -613,7 +613,7 @@ static void emit_pte(struct xe_migrate *m,
+@@ -655,7 +655,7 @@ static void emit_pte(struct xe_migrate *m,
  			bb->cs[bb->len++] = lower_32_bits(addr);
  			bb->cs[bb->len++] = upper_32_bits(addr);
  
@@ -117,5 +117,5 @@ index 84f412fd3c5d..47cfd67db6af 100644
  		}
  	}
 -- 
-2.51.0
+2.54.0
 
