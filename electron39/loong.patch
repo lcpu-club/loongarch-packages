@@ -1,33 +1,18 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 8da2662..4574dd6 100644
+index 364ed7c..4557733 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -443,6 +443,9 @@ prepare() {
- 
-   sed -i "s|@ELECTRON@|${pkgname}|" electron-launcher.sh
- 
-+  # Get the binary from the npm package
-+  npm install @esbuild/linux-loong64@0.24.0
-+
-   cp -r chromium-mirror_third_party_depot_tools depot_tools
-   export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
-   #export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
-@@ -450,6 +453,14 @@ prepare() {
+@@ -452,6 +452,9 @@ prepare() {
    echo "Putting together electron sources"
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
 +  # Do not use the script to fetch esbuild since google doesn't distribute it
 +  # The esbuild is added manually
 +  sed -i '/esbuild/d' prepare-electron-source-tree.sh
-+  # Add esbuild binary manually
-+  npm install @esbuild/linux-loong64@0.24.0
-+  mkdir -p src/third_party/devtools-frontend/src/third_party/esbuild
-+  mv node_modules/@esbuild/linux-loong64/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
-+  rm -r node_modules # Cleaning
    rbash prepare-electron-source-tree.sh "$CARCH"
    mv electron src/electron
  
-@@ -463,12 +474,48 @@ prepare() {
+@@ -465,12 +468,50 @@ prepare() {
      -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
    src/build/util/lastchange.py \
      -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
@@ -52,6 +37,8 @@ index 8da2662..4574dd6 100644
 +  jq ".dependencies.rollup=\"$_rollup_ver\"" package.json > package.json.new
 +  mv package.json{.new,}
 +  popd
++
++  export SENTRYCLI_SKIP_DOWNLOAD=1
  
    # https://gitlab.archlinux.org/archlinux/packaging/packages/electron32/-/issues/1
    src/third_party/node/update_npm_deps
@@ -78,7 +65,7 @@ index 8da2662..4574dd6 100644
    src/electron/script/apply_all_patches.py \
        src/electron/patches/config.json
  
-@@ -518,6 +565,12 @@ prepare() {
+@@ -523,6 +564,19 @@ prepare() {
    patch -Np1 -i "${srcdir}/jinja-python-3.10.patch" -d "third_party/electron_node/tools/inspector_protocol/jinja2"
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
  
@@ -88,12 +75,19 @@ index 8da2662..4574dd6 100644
 +  # Add loong64 support for electron
 +  patch -Np1 -d electron -i "${srcdir}/electron_runtime_api_dalagate-add-loongarch64-support.patch"
 +
++  pushd ${srcdir}
++  # Add esbuild binary manually
++  npm install @esbuild/linux-loong64@0.25.1
++  install -Dm755 node_modules/@esbuild/linux-loong64/bin/esbuild src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
++  rm -r node_modules # Cleaning
++  popd
++
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -624,6 +677,13 @@ build() {
-   # https://crbug.com/957519#c122
-   CXXFLAGS=${CXXFLAGS/-Wp,-D_GLIBCXX_ASSERTIONS}
+@@ -638,6 +692,13 @@ build() {
+     CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
+   fi
  
 +  # Disable xnnpack on loong64
 +  # Make sure PGO is disabled on loong64
@@ -105,7 +99,7 @@ index 8da2662..4574dd6 100644
    export CHROMIUM_BUILDTOOLS_PATH="${PWD}/buildtools"
    gn gen out/Release \
        --args="import(\"//electron/build/args/release.gn\") ${_flags[*]}"
-@@ -648,3 +708,11 @@ package() {
+@@ -662,3 +723,11 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
