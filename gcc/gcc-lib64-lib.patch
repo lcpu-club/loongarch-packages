@@ -8,10 +8,10 @@ diff --git a/gcc/config/loongarch/linux.h b/gcc/config/loongarch/linux.h
 index 17d9f87537b..9ff32844d4e 100644
 --- a/gcc/config/loongarch/linux.h
 +++ b/gcc/config/loongarch/linux.h
-@@ -24,11 +24,11 @@ along with GCC; see the file COPYING3.  If not see
- #if defined(LA_DISABLE_MULTILIB) && defined(LA_DISABLE_MULTIARCH)
- 
-   #if DEFAULT_ABI_BASE == ABI_BASE_LP64D
+@@ -32,11 +32,11 @@
+   #elif DEFAULT_ABI_BASE == ABI_BASE_ILP32S
+     #define ABI_LIBDIR "lib32/sf"
+   #elif DEFAULT_ABI_BASE == ABI_BASE_LP64D
 -    #define ABI_LIBDIR "lib64"
 +    #define ABI_LIBDIR "lib"
    #elif DEFAULT_ABI_BASE == ABI_BASE_LP64F
@@ -27,10 +27,10 @@ diff --git a/gcc/config/loongarch/t-linux b/gcc/config/loongarch/t-linux
 index 23e1fb97934..4475600ad9b 100644
 --- a/gcc/config/loongarch/t-linux
 +++ b/gcc/config/loongarch/t-linux
-@@ -16,9 +16,9 @@
- # along with GCC; see the file COPYING3.  If not see
- # <http://www.gnu.org/licenses/>.
- 
+@@ -19,9 +19,9 @@
+ MULTIOSDIR_ilp32d := ../lib32$(call if_multiarch,:loongarch32-linux-gnu)
+ MULTIOSDIR_ilp32f := ../lib32/f32$(call if_multiarch,:loongarch32-linux-gnuf32)
+ MULTIOSDIR_ilp32s := ../lib32/sf$(call if_multiarch,:loongarch32-linux-gnusf)
 -MULTIOSDIR_lp64d := ../lib64$(call if_multiarch,:loongarch64-linux-gnu)
 -MULTIOSDIR_lp64f := ../lib64/f32$(call if_multiarch,:loongarch64-linux-gnuf32)
 -MULTIOSDIR_lp64s := ../lib64/sf$(call if_multiarch,:loongarch64-linux-gnusf)
