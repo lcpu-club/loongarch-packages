@@ -14,7 +14,7 @@
    'usbip'
 -  'x86_energy_perf_policy'
  )
- pkgver=6.19.3
+ pkgver=7.0.3
  pkgrel=1
 @@ -39,11 +34,11 @@ makedepends+=('ncurses')
  # bpf deps
@@ -30,7 +30,15 @@
  groups=("$pkgbase")
  source=(https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/${_srcname}.tar.{xz,sign}
          'usbipd.service'
-@@ -104,10 +99,13 @@ build() {
+@@ -73,6 +68,7 @@ prepare() {
+     echo ":: Applying patch $src"
+     patch -p1 -N -i "$srcdir/$src"
+   done
++  sed -i '/perf-util-$(CONFIG_LIBDW_DWARF_UNWIND) += unwind-libdw.o/d' tools/perf/arch/loongarch/util/Build
+   # force our perf version
+   cat > tools/perf/util/PERF-VERSION-GEN << EOF
+ #!/bin/sh
+@@ -105,10 +101,13 @@ build() {
    make VERSION=$pkgver-$pkgrel
    popd
  
@@ -44,7 +52,7 @@
  
    echo ':: usbip'
    pushd "$_srcname"/tools/usb/usbip
-@@ -123,6 +121,7 @@ build() {
+@@ -124,6 +123,7 @@ build() {
    make
    popd
  
@@ -52,7 +60,7 @@
    echo ':: turbostat'
    pushd "$_srcname"/tools/power/x86/turbostat
    make
-@@ -132,6 +131,7 @@ build() {
+@@ -133,6 +133,7 @@ build() {
    pushd "$_srcname"/tools/hv
    CFLAGS+=' -DKVP_SCRIPTS_PATH=\"/usr/lib/hypervkvpd/\"' make
    popd
@@ -60,7 +68,7 @@
  
    echo ':: bpf'
    pushd "$_srcname"/tools/bpf
-@@ -147,6 +147,7 @@ build() {
+@@ -149,6 +150,7 @@ build() {
    make
    popd
  
@@ -68,7 +76,7 @@
    echo ':: intel-speed-select'
    pushd "$_srcname"/tools/power/x86/intel-speed-select
    make
-@@ -156,6 +157,7 @@ build() {
+@@ -158,6 +160,7 @@ build() {
    pushd "$_srcname"/tools/arch/x86/kcpuid
    make
    popd
@@ -76,7 +84,7 @@
  }
  
  package_linux-tools-meta() {
-@@ -165,14 +167,9 @@ package_linux-tools-meta() {
+@@ -167,14 +170,9 @@ package_linux-tools-meta() {
      'bootconfig'
      'bpf'
      'cpupower'
@@ -91,7 +99,7 @@
    )
    conflicts=(
      'acpidump'
-@@ -190,7 +187,7 @@ package_perf() {
+@@ -192,7 +190,7 @@ package_perf() {
      prefix=/usr \
      lib=lib/perf \
      perfexecdir=lib/perf \
