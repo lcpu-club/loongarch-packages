@@ -1,14 +1,8 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 177151f..b499f1f 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -11,7 +11,6 @@ license=('MIT')
- options=('!lto')
- depends=('clang20' 'lld20' 'llvm20-libs')
- makedepends=('cmake' 'llvm20')
--checkdepends=('lib32-glibc')
- source=("https://ziglang.org/download/$pkgver/zig-$pkgver.tar.xz"
-         "skip-localhost-test.patch"
-         "skip-futex2-test.patch")
-@@ -47,6 +46,7 @@ build() {
+@@ -47,6 +47,7 @@ build() {
      cmake --build build
  }
  
@@ -16,7 +10,7 @@
  check() {
      cd "$pkgname-$pkgver"
      # ugly workaround until test target is provided
-@@ -57,6 +57,7 @@ check() {
+@@ -57,6 +58,7 @@ check() {
        -Denable-llvm=true \
        -Dskip-non-native=true
  }
@@ -24,3 +18,9 @@
  
  package() {
      cd "$pkgname-$pkgver"
+@@ -65,3 +67,5 @@ package() {
+ 
+     DESTDIR="$pkgdir" cmake --install build
+ }
++
++checkdepends=()
