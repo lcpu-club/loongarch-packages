@@ -1,0 +1,42 @@
+commit 3e7d62b76f8c32212dd0dc940b130abd9dbf728d
+Author: Xiaotian Wu <wuxiaotian@loongson.cn>
+Date:   Thu Mar 24 17:15:03 2022 +0800
+
+    change lib64->lib directory
+
+diff --git a/gcc/config/loongarch/linux.h b/gcc/config/loongarch/linux.h
+index 17d9f87537b..9ff32844d4e 100644
+--- a/gcc/config/loongarch/linux.h
++++ b/gcc/config/loongarch/linux.h
+@@ -24,11 +24,11 @@ along with GCC; see the file COPYING3.  If not see
+ #if defined(LA_DISABLE_MULTILIB) && defined(LA_DISABLE_MULTIARCH)
+ 
+   #if DEFAULT_ABI_BASE == ABI_BASE_LP64D
+-    #define ABI_LIBDIR "lib64"
++    #define ABI_LIBDIR "lib"
+   #elif DEFAULT_ABI_BASE == ABI_BASE_LP64F
+-    #define ABI_LIBDIR "lib64/f32"
++    #define ABI_LIBDIR "lib/f32"
+   #elif DEFAULT_ABI_BASE == ABI_BASE_LP64S
+-    #define ABI_LIBDIR "lib64/sf"
++    #define ABI_LIBDIR "lib/sf"
+   #endif
+ 
+ #endif
+diff --git a/gcc/config/loongarch/t-linux b/gcc/config/loongarch/t-linux
+index 23e1fb97934..4475600ad9b 100644
+--- a/gcc/config/loongarch/t-linux
++++ b/gcc/config/loongarch/t-linux
+@@ -16,9 +16,9 @@
+ # along with GCC; see the file COPYING3.  If not see
+ # <http://www.gnu.org/licenses/>.
+ 
+-MULTIOSDIR_lp64d := ../lib64$(call if_multiarch,:loongarch64-linux-gnu)
+-MULTIOSDIR_lp64f := ../lib64/f32$(call if_multiarch,:loongarch64-linux-gnuf32)
+-MULTIOSDIR_lp64s := ../lib64/sf$(call if_multiarch,:loongarch64-linux-gnusf)
++MULTIOSDIR_lp64d := ../lib$(call if_multiarch,:loongarch64-linux-gnu)
++MULTIOSDIR_lp64f := ../lib/f32$(call if_multiarch,:loongarch64-linux-gnuf32)
++MULTIOSDIR_lp64s := ../lib/sf$(call if_multiarch,:loongarch64-linux-gnusf)
+ 
+ # Don't define MULTILIB_OSDIRNAMES if multilib is disabled.
+ ifeq ($(filter LA_DISABLE_MULTILIB,$(tm_defines)),)
