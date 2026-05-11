@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 740f343..5dcc502 100644
+index b8f1cdc..d14ed58 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -54,6 +54,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
@@ -10,7 +10,7 @@ index 740f343..5dcc502 100644
  source=(https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$pkgver-lite.tar.xz
          https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver/chromium-launcher-$_launcher_ver.tar.gz
          chromium-138-nodejs-version-check.patch
-@@ -83,6 +84,8 @@ if (( _manual_clone )); then
+@@ -89,6 +90,8 @@ if (( _manual_clone )); then
    source[0]=fetch-chromium-release
    sha256sums[0]='2e2f36e3cd1ebc4ad57fd310774a5e5e9db77883d5f9374fedeaabd3c103b819'
    makedepends+=('python-httplib2' 'python-pyparsing' 'python-six' 'npm' 'rsync')
@@ -19,7 +19,7 @@ index 740f343..5dcc502 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -211,6 +214,46 @@ prepare() {
+@@ -231,6 +234,49 @@ prepare() {
    python3 build/util/lastchange.py -m DAWN_COMMIT_HASH \
      -s third_party/dawn --revision gpu/webgpu/DAWN_VERSION \
      --header gpu/webgpu/dawn_commit_hash.h
@@ -63,20 +63,27 @@ index 740f343..5dcc502 100644
 +  mv node_modules/@esbuild/linux-loong64/bin/esbuild third_party/devtools-frontend/src/third_party/esbuild/esbuild
 +  rm -r node_modules # Cleaning
 +  python3 third_party/devtools-frontend/src/scripts/deps/manage_node_deps.py
++
++  mkdir -p third_party/gperf/cipd/bin
++  ln -sf /usr/bin/gperf third_party/gperf/cipd/bin/gperf
  }
  
  build() {
-@@ -318,6 +361,9 @@ build() {
+@@ -338,6 +384,13 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
 +  # Disable xnnpack on loong64
-+  _flags+=('build_tflite_with_xnnpack=false')
++  _flags+=(
++    build_litert_with_xnnpack=false
++    build_tflite_with_xnnpack=false
++    build_webnn_with_xnnpack=false
++  )
 +
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -395,4 +441,10 @@ package() {
+@@ -415,4 +468,10 @@ package() {
    install -Dvm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
