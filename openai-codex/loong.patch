@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -32,7 +32,7 @@ b2sums=('c886b78d6680019d8c34a5f6839b01e109a428923172f1bb9299c8659917fba2b158d8c
+@@ -32,7 +32,7 @@ b2sums=('077be63eaeacc94cafb3505c01f90b78947fce878be80bd040b466c0b81374d721856ca
  
  prepare() {
    cd codex-rust-v$pkgver/codex-rs
@@ -9,12 +9,3 @@
    cargo fetch --target "$(rustc --print host-tuple)"
  }
  
-@@ -142,7 +142,7 @@ check() {
-     _skip_args+=(--skip "$_test")
-   done
- 
--  cargo nextest run --all-features --no-fail-fast -- "${_skip_args[@]}"
-+  cargo nextest run --all-features --no-fail-fast -- "${_skip_args[@]}" || echo "Watch out for failed tests!"
- }
- 
- package() {
