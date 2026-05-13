@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -51,13 +51,13 @@ prepare() {
+@@ -46,13 +46,13 @@ prepare() {
  
-   # Fix building with -std=gnu23 https://github.com/openucx/ucx/issues/11185
-   patch -p1 -i ../c-gnu23.patch
+   # Do not hijack SIGHUP https://gitlab.archlinux.org/archlinux/packaging/packages/openucx/-/issues/3
+   patch -Np1 -i ../ucx-conf.patch
 +  patch -Np1 -i ../LoongArch64-support.patch
  }
  
@@ -15,7 +15,7 @@
      --with-rocm=/opt/rocm
      --with-verbs
      --with-rc
-@@ -94,3 +94,11 @@ package() {
+@@ -89,3 +89,11 @@ package() {
    # install the license
    install -vDm 644 $_name-$pkgver/LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
