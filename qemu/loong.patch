@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 1b7295c..a32237b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -10,7 +10,7 @@ pkgname=(
@@ -17,7 +19,7 @@
    sdl2
    sdl2_image
    snappy
-@@ -243,13 +242,10 @@ _qemu_base_optdepends=(
+@@ -241,13 +240,10 @@ _qemu_base_optdepends=(
    'qemu-hw-display-qxl: for the QXL display device'
    'qemu-hw-display-virtio-vga: for the virtio-vga display device'
    'qemu-hw-display-virtio-vga-gl: for the virtio-vga-gl display device'
@@ -31,7 +33,7 @@
    'qemu-hw-uefi-vars: for UEFI variable support'
    'qemu-hw-usb-host: for host USB support'
    'qemu-hw-usb-redirect: for USB redirect support'
-@@ -323,7 +319,6 @@ build() {
+@@ -317,7 +313,6 @@ build() {
      --enable-sdl
      --enable-slirp
      --enable-tpm
@@ -39,7 +41,19 @@
      --smbd=/usr/bin/smbd
      --with-coroutine=ucontext
    )
-@@ -488,13 +483,10 @@ package_qemu-common() {
+@@ -409,10 +404,8 @@ package_qemu-common() {
+   done
+   # modify and rename binfmt.d configs to prevent name conflicts
+   for _conf in "$pkgdir/usr/lib/binfmt.d/"*; do
+-    _exe_name="$(basename "${_conf/.conf/}")"
+-    _new_exe_name="${_exe_name}-static"
+     _new_conf_name="${_conf/.conf/-static.conf}"
+-    sed -e "s|usr/bin/${_exe_name}|usr/bin/${_new_exe_name}|" "$_conf" > "${_new_conf_name}"
++    sed -e 's|usr/bin/qemu-\([^:]*\)|usr/bin/qemu-\1-static|' "$_conf" > "${_new_conf_name}"
+   done
+ 
+   # install default binaries
+@@ -478,13 +471,10 @@ package_qemu-common() {
      _pick qemu-hw-display-qxl usr/lib/qemu/hw-display-qxl.so
      _pick qemu-hw-display-virtio-gpu usr/lib/qemu/hw-display-virtio-gpu.so
      _pick qemu-hw-display-virtio-gpu-gl usr/lib/qemu/hw-display-virtio-gpu-gl.so
@@ -53,7 +67,7 @@
  
      _pick qemu-hw-usb-host usr/lib/qemu/hw-usb-host.so
      _pick qemu-hw-usb-redirect usr/lib/qemu/hw-usb-redirect.so
-@@ -898,7 +890,7 @@ package_qemu-system-hppa-firmware() {
+@@ -899,7 +889,7 @@ package_qemu-system-hppa-firmware() {
  
  package_qemu-system-loongarch64() {
    pkgdesc="QEMU system emulator for LoongArch64"
@@ -62,7 +76,7 @@
    mv -v $pkgname/* "$pkgdir"
    _install_licenses
  }
-@@ -1222,7 +1214,7 @@ package_qemu-base() {
+@@ -1223,7 +1213,7 @@ package_qemu-base() {
    depends=(
      qemu-common=$pkgver-$pkgrel
      qemu-img=$pkgver-$pkgrel
@@ -71,7 +85,7 @@
      virtiofsd
    )
    optdepends=("${_qemu_base_optdepends[@]}")
-@@ -1238,8 +1230,8 @@ package_qemu-desktop() {
+@@ -1239,8 +1229,8 @@ package_qemu-desktop() {
      qemu-audio-{alsa,dbus,jack,oss,pa,pipewire,sdl,spice}=$pkgver-$pkgrel
      qemu-block-{curl,dmg,nfs,ssh}=$pkgver-$pkgrel
      qemu-chardev-spice=$pkgver-$pkgrel
@@ -82,7 +96,7 @@
      qemu-hw-uefi-vars=$pkgver-$pkgrel
      qemu-hw-usb-{host,redirect,smartcard}=$pkgver-$pkgrel
      qemu-ui-{curses,dbus,egl-headless,gtk,opengl,sdl,spice-{app,core}}=$pkgver-$pkgrel
-@@ -1281,4 +1273,6 @@ package_qemu-full() {
+@@ -1282,4 +1272,6 @@ package_qemu-full() {
    _install_licenses
  }
  
