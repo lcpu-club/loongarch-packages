@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6558b6d..197c436 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -82,8 +82,20 @@ prepare() {
@@ -13,7 +15,7 @@
 +
    echo "Setting config..."
 -  cp ../config.$CARCH .config
-+  # cp ../config.$CARCH .config
++#  cp ../config.$CARCH .config
 +  cp ../config.x86_64 .config
 +  if [ $CARCH == loong64 ]; then
 +    make savedefconfig
@@ -30,7 +32,7 @@
      *) echo "Unknown CARCH $CARCH"; exit 1 ;;
    esac
  
-@@ -277,4 +290,36 @@ for _p in "${pkgname[@]}"; do
+@@ -277,4 +290,35 @@ for _p in "${pkgname[@]}"; do
    }"
  done
  
@@ -38,32 +40,31 @@
 +         "loong-addition.config"
 +         "LoongArch-Add-CPU-HWMon-platform-driver.patch::https://github.com/chenhuacai/linux/commit/9367b1a79e9b7b2d09e330d1f4fc0cd195f82091.diff"
 +         "0001-LOONGARCH-drm-radeon-Call-mmiowb-at-the-end-of-radeon_ring_commit.patch"
-+         "0016-REVERT-Revert-Mark-xe-driver-as-BROKEN-if-kernel-pag.patch"
-+         "0017-BACKPORT-FROMLIST-drm-xe-bo-fix-alignment-with-non-4.patch"
-+         "0018-BACKPORT-FROMLIST-drm-xe-guc-use-SZ_4K-for-alignment.patch"
-+         "0019-BACKPORT-FROMLIST-drm-xe-regs-fix-RING_CTL_SIZE-size.patch"
-+         "0020-FROMLIST-drm-xe-use-4K-alignment-for-cursor-jumps.patch"
-+         "0021-FROMLIST-drm-xe-query-use-PAGE_SIZE-as-the-minimum-p.patch"
-+)
++         "0010-REVERT-Revert-Mark-xe-driver-as-BROKEN-if-kernel-pag.patch"
++         "0011-BACKPORT-FROMLIST-drm-xe-bo-fix-alignment-with-non-4.patch"
++         "0012-BACKPORT-FROMLIST-drm-xe-guc-use-SZ_4K-for-alignment.patch"
++         "0013-BACKPORT-FROMLIST-drm-xe-regs-fix-RING_CTL_SIZE-size.patch"
++         "0014-FROMLIST-drm-xe-use-4K-alignment-for-cursor-jumps.patch"
++         "0015-FROMLIST-drm-xe-query-use-PAGE_SIZE-as-the-minimum-p.patch")
 +sha256sums+=('SKIP'
 +             '77eba2e995872642d763af67747228ef2e27b9d0a7958e8db0a12c4cdcc9acc1'
 +             'cde52675c44a69282c5b0fd1c6de2affd8f8ddeb0436a2db8bb03f55a9a9ef42'
 +             'd146728a3b3c722f433e310cad21e93c53e64a7afe948b5b43b077e962750941'
-+             'c16845f0e9ac9d592e6a8ed2276b96749a58c7a8d95b23f0126a4ee92ee1685b'
-+             'b82a5f954d688f2d21823a807141596713744f0458d2bac3439c8c203bd6b654'
-+             '415aa6b21912dce689c11c6e2afcb6d2fb887f38a8c6da18b8f7727d3256d743'
-+             'c46de055ed82702c20d3c70cc2a268ed48a6fa4ad2a546fd3b339a1366954618'
-+             '30accab32bd0699304421ad347bd9866820a499b78d473d14e099600912717a8'
-+             'e629cc73e44a63c4a332c8f77f8e4baa01227a9ed4390bf5ef978b02be9b6b0d')
++             '07fe8acbb42ebf0b6c72f4d8f52f382aef85f716d31c2c191a90e73470749cb8'
++             '1eb4e6bd37217f912e6a56c7cebe2786a62c9c9647b86b45941315e11a303209'
++             'cb045de2ee45cc28eaae659b5d3c099037fd7edaac76700eabb66a3381149664'
++             'dc38675f139a4d9bab42e9a4f78d23677f7b3a4ecf6b02fe5b7ce2f4d7bcfd50'
++             '6fc36025625e71bccdf22c3644aa0d0fa8f8a604103dad5575e0e4454884a675'
++             '445ed8bdb705a08afdc7369680e528f01f2dcf56cb9361ba9462763132ee16fe')
 +b2sums+=('SKIP'
 +         '652069e50060a3d84530f004f7064d98d6ac9bb02e690a3510d092d0df17598c9b3d564ae07fdb0dbbecc68d2d12d58c4c78c02cc08fbcbb8c01ba6e6256d922'
 +         'f0f3a73bd953fe1c3ec3b06519ca2bdec70231de0470f217b166a9bba44168d27e826898913e38f8045f05dc5b7d84eed6074befab9563814663f1fd9b882873'
 +         '4a0b268f1a28d4bfa37d9b644477c75a5215083414fe5cc5d637e2edc4895aace9e42b3b33ac0b3e2a15a18340bec651511fa3c347c1c3e347ed3418c033582c'
-+         'f4b5787523241762389a2ebbe391cc7f4fdef0408c254461f4a54d6f6577f6f7bb525552cd9ccc639da39f06b03f5061578c0c6b009acf9101f6ff17d63111b0'
-+         '9b349d174549daa31177f2f65971c2c6e8f691882c77f3ba2ff95d55592b22d49b5caf549847ba21fc776f7f29508f10a96bf57f9b04d93956340579e01c8266'
-+         'be8e7e21b4706e6d7c5ea314c080f6d50cd0fefde7a7694d424d82be6f85d5588fc683514d505f14f74c76b9b435d03281c0761cbb7d177222984f7c4710d70b'
-+         '6b00b56e99f3c534f51b3991a051c3a158a155c19de1e1d4f344965c56f84ea95b8d2c6fb91b96930847a8c68699a46393235777d6176dfd1c2946b11ea4857e'
-+         '4513616d06073e36675511be5375e64be7cc2bcff0fecbf959fae4485875d5c0f2428ac8df9492052cce9cf1cc99d44e94cbbd49364146a491d97716d8ca7595'
-+         'e9e60112c0b5e0d57db30b2dc7b7c0d093d5df846daaaccc7df4f1a8cdbc1e445542132d9db06d87210bacf495d9a95d655f4f227869d38d312234a654a233f1')
++         '84cc56429a3c4efc1926486d2d2eaab997bc905bed69b72ce2e461bf63203ee35f652a26fd46eb412768519a35834f0ff6f74057146b59df5af233e6d48e98fe'
++         'c50d7972d3c35d56039b70fe33c4587222c7df4595e0025efc733e42ab2e8ba8ce4ce938828ef6183d84ac413665c8ab7f1dc7b09227c3bbe44591322849648f'
++         'beb12df9b2261bfe03f4835573a5b54f545a53350ec423b42c66ad345defc645a46fa496fc0c0fc2de38da3cbbf0125ff1bab33d4452edf7baa1df23a43a2567'
++         '79a2d78fbc6055ef17f2a816bf5edeb9ee61c7e16a6cd4d5c89711dcb9328b08a4b05194bc6fda9da60818dded0a5e3916c0cb8f9e8060fcc602f12ad9a39e91'
++         'cda91ae4f92cae590be2366a72d819e7c679d322e1a118de15e7917b75bc86f4327bc3e4d1813a422ee159e218a3dd00be5291f6bd5d939702c5ef1e3cbcf053'
++         '925d08a6656b4f34566d5a69b55c0110e32ec0c4281a0395bccca70f4f593851f12a2d5a83f3971f2188e5ac4a24ede206ba248b0af21a6ab51afd43bb92fb57')
 +
  # vim:set ts=8 sts=2 sw=2 et:
