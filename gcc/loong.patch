@@ -1,6 +1,8 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6164e19..dc7952a 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -101,6 +101,12 @@ prepare() {
+@@ -101,6 +101,14 @@ prepare() {
    # Reproducible gcc-ada
    patch -Np0 < "$srcdir/gcc-ada-repro.patch"
  
@@ -9,11 +11,13 @@
 +  patch -Np1 -i "$srcdir/gcc-lib64-lib.patch"
 +  # fix ICE with associating DOT_PROD_EXPR
 +  git cherry-pick -n 27b8544e08922d4625a4e2787bd00f36af13d12f
++  # fix missing cpu-features.h
++  patch -Np1 -i "$srcdir/fix-missing-cpu-features.h.patch"
 +
    mkdir -p "$srcdir/gcc-build"
    mkdir -p "$srcdir/libgccjit-build"
  }
-@@ -127,7 +133,8 @@ build() {
+@@ -127,7 +135,8 @@ build() {
        --enable-link-serialization=1
        --enable-linker-build-id
        --enable-lto
@@ -23,7 +27,7 @@
        --enable-plugin
        --enable-shared
        --enable-threads=posix
-@@ -146,7 +153,7 @@ build() {
+@@ -146,7 +155,7 @@ build() {
    CXXFLAGS=${CXXFLAGS/-Werror=format-security/}
  
    "$srcdir/gcc/configure" \
@@ -32,7 +36,7 @@
      --enable-bootstrap \
      "${_confflags[@]:?_confflags unset}"
  
-@@ -238,24 +245,19 @@ package_gcc() {
+@@ -238,24 +247,19 @@ package_gcc() {
    install -m755 -t "$pkgdir/$_libdir/" gcc/{cc1,cc1plus,collect2,lto1}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
@@ -59,7 +63,7 @@
  
    make DESTDIR="$pkgdir" install-fixincludes
    make -C gcc DESTDIR="$pkgdir" install-mkheaders
-@@ -272,15 +274,11 @@ package_gcc() {
+@@ -272,15 +276,11 @@ package_gcc() {
    make -C $CHOST/libsanitizer/asan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
    make -C $CHOST/libsanitizer/tsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
    make -C $CHOST/libsanitizer/lsan DESTDIR="$pkgdir" install-nodist_toolexeclibHEADERS
@@ -78,7 +82,7 @@
  
    make -C libcpp DESTDIR="$pkgdir" install
    make -C gcc DESTDIR="$pkgdir" install-po
-@@ -291,7 +289,7 @@ package_gcc() {
+@@ -291,7 +291,7 @@ package_gcc() {
    # create cc-rs compatible symlinks
    # https://github.com/rust-lang/cc-rs/blob/1.0.73/src/lib.rs#L2578-L2581
    for binary in {c++,g++,gcc,gcc-ar,gcc-nm,gcc-ranlib}; do
@@ -87,7 +91,7 @@
    done
  
    # POSIX conformance launcher scripts for c89 and c99
-@@ -302,8 +300,7 @@ package_gcc() {
+@@ -302,8 +302,7 @@ package_gcc() {
    make -C $CHOST/libstdc++-v3/doc DESTDIR="$pkgdir" doc-install-man
  
    # remove files provided by lib32-gcc-libs and libgcc
@@ -97,7 +101,7 @@
  
    # byte-compile python libraries
    python -m compileall "$pkgdir/usr/share/gcc-${pkgver%%+*}/"
-@@ -344,10 +341,6 @@ package_gcc-ada() {
+@@ -344,10 +343,6 @@ package_gcc-ada() {
    make DESTDIR="$pkgdir" INSTALL="install" \
      INSTALL_DATA="install -m644" install-libada
  
@@ -108,7 +112,7 @@
    ln -s gcc "$pkgdir/usr/bin/gnatgcc"
  
    # insist on dynamic linking, but keep static libraries because gnatmake complains
-@@ -356,12 +349,6 @@ package_gcc-ada() {
+@@ -356,12 +351,6 @@ package_gcc-ada() {
    ln -s libgnat-${pkgver%%.*}.so "$pkgdir/usr/lib/libgnat.so"
    rm -f "$pkgdir"/$_libdir/adalib/libgna{rl,t}.so
  
@@ -121,7 +125,7 @@
    _install_runtime_library_exception
  }
  
-@@ -397,7 +384,6 @@ package_gcc-d() {
+@@ -397,7 +386,6 @@ package_gcc-d() {
  
    make -C $CHOST/libphobos DESTDIR="$pkgdir" install
    rm -f "$pkgdir/usr/lib/"lib{gphobos,gdruntime}.so*
@@ -129,7 +133,7 @@
  
    _install_runtime_library_exception
  }
-@@ -425,8 +411,6 @@ package_gcc-fortran() {
+@@ -425,8 +413,6 @@ package_gcc-fortran() {
    cd gcc-build
    make -C $CHOST/libgfortran DESTDIR="$pkgdir" install-cafexeclibLTLIBRARIES \
      install-{toolexeclibDATA,nodist_fincludeHEADERS,gfor_cHEADERS}
@@ -138,7 +142,7 @@
    make -C $CHOST/libgomp DESTDIR="$pkgdir" install-nodist_fincludeHEADERS
    make -C gcc DESTDIR="$pkgdir" fortran.install-{common,man,info}
    install -Dm755 gcc/f951 "$pkgdir/$_libdir/f951"
-@@ -455,7 +439,7 @@ package_gcc-gcobol() {
+@@ -455,7 +441,7 @@ package_gcc-gcobol() {
  
    install -Dm755 gcc/gcobol "$pkgdir"/usr/bin/gcobol
  
@@ -147,7 +151,7 @@
  
    _install_runtime_library_exception
  }
-@@ -486,11 +470,10 @@ package_gcc-go() {
+@@ -486,11 +472,10 @@ package_gcc-go() {
  
    cd gcc-build
    make -C $CHOST/libgo DESTDIR="$pkgdir" install-exec-am
@@ -160,7 +164,7 @@
    install -Dm755 gcc/go1 "$pkgdir/$_libdir/go1"
  
    _install_runtime_library_exception
-@@ -619,9 +602,7 @@ package_lib32-gcc-libs() {
+@@ -619,9 +604,7 @@ package_lib32-gcc-libs() {
    rm -f "$pkgdir/$_libdir/32/libgcc_eh.a"
  
    for lib in libatomic \
@@ -170,7 +174,7 @@
               libgomp \
               libitm \
               libquadmath \
-@@ -724,8 +705,8 @@ package_libgcobol() {
+@@ -724,8 +707,8 @@ package_libgcobol() {
      libgcobol.so
    )
  
@@ -181,7 +185,7 @@
  
    _install_runtime_library_exception
  }
-@@ -797,9 +778,6 @@ package_libgm2() {
+@@ -797,9 +780,6 @@ package_libgm2() {
  
    make -C $CHOST/libgm2 DESTDIR="$pkgdir" install
  
@@ -191,7 +195,7 @@
    _install_runtime_library_exception
  }
  
-@@ -820,9 +798,6 @@ package_libgphobos() {
+@@ -820,9 +800,6 @@ package_libgphobos() {
    rm -rf "$pkgdir"/$_libdir/include/d/
    rm -f "$pkgdir"/usr/lib/libgphobos.spec
  
@@ -201,7 +205,7 @@
    _install_runtime_library_exception
  }
  
-@@ -875,9 +850,6 @@ package_libobjc() {
+@@ -875,9 +852,6 @@ package_libobjc() {
    cd gcc-build
    make -C $CHOST/libobjc DESTDIR="$pkgdir" install-libs
  
@@ -211,12 +215,14 @@
    _install_runtime_library_exception
  }
  
-@@ -970,3 +942,8 @@ package_lto-dump() {
+@@ -970,3 +944,10 @@ package_lto-dump() {
  
    _install_runtime_library_exception
  }
 +
-+source+=("gcc-lib64-lib.patch")
-+sha256sums+=('5e8717aae7b83ed219e44fdba8379de7fb02c7c776ae6379ab26a6b22a7878d1')
++source+=("gcc-lib64-lib.patch"
++         "fix-missing-cpu-features.h.patch")
++sha256sums+=('5e8717aae7b83ed219e44fdba8379de7fb02c7c776ae6379ab26a6b22a7878d1'
++             'cef80500d4fa4ee028bbb8fdc19f3eb01a2030d2c4d49e37c1082027a9842705')
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(lib32-glibc|lib32-gcc-libs)$'))
 +pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(lib32-gcc-libs|gcc-go|libgo)$'))
