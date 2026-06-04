@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -189,6 +189,20 @@ check() {
-     --ignore=tests/test_asyncio/test_observability
-     # Requires a cluster on ports 15379-15384 which we don't set up
-     --ignore=tests/maint_notifications
+@@ -192,6 +192,20 @@ check() {
+ 
+     # New test failures in 8.0.0
+     --deselect tests/test_commands.py::TestRedisCommands::test_acl_getuser_setuser
 +    # To build on loong64 (floating point precision issues)
 +    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_geopos
 +    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_georadius_with
