@@ -1,14 +1,15 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -113,6 +113,7 @@ validpgpkeys=(
+@@ -117,6 +117,8 @@ validpgpkeys=(
  
  prepare() {
    cd wpewebkit-$pkgver
 +  patch -p1 -i "${srcdir}/loongarch-simde-use-a-portable-version-to-avoid-comp.patch"
++  sed -i '/bmalloc_CopyHeaders/d' Source/JavaScriptCore/CMakeLists.txt
  }
  
  build() {
-@@ -184,4 +185,7 @@ package_wpewebkit-docs() {
+@@ -189,4 +191,7 @@ package_wpewebkit-docs() {
    mv doc/* "$pkgdir"
  }
  
