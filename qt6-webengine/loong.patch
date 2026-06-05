@@ -1,11 +1,9 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 96c3e63..cd1c0c6 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -94,6 +94,13 @@ prepare() {
-   # Bump chromium to head of stable branch
-   cd src/3rdparty
+@@ -97,6 +97,13 @@ prepare() {
    [[ -n $_chromium ]] && git checkout $_chromium || true
+ 
+   git revert -n d3f726be3023f698a01ba4f74533524bd81df8d6 # Revert commit that causes crashes
 +  pushd "${srcdir}/${_pkgfn}"
 +  # Fix build for loong64
 +  patch -Np2 -i "$srcdir/add-loong64-support.patch"
@@ -16,9 +14,9 @@ index 96c3e63..cd1c0c6 100644
  }
  
  build() {
-@@ -117,3 +124,10 @@ package() {
- # Remove cmake module that breaks corrosion
-   rm "$pkgdir"/usr/lib/cmake/Qt6/FindRust.cmake
+@@ -118,3 +125,10 @@ package() {
+ 
+   install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
  }
 +
 +source+=("add-loong64-support.patch"
