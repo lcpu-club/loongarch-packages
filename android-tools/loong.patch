@@ -1,17 +1,16 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -21,7 +21,7 @@ sha256sums=('d2c3222280315f36d8bfa5c02d7632b47e365bfe2e77e99a3564fb6576f04097'
- prepare() {
+@@ -25,6 +25,7 @@ prepare() {
    cd android-tools-$_tag
    patch -Np 1 -d "vendor/extras" < ../android-tools-35.0.2-fix-protobuf-30.0-compilation.patch
--
+   patch -p1 -i ../gcc-16.patch
 +  patch -Np 1 -d "vendor" < ../boringssl-add-loong64-support.patch
  }
  
  build() {
-@@ -48,3 +48,6 @@ package() {
- 
-   DESTDIR="${pkgdir}" ninja -C build install
+@@ -55,3 +56,6 @@ package() {
+   install -Dm644 vendor/fmtlib/LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/MIT.txt"
+   install -Dm644 vendor/avb/LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/BSD-3-Clause.txt"
  }
 +
 +source+=("boringssl-add-loong64-support.patch")
