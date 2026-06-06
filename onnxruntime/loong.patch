@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -76,6 +76,17 @@ prepare() {
+@@ -78,6 +78,17 @@ prepare() {
    sed 's|${DEP_SHA1_cxxopts}|&\n\ \ \ \ \FIND_PACKAGE_ARGS NAMES cxxopts|g' \
      -i cmake/external/onnxruntime_external_deps.cmake
  
@@ -18,7 +18,7 @@
    patch -Np1 -i "${srcdir}/${pkgbase}-install-orttraining-files.patch"
    patch -Np1 -i "${srcdir}/${pkgbase}-system-flatbuffers.patch"
  
-@@ -87,8 +98,8 @@ prepare() {
+@@ -92,8 +103,8 @@ prepare() {
  
    cd "${srcdir}"
    cp -r "${pkgbase}" "${pkgbase}-cpu"
@@ -29,7 +29,7 @@
    cp -r "${pkgbase}" "${pkgbase}-rocm"
    cp -r "${pkgbase}" "${pkgbase}-opt-rocm"
  }
-@@ -168,6 +179,7 @@ build() {
+@@ -167,6 +178,7 @@ build() {
    cp -r build/onnxruntime/* onnxruntime
    python -m build --wheel --no-isolation
  
@@ -37,8 +37,8 @@
    ##### onnxruntime-cuda
  
    echo "Build onnxruntime with CUDA without optimization"
-@@ -198,7 +210,7 @@ build() {
-   python setup.py --help # We have to call it like this once to generate the file we need.
+@@ -191,7 +203,7 @@ build() {
+ 
    cp -r build/onnxruntime/* onnxruntime
    python -m build --wheel --no-isolation
 -
@@ -46,7 +46,7 @@
  
    ##### onnxruntime-rocm
  
-@@ -216,11 +228,11 @@ build() {
+@@ -207,11 +219,11 @@ build() {
  
    ##### onnxruntime-opt-rocm
  
@@ -61,7 +61,7 @@
      >> cmake/adjust_global_compile_flags.cmake
    cmake "${_cmake_rocm_args[@]}"
    cmake --build build
-@@ -285,7 +297,7 @@ package_onnxruntime-rocm() {
+@@ -274,7 +286,7 @@ package_onnxruntime-rocm() {
  }
  
  package_onnxruntime-opt-rocm() {
@@ -70,16 +70,16 @@
    depends+=('rocm-hip-sdk' 'roctracer' 'rccl' 'migraphx')
    provides=("${pkgbase}=${pkgver}")
    conflicts=("${pkgbase}")
-@@ -347,7 +359,7 @@ package_python-onnxruntime-rocm() {
+@@ -339,7 +351,7 @@ package_python-onnxruntime-rocm() {
  }
  
  package_python-onnxruntime-opt-rocm() {
 -  pkgdesc="$_pkgdesc (with ROCm and AVX2 CPU optimizations)"
 +  pkgdesc="$_pkgdesc (with ROCm and LASX CPU optimizations)"
-   depends+=("${pkgbase}-opt-rocm" "${_pydepends[@]}")
+   depends+=('rocm-hip-sdk' 'roctracer' 'rccl' 'migraphx')
+   depends+=("${_pydepends[@]}")
    provides=("python-${pkgbase}=${pkgver}")
-   conflicts=("python-${pkgbase}")
-@@ -357,3 +369,6 @@ package_python-onnxruntime-opt-rocm() {
+@@ -350,3 +362,6 @@ package_python-onnxruntime-opt-rocm() {
    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
    install -Dm644 ThirdPartyNotices.txt "${pkgdir}/usr/share/licenses/${pkgname}/ThirdPartyNotices.txt"
  }
