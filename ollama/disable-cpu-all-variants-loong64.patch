@@ -1,0 +1,15 @@
+--- a/cmake/local.cmake
++++ b/cmake/local.cmake
+@@ -512,8 +512,10 @@
+     else()
+         list(APPEND _cpu_args
+             -DBUILD_SHARED_LIBS=ON
+-            -DGGML_BACKEND_DL=ON
+-            -DGGML_CPU_ALL_VARIANTS=ON)
++            -DGGML_BACKEND_DL=ON)
++        if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "loongarch64")
++            list(APPEND _cpu_args -DGGML_CPU_ALL_VARIANTS=ON)
++        endif()
+         if(WIN32)
+             list(APPEND _cpu_args -DGGML_OPENMP=ON)
+         endif()
