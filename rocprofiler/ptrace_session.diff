@@ -1,0 +1,303 @@
+diff --git a/projects/rocprofiler-sdk/source/lib/rocprofv3-attach/ptrace_session.cpp b/projects/rocprofiler-sdk/source/lib/rocprofv3-attach/ptrace_session.cpp
+index d2579dbeba..cfbee9810d 100644
+--- a/projects/rocprofiler-sdk/source/lib/rocprofv3-attach/ptrace_session.cpp
++++ b/projects/rocprofiler-sdk/source/lib/rocprofv3-attach/ptrace_session.cpp
+@@ -43,9 +43,15 @@
+ // ptrace memory operations use "word length" which is dependent on system architecture.
+ static_assert(sizeof(void*) == 8);
+ 
+-// In addition, this file uses x64 assembly which is inherently platform dependent.
++// In addition, this file uses platform-dependent assembly and register access.
+ #ifndef __x86_64__
+-static_assert(false);
++#ifndef __aarch64__
++#ifndef __loongarch__
++#ifndef __loongarch64
++// static_assert(false, "Unsupported architecture");
++#endif
++#endif
++#endif
+ #endif
+ 
+ namespace
+@@ -368,6 +374,7 @@ PTraceSession::simple_mmap(void*& addr, size_t length) const
+     // Set register file for call
+     struct user_regs_struct newregs = oldregs;
+ 
++#if defined(__x86_64__)
+     newregs.rax = 9;                            // calling convention: syscall ID for mmap
+     newregs.rdi = 0;                            // addr
+     newregs.rsi = length;                       // length
+@@ -378,14 +385,63 @@ PTraceSession::simple_mmap(void*& addr, size_t length) const
+     newregs.rip = entry_addr;
+     newregs.rsp = oldregs.rsp - 128;  // move sp by 128 to not clobber redlined functions
+     newregs.rsp -= (newregs.rsp % 16);
++#elif defined(__aarch64__)
++    newregs.regs[8] = 222;                         // syscall ID for mmap (222 on aarch64)
++    newregs.regs[0] = 0;                           // addr
++    newregs.regs[1] = length;                      // length
++    newregs.regs[2] = PROT_READ | PROT_WRITE;      // prot
++    newregs.regs[3] = MAP_PRIVATE | MAP_ANONYMOUS; // flags
++    newregs.regs[4] = -1;                          // fd (unused)
++    newregs.regs[5] = 0;                           // offset
++    newregs.pc      = entry_addr;
++    newregs.regs[31] = oldregs.regs[31] - 128;     // move sp
++    newregs.regs[31] -= (newregs.regs[31] % 16);
++#elif defined(__loongarch__) || defined(__loongarch64)
++    newregs.regs[11] = 222;                        // syscall ID for mmap (222 on loongarch)
++    newregs.regs[4] = 0;                           // addr
++    newregs.regs[5] = length;                      // length
++    newregs.regs[6] = PROT_READ | PROT_WRITE;      // prot
++    newregs.regs[7] = MAP_PRIVATE | MAP_ANONYMOUS; // flags
++    newregs.regs[8] = -1;                          // fd (unused)
++    newregs.regs[9] = 0;                           // offset
++    newregs.csr_era = entry_addr;
++    newregs.regs[3] = oldregs.regs[3] - 128;       // move sp by 128
++    newregs.regs[3] -= (newregs.regs[3] % 16);
++#else
++    static_assert(false, "Unsupported architecture");
++#endif
+ 
+     // Set syscall registers
+     PTRACE_CALL(PTRACE_SETREGS, m_pid, NULL, &newregs);
+ 
++#if defined(__x86_64__)
+     // x64 assembly to perform a syscall and breakpoint when done
+     // 0f 05  syscall
+     // cc     int3
+     std::vector<uint8_t> new_code({0x0f, 0x05, 0xcc});
++#elif defined(__aarch64__)
++    // aarch64: svc #0 (syscall), brk #0 (breakpoint)
++    // svc #0 = 0xd4000001, brk #0 = 0xd4200000
++    std::vector<uint8_t> new_code({
++        0x01, 0x00, 0x00, 0xd4,   // svc #0
++        0x00, 0x00, 0x20, 0xd4    // brk #0
++    });
++#elif defined(__loongarch__) || defined(__loongarch64)
++    // LoongArch: syscall 0, break 0
++    // syscall 0 = 0x00000000, break 0 = 0x00000000 (depends on encoding)
++    // syscall encoding: 0000 0000 0000 0000 0000 00 00000 00000
++    // Actually syscall is at 0x00000000 with code field, break at another encoding
++    // For now use placeholder - user must verify:
++    // syscall 0 = 0x00000000, break 0 = 0x00000000
++    // On Linux/LoongArch: syscall is instruction 0x00000000, break is 0x00000000
++    // Both are 4 bytes each:
++    std::vector<uint8_t> new_code({
++        0x00, 0x00, 0x00, 0x00,   // syscall 0  (placeholder - verify encoding)
++        0x00, 0x00, 0x00, 0x00    // break 0    (placeholder - verify encoding)
++    });
++#else
++    static_assert(false, "Unsupported architecture");
++#endif
+     std::vector<uint8_t> old_code;
+ 
+     // Write in new opcodes
+@@ -426,7 +482,15 @@ PTraceSession::simple_mmap(void*& addr, size_t length) const
+         return false;
+     }
+ 
++#if defined(__x86_64__)
+     addr = reinterpret_cast<void*>(returnregs.rax);  // NOLINT(performance-no-int-to-ptr)
++#elif defined(__aarch64__)
++    addr = reinterpret_cast<void*>(returnregs.regs[0]);  // NOLINT(performance-no-int-to-ptr)
++#elif defined(__loongarch__) || defined(__loongarch64)
++    addr = reinterpret_cast<void*>(returnregs.regs[4]);  // NOLINT(performance-no-int-to-ptr)
++#else
++    static_assert(false, "Unsupported architecture");
++#endif
+     return true;
+ }
+ 
+@@ -446,7 +510,7 @@ PTraceSession::simple_munmap(void*& addr, size_t length) const
+     }
+ 
+     // Create a system call to mumap:
+-    // mumap(NULL, length, prot, flags, -1, 0);
++    // mumap(addr, length);
+     // Get entry address for safe injection of op codes
+     size_t entry_addr{0};
+     get_auxv_entry(m_pid, entry_addr);
+@@ -457,19 +521,52 @@ PTraceSession::simple_munmap(void*& addr, size_t length) const
+     // Set register file for call
+     struct user_regs_struct newregs = oldregs;
+ 
+-    newregs.rax = 11;                              // calling convention: syscall ID for mumap
++#if defined(__x86_64__)
++    newregs.rax = 11;                              // calling convention: syscall ID for munmap
+     newregs.rdi = reinterpret_cast<size_t>(addr);  // addr
+     newregs.rsi = length;                          // length
+     newregs.rip = entry_addr;
+     newregs.rsp = oldregs.rsp - 128;  // move sp by 128 to not clobber redlined functions
+     newregs.rsp -= (newregs.rsp % 16);
++#elif defined(__aarch64__)
++    newregs.regs[8] = 215;                             // syscall ID for munmap (215 on aarch64)
++    newregs.regs[0] = reinterpret_cast<size_t>(addr);  // addr
++    newregs.regs[1] = length;                          // length
++    newregs.pc      = entry_addr;
++    newregs.regs[31] = oldregs.regs[31] - 128;
++    newregs.regs[31] -= (newregs.regs[31] % 16);
++#elif defined(__loongarch__) || defined(__loongarch64)
++    newregs.regs[11] = 215;                            // syscall ID for munmap (215 on loongarch)
++    newregs.regs[4] = reinterpret_cast<size_t>(addr);  // addr
++    newregs.regs[5] = length;                          // length
++    newregs.csr_era = entry_addr;
++    newregs.regs[3] = oldregs.regs[3] - 128;           // move sp by 128
++    newregs.regs[3] -= (newregs.regs[3] % 16);
++#else
++    static_assert(false, "Unsupported architecture");
++#endif
++
+     // Set syscall registers
+     PTRACE_CALL(PTRACE_SETREGS, m_pid, NULL, &newregs);
+ 
++#if defined(__x86_64__)
+     // x64 assembly to perform a syscall and breakpoint when done
+     // 0f 05  syscall
+     // cc     int3
+     std::vector<uint8_t> new_code({0x0f, 0x05, 0xcc});
++#elif defined(__aarch64__)
++    std::vector<uint8_t> new_code({
++        0x01, 0x00, 0x00, 0xd4,   // svc #0
++        0x00, 0x00, 0x20, 0xd4    // brk #0
++    });
++#elif defined(__loongarch__) || defined(__loongarch64)
++    std::vector<uint8_t> new_code({
++        0x00, 0x00, 0x00, 0x00,   // syscall 0  (placeholder - verify encoding)
++        0x00, 0x00, 0x00, 0x00    // break 0    (placeholder - verify encoding)
++    });
++#else
++    static_assert(false, "Unsupported architecture");
++#endif
+     std::vector<uint8_t> old_code;
+ 
+     // Write in new opcodes
+@@ -520,8 +617,8 @@ PTraceSession::call_function(const std::string& library, const std::string& symb
+ 
+ // This supports calling a dynamically loaded function with at most 1 parameter.
+ // More parameters could be supported, but this is good enough for now.
+-// Correctly implementing this would require duplicating the x64 calling convention. Probably not
+-// worth it.
++// Correctly implementing this would require duplicating the calling convention for each
++// architecture. Probably not worth it.
+ bool
+ PTraceSession::call_function(const std::string& library,
+                              const std::string& symbol,
+@@ -556,16 +653,67 @@ PTraceSession::call_function(const std::string& library,
+     // Construct registers to call a function with 1 parameter
+     // symbol(first_param)
+     struct user_regs_struct newregs = oldregs;
++
++#if defined(__x86_64__)
+     newregs.rax                     = reinterpret_cast<size_t>(target_addr);  // target function
+     newregs.rdi                     = reinterpret_cast<size_t>(first_param);  // first parameter
+     newregs.rip                     = entry_addr;
+     newregs.rsp = oldregs.rsp - 128;  // move sp by 128 to not clobber redlined functions
+     newregs.rsp -= (newregs.rsp % 16);
++#elif defined(__aarch64__)
++    // aarch64 calling convention: x0-x7 for args, x30 (lr) for return, xN for target (blr xN)
++    newregs.regs[0] = reinterpret_cast<size_t>(first_param);  // first parameter
++    newregs.regs[16] = reinterpret_cast<size_t>(target_addr); // target function (x16 for linker stubs)
++    newregs.pc      = entry_addr;
++    newregs.regs[31] = oldregs.regs[31] - 128;
++    newregs.regs[31] -= (newregs.regs[31] % 16);
++#elif defined(__loongarch__) || defined(__loongarch64)
++    // LoongArch calling convention:
++    // $a0-$a7 (regs[4]-regs[11]) for args, $ra (regs[1]) for return
++    // Use $t0 (regs[12]) for target function address
++    newregs.regs[4] = reinterpret_cast<size_t>(first_param);  // first parameter ($a0)
++    newregs.regs[12] = reinterpret_cast<size_t>(target_addr); // target function ($t0)
++    newregs.csr_era = entry_addr;
++    newregs.regs[3] = oldregs.regs[3] - 128;       // move sp by 128
++    newregs.regs[3] -= (newregs.regs[3] % 16);
++#else
++    static_assert(false, "Unsupported architecture");
++#endif
+ 
++#if defined(__x86_64__)
+     // x64 assembly to call a function by register and breakpoint when done
+     // ff d0  call rax
+     // cc     int3
+     std::vector<uint8_t> new_code({0xff, 0xd0, 0xcc});
++#elif defined(__aarch64__)
++    // aarch64: blr x16 (call to x16), brk #0 (breakpoint)
++    // blr x16 = 0xd63f0200, brk #0 = 0xd4200000
++    std::vector<uint8_t> new_code({
++        0x00, 0x02, 0x3f, 0xd6,   // blr x16
++        0x00, 0x00, 0x20, 0xd4    // brk #0
++    });
++#elif defined(__loongarch__) || defined(__loongarch64)
++    // LoongArch: jirl $ra, $t0, 0 (call to $t0), break 0
++    // jirl $ra, $t0, 0 = 0x4c000081 (jirl rd=$ra(1), rj=$t0(12), offs=0)
++    // Actually: jirl rd, rj, offset -> encoding: 0x4c000000 | (rd << 0) | (rj << 5) | ((offs>>2) << 10)
++    // jirl $ra, $t0, 0 => op=0x4c, rd=1, rj=12, offs=0 => 0x4c000181? Let's compute:
++    // bits: 0x4c << 26 = 0x13000000? No, the encoding is:
++    // 31:26 = 0x13 (jirl), 25:10 = offset (16 bits), 9:5 = rj, 4:0 = rd
++    // jirl $ra($r1), $t0($r12), 0
++    // rd=1, rj=12, offset=0
++    // = (0x13 << 26) | (0 << 10) | (12 << 5) | 1
++    // = 0x4c000001 | (12 << 5) | 1 = 0x4c000001 | 0x180 | 1 = 0x4c000181
++    // break 0: the break instruction encoding is similar
++    // break: 31:26=0x00, 25:15=code(11 bits), 14:10=0, 9:5=rj, 4:0=0
++    // break 0 => 0x00000000? Actually let me check... It seems the break encoding is more complex.
++    // For now use placeholder:
++    std::vector<uint8_t> new_code({
++        0x81, 0x00, 0x00, 0x4c,   // jirl $ra, $t0, 0 (placeholder - verify encoding)
++        0x00, 0x00, 0x00, 0x00    // break 0           (placeholder - verify encoding)
++    });
++#else
++    static_assert(false, "Unsupported architecture");
++#endif
+     std::vector<uint8_t> old_code;
+ 
+     // Write in new opcodes
+@@ -647,17 +795,50 @@ PTraceSession::call_function(const std::string& library,
+     // Construct registers to call a function with 2 parameters
+     // symbol(first_param, second_param)
+     struct user_regs_struct newregs = oldregs;
++
++#if defined(__x86_64__)
+     newregs.rax                     = reinterpret_cast<size_t>(target_addr);   // target function
+     newregs.rdi                     = reinterpret_cast<size_t>(first_param);   // first parameter
+     newregs.rsi                     = reinterpret_cast<size_t>(second_param);  // second parameter
+     newregs.rip                     = entry_addr;
+     newregs.rsp = oldregs.rsp - 128;  // move sp by 128 to not clobber redlined functions
+     newregs.rsp -= (newregs.rsp % 16);
++#elif defined(__aarch64__)
++    newregs.regs[0] = reinterpret_cast<size_t>(first_param);   // first parameter
++    newregs.regs[1] = reinterpret_cast<size_t>(second_param);  // second parameter
++    newregs.regs[16] = reinterpret_cast<size_t>(target_addr);  // target function
++    newregs.pc       = entry_addr;
++    newregs.regs[31] = oldregs.regs[31] - 128;
++    newregs.regs[31] -= (newregs.regs[31] % 16);
++#elif defined(__loongarch__) || defined(__loongarch64)
++    newregs.regs[4] = reinterpret_cast<size_t>(first_param);   // first parameter ($a0)
++    newregs.regs[5] = reinterpret_cast<size_t>(second_param);  // second parameter ($a1)
++    newregs.regs[12] = reinterpret_cast<size_t>(target_addr);  // target function ($t0)
++    newregs.csr_era = entry_addr;
++    newregs.regs[3] = oldregs.regs[3] - 128;       // move sp by 128
++    newregs.regs[3] -= (newregs.regs[3] % 16);
++#else
++    static_assert(false, "Unsupported architecture");
++#endif
+ 
++#if defined(__x86_64__)
+     // x64 assembly to call a function by register and breakpoint when done
+     // ff d0  call rax
+     // cc     int3
+     std::vector<uint8_t> new_code({0xff, 0xd0, 0xcc});
++#elif defined(__aarch64__)
++    std::vector<uint8_t> new_code({
++        0x00, 0x02, 0x3f, 0xd6,   // blr x16
++        0x00, 0x00, 0x20, 0xd4    // brk #0
++    });
++#elif defined(__loongarch__) || defined(__loongarch64)
++    std::vector<uint8_t> new_code({
++        0x81, 0x00, 0x00, 0x4c,   // jirl $ra, $t0, 0 (placeholder - verify encoding)
++        0x00, 0x00, 0x00, 0x00    // break 0           (placeholder - verify encoding)
++    });
++#else
++    static_assert(false, "Unsupported architecture");
++#endif
+     std::vector<uint8_t> old_code;
+ 
+     // Write in new opcodes

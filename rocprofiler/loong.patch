@@ -1,0 +1,21 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -62,6 +62,9 @@ prepare() {
+   # Add missing <cstdint> include
+   cd "${srcdir}/rocm-systems/projects/rocprofiler-sdk/external/elfio"
+   git cherry-pick -n 34d2c64237bb40f09879e7421db120e50e7e2923
++  cd "${srcdir}/rocm-systems"
++  patch -Np1 -i "${srcdir}/perf_timer.diff"
++  patch -Np1 -i "${srcdir}/ptrace_session.diff"
+ }
+ 
+ build() {
+@@ -108,3 +111,8 @@ package() {
+   DESTDIR="$pkgdir" cmake --install build-sdk
+   install -Dm644 "$_dir_name/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++source+=("perf_timer.diff"
++         "ptrace_session.diff")
++sha256sums+=('b4c6e48e6c42be301bd8418901b0d2eb7be4904156d6b843141553dca825b393'
++             '5b71f09827c4a1ce9882b70ffefee1217e11354fd24cfa601441f81a8c37ef96')

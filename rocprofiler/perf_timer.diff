@@ -1,0 +1,26 @@
+diff --git a/projects/rocprofiler/test/util/perf_timer.h b/projects/rocprofiler/test/util/perf_timer.h
+index bfd553240c..4646d2a771 100644
+--- a/projects/rocprofiler/test/util/perf_timer.h
++++ b/projects/rocprofiler/test/util/perf_timer.h
+@@ -37,7 +37,20 @@ THE SOFTWARE.
+ #else
+ #if defined(__GNUC__)
+ #include <sys/time.h>
+-#include <x86intrin.h>
++#if defined(__x86_64__) || defined(__i386__)
++    #include <x86intrin.h>
++#elif defined(__loongarch__)
++    #include <larchintrin.h>
++    static inline uint64_t __rdtscp(uint32_t* aux) {
++        // dbar 0 guarantees instructions are serialized (like rdtscp)
++        __asm__ __volatile__("dbar 0" ::: "memory");
++
++        // Read the timer and the timer ID (CPU node)
++        __drdtime_t res = __rdtime_d();
++        if (aux) *aux = res.dtimeid;
++        return res.dvalue;
++    }
++#endif
+ #endif  // __GNUC__
+ #endif  // _MSC_VER
+ 
