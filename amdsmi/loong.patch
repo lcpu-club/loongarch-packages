@@ -1,0 +1,25 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -52,6 +52,7 @@ prepare() {
+ 
+   patch -Np1 -i "$srcdir"/gcc15-missing-include.patch
+   patch -Np1 -i "$srcdir"/165.patch
++  patch -Np1 -i "$srcdir"/amdsmi_go_shim_loongarch64.patch
+ }
+ 
+ build() {
+@@ -62,6 +63,7 @@ build() {
+     -D CMAKE_INSTALL_PREFIX=/opt/rocm
+     -D CMAKE_BUILD_TYPE=None
+     -D BUILD_TESTS=OFF
++    -D ENABLE_ESMI_LIB=OFF
+   )
+   cmake "${cmake_args[@]}"
+   cmake --build build
+@@ -80,3 +82,6 @@ package() {
+   # cmake also installs python package under share.
+   rm -r "${pkgdir}"/opt/rocm/share/amd_smi
+ }
++
++source+=("amdsmi_go_shim_loongarch64.patch")
++sha256sums+=('e5840ba2c27e36a75c539990add1011fadf6d410b7abd58797123c4e2f7f131c')
