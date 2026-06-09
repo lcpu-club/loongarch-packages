@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 9ae703f..ecbf8a0 100644
+index c8280df..64e430c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -54,6 +54,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
+@@ -76,6 +76,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
              'org.freedesktop.secrets: password storage backend on GNOME, KDE and Xfce'
              'upower: Battery Status API support')
  options=('!lto') # Chromium adds its own flags for ThinLTO
@@ -10,7 +10,7 @@ index 9ae703f..ecbf8a0 100644
  source=(https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$pkgver-lite.tar.xz
          https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver/chromium-launcher-$_launcher_ver.tar.gz
          chromium-138-nodejs-version-check.patch
-@@ -89,6 +90,8 @@ if (( _manual_clone )); then
+@@ -111,6 +112,8 @@ if (( _manual_clone )); then
    source[0]=fetch-chromium-release
    sha256sums[0]='2e2f36e3cd1ebc4ad57fd310774a5e5e9db77883d5f9374fedeaabd3c103b819'
    makedepends+=('python-httplib2' 'python-pyparsing' 'python-six' 'npm' 'rsync')
@@ -19,15 +19,7 @@ index 9ae703f..ecbf8a0 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -199,6 +202,7 @@ prepare() {
-            third_party/jdk/current/bin
- 
-   ln -s /usr/bin/node third_party/node/linux/node-linux-x64/bin/
-+  ln -s /usr/bin/rustc third_party/rust-toolchain/bin/
-   ln -s /usr/bin/java third_party/jdk/current/bin/
- 
-   # remove x86_64 binary and use our own
-@@ -234,6 +238,46 @@ prepare() {
+@@ -262,6 +265,48 @@ prepare() {
    python3 build/util/lastchange.py -m DAWN_COMMIT_HASH \
      -s third_party/dawn --revision gpu/webgpu/DAWN_VERSION \
      --header gpu/webgpu/dawn_commit_hash.h
@@ -35,6 +27,8 @@ index 9ae703f..ecbf8a0 100644
 +  # Patches for loong64
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++  patch -Np1 -i "${srcdir}/fix-libyuv-lsx.patch"
++  patch -Np1 -i "${srcdir}/Fix-build-for-CPU-yield-on-LoongArch.patch"
 +
 +  pushd third_party/node/
 +  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
@@ -74,7 +68,7 @@ index 9ae703f..ecbf8a0 100644
  }
  
  build() {
-@@ -341,6 +385,12 @@ build() {
+@@ -369,6 +414,12 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -87,14 +81,18 @@ index 9ae703f..ecbf8a0 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -418,4 +468,10 @@ package() {
+@@ -446,4 +497,14 @@ package() {
    install -Dvm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
-+         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
++         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++         "fix-libyuv-lsx.patch"
++         "Fix-build-for-CPU-yield-on-LoongArch.patch")
 +sha256sums+=('c498ad298917886739606cd8fac8f526fd05218a460997c0e9100db18b1996bb'
-+             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
++             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
++             'f93d3f3439494da3bbb623b19919cb2656200be4459684815b2c5d929dae3496'
++             'b88f43b6b96a6b247f4bfbb267904655f57105ffd396c73829cd07759f8b5a1b')
 +makedepends+=(jq npm rsync)
 +
  # vim:set ts=2 sw=2 et:
