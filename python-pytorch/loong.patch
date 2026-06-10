@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -220,6 +220,11 @@ prepare() {
+@@ -228,6 +228,11 @@ prepare() {
  
    git -c protocol.file.allow=always submodule update --init --recursive
  
@@ -12,7 +12,33 @@
    # Fix cmake prefix path (FS#78665)
    patch -Np1 -i "${srcdir}"/fix_cmake_prefix_path.patch
  
-@@ -270,7 +275,7 @@ _prepare() {
+@@ -258,18 +263,18 @@ prepare() {
+   cd "${srcdir}"
+ 
+   cp -r "${_pkgname}" "${_pkgname}-opt"
+-  cp -r "${_pkgname}" "${_pkgname}-cuda"
+-  cp -r "${_pkgname}" "${_pkgname}-opt-cuda"
++#  cp -r "${_pkgname}" "${_pkgname}-cuda"
++#  cp -r "${_pkgname}" "${_pkgname}-opt-cuda"
+   cp -r "${_pkgname}" "${_pkgname}-rocm"
+   cp -r "${_pkgname}" "${_pkgname}-opt-rocm"
+-  cp -r "${_pkgname}" "${_pkgname}-xpu"
+-  cp -r "${_pkgname}" "${_pkgname}-opt-xpu"
++#  cp -r "${_pkgname}" "${_pkgname}-xpu"
++#  cp -r "${_pkgname}" "${_pkgname}-opt-xpu"
+ 
+   # Handle glog 0.6 vs 0.7 mismatch
+   local _suffix
+-  for _suffix in xpu opt-xpu; do
+-    sed -i '1s/^/#ifndef GLOG_USE_GLOG_EXPORT\n#define GLOG_USE_GLOG_EXPORT\n#endif\n\n/' ${_pkgname}-${_suffix}/c10/util/logging_is_google_glog.h
+-  done
++#  for _suffix in xpu opt-xpu; do
++#    sed -i '1s/^/#ifndef GLOG_USE_GLOG_EXPORT\n#define GLOG_USE_GLOG_EXPORT\n#endif\n\n/' ${_pkgname}-${_suffix}/c10/util/logging_is_google_glog.h
++#  done
+ }
+ 
+ # Common build configuration, called in the build() function.
+@@ -281,7 +286,7 @@ _prepare() {
    # Check tools/setup_helpers/cmake.py, setup.py and CMakeLists.txt for a list of flags that can be set via env vars.
    export BUILD_TEST=OFF  # do not build tests
    export ATEN_NO_TEST=ON  # do not build ATen tests
@@ -21,8 +47,8 @@
    export BUILD_CUSTOM_PROTOBUF=OFF
    export USE_GFLAGS=ON
    export USE_GLOG=ON
-@@ -279,10 +284,11 @@ _prepare() {
-   export USE_MAGMA=ON
+@@ -289,10 +294,11 @@ _prepare() {
+   export USE_OBSERVERS=ON
    # export USE_SYSTEM_LIBS=ON  # experimental, not all libs present in repos
    # USE_SYSTEM_ONNX=ON does not work and onnx itself should be removed from pytorch: https://github.com/pytorch/pytorch/issues/166546#issuecomment-3463370459
 -  export USE_NCCL=ON
@@ -35,7 +61,7 @@
    export USE_GOLD_LINKER=ON
    export NCCL_VERSION=$(pkg-config nccl --modversion)
    export NCCL_VER_CODE=$(sed -n 's/^#define NCCL_VERSION_CODE\s*\(.*\).*/\1/p' /usr/include/nccl.h)
-@@ -303,7 +309,7 @@ _prepare() {
+@@ -313,7 +319,7 @@ _prepare() {
    # https://github.com/pytorch/pytorch/blob/f9074c7332c3dfd43fe39e8733ec98f7f29b3e61/torch/utils/cpp_extension.py#L2417-L2420
    # (note that 8.8 is not supported)
    export TORCH_CUDA_ARCH_LIST="7.5 8.0 8.6 8.7 8.9 9.0 10.0 10.3 11.0 12.0 12.1"
@@ -44,7 +70,7 @@
    export ROCM_PATH=/opt/rocm
    export HIP_ROOT_DIR=/opt/rocm
    # gfx950 lacks support for 128 bit atomics
-@@ -315,7 +321,7 @@ _prepare() {
+@@ -325,7 +331,7 @@ _prepare() {
    export USE_FBGEMM_GENAI=OFF
  
    # Compile source code for supported GPU archs in parallel (but using too many jobs is not helpful)
@@ -53,7 +79,7 @@
    export HIPCC_LINK_FLAGS_APPEND="-parallel-jobs=4"
  
    export AOTRITON_INSTALLED_PREFIX=/usr
-@@ -331,23 +337,24 @@ _prepare() {
+@@ -341,25 +347,26 @@ _prepare() {
  
  build() {
    cd "${srcdir}/${_pkgname}"
@@ -63,6 +89,7 @@
    export USE_CUDA=0
    export USE_CUDNN=0
    export USE_ROCM=0
+   export USE_XPU=0
 -  echo "add_definitions(-march=x86-64)" >> cmake/MiscCheck.cmake
 +  echo "add_definitions(-march=loongarch64)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
@@ -74,6 +101,7 @@
    export USE_CUDA=0
    export USE_CUDNN=0
    export USE_ROCM=0
+   export USE_XPU=0
 -  echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
 +  echo "add_definitions(-march=la464)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
@@ -82,7 +110,7 @@
    cd "${srcdir}/${_pkgname}-cuda"
    echo "Building with cuda and without non-x86-64 optimizations"
    _prepare
-@@ -368,9 +375,10 @@ build() {
+@@ -380,9 +387,10 @@ build() {
    _prepare
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
@@ -94,12 +122,12 @@
    # -fcf-protection is not supported by HIP, see
    # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
    CXXFLAGS+=" -fcf-protection=none"
-@@ -379,19 +387,21 @@ build() {
+@@ -391,23 +399,26 @@ build() {
    export USE_CUDNN=0
    export USE_ROCM=1
-   export MAGMA_HOME=/opt/rocm
+   export USE_XPU=0
 -  echo "add_definitions(-march=x86-64)" >> cmake/MiscCheck.cmake
-+  export MAX_JOBS=16
++  export MAX_JOBS=8
 +  echo "add_definitions(-march=loongarch64)" >> cmake/MiscCheck.cmake
    # Conversion of CUDA to ROCm source files
    python tools/amd_build/build_amd.py
@@ -112,14 +140,27 @@
    export USE_CUDA=0
    export USE_CUDNN=0
    export USE_ROCM=1
-   export MAGMA_HOME=/opt/rocm
+   export USE_XPU=0
 -  echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
-+  export MAX_JOBS=16
++  export MAX_JOBS=8
 +  echo "add_definitions(-march=la464)" >> cmake/MiscCheck.cmake
    # Conversion of CUDA to ROCm source files
    python tools/amd_build/build_amd.py
    python -m build --wheel --no-isolation
-@@ -430,7 +440,7 @@ package_python-pytorch() {
+ 
++  : <<COMMENT_SEPARATOR
+   # Strip the problematic format-security flag that breaks SYCL CMake scripts
+   export CFLAGS="${CFLAGS/-Werror=format-security/}"
+   export CXXFLAGS="${CXXFLAGS/-Werror=format-security/}"
+@@ -433,6 +444,7 @@ build() {
+   export USE_XPU=1
+   echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
+   python -m build --wheel --no-isolation
++COMMENT_SEPARATOR
+ }
+ 
+ _package() {
+@@ -468,7 +480,7 @@ package_python-pytorch() {
  }
  
  package_python-pytorch-opt() {
@@ -128,27 +169,25 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -460,7 +470,7 @@ package_python-pytorch-opt-cuda() {
+@@ -498,7 +510,7 @@ package_python-pytorch-opt-cuda() {
  
  package_python-pytorch-rocm() {
    pkgdesc+=" (with ROCm)"
--  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn python-triton python-aotriton)
-+  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn)
+-  depends+=(amdsmi rocm-hip-sdk hipblaslt rocprofiler roctracer miopen-hip onednn python-triton python-aotriton)
++  depends+=(amdsmi rocm-hip-sdk hipblaslt rocprofiler roctracer miopen-hip onednn)
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -469,8 +479,8 @@ package_python-pytorch-rocm() {
- }
+@@ -508,7 +520,7 @@ package_python-pytorch-rocm() {
  
  package_python-pytorch-opt-rocm() {
--  pkgdesc+=" (with ROCm and AVX2 CPU optimizations)"
--  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn python-triton python-aotriton)
-+  pkgdesc+=" (with ROCm and LASX CPU optimizations)"
-+  depends+=(rocm-hip-sdk hipblaslt roctracer miopen-hip magma-hip onednn)
+   pkgdesc+=" (with ROCm and AVX2 CPU optimizations)"
+-  depends+=(amdsmi rocm-hip-sdk hipblaslt rocprofiler roctracer miopen-hip onednn python-triton python-aotriton)
++  depends+=(amdsmi rocm-hip-sdk hipblaslt rocprofiler roctracer miopen-hip onednn)
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver} python-pytorch-rocm=${pkgver})
  
-@@ -478,4 +488,20 @@ package_python-pytorch-opt-rocm() {
+@@ -551,4 +563,30 @@ package_python-pytorch-opt-xpu() {
    _package
  }
  
@@ -157,10 +196,20 @@
 +makedepends=(${makedepends[@]/cuda})
 +makedepends=(${makedepends[@]/nccl})
 +makedepends=(${makedepends[@]/cudnn})
++makedepends=(${makedepends[@]/oneccl})
++makedepends=(${makedepends[@]/onedpl})
++makedepends=(${makedepends[@]/intel-pti})
++makedepends=(${makedepends[@]/intel-oneapi-dpcpp-cpp})
++makedepends=(${makedepends[@]/intel-compute-runtime})
++makedepends=(${makedepends[@]/intel-oneapi-mkl-sycl})
++makedepends=(${makedepends[@]/intel-oneapi-common})
++makedepends=(${makedepends[@]/})
 +makedepends=(${makedepends[@]/python-triton})
 +makedepends=(${makedepends[@]/python-aotriton})
 +pkgname=(${pkgname[@]/"${pkgbase}-cuda"})
 +pkgname=(${pkgname[@]/"${pkgbase}-opt-cuda"})
++pkgname=(${pkgname[@]/"${pkgbase}-xpu"})
++pkgname=(${pkgname[@]/"${pkgbase}-opt-xpu"})
 +source+=("disable-aotriton.patch"
 +         "sleef_loong64.patch"
 +         "cpuinfo_loong64.patch::https://raw.githubusercontent.com/loong64/pytorch/refs/heads/main/cpuinfo/cpuinfo_loong64.patch")
