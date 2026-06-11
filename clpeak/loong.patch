@@ -1,0 +1,28 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 34e852b..190c4d7 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,6 +21,8 @@ build() {
+     -DCLPEAK_ENABLE_CUDA=OFF
+   ninja -C build
+ 
++  # Use a "multi-line comment" to keep patch from rotting
++  : <<COMMENT_SEPARATOR
+   cmake \
+     -Bbuild-cuda \
+     -GNinja \
+@@ -28,6 +30,7 @@ build() {
+     -DCMAKE_INSTALL_PREFIX=/usr \
+     -DCLPEAK_ENABLE_CUDA=ON
+   ninja -C build-cuda
++COMMENT_SEPARATOR
+ }
+ 
+ package_clpeak() {
+@@ -54,3 +57,6 @@ package_clpeak-cuda() {
+   cp -r results "$pkgdir"/usr/share/clpeak-cuda/results
+   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/clpeak-cuda/LICENSE"
+ }
++
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(clpeak-cuda)$'))
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda)$'))
