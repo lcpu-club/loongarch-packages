@@ -1,0 +1,27 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -63,6 +63,7 @@ prepare() {
+   cd ../$_dirname
+   # Prevent the virtualenv install from cmake
+   sed -i -e 's@virtualenv_install@#virtualenv_install@' CMakeLists.txt
++  patch -Np3 -i $srcdir/add-loongarch64-support.patch
+ }
+ 
+ build() {
+@@ -100,6 +101,9 @@ build() {
+     -D Tensile_COMPILER=amdclang++
+     -D Tensile_LIBRARY_FORMAT=msgpack
+     -D VIRTUALENV_BIN_DIR=/usr/bin
++    -D CMAKE_LINKER_TYPE=LLD
++    -D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld"
++    -D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=lld"
+     # tensililte keeps an explicit allowlist of allowed values for GPU_TARGET
+     # https://github.com/ROCm/rocm-libraries/blob/rocm-7.1.0/projects/hipblaslt/cmake/tensilelite_supported_architectures.cmake#L14-L33
+     -D GPU_TARGET="gfx908;gfx90a;gfx942;gfx950;gfx1100;gfx1101;gfx1103;gfx1150;gfx1151;gfx1200;gfx1201;gfx908:xnack+;gfx908:xnack-;gfx90a:xnack+;gfx90a:xnack-"
+@@ -113,3 +117,6 @@ package() {
+ 
+   install -Dm644 "$_dirname/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++source+=('add-loongarch64-support.patch')
++sha256sums+=('d2996bd0ee912742bf7ad2a40fc85a30c3a12b1655b18b5349db9634caef3160')
