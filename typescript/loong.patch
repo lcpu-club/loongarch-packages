@@ -1,13 +1,12 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 489c079..7451cea 100644
+index 33c811f..5457bfa 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -21,6 +21,12 @@ b2sums=('c0361e8140820040a5a10adc43dbd2aaf29bff8a1da04993a33c967b11b9ac841b7c3ff
+@@ -21,6 +21,11 @@ b2sums=('88d24a857f85e695e32b5d4b1bdff74cdbe6f3e46c12c00cebdf927412d9446e2592b34
  
  prepare() {
    cd $_name
 +
-+  # Remove dprint from dependencies and disable formatting when building code
 +  # dprint itself requires prebuilt binary available, and some of its plugins uses prebuilts as well
 +  # Building dprint from source from NPM package is upstreamed to https://github.com/dprint/dprint/pull/820
 +  patch -Np1 -i ../remove-dprint.patch
@@ -15,7 +14,7 @@ index 489c079..7451cea 100644
    npm ci
  }
  
-@@ -31,7 +37,7 @@ build() {
+@@ -31,7 +36,7 @@ build() {
  
  check() {
    cd $_name
@@ -24,10 +23,10 @@ index 489c079..7451cea 100644
  }
  
  package() {
-@@ -46,3 +52,6 @@ package() {
+@@ -46,3 +51,6 @@ package() {
    install -Dm644 -t "$pkgdir"/usr/share/licenses/$pkgname \
      ThirdPartyNoticeText.txt
  }
 +
-+source+=("remove-dprint.patch::https://github.com/wszqkzqk/TypeScript/commit/dddc74c0cb779a3889c512cd2d5b239bce1c94b9.patch")
-+b2sums+=('9f75684e04056643cf57873165538e82ca6836b3789e2c3553ca34f14bda1fec8213920d0dda2ce9e454c8ff74d9c7da024253c3c6099f358baaec9ca0676470')
++source+=("remove-dprint.patch")
++b2sums+=('d04f449c4a90ffbab705d85f8b62bb8905753fa3486d7fa8e9864e22f72b0bcd10e650ea2aab9417738773b48602adefe265508d66eea77ca1760a4359744124')
