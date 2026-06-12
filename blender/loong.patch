@@ -1,19 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 5103510..4d41912 100644
+index bab1baf..5994774 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -137,6 +137,10 @@ prepare() {
-   git lfs fetch network-origin
-   git lfs checkout
- 
-+  # Adding missing include of the "state_util.h" header
-+  git cherry-pick -n d0938c1cfba8868e58af27f8a4e16b3594d41765
-+
-+
-   # Fix build with older oneapi (we really should upgrade soon!)
-   git revert -n d4147c046e98d5996720cefd6e0b630e19c88e94 49414a72f607ccd15f8b71b81edc9aff040d581e
- 
-@@ -173,8 +177,11 @@ build() {
+@@ -180,8 +180,11 @@ build() {
      -D CMAKE_BUILD_TYPE=Release
      -D CMAKE_INSTALL_PREFIX=/usr
      -D WITH_LINKER_MOLD=ON
@@ -27,12 +16,7 @@ index 5103510..4d41912 100644
      -D HIP_ROOT_DIR=/opt/rocm
      -D HIPRT_INCLUDE_DIR=/opt/rocm/include
      -D HIPRT_COMPILER_PARALLEL_JOBS=8
-@@ -212,7 +219,11 @@ package() {
- 
-   # Move OneAPI AOT lib to proper place
-   mkdir "${pkgdir}"/usr/lib/
--  mv "${pkgdir}"/usr/share/blender/lib/libcycles_kernel_oneapi_aot.so "${pkgdir}"/usr/lib/
-+  # mv "${pkgdir}"/usr/share/blender/lib/libcycles_kernel_oneapi_aot.so "${pkgdir}"/usr/lib/
+@@ -238,3 +241,7 @@ package() {
  
    install -vDm 644 doc/license/{BSD-{2,3}-Clause,MIT,Zlib}-license.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
