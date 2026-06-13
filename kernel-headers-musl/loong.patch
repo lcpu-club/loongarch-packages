@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,6 +15,7 @@ sha512sums=('10a5281c6535705171a2d8a7619f13d19a2dbdd15af28ee470bb436fbf9b954502b
+ 
+ _CARCH=$CARCH
+ [[ $CARCH = i?86 ]] && _CARCH=x86
++[[ $CARCH = loong64 ]] && _CARCH=loongarch
+ 
+ build() {
+   cd "$srcdir"/kernel-headers-${pkgver/_/-}
