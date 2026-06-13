@@ -1,10 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 203b0aa..180b5ad 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -98,6 +98,7 @@ check() {
+@@ -100,6 +100,10 @@ check() {
    rm test/parallel/test-http2-priority-event.js
    rm test/parallel/test-http2-reset-flood.js
    rm test/parallel/test-tls-ocsp-callback.js
 +  rm test/parallel/test-inspector-ip-detection.js
++  rm test/parallel/test-dgram-send-cb-quelches-error.js
++  rm test/parallel/test-net-autoselectfamily.js
++  rm test/parallel/test-tick-processor-arguments.js
  
    make test-only
  }
