@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d2eabba..b20e750 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,6 +17,9 @@ sha256sums=('74682d750b3dfa97388d9334fd9f48b797c688642bec0f30d192bb5085c12577'
+ build(){
+     cd "${pkgname}-v${pkgver}"
+     export GOFLAGS="-buildmode=pie -modcacherw"
++    if [[ "$CARCH" == "loong64" ]]; then
++        export CGO_CFLAGS+=" -DRADIX_BITS=64"
++    fi
+     make
+ }
+ 
