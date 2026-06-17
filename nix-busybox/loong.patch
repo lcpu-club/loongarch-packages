@@ -1,0 +1,26 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 0e8198f..4141ca6 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,6 +32,13 @@ build() {
+   cd "$_pkgname-$pkgver"
+ 
+   cp "$srcdir/config" .config
++  if [ "$CARCH" == loong64 ]; then
++    # busybox kconfig does not allow a symbol to be reassigned within the same .config
++    grep -v -E '^(# )?CONFIG_(SHA1_HWACCEL|SHA256_HWACCEL|STACK_OPTIMIZATION_386|ASH_SLEEP|TC|FEATURE_TC_INGRESS)(=y| is not set)$|^(# )?CONFIG_(EXTRA_CFLAGS|EXTRA_LDFLAGS)=' .config > .config.tmp
++    cat "$srcdir/loong-addition.config" >> .config.tmp
++    mv .config.tmp .config
++    make CC=musl-gcc silentoldconfig
++  fi
+ 
+   # reproducible build
+   export KCONFIG_NOTIMESTAMP=1
+@@ -43,3 +50,7 @@ package() {
+ 
+   install -vDm755 -t "$pkgdir/usr/lib/nix" busybox
+ }
++
++source+=('loong-addition.config')
++sha512sums+=('6f32f1b6f9ac9c1c710bdc1b11a094704406f30e8896b1d3e8b8382e9ac7c4a61c478ef2f46b496ad60f4cac423ffb84e1f77120323fb632d6beb2a3e8fa9db2')
++b2sums+=('7f849fed92a84966c7743d1d68151a7b8af61c49a3ad4651fd96209cf27bf49493937fd1aee1885065aeeda83f06eba1b41ef707d6b9a18938d41dd5196bb61c')
