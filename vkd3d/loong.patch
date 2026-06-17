@@ -1,10 +1,61 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -15,6 +15,7 @@ sha512sums=('2b14f7f8d4d58c2bfc6c30aa0d24b6789c0887b2869cfb6be98d03b7b001a74a1fb
+@@ -27,23 +27,17 @@ makedepends=(
+   spirv-headers
+   vulkan-headers
+   vulkan-icd-loader
+-  wine
+   xcb-util-keysyms
+   xorgproto
+ )
+ source=(
+-  "git+https://gitlab.winehq.org/wine/vkd3d.git?signed#tag=vkd3d-$pkgver"
++  https://dl.winehq.org/vkd3d/source/vkd3d-$pkgver.tar.xz
+ )
+-b2sums=('89c5b3521491cca9a1ee7633f8c3258f05f1b04aa53c11b8ff1a5afa0803788f8968d3ad0bc370927c9a41eabc5bd7c416e750780d81f04b52f337095ef0555a')
++b2sums=(6ab708529ff1c6c181a8ea7dfa3ad2f127622e2ee7c85ba720237a426763227518cdad30c2aba1ae5641e3309c12bc95f18b6323ac2a65005587d8be2cfbb8b5)
+ validpgpkeys=(
+   277EB71D1BEBFC86E0E14983C380B588AA8A1D1C # Henri Verbeet <hverbeet@locutus.nl>
+ )
  
- prepare() {
-   cd vkd3d-$pkgver
-+  autoreconf -ifv
-   ./configure --prefix=/usr --with-spirv-tools
+-prepare() {
+-  cd vkd3d
+-  ./autogen.sh
+-}
+-
+ build() {
+   local configure_options=(
+     --prefix=/usr
+@@ -55,20 +49,20 @@ build() {
+     --with-spirv-tools
+   )
+ 
+-  cd vkd3d
++  cd vkd3d-$pkgver
+   ./configure "${configure_options[@]}"
+   make
  }
  
+ check() {
+-  cd vkd3d
++  cd vkd3d-$pkgver
+   make check
+ }
+ 
+ package_vkd3d() {
+   provides=(libvkd3d{,-shader,-utils}.so)
+ 
+-  cd vkd3d
++  cd vkd3d-$pkgver
+   make DESTDIR="$pkgdir" install
+ }
+ 
+@@ -76,7 +70,7 @@ package_vkd3d-docs() {
+   pkgdesc+=" - API documentation"
+   depends=()
+ 
+-  cd vkd3d
++  cd vkd3d-$pkgver
+   mkdir -p "$pkgdir/usr/share/doc"
+   cp -aT doc/html "$pkgdir/usr/share/doc/$pkgbase"
+ }
