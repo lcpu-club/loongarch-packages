@@ -1,30 +1,14 @@
-diff --git a/GPL/nativeBuildProperties.gradle b/GPL/nativeBuildProperties.gradle
-index 5e9c33f4e..cfad0b1d2 100644
---- a/GPL/nativeBuildProperties.gradle
-+++ b/GPL/nativeBuildProperties.gradle
-@@ -43,6 +43,9 @@ model {
- 				if (isCurrentArm_64()) {
- 					target("linux_arm_64")
- 				}
-+				if (isCurrentLoongarch_64()) {
-+					target("linux_loongarch_64")
-+				}
- 			}
- 		}
- 		if (isCurrentMac()) {
-diff --git a/GPL/nativePlatforms.gradle b/GPL/nativePlatforms.gradle
-index a75cf48a5..09b817dde 100644
---- a/GPL/nativePlatforms.gradle
-+++ b/GPL/nativePlatforms.gradle
-@@ -23,6 +23,7 @@ project.ext.PLATFORMS = [
- 	[name: "win_x86_64", os: "windows", arch: "x86_64"],
+--- a/GPL/nativePlatforms.gradle	2026-06-03 05:19:03.000000000 +0800
++++ b/GPL/nativePlatforms.gradle	2026-06-17 16:31:30.721000000 +0800
+@@ -24,6 +24,7 @@
+ 	[name: "win_arm_64", os: "windows", arch: "arm64"],
  	[name: "linux_x86_64", os: "linux", arch: "x86_64"],
  	[name: "linux_arm_64", os: "linux", arch: "arm64"],
 +	[name: "linux_loongarch_64", os: "linux", arch: "loongarch64"],
  	[name: "mac_x86_64", os: "osx", arch: "x86_64"],
- 	[name: "mac_arm_64", os: "osx", arch: "arm64"]
- ]
-@@ -71,6 +72,9 @@ ext.getCurrentPlatformName = {
+ 	[name: "mac_arm_64", os: "osx", arch: "arm64"],
+ 	[name: "freebsd_x86_64", os: "freebsd", arch: "x86_64"],
+@@ -77,6 +78,9 @@
  		case "arm64":
  			arch = "arm_64"
  			break
@@ -34,7 +18,7 @@ index a75cf48a5..09b817dde 100644
  		default:
  			throw new GradleException("Unrecognized platform architecture: $arch" )
  	}
-@@ -152,6 +156,14 @@ ext.isCurrentArm_64 = {
+@@ -172,6 +176,14 @@
  	return isArm_64(getCurrentPlatformName())
  }
  
@@ -49,102 +33,156 @@ index a75cf48a5..09b817dde 100644
  /****************************************************************************
   * Establish Visual Studio configuration environment for Windows native builds
   * NOTE: vsconfig.gradle path is relative to each GPL project module
-diff --git a/Ghidra/Debug/Debugger-rmi-trace/build.gradle b/Ghidra/Debug/Debugger-rmi-trace/build.gradle
-index 40fbc17ab..c10fec6eb 100644
---- a/Ghidra/Debug/Debugger-rmi-trace/build.gradle
-+++ b/Ghidra/Debug/Debugger-rmi-trace/build.gradle
-@@ -46,9 +46,14 @@ task generateProtoPy {
- 	inputs.files(src)
- 	dependsOn(configurations.protocArtifact)
- 	doLast {
--		def exe = configurations.protocArtifact.first()
--		if (!isCurrentWindows()) {
--			exe.setExecutable(true)
-+		def exe
-+		if (isCurrentLoongarch_64()) {
-+			exe = System.env.PROTOBUF_DESTDIR + "/usr/local/bin/protoc"
-+		} else {
-+			exe = configurations.protocArtifact.first()
-+			if (!isCurrentWindows()) {
-+				exe.setExecutable(true)
-+			}
- 		}
- 		exec {
- 			commandLine exe, "--python_out=$outdir", "-I$srcdir"
-diff --git a/gradle/debugger/hasProtobuf.gradle b/gradle/debugger/hasProtobuf.gradle
-index 23b4ce74b..24adc50d7 100644
---- a/gradle/debugger/hasProtobuf.gradle
-+++ b/gradle/debugger/hasProtobuf.gradle
-@@ -26,31 +26,34 @@ def platform = getCurrentPlatformName()
+--- a/GPL/DemanglerGnu/build.gradle	2026-06-03 05:19:03.000000000 +0800
++++ b/GPL/DemanglerGnu/build.gradle	2026-06-17 16:32:39.168000000 +0800
+@@ -80,6 +80,7 @@
+ 			targetPlatform "win_arm_64"
+ 			targetPlatform "linux_x86_64"
+ 			targetPlatform "linux_arm_64"
++			targetPlatform "linux_loongarch_64"
+ 			targetPlatform "mac_x86_64"
+ 			targetPlatform "mac_arm_64"
+ 			targetPlatform "freebsd_x86_64"
+@@ -104,6 +105,7 @@
+ 			targetPlatform "win_arm_64"
+ 			targetPlatform "linux_x86_64"
+ 			targetPlatform "linux_arm_64"
++			targetPlatform "linux_loongarch_64"
+ 			targetPlatform "mac_x86_64"
+ 			targetPlatform "mac_arm_64"
+ 			targetPlatform "freebsd_x86_64"
+--- a/GPL/GnuDisassembler/buildGdis.gradle	2026-06-03 05:19:03.000000000 +0800
++++ b/GPL/GnuDisassembler/buildGdis.gradle	2026-06-17 16:31:54.252000000 +0800
+@@ -4,7 +4,7 @@
  
+ defaultTasks 'assemble'
  
- dependencies {
--	allProtocArtifacts 'com.google.protobuf:protoc:3.21.8:windows-x86_64@exe'
--	allProtocArtifacts 'com.google.protobuf:protoc:3.21.8:linux-x86_64@exe'
--	allProtocArtifacts 'com.google.protobuf:protoc:3.21.8:linux-aarch_64@exe'
--	allProtocArtifacts 'com.google.protobuf:protoc:3.21.8:osx-x86_64@exe'
--	allProtocArtifacts 'com.google.protobuf:protoc:3.21.8:osx-aarch_64@exe'
-+	if (!isCurrentLoongarch_64()) {
-+		allProtocArtifacts 'com.google.protobuf:protoc:3.21.8:windows-x86_64@exe'
-+		allProtocArtifacts 'com.google.protobuf:protoc:3.21.8:linux-x86_64@exe'
-+		allProtocArtifacts 'com.google.protobuf:protoc:3.21.8:linux-aarch_64@exe'
-+		allProtocArtifacts 'com.google.protobuf:protoc:3.21.8:osx-x86_64@exe'
-+		allProtocArtifacts 'com.google.protobuf:protoc:3.21.8:osx-aarch_64@exe'
+-ext.supportedPlatforms = ['mac_x86_64', 'mac_arm_64', 'linux_x86_64', 'linux_arm_64']
++ext.supportedPlatforms = ['mac_x86_64', 'mac_arm_64', 'linux_x86_64', 'linux_arm_64', 'linux_loongarch_64']
  
--	if (isCurrentWindows()) {
--		protocArtifact 'com.google.protobuf:protoc:3.21.8:windows-x86_64@exe'
--	}
--	if (isCurrentLinux()) {
--		if (platform.endsWith("x86_64")) {
--			protocArtifact 'com.google.protobuf:protoc:3.21.8:linux-x86_64@exe'
--		}
--		else {
--			protocArtifact 'com.google.protobuf:protoc:3.21.8:linux-aarch_64@exe'
-+		if (isCurrentWindows()) {
-+			protocArtifact 'com.google.protobuf:protoc:3.21.8:windows-x86_64@exe'
- 		}
--	}
--	if (isCurrentMac()) {
--		if (platform.endsWith("x86_64")) {
--			protocArtifact 'com.google.protobuf:protoc:3.21.8:osx-x86_64@exe'
-+		if (isCurrentLinux()) {
-+			if (platform.endsWith("x86_64")) {
-+				protocArtifact 'com.google.protobuf:protoc:3.21.8:linux-x86_64@exe'
-+			}
-+			else {
-+				protocArtifact 'com.google.protobuf:protoc:3.21.8:linux-aarch_64@exe'
-+			}
- 		}
--		else {
--			protocArtifact 'com.google.protobuf:protoc:3.21.8:osx-aarch_64@exe'
-+		if (isCurrentMac()) {
-+			if (platform.endsWith("x86_64")) {
-+				protocArtifact 'com.google.protobuf:protoc:3.21.8:osx-x86_64@exe'
-+			}
-+			else {
-+				protocArtifact 'com.google.protobuf:protoc:3.21.8:osx-aarch_64@exe'
-+			}
- 		}
+ ext.binutilsResource = new File("${binutilsLocation}/${binutils}.tar.bz2")
+ 
+@@ -57,6 +57,9 @@
+ 	tasks.compileGdisLinux_arm_64ExecutableGdisC {
+ 		dependsOn 'copyBinutilsArtifcats_linux_arm_64'
  	}
-+
++	tasks.compileGdisLinux_loongarch_64ExecutableGdisC {
++		dependsOn 'copyBinutilsArtifcats_linux_loongarch_64'
++	}
+ 	
  }
  
- /*protobuf {
-@@ -69,9 +72,14 @@ task generateProto {
- 	inputs.files(src)
- 	dependsOn(configurations.protocArtifact)
+--- a/Ghidra/Features/Decompiler/buildNatives.gradle	2026-06-03 05:19:03.000000000 +0800
++++ b/Ghidra/Features/Decompiler/buildNatives.gradle	2026-06-17 16:32:39.168000000 +0800
+@@ -41,6 +41,7 @@
+ 			targetPlatform "win_arm_64"
+ 			targetPlatform "linux_x86_64"
+ 			targetPlatform "linux_arm_64"
++			targetPlatform "linux_loongarch_64"
+ 			targetPlatform "mac_x86_64"
+ 			targetPlatform "mac_arm_64"
+ 			targetPlatform "freebsd_x86_64"
+@@ -153,6 +154,7 @@
+ 			targetPlatform "win_arm_64"
+ 			targetPlatform "linux_x86_64"
+ 			targetPlatform "linux_arm_64"
++			targetPlatform "linux_loongarch_64"
+ 			targetPlatform "mac_x86_64"
+ 			targetPlatform "mac_arm_64"
+ 			targetPlatform "freebsd_x86_64"
+--- a/Ghidra/Features/FileFormats/buildNatives.gradle	2026-06-03 05:19:03.000000000 +0800
++++ b/Ghidra/Features/FileFormats/buildNatives.gradle	2026-06-17 16:39:41.473000000 +0800
+@@ -32,6 +32,7 @@
+ 			targetPlatform "win_arm_64"
+ 			targetPlatform "linux_x86_64"
+ 			targetPlatform "linux_arm_64"
++			targetPlatform "linux_loongarch_64"
+ 			targetPlatform "mac_x86_64"
+ 			targetPlatform "mac_arm_64"
+ 			targetPlatform "freebsd_x86_64"
+--- a/gradle/hasProtobuf.gradle	2026-06-03 05:19:03.000000000 +0800
++++ b/gradle/hasProtobuf.gradle	2026-06-17 16:30:16.200000000 +0800
+@@ -41,9 +41,14 @@
+ 		if (platform.endsWith("x86_64")) {
+ 			protocArtifact "com.google.protobuf:protoc:${version}:linux-x86_64@exe"
+ 		}
+-		else {
++		else if (platform.endsWith("arm_64")) {
+ 			protocArtifact "com.google.protobuf:protoc:${version}:linux-aarch_64@exe"
+ 		}
++		else {
++			// No prebuilt protoc artifact for this platform (e.g. loongarch64).
++			// A locally-built protoc will be used instead (see configureGenerateProto).
++			println "No prebuilt protoc artifact for ${platform}; will use locally-built protoc"
++		}
+ 	}
+ 	if (isCurrentMac()) {
+ 		if (platform.endsWith("x86_64")) {
+@@ -62,12 +67,28 @@
+ }*/
+ 
+ task configureGenerateProto {
+-	dependsOn(configurations.protocArtifact)
++	if (!configurations.protocArtifact.isEmpty()) {
++		dependsOn(configurations.protocArtifact)
++	}
+ 
  	doLast {
 -		def exe = configurations.protocArtifact.first()
 -		if (!isCurrentWindows()) {
 -			exe.setExecutable(true)
 +		def exe
-+		if (isCurrentLoongarch_64()) {
-+			exe = System.env.PROTOBUF_DESTDIR + "/usr/local/bin/protoc"
-+		} else {
++		if (!configurations.protocArtifact.isEmpty()) {
 +			exe = configurations.protocArtifact.first()
 +			if (!isCurrentWindows()) {
 +				exe.setExecutable(true)
 +			}
++		} else {
++			String protobufDest = System.env.PROTOBUF_DESTDIR
++			if (protobufDest != null) {
++				exe = file("${protobufDest}/bin/protoc")
++				if (!exe.exists()) {
++					throw new GradleException("PROTOBUF_DESTDIR set but protoc not found at ${exe}")
++				}
++				println "Using locally-built protoc (via PROTOBUF_DESTDIR): ${exe}"
++			} else {
++				throw new GradleException("No protoc binary found")
++			}
  		}
- 		exec {
- 			commandLine exe, "--java_out=$outdir", "-I$srcdir"
+ 		generateProto.commandLine exe, "--java_out=${generateProto.outdir}", "-I${generateProto.srcdir}"
+ 		generateProto.args generateProto.src
+--- a/Ghidra/Debug/Debugger-rmi-trace/build.gradle	2026-06-03 05:19:03.000000000 +0800
++++ b/Ghidra/Debug/Debugger-rmi-trace/build.gradle	2026-06-17 16:29:51.781000000 +0800
+@@ -38,12 +38,28 @@
+ }
+ 
+ task configureGenerateProtoPy {
+-	dependsOn(configurations.protocArtifact)
++	if (!configurations.protocArtifact.isEmpty()) {
++		dependsOn(configurations.protocArtifact)
++	}
+ 
+ 	doLast {
+-		def exe = configurations.protocArtifact.first()
+-		if (!isCurrentWindows()) {
+-			exe.setExecutable(true)
++		def exe
++		if (!configurations.protocArtifact.isEmpty()) {
++			exe = configurations.protocArtifact.first()
++			if (!isCurrentWindows()) {
++				exe.setExecutable(true)
++			}
++		} else {
++			String protobufDest = System.env.PROTOBUF_DESTDIR
++			if (protobufDest != null) {
++				exe = file("${protobufDest}/bin/protoc")
++				if (!exe.exists()) {
++					throw new GradleException("PROTOBUF_DESTDIR set but protoc not found at ${exe}")
++				}
++				println "Using locally-built protoc (via PROTOBUF_DESTDIR): ${exe}"
++			} else {
++				throw new GradleException("No protoc binary found")
++			}
+ 		}
+ 		generateProtoPy.commandLine exe
+ 		generateProtoPy.args "--python_out=${generateProtoPy.outdir}"

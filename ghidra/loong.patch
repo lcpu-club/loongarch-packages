@@ -1,62 +1,77 @@
---- PKGBUILD
-+++ PKGBUILD
-@@ -33,6 +33,12 @@ sha512sums=('4805c0508c2781f3b05697aa7930b044241d749341b2ba5087d50ff0839d08052c8
-             '04d1f895f87a8f0a653ee5c2b18ed0b6d158f1b7de4e16de2e50ed5a3087b1e83ca01f6c4c8c53d1788942e29d2f41528c910f224c41e27098cb5c2838a8ddf3')
- 
- prepare() {
-+  # prepare for protobuf
-+  mkdir protobuf-dst
-+  cd protobuf-${_protobuf_cpp}
-+  ./configure --disable-shared
-+  cd ..
-+
-   export PATH="/usr/lib/jvm/java-17-openjdk/bin:${PATH}"
-   cd ghidra-Ghidra_${pkgver}_build
- 
-@@ -50,14 +56,24 @@ prepare() {
- 
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -7,6 +7,7 @@ pkgrel=1
+ _yajsw=13.18
+ _jsarif=2.1
+ _protobuf=6.31.0
++_protobuf_cpp=31.0
+ _psutil=5.9.8
+ _setuptools=80.9.0
+ _wheel=0.45.1
+@@ -39,6 +40,8 @@ makedepends=(
+   python-setuptools
+   z3
+   z3-java
++  abseil-cpp
++  cmake
+ )
+ optdepends=(
+   'pam: GhidraServer support'
+@@ -105,8 +108,9 @@ prepare() {
    # Ignore lack of licensing for YAJSW zip, packed FID datasets, and the native binaries
    sed -i '/FileTree tree/a\\t\texclude "yajsw-stable-**.zip"\n\t\texclude "src/main/fidb/**.fidb"\n\t\texclude "os/linux64/**"' gradle/support/ip.gradle
-+
+ 
 +  patch -Np1 -i ../add-loongarch64-build.patch
+   # z3 dependencies
+-  install -Dm 644 /usr/lib/libz3* -t dependencies/SymbolicSummaryZ3/os/linux_x86_64
++  install -Dm 644 /usr/lib/libz3* -t dependencies/SymbolicSummaryZ3/os/linux_loongarch_64
+   install -Dm 644 /usr/share/java/com.microsoft.z3.jar -t dependencies/flatRepo
+ }
+ 
+@@ -119,6 +123,17 @@ _check_dep() {
  }
  
  build() {
-+  # protoc
-+  export PROTOBUF_DESTDIR=${srcdir}/protobuf-dst
++  # Build protoc from source (no prebuilt binary for loongarch64)
 +  cd protobuf-${_protobuf_cpp}
-+  make
-+  # make check
-+  make DESTDIR=${PROTOBUF_DESTDIR} install
++  cmake -B build \
++    -DCMAKE_BUILD_TYPE=Release \
++    -Dprotobuf_BUILD_TESTS=OFF \
++    -Dprotobuf_BUILD_EXAMPLES=OFF \
++    -Dprotobuf_BUILD_PROTOBUF_BINARIES=ON \
++    -DCMAKE_INSTALL_PREFIX="${srcdir}/protobuf-dst"
++  cmake --build build -j$(nproc)
++  cmake --install build
 +  cd ..
-+
-   export GRADLE_HOME="$(pwd)/usr/share/java/gradle/"
-   export PATH="$(pwd)/usr/share/java/gradle/bin/:${PATH}"
    cd ghidra-Ghidra_${pkgver}_build
+ 
+   export GRADLE_HOME="$(pwd)/usr/share/java/gradle/"
+@@ -133,8 +148,9 @@ build() {
+   _build_python_dependency jpype1-${_jpype1} PyGhidra
+ 
+   # Ghidra build
++  export PROTOBUF_DESTDIR="${srcdir}/protobuf-dst"
    gradle yajswDevUnpack
 -  gradle buildNatives_linux_x86_64
 +  gradle buildNatives_linux_loongarch_64
    gradle sleighCompile
    gradle buildGhidra
  }
-@@ -69,7 +85,7 @@ package() {
+@@ -161,7 +177,7 @@ package() {
    install -d "${pkgdir}"/{opt,usr/bin}
    _appver=$(grep -oP '(?<=^application.version=).*$' Ghidra/application.properties)
    _relname=$(grep -oP '(?<=^application.release.name=).*$' Ghidra/application.properties)
--  unzip -u "build/dist/ghidra_${_appver}_${_relname}"_*_linux_x86_64.zip -d "${pkgdir}"/opt
-+  unzip -u "build/dist/ghidra_${_appver}_${_relname}"_*_linux_loongarch_64.zip -d "${pkgdir}"/opt
+-  bsdtar xf "build/dist/ghidra_${_appver}_${_relname}"_*_linux_x86_64.zip -C "${pkgdir}"/opt
++  bsdtar xf "build/dist/ghidra_${_appver}_${_relname}"_*_linux_loongarch_64.zip -C "${pkgdir}"/opt
  
    # Simplify some directory and binary names
    mv "${pkgdir}"/opt/ghidra{_*,}
-@@ -77,4 +93,11 @@ package() {
+@@ -170,4 +186,8 @@ package() {
    ln -s /opt/ghidra/support/analyzeHeadless "${pkgdir}"/usr/bin/ghidra-analyzeHeadless
  }
  
-+_protobuf=21.8
-+_protobuf_cpp=3.$_protobuf
-+source+=(https://github.com/protocolbuffers/protobuf/releases/download/v${_protobuf}/protobuf-cpp-${_protobuf_cpp}.tar.gz
-+         add-loongarch64-build.patch)
-+sha512sums+=('ef4939dcd7d10a602f95cb8d6fdb5d31c53bd39f18678572f97d443be01093e05a69b6756e8431a27200ad30decf2a007274a5b90ecaecbb5d8e341008bba175'
-+             '751949a79d9f06263b7cc33a8c6a280d7bafa8e279f2687d4ac2eabcebc1463618dec576f428b7d5bf9af67265453afd78df72c9ca4647e8ad3921a77230ee85')
-+
++source+=(add-loongarch64-build.patch
++         https://github.com/protocolbuffers/protobuf/releases/download/v${_protobuf_cpp}/protobuf-${_protobuf_cpp}.tar.gz)
++sha512sums+=('a588aaa3570e801d2118ddc285e58ffe0db24dfd134c8ad9c8d4e0c00466689fd9a3ef7b20defdd0d759df7b8c08c34058f9f9d80ee3c4771831006eabf706fa'
++            '818807596b19424b56baa208594c45066d42faa66c1603b420c35e3d01d2e7d9e59ce9300d3d8bcb56d1e6d3580f6e7b3cc8e646385914b4a6552457912c98c5')
  # vim: ts=2 sw=2 et:
