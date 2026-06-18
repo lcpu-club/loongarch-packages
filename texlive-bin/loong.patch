@@ -1,16 +1,16 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -63,6 +63,9 @@ prepare() {
-   patch -p1 -i ../ptex-debug-print.patch
- # Fix LUA_ROOT define
+@@ -65,6 +65,9 @@ prepare() {
    patch -p1 -i ../lua-root.patch
+ # Fix build with GCC 16
+   patch -p1 -i ../b50e042b.patch
 +# loong64-specific patches
 +  patch -p1 -i $srcdir/texlive-bin-loong64.patch
 +  patch -p1 -d libs/luajit/LuaJIT-src -i $srcdir/texlive-luajit-loong.patch
  }
  
  build() {
-@@ -197,3 +200,8 @@ package_texlive-bin() {
+@@ -198,3 +201,8 @@ package_texlive-bin() {
    rm "$pkgdir"/usr/lib/libsynctex.*
    rm "$pkgdir"/usr/lib/pkgconfig/synctex.pc
  }
