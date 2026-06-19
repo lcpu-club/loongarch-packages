@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -97,6 +97,13 @@ prepare() {
+@@ -95,6 +95,13 @@ prepare() {
+   # Bump chromium to head of stable branch
+   cd src/3rdparty
    [[ -n $_chromium ]] && git checkout $_chromium || true
- 
-   git revert -n d3f726be3023f698a01ba4f74533524bd81df8d6 # Revert commit that causes crashes
 +  pushd "${srcdir}/${_pkgfn}"
 +  # Fix build for loong64
 +  patch -Np2 -i "$srcdir/add-loong64-support.patch"
@@ -14,7 +14,7 @@
  }
  
  build() {
-@@ -118,3 +125,10 @@ package() {
+@@ -116,3 +123,10 @@ package() {
  
    install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
  }
