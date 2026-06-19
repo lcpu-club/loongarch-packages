@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index ab72d27..7b48bad 100644
+index 44538f9..a9752ab 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -452,6 +452,9 @@ prepare() {
+@@ -450,6 +450,9 @@ prepare() {
    echo "Putting together electron sources"
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
@@ -12,7 +12,7 @@ index ab72d27..7b48bad 100644
    rbash prepare-electron-source-tree.sh "$CARCH"
    mv electron src/electron
  
-@@ -465,12 +468,50 @@ prepare() {
+@@ -463,12 +466,50 @@ prepare() {
      -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
    src/build/util/lastchange.py \
      -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
@@ -65,7 +65,17 @@ index ab72d27..7b48bad 100644
    src/electron/script/apply_all_patches.py \
        src/electron/patches/config.json
  
-@@ -528,6 +569,19 @@ prepare() {
+@@ -477,7 +518,8 @@ prepare() {
+ 
+   pushd src
+   pushd electron
+-  yarn install --frozen-lockfile
++  # Skip build scripts for native test addons only needed for the Electron test suite and fail on loong64.
++  yarn install --frozen-lockfile --mode=skip-build
+   popd
+ 
+   echo "Applying local patches..."
+@@ -526,6 +568,19 @@ prepare() {
    patch -Np1 -i "${srcdir}/jinja-python-3.10.patch" -d "third_party/electron_node/tools/inspector_protocol/jinja2"
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
  
@@ -85,7 +95,7 @@ index ab72d27..7b48bad 100644
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -643,6 +697,13 @@ build() {
+@@ -641,6 +696,13 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -99,7 +109,7 @@ index ab72d27..7b48bad 100644
    export CHROMIUM_BUILDTOOLS_PATH="${PWD}/buildtools"
    gn gen out/Release \
        --args="import(\"//electron/build/args/release.gn\") ${_flags[*]}"
-@@ -667,3 +728,11 @@ package() {
+@@ -665,3 +727,11 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
