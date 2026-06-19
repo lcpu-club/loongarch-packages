@@ -1,21 +1,21 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index ff693f4..331acea 100644
+index 88e8500..65d1250 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -32,6 +32,7 @@ b2sums=('fd4bf76a7074e20b8256461d79be0ac72679c6d4432c038997383cf1dd2d38a83fe84c1
+@@ -33,6 +33,7 @@ b2sums=('5c0e6e35e0b81fab7e16448322cb1d638ae4d22476cff4a7e2d0d51442fd2b9f1244f5e
  
  prepare() {
    cd "${pkgname}-${pkgver}"
-+  patch -Np1 -i "${srcdir}/test-Enable-some-libc-integration-variants.patch"
++  patch -Np1 -i "${srcdir}/fix-loong64-call36.patch"
    cp "${srcdir}/test-config.toml" .
-   cargo fetch --locked --target "$(rustc --print host-tuple)"
+   cargo fetch --locked --target host-tuple
  }
-@@ -53,4 +54,8 @@ package() {
+@@ -59,4 +60,8 @@ package() {
    install -Dm 644 LICENSE-* -t "${pkgdir}/usr/share/licenses/${pkgname}"
  }
  
-+source+=("test-Enable-some-libc-integration-variants.patch::https://github.com/wild-linker/wild/commit/ee3bd3f480d9b69eedc055c544f65903910684da.diff")
-+sha256sums+=('af4a91d1feb92a8d7a620a977d11a4815f5eeb92ce031e8d373d96997caa854b')
-+b2sums+=('fc458270c15a629ac11def4dd5f205ca868701c8a7ede080717b5eb5427dea7b263f6dd1c75162d187ac2dc236b127aa9777dcc947cf478f7db5973f22416bb5')
++source+=('fix-loong64-call36.patch::https://github.com/wild-linker/wild/commit/fc6dd8e6a3709b97961a71a969a5730a6a30b5c6.diff')
++sha256sums+=('620c35aac8cd09ec7b8c874bcddb41cf456abc2544fc1c32e176edff3db62fa7')
++b2sums+=('7474a6536ca9026f95998901819286430c52aeb6b87e839b2392d7d322dc22bedccd10e0bca7dcdfbb35c4a97a314c3d26d14e826d5960c28e5191526de9aeba')
 +
  # vim: ts=2 sw=2 et:
