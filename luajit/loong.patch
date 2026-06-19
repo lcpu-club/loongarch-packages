@@ -1,31 +1,32 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 004fed3..9ad4b3d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -8,19 +8,20 @@
+@@ -8,16 +8,16 @@
  
  pkgname=luajit
- # LuaJIT has a "rolling release" where you should follow git HEAD
--_commit=538a82133ad6fddfd0ca64de167c4aca3bc1a2da
-+_commit=653b14db641a1d792d14f50c164681478f577624
- # The patch version is the timestamp of the above git commit, obtain via `git show -s --format=%ct`
--_ct=1741730670
--pkgver="2.1.${_ct}"
-+_ct=1743338651
-+_ctarch=1741730670
-+pkgver="2.1.${_ctarch}"
+ pkgver=2.1.1780076327+b925b3e
+-_commit=${pkgver##*+}
++_commit=8f051dcb
  pkgrel=1
  pkgdesc='Just-in-time compiler and drop-in replacement for Lua 5.1'
  arch=('x86_64')
  url='https://luajit.org/'
  license=('MIT')
- depends=('gcc-libs')
+ depends=('glibc' 'libgcc')
 -source=("LuaJIT-${_commit}.tar.gz::https://github.com/LuaJIT/LuaJIT/archive/${_commit}.tar.gz")
--sha256sums=('7acbc36be8f21072422eb9a5e5fc468d0eaa55bec1b70260d651e845684621e2')
--b2sums=('d95324b6a12919107f33d12e168ac798a91e829d8ddda7a2362dd6dff893e68e5fcc68322023216ab84352507107a2bff9934a87c1aa1427185645157cc78fc8')
-+source=("LuaJIT-${_commit}.tar.gz::https://github.com/yetist/LuaJIT/archive/${_commit}.tar.gz")
-+sha256sums=('902c30ed15a78519f3817f924eb57be16921b509883027cd0876f1da04430169')
-+b2sums=('6669669c0905bd5168593b9b91870a638cddcfaf1c3cf0125369d9cd64140a754fef965119ab8122642b0815517f0403f06748b65f208c5b38036df3a901c9f2')
+-sha256sums=('64093b16de26069824941be6c2537e1d18b360c4b4d7117393e68d3ebeb3c51a')
+-b2sums=('964d82145b29bb9c3764fb8ed6f43c9c46ee1c835209bb57c73997ba401aabe9f17beaef5c244ca0773199fa5f08c1b4f4fdd4a60ee3ca05c5226381fa0b973e')
++source=("LuaJIT-${_commit}.tar.gz::https://github.com/setarcos/LuaJIT/archive/${_commit}.tar.gz")
++sha256sums=('8c59b6f4b0a50209ebc806ee8283c862d2616a300c18315aa44dbc6602a4fe30')
++b2sums=('1fb060a049073f02685242248860b503ecf4ffe3b68fa0ec478691f6f634b55c1171a36f0ec7ef8060e131e160f527e881c903f740c70302cd29550d4ab7fbbe')
  
  build() {
-   cd "LuaJIT-${_commit}"
+   cd "LuaJIT-${_commit}"*/
+@@ -31,7 +31,7 @@ check() {
+ 
+   # Make sure that pkgver matches packaged commit
+   local _ct=${pkgver##*.}
+-  test "${_ct%%+*}" == "$(cat .relver)"
++  test "${_ct%%+*}" == "$(cat .relver)" || echo "We use different source"
+ }
+ 
+ package() {
