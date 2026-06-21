@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3268f5b..a1c0e47 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,6 +22,7 @@ sha256sums=('c6bc8b4252724665297f7cad0c55897285c673f9b8e6db3522ace833593fe0b1'
+ prepare() {
+     cd graphite2-${pkgver}
+     patch -Np1 -i ../gcc15.patch  # https://github.com/silnrsi/graphite/pull/97
++    patch -Np1 -i ../fix-nametabletest-off-by-one.patch  # https://github.com/silnrsi/graphite/issues/96
+ }
+ 
+ build() {
+@@ -67,4 +68,7 @@ package_graphite-docs() {
+   install -Dm644 graphite2-${pkgver}/COPYING -t "${pkgdir}/usr/share/licenses/${pkgname}"
+ }
+ 
++source+=('fix-nametabletest-off-by-one.patch::https://github.com/bgermann/graphite/commit/bfc4d86bed6c05dcab084c2107f211b19d2dd0d8.diff')
++sha256sums+=('39a631cdb39a43f2a3c1f1381847798bef70315c19596bf3c95e680840cec71a')
++
+ # vim:set sw=2 sts=-1 et:
