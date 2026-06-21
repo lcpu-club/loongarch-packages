@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c8280df..64e430c 100644
+index d4a02bd..6e1b8d5 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -76,6 +76,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
@@ -19,7 +19,7 @@ index c8280df..64e430c 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -262,6 +265,48 @@ prepare() {
+@@ -264,6 +267,47 @@ prepare() {
    python3 build/util/lastchange.py -m DAWN_COMMIT_HASH \
      -s third_party/dawn --revision gpu/webgpu/DAWN_VERSION \
      --header gpu/webgpu/dawn_commit_hash.h
@@ -27,7 +27,6 @@ index c8280df..64e430c 100644
 +  # Patches for loong64
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
-+  patch -Np1 -i "${srcdir}/fix-libyuv-lsx.patch"
 +  patch -Np1 -i "${srcdir}/Fix-build-for-CPU-yield-on-LoongArch.patch"
 +
 +  pushd third_party/node/
@@ -68,7 +67,7 @@ index c8280df..64e430c 100644
  }
  
  build() {
-@@ -369,6 +414,12 @@ build() {
+@@ -371,6 +415,12 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -81,17 +80,15 @@ index c8280df..64e430c 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -446,4 +497,14 @@ package() {
+@@ -448,4 +498,12 @@ package() {
    install -Dvm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
-+         "fix-libyuv-lsx.patch"
 +         "Fix-build-for-CPU-yield-on-LoongArch.patch")
 +sha256sums+=('c498ad298917886739606cd8fac8f526fd05218a460997c0e9100db18b1996bb'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
-+             'f93d3f3439494da3bbb623b19919cb2656200be4459684815b2c5d929dae3496'
 +             'b88f43b6b96a6b247f4bfbb267904655f57105ffd396c73829cd07759f8b5a1b')
 +makedepends+=(jq npm rsync)
 +
