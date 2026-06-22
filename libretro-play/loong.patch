@@ -1,11 +1,9 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index a10f4f1..d061673 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -70,6 +70,10 @@ prepare() {
+@@ -63,6 +63,10 @@ prepare() {
    git submodule init zstd
    git config submodule.zstd.url ../../../zstd
-   git submodule update
+   git -c protocol.file.allow=always submodule update
 +
 +  cd "${srcdir}/libretro-play"
 +  patch -p1 -i "${srcdir}/add-loong64-build.patch"
@@ -13,7 +11,7 @@ index a10f4f1..d061673 100644
  }
  
  build() {
-@@ -88,4 +92,10 @@ package() {
+@@ -82,4 +86,10 @@ package() {
    install -Dm 644 libretro-play/License.txt -t "${pkgdir}"/usr/share/licenses/libretro-play/
  }
  
