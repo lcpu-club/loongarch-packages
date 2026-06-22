@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index c555a4b..4c4a71a 100644
+index dd261f0..0073a3c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -131,3 +131,6 @@ package() {
@@ -7,5 +7,5 @@ index c555a4b..4c4a71a 100644
    install -Dm0644 -t "${pkgdir}/usr/lib/systemd/system/" "${srcdir}"/hedgedoc.service
  }
 +
-+depends=(${depends[@]/'nodejs'/'nodejs-lts-iron'})
-+makedepends=(${makedepends[@]/'nodejs'/'nodejs-lts-iron'} 'python' 'python-setuptools')
++# node-sqlite3 bundles node-gyp 8.x which imports distutils (removed in Python 3.12+)
++makedepends+=('python-setuptools')
