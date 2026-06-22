@@ -1,25 +1,17 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index dfb095b..88c8dab 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -41,17 +41,17 @@ build() {
-   # Use LTO
+@@ -54,12 +54,12 @@ build() {
    export CARGO_PROFILE_RELEASE_LTO=true CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1
- 
+   # Dynamically link system libraries
+   export ZSTD_SYS_USE_PKG_CONFIG=1
 -  cargo build --release --frozen --features all,dist-server
 +  cargo build --release --frozen --features all
  }
  
- #check() {
- #  cd sccache
--#  cargo test --frozen --features all,dist-server
-+#  cargo test --frozen --features all
- #}
- 
  package() {
    cd sccache
--  install -Dt "$pkgdir/usr/bin" target/release/sccache{,-dist}
-+  install -Dt "$pkgdir/usr/bin" target/release/sccache
-   install -Dt "$pkgdir/usr/share/doc/$pkgname" -m644 README.md docs/*
- }
- 
+-  install -Dm 755 target/release/sccache{,-dist} -t "${pkgdir}/usr/bin/"
++  install -Dm 755 target/release/sccache -t "${pkgdir}/usr/bin/"
+   install -dm 755 "${pkgdir}/usr/share/doc/${pkgname}"
+   install -m 644 README.md docs/* -t "${pkgdir}/usr/share/doc/${pkgname}/"
+   install -dm 755 "${pkgdir}/usr/lib/sccache/bin"
