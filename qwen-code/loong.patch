@@ -1,11 +1,11 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -44,7 +44,7 @@ build() {
- check() {
-   cd $pkgname
+@@ -52,7 +52,7 @@ check() {
+   export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--localstorage-file=$PWD/.node-localstorage"
+   # This process-tree integration test sees no children in clean chroots.
    npm run test --workspaces --if-present -- \
--    --exclude='**/{qwenConnectionHandler,useAtCompletion}.test.ts'
-+    --exclude='**/{qwenConnectionHandler,useAtCompletion}.test.ts' || echo "Watch out for failed tests!"
+-    --exclude='**/{qwenConnectionHandler,useAtCompletion,pid-descendants}.test.ts'
++    --exclude='**/{qwenConnectionHandler,useAtCompletion,pid-descendants}.test.ts' || echo "Watch out for failed tests!"
  }
  
  package() {
