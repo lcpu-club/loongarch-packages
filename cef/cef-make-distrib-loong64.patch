@@ -1,0 +1,54 @@
+--- a/cef/tools/make_distrib.py	2026-06-22 23:42:54.000000000 +0000
++++ b/cef/tools/make_distrib.py	2026-06-22 23:59:59.248648800 +0000
+@@ -704,6 +704,12 @@
+     default=False,
+     help='create an ARM binary distribution (Linux only)')
+ parser.add_option(
++    '--loong64-build',
++    action='store_true',
++    dest='loong64build',
++    default=False,
++    help='create a Loong64 binary distribution (Linux only)')
++parser.add_option(
+     '--arm64-build',
+     action='store_true',
+     dest='arm64build',
+@@ -766,7 +772,7 @@
+   print_error('Cannot specify both --minimal and --client.')
+   sys.exit()
+ 
+-if options.x64build + options.armbuild + options.arm64build > 1:
++if options.x64build + options.armbuild + options.loong64build + options.arm64build > 1:
+   print_error('Invalid combination of build options.')
+   sys.exit()
+ 
+@@ -774,6 +780,10 @@
+   print_error('--arm-build is only supported on Linux.')
+   sys.exit()
+ 
++if options.loong64build and platform != 'linux':
++  print_error('--loong64-build is only supported on Linux.')
++  sys.exit()
++
+ if options.sandbox and not platform in ('mac', 'windows'):
+   print_error('--sandbox is only supported on macOS and Windows.')
+   sys.exit()
+@@ -848,6 +858,9 @@
+ elif options.arm64build:
+   platform_arch = 'arm64'
+   binary_arch = 'arm64'
++elif options.loong64build:
++  platform_arch = 'loong64'
++  binary_arch = 'loong64'
+ else:
+   platform_arch = '32'
+   binary_arch = 'x86'
+@@ -918,6 +931,8 @@
+   build_dir_suffix = '_GN_arm'
+ elif options.arm64build:
+   build_dir_suffix = '_GN_arm64'
++elif options.loong64build:
++  build_dir_suffix = '_GN_loong64'
+ else:
+   build_dir_suffix = '_GN_x86'
+ 
