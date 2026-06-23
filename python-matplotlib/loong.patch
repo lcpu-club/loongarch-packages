@@ -1,11 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f974803..821cf54 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -146,7 +146,7 @@ check() {
-   XDG_RUNTIME_DIR=/tmp/runtime-build \
-   PYTHONPATH=test-env/lib/python${python_version}/site-packages \
-   xvfb-run -a -s "-screen 0 640x480x24" \
--    test-env/bin/python -m pytest "${pytest_options[@]}"
-+    test-env/bin/python -m pytest "${pytest_options[@]}" || "Watch out for failed tests!"
- }
+@@ -102,6 +102,9 @@ validpgpkeys=(23CAB59E3332F94D26BEF0378D86E7FAE5EB0C10  # Elliott Sales de Andra
+ prepare() {
+   cd matplotlib
  
- package() {
++  # Apply LoongArch64-specific per-test tolerance for image comparison tests
++  patch -p1 -i "${srcdir}/loongarch64-test-tolerance.patch"
++
+   # Allow to use new meson-python
+   sed -i 's|,<0.17.0||' pyproject.toml
+ 
+@@ -158,3 +161,6 @@ package() {
+   # Remove tests
+   rm -r "${pkgdir}"$(python -c "import site; print(site.getsitepackages()[0])")/{matplotlib,mpl_toolkits/*}/tests/
+ }
++
++source+=('loongarch64-test-tolerance.patch::https://github.com/matplotlib/matplotlib/commit/5feeb8bf35d2d9016bd55c794c41c62df6c042da.diff')
++b2sums+=('9437d8c9c889c59fed05af98e3bda113b7cc9ae51f97e05cc1b8bc28ca851a558227d8b97ffa93521339722b02fd5439e2e621dc07c4b9f196cba320c3a4983f')
