@@ -1,0 +1,15 @@
+diff --git a/src/runtime/eng/Subsets.props b/src/runtime/eng/Subsets.props
+index 5770eec315e..647f0f7b107 100644
+--- a/src/runtime/eng/Subsets.props
++++ b/src/runtime/eng/Subsets.props
+@@ -57,7 +57,9 @@
+     <SdkToolsSupported Condition="'$(_SdkToolsSupportedOS)' == 'true' and '$(_SdkToolsSupportedArch)' == 'true'">true</SdkToolsSupported>
+ 
+     <_UseNativeAotForComponentsCrossOS Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(_hostOS)' != 'windows'">true</_UseNativeAotForComponentsCrossOS>
+-    <UseNativeAotForComponents Condition="'$(NativeAotSupported)' == 'true' and ('$(TargetOS)' == '$(HostOS)' or '$(_UseNativeAotForComponentsCrossOS)' == 'true') and '$(TargetsLinuxBionic)' != 'true'">true</UseNativeAotForComponents>
++    <!-- LoongArch64: disable NativeAOT for components to work around NullReferenceException in ILCompiler
++         dataflow analyzers (GenericCycleDetection / FlowAnnotations). See dotnet/runtime#122845 -->
++    <UseNativeAotForComponents Condition="'$(NativeAotSupported)' == 'true' and ('$(TargetOS)' == '$(HostOS)' or '$(_UseNativeAotForComponentsCrossOS)' == 'true') and '$(TargetsLinuxBionic)' != 'true' and '$(TargetArchitecture)' != 'loongarch64'">true</UseNativeAotForComponents>
+   </PropertyGroup>
+ 
+   <PropertyGroup>

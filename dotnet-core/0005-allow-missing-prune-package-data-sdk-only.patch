@@ -1,0 +1,15 @@
+OK
+diff --git a/src/sdk/Directory.Build.props b/src/sdk/Directory.Build.props
+index d2c665776ff..07e56a4d16f 100644
+--- a/src/sdk/Directory.Build.props
++++ b/src/sdk/Directory.Build.props
+@@ -121,4 +121,9 @@
+ 
+   <Import Project="build/GenerateResxSource.targets" />
+ 
++  <!-- LoongArch64: work around missing prune package data in source-build -->
++  <PropertyGroup>
++    <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
++  </PropertyGroup>
++
+ </Project>
