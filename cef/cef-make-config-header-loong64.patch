@@ -1,0 +1,11 @@
+--- a/cef/tools/make_config_header.py	2026-06-23 13:09:33.130597850 +0000
++++ b/cef/tools/make_config_header.py	2026-06-23 13:09:33.133160340 +0000
+@@ -32,7 +32,7 @@
+   # the target_cpu is arm64 or x64 (see v8_enable_pointer_compression)
+   # add CEF_V8_ENABLE_SANDBOX define used in cef_message_router.h
+   if not 'v8_enable_sandbox=false' in lines and \
+-          ('target_cpu="arm64"' in lines or 'target_cpu="x64"' in lines):
++          ('target_cpu="arm64"' in lines or 'target_cpu="x64"' in lines or 'target_cpu="loong64"' in lines):
+     defines.append('#define CEF_V8_ENABLE_SANDBOX 1')
+ 
+   result = get_copyright(full=True, translator=False) + \
