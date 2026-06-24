@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 21ad788..12c9255 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -39,6 +39,7 @@ sha256sums=('0d1a459ef8390a8d991f8e6501c0292cc5f443a7663aeedf0922df855a61f9a2'
+             'SKIP')
+ 
+ prepare() {
++    git -C libjxl cherry-pick -n affa2290b380fe8ca35dacbf69775129eb41628e
+     git -C libjxl submodule init
+     
+     local _submodule
