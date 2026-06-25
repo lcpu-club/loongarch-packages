@@ -1,0 +1,29 @@
+diff --git a/toolchains/BUILD b/toolchains/BUILD
+index 560706a..cd8e5f7 100644
+--- a/toolchains/BUILD
++++ b/toolchains/BUILD
+@@ -142,6 +142,7 @@
+         "@bazel_tools//src/conditions:freebsd": [":jni_md_header-freebsd"],
+         "@bazel_tools//src/conditions:linux_aarch64": [":jni_md_header-linux"],
+         "@bazel_tools//src/conditions:linux_mips64": [":jni_md_header-linux"],
++        "@bazel_tools//src/conditions:linux_loongarch64": [":jni_md_header-linux"],
+         "@bazel_tools//src/conditions:linux_ppc64le": [":jni_md_header-linux"],
+         "@bazel_tools//src/conditions:linux_riscv64": [":jni_md_header-linux"],
+         "@bazel_tools//src/conditions:linux_s390x": [":jni_md_header-linux"],
+@@ -155,6 +156,7 @@
+         "@bazel_tools//src/conditions:freebsd": ["include/freebsd"],
+         "@bazel_tools//src/conditions:linux_aarch64": ["include/linux"],
+         "@bazel_tools//src/conditions:linux_mips64": ["include/linux"],
++        "@bazel_tools//src/conditions:linux_loongarch64": ["include/linux"],
+         "@bazel_tools//src/conditions:linux_ppc64le": ["include/linux"],
+         "@bazel_tools//src/conditions:linux_riscv64": ["include/linux"],
+         "@bazel_tools//src/conditions:linux_s390x": ["include/linux"],
+@@ -379,7 +381,7 @@
+ [
+     default_java_toolchain(
+         name = ("toolchain_java%d" if release <= 11 else "toolchain_jdk_%d") % release,
+-        configuration = DEFAULT_TOOLCHAIN_CONFIGURATION | {"java_runtime": ":remotejdk_25"},
++        configuration = DEFAULT_TOOLCHAIN_CONFIGURATION | {"java_runtime": ":current_java_runtime"},
+         source_version = "%s" % release,
+         target_version = "%s" % release,
+     )

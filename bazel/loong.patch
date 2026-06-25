@@ -1,0 +1,38 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,6 +20,24 @@ b2sums=('dedfd94c77d69abcc3fc0ff7d0db811b9c5e940f389311c62dd47554021694ea430fb12
+         'SKIP')
+ validpgpkeys=('71A1D0EFCFEB6281FD0437C93D5919B448457EE0')
+ 
++prepare() {
++  cd "${srcdir}"
++
++  # Apply all loongarch64-related changes
++  patch -Np1 -i "${srcdir}/add-loongarch64-support.patch"
++
++  # Install rules_java loongarch64 patch for use by bzlmod
++  install -Dm644 "${srcdir}/add-loongarch64-rules_java.patch" \
++    "${srcdir}/third_party/rules_java_loongarch64.patch"
++
++  # Install platforms loongarch64 patch for use by bzlmod
++  install -Dm644 "${srcdir}/add-loongarch64-platforms.patch" \
++    "${srcdir}/third_party/platforms_loongarch64.patch"
++
++  # Remove lock file to force dependency re-resolution
++  rm -f MODULE.bazel.lock
++}
++
+ build() {
+   EMBED_LABEL=$pkgver EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" ./compile.sh
+   ./output/bazel build scripts:bazel-complete.bash
+@@ -39,4 +57,10 @@ package() {
+     cp -r "${srcdir}/${d}" "${pkgdir}/usr/share/bazel/"
+   done
+ }
++source+=("add-loongarch64-support.patch"
++         "add-loongarch64-rules_java.patch"
++         "add-loongarch64-platforms.patch")
++b2sums+=('a8a0ea055575887398b34b8b3d1ccb512529b358b7dc3f049ae5c1902735d67d563e93e858f7a65d8fd7e1ddb1a6b816aebf59fedb20eb244d9d491bc7872aec'
++         'e478de6660e3501d7a746105e1091fd2808b519dbd43020b2616804bfa24a21e4c50fc66a64a996cf24773653bd2fb156abc85c3a9f16eaa8f69087cb56a5ec9'
++         '5998221099cec141e9e4e1d4a4b8d96b8315b462b9c398c1203e5173ac01a2c73f11700a5c0b21cd7ffc8e23ba9586f53bf2992be423f931533991c608b310f9')
+ # vim:set ts=2 sw=2 et:

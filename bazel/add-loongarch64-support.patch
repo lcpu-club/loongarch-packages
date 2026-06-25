@@ -1,0 +1,225 @@
+diff -urN a/.bazelrc b/.bazelrc
+--- a/.bazelrc	2026-06-25 12:33:24.119000000 +0800
++++ b/.bazelrc	2026-06-25 13:38:30.301561010 +0800
+@@ -52,8 +52,8 @@
+ # version of the embedded JDK.
+ common --java_language_version=21
+ common --tool_java_language_version=21
+-common --java_runtime_version=remotejdk_25
+-common --tool_java_runtime_version=remotejdk_25
++common --java_runtime_version=local_jdk
++common --tool_java_runtime_version=local_jdk
+ # Reduce the amount of warnings shown due to the deprecation of most Unsafe
+ # methods.
+ # TODO: Remove this after migrating more code to use VarHandles.
+diff -urN a/MODULE.bazel b/MODULE.bazel
+--- a/MODULE.bazel	1980-01-01 00:00:00.000000000 +0800
++++ b/MODULE.bazel	2026-06-25 13:38:30.300054620 +0800
+@@ -22,7 +22,7 @@
+ bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")
+ bazel_dep(name = "grpc-java", version = "1.71.0")
+ bazel_dep(name = "grpc", version = "1.76.0.bcr.1", repo_name = "com_github_grpc_grpc")
+-bazel_dep(name = "platforms", version = "1.0.0")
++bazel_dep(name = "platforms", version = "1.1.0")
+ bazel_dep(name = "protobuf", version = "33.4", repo_name = "com_google_protobuf")
+ bazel_dep(name = "re2", version = "2025-11-05.bcr.1")
+ bazel_dep(name = "rules_graalvm", version = "0.11.1")
+@@ -59,7 +59,7 @@
+ bazel_dep(name = "rules_apple", version = "4.3.1", repo_name = None)
+ bazel_dep(name = "google_benchmark", version = "1.9.4", repo_name = None)
+ bazel_dep(name = "onetbb", version = "2022.2.0", repo_name = None)
+-bazel_dep(name = "rules_go", version = "0.59.0", repo_name = None)  # Required for loads of CcInfo
++bazel_dep(name = "rules_go", version = "0.61.0", repo_name = None)  # Required for loads of CcInfo
+ 
+ # bazel_dep overrides
+ single_version_override(
+@@ -101,6 +101,22 @@
+     version = "1.2.1.bcr.1",
+ )
+ 
++
++# Add loongarch64 support to rules_java JNI headers and use current_java_runtime
++single_version_override(
++    module_name = "rules_java",
++    patch_strip = 1,
++    patches = ["//third_party:rules_java_loongarch64.patch"],
++    version = "9.1.0",
++)
++
++# Add loongarch64 CPU detection to platforms host extension
++single_version_override(
++    module_name = "platforms",
++    patch_strip = 1,
++    patches = ["//third_party:platforms_loongarch64.patch"],
++    version = "1.1.0",
++)
+ # 1. Expose @com_google_protobuf//java/core:lite_runtime_only
+ # due to https://github.com/protocolbuffers/protobuf/commit/079be27925955348d1b3cb30ffbfa33dcec5778c
+ # We need to package the lite runtime jar for Bazel's bootstrap build
+@@ -467,3 +483,7 @@
+ register_toolchains("//src/main/res:empty_rc_toolchain")
+ 
+ register_toolchains("@graalvm_ce_toolchains//:gvm")
++
++register_toolchains("@bazel_tools//tools/python:autodetecting_python3_loongarch64_linux")
++
++register_toolchains("@bazel_tools//tools/jdk:local_jdk_toolchain_loongarch64")
+diff -urN a/src/BUILD b/src/BUILD
+--- a/src/BUILD	1980-01-01 00:00:00.000000000 +0800
++++ b/src/BUILD	2026-06-25 14:02:14.609000000 +0800
+@@ -171,6 +171,9 @@
+         "//src/conditions:linux_riscv64": [
+             "@openjdk_linux_riscv64_vanilla//file",
+         ],
++        "//src/conditions:linux_loongarch64": [
++	    ":loongarch64_jdk_tar",
++        ],
+         "//conditions:default": [
+             "@openjdk_linux_vanilla//file",
+         ],
+@@ -187,6 +190,14 @@
+     allow_symlink = True,
+ )
+ 
++# Capture the system JDK for minimization
++genrule(
++    name = "loongarch64_jdk_tar",
++    outs = ["loongarch64_jdk.tar.gz"],
++    cmd = "tar czf $@ -C /usr/lib/jvm/java-21-openjdk .",
++    visibility = ["//src:__subpackages__"],
++)
++
+ # Reads the app manifest of a Windows executable.
+ cc_binary(
+     name = "read_manifest",
+diff -urN a/src/conditions/BUILD b/src/conditions/BUILD
+--- a/src/conditions/BUILD	1980-01-01 00:00:00.000000000 +0800
++++ b/src/conditions/BUILD	2026-06-25 13:38:30.300618530 +0800
+@@ -76,6 +76,15 @@
+ )
+ 
+ config_setting(
++    name = "linux_loongarch64",
++    constraint_values = [
++        "@platforms//os:linux",
++        "@platforms//cpu:loongarch64",
++    ],
++    visibility = ["//visibility:public"],
++)
++
++config_setting(
+     name = "linux_riscv64",
+     constraint_values = [
+         "@platforms//os:linux",
+diff -urN a/src/conditions/BUILD.tools b/src/conditions/BUILD.tools
+--- a/src/conditions/BUILD.tools	1980-01-01 00:00:00.000000000 +0800
++++ b/src/conditions/BUILD.tools	2026-06-25 13:38:30.300769500 +0800
+@@ -59,6 +59,15 @@
+ )
+ 
+ config_setting(
++    name = "linux_loongarch64",
++    constraint_values = [
++        "@platforms//os:linux",
++        "@platforms//cpu:loongarch64",
++    ],
++    visibility = ["//visibility:public"],
++)
++
++config_setting(
+     name = "linux_riscv64",
+     constraint_values = [
+         "@platforms//os:linux",
+diff -urN a/src/main/java/com/google/devtools/build/lib/util/CPU.java b/src/main/java/com/google/devtools/build/lib/util/CPU.java
+--- a/src/main/java/com/google/devtools/build/lib/util/CPU.java	1980-01-01 00:00:00.000000000 +0800
++++ b/src/main/java/com/google/devtools/build/lib/util/CPU.java	2026-06-25 13:38:30.300954250 +0800
+@@ -28,6 +28,7 @@
+   AARCH64("aarch64", ImmutableSet.of("aarch64")),
+   S390X("s390x", ImmutableSet.of("s390x", "s390")),
+   MIPS64("mips64", ImmutableSet.of("mips64el", "mips64")),
++  LOONGARCH64("loongarch64", ImmutableSet.of("loongarch64")),
+   RISCV64("riscv64", ImmutableSet.of("riscv64")),
+   UNKNOWN("unknown", ImmutableSet.<String>of());
+ 
+diff -urN a/src/minimize_jdk.sh b/src/minimize_jdk.sh
+--- a/src/minimize_jdk.sh	1980-01-01 00:00:00.000000000 +0800
++++ b/src/minimize_jdk.sh	2026-06-25 13:44:37.563777600 +0800
+@@ -65,7 +65,7 @@
+ # compatible JDKs.
+ # Native access is required for the JNI library.
+ # Compact object headers reduce retained and peak memory usage.
+-JVM_OPTIONS='--enable-native-access=ALL-UNNAMED -XX:+UseCompactObjectHeaders'
++JVM_OPTIONS='--enable-native-access=ALL-UNNAMED'
+ 
+ if [[ "$UNAME" =~ msys_nt* ]]; then
+   unzip -q "$tooljdk" -d "tool_jdk.$$"
+diff -urN a/tools/BUILD b/tools/BUILD
+--- a/tools/BUILD	1980-01-01 00:00:00.000000000 +0800
++++ b/tools/BUILD	2026-06-25 13:38:30.301104730 +0800
+@@ -2,6 +2,17 @@
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++alias(
++    name = "host_platform",
++    actual = "@platforms//host",
++)
++
++# Platform used for invalid or empty (e.g. builtin) Bazel actions.
++platform(
++    name = "internal_platform",
++    visibility = ["//visibility:private"],
++)
++
+ exports_files(["fastutil.proguard"])
+ 
+ filegroup(
+diff -urN a/tools/jdk/BUILD.tools b/tools/jdk/BUILD.tools
+--- a/tools/jdk/BUILD.tools	1980-01-01 00:00:00.000000000 +0800
++++ b/tools/jdk/BUILD.tools	2026-06-25 13:38:30.301256870 +0800
+@@ -202,3 +202,17 @@
+     name = "launcher_flag_alias",
+     visibility = ["//visibility:public"],
+ )
++
++toolchain(
++    name = "local_jdk_toolchain_loongarch64",
++    exec_compatible_with = [
++        "@platforms//os:linux",
++        "@platforms//cpu:loongarch64",
++    ],
++    target_compatible_with = [
++        "@platforms//os:linux",
++        "@platforms//cpu:loongarch64",
++    ],
++    toolchain = "@local_jdk//:jdk",
++    toolchain_type = "@bazel_tools//tools/jdk:runtime_toolchain_type",
++)
+diff -urN a/tools/python/BUILD.tools b/tools/python/BUILD.tools
+--- a/tools/python/BUILD.tools	1980-01-01 00:00:00.000000000 +0800
++++ b/tools/python/BUILD.tools	2026-06-25 13:38:30.301414030 +0800
+@@ -107,3 +107,24 @@
+     deprecation = "Use @rules_python//python:autodetecting_toolchain",
+ )
+ 
++load("@rules_python//python:py_runtime.bzl", "py_runtime")
++load("@rules_python//python:py_runtime_pair.bzl", "py_runtime_pair")
++
++py_runtime(
++    name = "python3_runtime",
++    interpreter_path = "/usr/bin/python3",
++    python_version = "PY3",
++)
++
++py_runtime_pair(
++    name = "autodetecting_py3_runtime_pair",
++    py3_runtime = ":python3_runtime",
++)
++
++toolchain(
++    name = "autodetecting_python3_loongarch64_linux",
++    exec_compatible_with = ["@platforms//os:linux", "@platforms//cpu:loongarch64"],
++    target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:loongarch64"],
++    toolchain = ":autodetecting_py3_runtime_pair",
++    toolchain_type = ":toolchain_type",
++)
