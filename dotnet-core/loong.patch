@@ -1,0 +1,154 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 41b9714..f5eded8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -52,14 +52,32 @@ prepare() {
+   # fix bootstrap
+   git remote set-url origin https://github.com/dotnet/dotnet.git
+ 
+-  local _bootstrapver=$(xmllint --xpath "//*[local-name()='PrivateSourceBuiltSdkVersion']/text()" eng/Versions.props)
+-  local _previousver=$(pacman -Q dotnet-source-built-artifacts | sed -r 's/.*([0-9]+\.[0-9]+)\.[0-9]+\.sdk([0-9]+)-.*/\1.\2/')
+-
+-  if [[ $_bootstrapver == $_previousver ]]; then
+-    cp -r /usr/share/dotnet .dotnet
+-    ln -sf /usr/share/dotnet/source-built-artifacts/Private.SourceBuilt.Artifacts.*.tar.gz prereqs/packages/archive/
+-  fi
+-  ./prep-source-build.sh
++  # LoongArch64: disable NativeAOT for components to work around ILCompiler
++  # NullReferenceException during ILCompiler_publish.
++  # See: https://github.com/dotnet/runtime/issues/122845
++  patch -p1 -i ../0004-disable-nativeaot-for-components-loongarch64.patch
++
++  # LoongArch64: allow missing prune package data in source-built SDK
++  patch -p1 -i ../0005-allow-missing-prune-package-data-sdk-only.patch
++
++  # Force to use local SDK (there is no official release for loong64)
++  cp -a /usr/share/dotnet .dotnet # Don't use `ln -s` here since the .dotnet dir should be writable
++  # Get installed SDK version and update global.json to match
++  local _installed_sdk_ver=$(dotnet --list-sdks | head -n1 | awk '{print $1}')
++  sed -i "s/\"dotnet\": \"[^\"]*\"/\"dotnet\": \"$_installed_sdk_ver\"/" global.json
++  echo "Updated global.json to use SDK $_installed_sdk_ver"
++
++  mkdir -p prereqs/packages/archive/
++  ln -s /usr/share/dotnet/source-built-artifacts/Private.SourceBuilt.Artifacts.*.tar.gz prereqs/packages/archive/
++  echo "Artifacts linked"
++  # Extract version from artifacts filename and update eng/Versions.props
++  local _artifacts_ver=$(ls /usr/share/dotnet/source-built-artifacts/Private.SourceBuilt.Artifacts.*.tar.gz | head -n1 | sed 's/.*Private\.SourceBuilt\.Artifacts\.\(.*\)\.tar\.gz/\1/')
++  sed -i "s/<PrivateSourceBuiltSdkVersion>[^<]*<\/PrivateSourceBuiltSdkVersion>/<PrivateSourceBuiltSdkVersion>$_artifacts_ver<\/PrivateSourceBuiltSdkVersion>/" eng/Versions.props
++  sed -i "s/<PrivateSourceBuiltArtifactsVersion>[^<]*<\/PrivateSourceBuiltArtifactsVersion>/<PrivateSourceBuiltArtifactsVersion>$_artifacts_ver<\/PrivateSourceBuiltArtifactsVersion>/" eng/Versions.props
++  echo "Updated eng/Versions.props to use artifacts version $_artifacts_ver"
++
++  # Use --no-sdk to skip downloading since we always use the local SDK
++  ./prep-source-build.sh --no-sdk
+ }
+ 
+ build() {
+@@ -70,13 +88,24 @@ build() {
+   export OPENSSL_ENABLE_SHA1_SIGNATURES=1
+ 
+   export PATH="/usr/lib/llvm20/bin:$PATH"
++  # Use llvm20 toolchain consistently via CLR_CC/CLR_CXX (respected by dotnet's init-compiler.sh)
++  export CLR_CC=/usr/lib/llvm20/bin/clang-20
++  export CLR_CXX=/usr/lib/llvm20/bin/clang++
++  export AR=/usr/lib/llvm20/bin/llvm-ar
++  export NM=/usr/lib/llvm20/bin/llvm-nm
++  export RANLIB=/usr/lib/llvm20/bin/llvm-ranlib
++  export STRIP=/usr/lib/llvm20/bin/llvm-strip
++  export OBJCOPY=/usr/lib/llvm20/bin/llvm-objcopy
++  export OBJDUMP=/usr/lib/llvm20/bin/llvm-objdump
++  export READELF=/usr/lib/llvm20/bin/llvm-readelf
+ 
+   # this uses malloc_usable_size, which is incompatible with fortification level 3
+   CFLAGS="${CFLAGS/_FORTIFY_SOURCE=3/_FORTIFY_SOURCE=2}"
+   CXXFLAGS="${CXXFLAGS/_FORTIFY_SOURCE=3/_FORTIFY_SOURCE=2}"
+ 
+-  CFLAGS=$(echo $CFLAGS  | sed -e 's/-fstack-clash-protection//' )
+-  CXXFLAGS=$(echo $CXXFLAGS  | sed -e 's/-fstack-clash-protection//' )
++  CFLAGS=$(echo $CFLAGS  | sed -e 's/-fstack-clash-protection//' -e 's/-fno-plt//')
++  CXXFLAGS=$(echo $CXXFLAGS  | sed -e 's/-fstack-clash-protection//' -e 's/-fno-plt//')
++  LDFLAGS=$(echo $LDFLAGS  | sed -e 's/-fstack-clash-protection//' -e 's/-fno-plt//')
+   export EXTRA_CFLAGS="$CFLAGS"
+   export EXTRA_CXXFLAGS="$CXXFLAGS"
+   export EXTRA_LDFLAGS="$LDFLAGS"
+@@ -84,8 +113,8 @@ build() {
+   unset CXXFLAGS
+   unset LDFLAGS
+ 
+-  # rtm branding strips out the "prerelease" tag from the version (see https://github.com/dotnet/dotnet/blob/b0f34d51fccc69fd334253924abd8d6853fad7aa/build.sh#L18)
+-  ./build.sh --clean-while-building --online --source-build
++  # Use correct RID for loong64 (linux-loongarch64 instead of arch-loongarch64)
++  ./build.sh --clean-while-building --online --source-build --target-rid linux-loongarch64
+ }
+ 
+ package_dotnet-host() {
+@@ -97,8 +126,8 @@ package_dotnet-host() {
+   optdepends=('bash-completion: Bash completion support')
+ 
+   install -dm 755 "${pkgdir}"/usr/{bin,lib,share/{dotnet,licenses/dotnet-host}}
+-  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-arch-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner dotnet host
+-  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-arch-*.tar.gz -C "${pkgdir}"/usr/share/licenses/dotnet-host/ --no-same-owner LICENSE.txt ThirdPartyNotices.txt
++  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner dotnet host
++  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-*.tar.gz -C "${pkgdir}"/usr/share/licenses/dotnet-host/ --no-same-owner LICENSE.txt ThirdPartyNotices.txt
+   ln -s /usr/share/dotnet/dotnet "${pkgdir}"/usr/bin/dotnet
+   ln -s /usr/share/dotnet/host/fxr/${pkgver%.sdk*}/libhostfxr.so "${pkgdir}"/usr/lib/libhostfxr.so
+   install -Dm 644 dotnet/src/sdk/scripts/register-completions.bash "${pkgdir}"/usr/share/bash-completion/completions/dotnet
+@@ -122,7 +151,7 @@ package_dotnet-runtime() {
+   conflicts=(dotnet-runtime-${pkgver%.*.sdk*})
+ 
+   install -dm 755 "${pkgdir}"/usr/share/{dotnet,licenses}
+-  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-arch-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner shared/Microsoft.NETCore.App
++  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner shared/Microsoft.NETCore.App
+   ln -s dotnet-host "${pkgdir}"/usr/share/licenses/dotnet-runtime
+ }
+ 
+@@ -133,7 +162,7 @@ package_aspnet-runtime() {
+   conflicts=(aspnet-runtime-${pkgver%.*.sdk*})
+ 
+   install -dm 755 "${pkgdir}"/usr/share/{dotnet,licenses}
+-  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-arch-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner shared/Microsoft.AspNetCore.App
++  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner shared/Microsoft.AspNetCore.App
+   ln -s dotnet-host "${pkgdir}"/usr/share/licenses/aspnet-runtime
+ }
+ 
+@@ -150,7 +179,7 @@ package_dotnet-sdk() {
+   conflicts=(dotnet-sdk-${pkgver%.*.sdk*})
+ 
+   install -dm 755 "${pkgdir}"/usr/share/{dotnet,licenses}
+-  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-arch-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner sdk sdk-manifests templates
++  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner sdk sdk-manifests templates
+   ln -s dotnet-host "${pkgdir}"/usr/share/licenses/dotnet-sdk
+ }
+ 
+@@ -160,7 +189,7 @@ package_dotnet-targeting-pack() {
+   conflicts=(dotnet-targeting-pack-${pkgver%.*.sdk*})
+ 
+   install -dm 755 "${pkgdir}"/usr/share/{dotnet,licenses}
+-  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-arch-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner packs/Microsoft.NETCore.App.{Host.arch-*,Ref}
++  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner packs/Microsoft.NETCore.App.{Host.*,Ref}
+   ln -s dotnet-host "${pkgdir}"/usr/share/licenses/dotnet-targeting-pack
+ }
+ 
+@@ -171,7 +200,7 @@ package_aspnet-targeting-pack() {
+   conflicts=(aspnet-targeting-pack-${pkgver%.*.sdk*})
+ 
+   install -dm 755 "${pkgdir}"/usr/share/{dotnet,licenses}
+-  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-arch-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner packs/Microsoft.AspNetCore.App.Ref
++  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner packs/Microsoft.AspNetCore.App.Ref
+   ln -s dotnet-host "${pkgdir}"/usr/share/licenses/aspnet-targeting-pack
+ }
+ 
+@@ -183,4 +212,14 @@ package_dotnet-source-built-artifacts() {
+   install -Dm 644 dotnet/artifacts/assets/Release/Private.SourceBuilt.Artifacts.*.tar.gz -t "${pkgdir}"/usr/share/dotnet/source-built-artifacts/
+ }
+ 
++# LoongArch64: append sources at the end of PKGBUILD to avoid merge conflicts with upstream updates
++source+=(
++  0004-disable-nativeaot-for-components-loongarch64.patch
++  0005-allow-missing-prune-package-data-sdk-only.patch
++)
++b2sums+=(
++  '088f933d78c1b16923d485468fce3b86e8cc76788a6490c24efb48c75ee71da7fbadb22b971e7775d3c2a424f814c97e2e387ae72ce797c13b332f2fbbb289c4'
++  'e303fe324fa4eb30079904a88a2a756f43f740929fbc9da12003665156175d5b27d512d4bd1b5e6912ddd60d41674f47fbd1e1007bcdef94dfecee94936535ac'
++)
++
+ # vim: ts=2 sw=2 et:
