@@ -1,0 +1,29 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5cb2bc0..5825209 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -30,6 +30,8 @@ build() {
+     -S $pkgname
+   make -C build
+ 
++  # CUDA support is not available on loong64
++  : <<COMMENT_SEPARATOR
+   cmake \
+     -B build-cuda \
+     -D BUILD_SHARED_LIBS=ON \
+@@ -42,6 +44,7 @@ build() {
+     -D USE_SSE2_INSTRUCTIONS=ON \
+     -S $pkgname
+   make -C build-cuda
++COMMENT_SEPARATOR
+ }
+ 
+ package_dlib() {
+@@ -67,3 +70,7 @@ package_dlib-cuda() {
+   # remove redundant external libraries
+   rm -r "$pkgdir/usr/include/dlib/external"
+ }
++
++# Remove CUDA-related items on loong64
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^dlib-cuda$'))
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|cudnn)$'))
