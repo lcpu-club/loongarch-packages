@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 510a1aa..58a3f7f 100644
+index 13b08c9..0c52a78 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -20,7 +20,10 @@ validpgpkeys=(7B74D1299568B586BA9962B5649E4D4AF74E7DEC) # Zoltan Kochan <z@kocha
+@@ -21,7 +21,25 @@ validpgpkeys=(7B74D1299568B586BA9962B5649E4D4AF74E7DEC) # Zoltan Kochan <z@kocha
  
  prepare() {
    cd $pkgname/$pkgname
@@ -10,7 +10,28 @@ index 510a1aa..58a3f7f 100644
 +  rm -r artifacts
 +  sed -i '/@yao-pkg\/pkg/d' ../package.json
 +  sed -i '/@yao-pkg\/pkg/d' ../pnpm-workspace.yaml
++
++  # Loong64: avoid platform-specific Node.js runtime downloads
++  jq 'del(.devDependencies.node,
++          .devDependencies["@typescript/native-preview"],
++          .devEngines.runtime)
++      | if .devEngines == {} then del(.devEngines) else . end' \
++    ../package.json > ../package.json.tmp && mv ../package.json.tmp ../package.json
++
++  # Loong64: use system node and tsc instead of downloaded runtime/tsgo
++  sed -i 's/tsgo --build/tsc --build/g' ../package.json
++  sed -i 's/pnx node@runtime:[^ ]*/node/g' ../package.json
++  sed -i 's/tsgo --build/tsc --build/g' package.json
++  sed -i 's/pnx node@runtime:[^ ]* bundle.ts/node bundle.ts/g' package.json
++  sed -i 's/tsgo --build/tsc --build/g' ../worker/package.json
++
 +  pnpm install
  }
  
  build() {
+@@ -44,3 +62,5 @@ package() {
+   cd dist
+   cp -r $pkgname.mjs pnpmrc templates worker.js "$pkgdir"/$mod_dir/dist
+ }
++
++makedepends+=('jq')
