@@ -1,8 +1,22 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 896b5ea..75c4a73 100644
+index 68f5620..764640c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -42,14 +42,15 @@ prepare() {
+@@ -23,7 +23,7 @@ optdepends=('python: for examples and tests'
+             'gcc-fortran: Fortran interface')
+ source=(
+   "${_pkgname}::git+https://github.com/icl-utk-edu/magma.git#tag=v${pkgver}"
+-  $pkgname-smaller-cuda-binaries.patch::https://github.com/icl-utk-edu/magma/pull/83.patch
++  $pkgbase-smaller-cuda-binaries.patch::https://github.com/icl-utk-edu/magma/pull/83.patch
+ )
+ sha256sums=('4ce599fec02a871aec6e1c2cea93e596364fddee6790113a552baca75fcb407b'
+             'bbe40b25601de852389e169335c0ee85a60fa4e634cf246ff74decf3a218cd91')
+@@ -42,18 +42,19 @@ prepare() {
+   cd "${_pkgname}"
+ 
+   # Fix https://github.com/icl-utk-edu/magma/issues/39
+-  patch -Np1 -i "$srcdir"/$pkgname-smaller-cuda-binaries.patch
++  patch -Np1 -i "$srcdir"/$pkgbase-smaller-cuda-binaries.patch
  
    cd "${srcdir}"
  
@@ -19,7 +33,7 @@ index 896b5ea..75c4a73 100644
  
    cd "${_pkgname}-${pkgver}-hip"
    echo -e "BACKEND = hip\nFORT = true\nGPU_TARGET=$(_valid_gfx)" > make.inc
-@@ -57,6 +58,7 @@ prepare() {
+@@ -61,6 +62,7 @@ prepare() {
  }
  
  build() {
@@ -27,7 +41,7 @@ index 896b5ea..75c4a73 100644
    echo "Build with cuda backend"
    cd "${srcdir}/${_pkgname}-${pkgver}-cuda"
    cmake \
-@@ -68,6 +70,7 @@ build() {
+@@ -72,6 +74,7 @@ build() {
      -DGPU_TARGET="$(_valid_sm)"
    ninja -C build
  
@@ -35,7 +49,7 @@ index 896b5ea..75c4a73 100644
  
    echo "Build with rocm/hip backend"
    cd "${srcdir}/${_pkgname}-${pkgver}-hip"
-@@ -127,4 +130,6 @@ package_magma-hip() {
+@@ -131,4 +134,6 @@ package_magma-hip() {
    _package "/opt/rocm"
  }
  
