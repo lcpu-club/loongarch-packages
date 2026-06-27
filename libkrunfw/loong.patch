@@ -1,0 +1,24 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 71f90f1..c184098 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,6 +18,12 @@ options=(!debug)  # suppress empty debug package
+ sha256sums=('b0cbf1450269c80aea1dccbf440011deb2762a098b338c234079a6ef06456ead'
+             'd367c7504bd4da520dd01eb08125d2d0ac088bc8af4cd56d236f2074dd4225b7')
+ 
++prepare() {
++  cd "$pkgname-$pkgver"
++
++  patch -p1 -i "$srcdir/libkrunfw-loongarch.patch"
++}
++
+ build() {
+   cd "$pkgname-$pkgver"
+ 
+@@ -35,3 +41,6 @@ package() {
+   install -Dm644 LICENSE-GPL-2.0-only "$pkgdir"/usr/share/licenses/$pkgname/LICENSE-GPL-2.0-only
+   install -Dm644 LICENSE-LGPL-2.1-only "$pkgdir"/usr/share/licenses/$pkgname/LICENSE-LGPL-2.1-only
+ }
++
++source+=('libkrunfw-loongarch.patch::https://github.com/containers/libkrunfw/pull/118.diff')
++sha256sums+=('ad4372007d8fbe0648511dfec7edc23f2f45e16e6e3692b779fa4a9c47db0cce')
