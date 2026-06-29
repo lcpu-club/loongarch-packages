@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index da712b9..64db76c 100644
+index 9e456b3..4b6d4e2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -189,6 +189,37 @@ prepare() {
@@ -38,7 +38,7 @@ index da712b9..64db76c 100644
 +  popd
 +
    # CEF: Override clang_exe to use system clang
-   echo 'clang_exe = "clang"' >> cef/tools/clang_util.py
+   echo 'clang_exe = "clang"' >>cef/tools/clang_util.py
  
 @@ -207,6 +238,13 @@ prepare() {
    rm -f third_party/gperf/cipd/bin/gperf
@@ -51,10 +51,10 @@ index da712b9..64db76c 100644
 +  rm -r node_modules
 +  python3 third_party/devtools-frontend/src/scripts/deps/manage_node_deps.py
 +
-   if (( !_system_clang )); then
+   if ((!_system_clang)); then
      # Use prebuilt rust as system rust cannot be used due to the error:
      #   error: the option `Z` is only accepted on the nightly compiler
-@@ -329,9 +367,22 @@ build() {
+@@ -330,9 +368,22 @@ build() {
      )
    fi
  
@@ -78,7 +78,7 @@ index da712b9..64db76c 100644
  
    # Facilitate deterministic builds (taken from build/config/compiler/BUILD.gn)
    CFLAGS+='   -Wno-builtin-macro-redefined'
-@@ -362,14 +413,23 @@ build() {
+@@ -363,14 +414,23 @@ build() {
  
    python3 cef/tools/gclient_hook.py
    sed -i '/__sanitizer_set_death_callback/d' v8/src/sandbox/testing.cc
@@ -104,7 +104,7 @@ index da712b9..64db76c 100644
      --minimal \
      --no-docs \
      --no-archive
-@@ -403,4 +463,20 @@ package() {
+@@ -404,4 +464,20 @@ package() {
    install -Dm644 ../chromium-$_chromium_ver/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE-CHROMIUM"
  }
  
