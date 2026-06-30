@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f9e7c06..752fff4 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -37,6 +37,8 @@ prepare() {
+   cd ${pkgname}
+   patch -Np1 < ../0001-seccomp-extend-syscalls-tested-on-Linux-6.1-with-gli.patch
+   patch -Np1 < ../0001-tests-enable-drop_privileges-by-default-for-better-s.patch
++  patch -Np1 < ../0002-seccomp-allow-ppoll-on-loongarch64.patch
++  patch -Np1 < ../0003-tests-fix-inefficient-wait-loops-in-slabs-mover.patch
+   patch -Np1 < ../memcached.service.patch
+   sed -e 's/^##safer##//g' -i scripts/*.service
+ 
+@@ -69,3 +71,8 @@ package() {
+ 
+   install -vDm 644 -t "${pkgdir}/usr/share/licenses/${pkgname}" LICENSE
+ }
++
++source+=('0002-seccomp-allow-ppoll-on-loongarch64.patch'
++           '0003-tests-fix-inefficient-wait-loops-in-slabs-mover.patch')
++b2sums+=('1bdc7a13fac1f29c6b77d6fbc721a67d885a05eee23e3f02aa1b673cf2e93b4f752f996c74be2796d0a00b765cb87a863ca4f0167aecf4605a426a108819f2e1'
++         'e70a5df354ecd2eb9645fc7e76a65ea66a6651e570cfc801b12ddfc9a30caa11f3dc9c0fefffd288515ccdf889bac7d8011609be7c66f94988114ab6d809e932')
