@@ -1,0 +1,17 @@
+diff --git a/meson.build b/meson.build
+index 2ea4da4..3039b36 100644
+--- a/meson.build
++++ b/meson.build
+@@ -109,7 +109,11 @@ if host_machine.system() == 'windows'
+ elif host_machine.system() == 'darwin'
+   async_ns_dep = dependency('appleframeworks', modules: ['CFNetwork', 'CoreFoundation'], required: async_ns_opt)
+ else
+-  async_ns_dep = cxx.find_library('anl', required: async_ns_opt)
++  async_ns_dep = cxx.find_library('anl', required: false)
++  if not async_ns_dep.found()
++    # glibc >= 2.34 has getaddrinfo_a built into libc, no separate libanl needed
++    async_ns_dep = cxx.has_function('getaddrinfo_a') ? declare_dependency() : dependency('', required: async_ns_opt)
++  endif
+ endif
+ 
+ if async_ns_dep.found()
