@@ -111,7 +111,7 @@
    echo "Building with cuda and without non-x86-64 optimizations"
    _prepare
 @@ -380,9 +387,10 @@ build() {
-   _prepare
+   export USE_XPU=0
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
 +COMMENT_SEPARATOR
@@ -187,7 +187,7 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver} python-pytorch-rocm=${pkgver})
  
-@@ -551,4 +563,30 @@ package_python-pytorch-opt-xpu() {
+@@ -551,4 +563,29 @@ package_python-pytorch-opt-xpu() {
    _package
  }
  
@@ -203,7 +203,6 @@
 +makedepends=(${makedepends[@]/intel-compute-runtime})
 +makedepends=(${makedepends[@]/intel-oneapi-mkl-sycl})
 +makedepends=(${makedepends[@]/intel-oneapi-common})
-+makedepends=(${makedepends[@]/})
 +makedepends=(${makedepends[@]/python-triton})
 +makedepends=(${makedepends[@]/python-aotriton})
 +pkgname=(${pkgname[@]/"${pkgbase}-cuda"})
