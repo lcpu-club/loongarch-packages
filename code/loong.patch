@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index d3ff448..c45274a 100644
+index 2afbe82..6d17bb8 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -55,6 +55,10 @@ case "$CARCH" in
+@@ -58,6 +58,10 @@ case "$CARCH" in
      _vscode_arch=riscv64
      _electron_arch=riscv64
      ;;
@@ -13,23 +13,125 @@ index d3ff448..c45274a 100644
    *)
      # Needed for mksrcinfo
      _vscode_arch=DUMMY
-@@ -83,7 +87,8 @@ prepare() {
+@@ -90,7 +94,9 @@ prepare() {
    patch -p0 -i ../product_json.diff
  
    # OpenVSX signature verification
 -  patch -p1 -i ../0009-openvsx-extension-signature.patch
-+  # Not supported on loong64
-+  #patch -p1 -i ../0009-openvsx-extension-signature.patch
++  if [[ "$CARCH" != "loong64" ]]; then
++    patch -p1 -i ../0009-openvsx-extension-signature.patch
++  fi
  
    # Set the commit and build date
-   sed -e "s/@COMMIT@/$(git rev-parse HEAD)/" -e "s/@DATE@/$(date -u -Is | sed 's/\+00:00/Z/')/" -i product.json
-@@ -125,6 +130,9 @@ prepare() {
-   local _electron_zip="electron-v$_electronver-linux-$_electron_arch.zip"
-   zip -q "$_cache_dir/$_electron_zip" . -i .
-   echo "$(sha256sum "$_cache_dir/$_electron_zip" | cut -d " " -f 1) *$_electron_zip" > build/checksums/electron.txt
+   local _commit _date
+@@ -126,6 +132,8 @@ prepare() {
+   sed -i 's|@@APPNAME@@|code-oss|g' resources/completions/{bash/code-oss,zsh/_code-oss}
+ 
+   patch -p1 -i "$srcdir/clipath.patch"
++  patch -p1 -i "$srcdir/gulpfile-vscode-loong64.patch"
++  patch -p1 -i "$srcdir/tsgo-loong64.patch"
+ 
+   # disable electron checksum verification as we are not bundling electron
+   sed -i 's|validateChecksum: false,|validateChecksum: true,|' build/lib/electron.ts
+@@ -133,6 +141,49 @@ prepare() {
+   # upstream has a compatibility issue with npm but it doesn't affect packaging
+   # so remove the check
+   sed -i '/Please use npm version < 11.2.0./{n;d}' build/npm/preinstall.ts
 +
-+  # Add missing loong64 definition
-+  sed -i "/BUILD_TARGETS = \[/a { platform: 'linux', arch: 'loong64' }," build/gulpfile.vscode.js
++  if [[ "$CARCH" == "loong64" ]]; then
++    # Use local stubs for packages without loong64 binaries.
++    local _vsce_sign_ver _ripgrep_ver
++    _vsce_sign_ver=$(jq -r '.packages["node_modules/@vscode/vsce-sign"].version' package-lock.json)
++    _ripgrep_ver=$(jq -r '.packages["node_modules/@vscode/ripgrep"].version' package-lock.json)
++
++    mkdir -p build/vsce-sign-stub/src
++    sed -e "s/@VERSION@/$_vsce_sign_ver/" "$srcdir/vsce-sign-stub-package.json" > build/vsce-sign-stub/package.json
++    cp "$srcdir/vsce-sign-stub-main.js" build/vsce-sign-stub/src/main.js
++    mkdir -p build/ripgrep-stub
++    sed -e "s/@VERSION@/$_ripgrep_ver/" "$srcdir/ripgrep-stub-package.json" > build/ripgrep-stub/package.json
++    cp "$srcdir/ripgrep-stub-index.js" build/ripgrep-stub/index.js
++    for pkg_json in build/package.json remote/package.json remote/web/package.json \
++                    test/automation/package.json test/integration/browser/package.json test/monaco/package.json \
++                    extensions/*/package.json extensions/*/*/package.json; do
++      [[ -f "$pkg_json" ]] || continue
++      rel_sign=$(realpath --relative-to="$(dirname "$pkg_json")" build/vsce-sign-stub)
++      rel_rg=$(realpath --relative-to="$(dirname "$pkg_json")" build/ripgrep-stub)
++      jq --arg sign "file:$rel_sign" --arg rg "file:$rel_rg" \
++         '.overrides["@vscode/vsce-sign"] = $sign | .overrides["@vscode/ripgrep"] = $rg' \
++         "$pkg_json" > "$pkg_json.tmp"
++      mv "$pkg_json.tmp" "$pkg_json"
++    done
++    jq --arg sign "file:./build/vsce-sign-stub" --arg rg "file:./build/ripgrep-stub" \
++       '.overrides["@vscode/vsce-sign"] = $sign | .overrides["@vscode/ripgrep"] = $rg' package.json > package.json.tmp
++    mv package.json.tmp package.json
++    jq --arg sign "file:build/vsce-sign-stub" --arg rg "file:build/ripgrep-stub" \
++       '(.packages["node_modules/@vscode/vsce-sign"] // .dependencies["@vscode/vsce-sign"]) |= {
++          version: $sign,
++          dev: (.dev // true),
++          license: "MIT"
++        }
++       | (.packages["node_modules/@vscode/ripgrep"] // .dependencies["@vscode/ripgrep"]) |= {
++          version: $rg,
++          dev: (.dev // true),
++          license: "MIT"
++        }' package-lock.json > package-lock.json.tmp
++    mv package-lock.json.tmp package-lock.json
++
++    # Upstream SHASUMS lacks a loong64 entry.
++    sed -i 's|validateChecksum: true,|validateChecksum: false,|' build/lib/electron.ts
++  fi
  }
  
  build() {
+@@ -141,6 +192,19 @@ build() {
+   export XDG_CACHE_HOME="$srcdir"
+   npm install --cpu=$_vscode_arch
+   npm add -S "node-ovsx-sign@~1.2.0"
++
++  if [[ "$CARCH" == "loong64" ]]; then
++    # Copilot needs a linux-loong64 ripgrep binary during packaging.
++    mkdir -p node_modules/@vscode/ripgrep-universal/bin/linux-loong64
++    ln -sf /usr/bin/rg node_modules/@vscode/ripgrep-universal/bin/linux-loong64/rg
++
++    # Use x64 electron binaries; loong64 ones do not exist and we discard them.
++    local _artifact_utils="node_modules/@vscode/gulp-electron/node_modules/@electron/get/dist/artifact-utils.js"
++    sed -i "/async function getArtifactRemoteURL(details) {/a \
++      if (details.arch === 'loong64') { details.arch = 'x64'; }" \
++      "$_artifact_utils"
++  fi
++
+   npm run gulp \
+        --openssl-legacy-provider \
+        vscode-linux-${_vscode_arch}-min
+@@ -159,8 +223,11 @@ package() {
+   # Replace statically included binary with system copy
+   # We can override the architecture-specific ones because they shouldn't be used anyway
+   for _useless_copy in "$pkgdir"/usr/lib/code/extensions/copilot/node_modules/@anthropic-ai/claude-agent-sdk/vendor/ripgrep/*/rg \
+-    "$pkgdir"/usr/lib/code/node_modules/@vscode/ripgrep-universal/bin/linux-x64/rg; do
+-    ln -vsf /usr/bin/rg "$_useless_copy"
++    "$pkgdir"/usr/lib/code/node_modules/@vscode/ripgrep-universal/bin/linux-x64/rg \
++    "$pkgdir"/usr/lib/code/node_modules/@vscode/ripgrep-universal/bin/linux-loong64/rg; do
++    if [[ -e "$_useless_copy" ]]; then
++      ln -vsf /usr/bin/rg "$_useless_copy"
++    fi
+   done
+ 
+   # Install binary
+@@ -187,3 +254,17 @@ package() {
+   install -Dm 644 VSCode-linux-$_vscode_arch/resources/app/LICENSE.txt "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+   install -Dm 644 VSCode-linux-$_vscode_arch/resources/app/ThirdPartyNotices.txt "$pkgdir"/usr/share/licenses/$pkgname/ThirdPartyNotices.txt
+ }
++
++# Stubs and patches for packages that do not provide loong64 binaries
++source+=('vsce-sign-stub-package.json'
++         'vsce-sign-stub-main.js'
++         'ripgrep-stub-package.json'
++         'ripgrep-stub-index.js'
++         'tsgo-loong64.patch'
++         'gulpfile-vscode-loong64.patch')
++sha512sums+=('ac170fda53ad65d06f3b4c745a482cf7b6fdb89dbf3ee2feca303d0f2422bc3c81fd527dab3f9f8c1028202e81daa77c6043dd04f5972fb0d56e907ec12e584d'
++             '50bd72095ee1622db6fa72f47bc3770a6a1b93f4893d2221dc0dbdb86e4aac3c91b27c474969b0740dc2310705fdcb722b444d59be0586d6e2324a1ca827eff0'
++             'f09e576a00dafe424d59121199c2bd9aadfc2be43fd96643db0e8c3e143ba059b33182a4fb4487b81145f74b74d41808057a6517d33246d5617b0fa170f1e3e8'
++             '96c37070b5d503eb0e97c41fba05e0168837336a0bf36dfc528ce784f216591d5bd86795faf192f37e5a632b8fab108090bd84e83ef275b93525ca9f8a6f9ecc'
++             '3f7e3a8e43f0d135131e806cd769164c59bcc06e260405255d4d60cf98bbe19176fb8ec79406fb2ecf6faba9bb51de8a574fc7b482724d80f1f0011b19187b9a'
++             '8c54f99d73e5817eb91339e876bce428001218a68767c763fba9b43eb578989d834e106d9a2ee73d188bc8af2c096f351555c4aab6c261fcbddc1950b4120470')

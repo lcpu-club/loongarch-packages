@@ -1,0 +1,7 @@
+{
+  "name": "@vscode/vsce-sign",
+  "version": "@VERSION@",
+  "description": "Stub for Visual Studio Code: extension package signing on loong64",
+  "main": "src/main.js",
+  "license": "MIT"
+}

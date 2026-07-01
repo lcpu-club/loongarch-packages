@@ -1,0 +1,10 @@
+--- a/build/gulpfile.vscode.ts	2026-07-02 03:34:51.505000000 +0000
++++ b/build/gulpfile.vscode.ts	2026-07-02 03:34:51.508000000 +0000
+@@ -618,6 +618,7 @@
+ 	{ platform: 'linux', arch: 'x64' },
+ 	{ platform: 'linux', arch: 'armhf' },
+ 	{ platform: 'linux', arch: 'arm64' },
++	{ platform: 'linux', arch: 'loong64' },
+ ];
+ BUILD_TARGETS.forEach(buildTarget => {
+ 	const dashed = (str: string) => (str ? `-${str}` : ``);
