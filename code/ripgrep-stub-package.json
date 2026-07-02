@@ -1,0 +1,7 @@
+{
+  "name": "@vscode/ripgrep",
+  "version": "@VERSION@",
+  "description": "Stub that points to system ripgrep on loong64",
+  "main": "index.js",
+  "license": "MIT"
+}

@@ -1,0 +1,13 @@
+--- a/build/lib/tsgo.ts
++++ b/build/lib/tsgo.ts
+@@ -24,7 +24,9 @@
+ 		}
+ 	}
+ 
+-	const args = ['tsgo', '--project', projectPath, '--pretty', 'false', '--incremental'];
++	const args = process.arch === 'loong64'
++		? ['tsc', '--project', projectPath, '--pretty', 'false', '--incremental']
++		: ['tsgo', '--project', projectPath, '--pretty', 'false', '--incremental'];
+ 	if (config.noEmit) {
+ 		args.push('--noEmit');
+ 	} else {
