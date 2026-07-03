@@ -1,8 +1,8 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -55,6 +55,14 @@ prepare() {
-   # Arch Linux installs x86_64 libraries /lib
+@@ -56,6 +56,14 @@ prepare() {
    sed -i '/m64=/s/lib64/lib/' gcc/config/i386/t-linux64
+   sed -i '/lp64=/s/lib64/lib/' gcc/config/aarch64/t-aarch64-linux
  
 +  # Patches for loong64
 +  # Fix libdir
@@ -15,7 +15,7 @@
    mkdir -p "$srcdir/gcc-build"
  }
  
-@@ -82,6 +90,7 @@ build() {
+@@ -83,6 +91,7 @@ build() {
        --enable-linker-build-id
        --enable-lto
        --disable-multilib
@@ -23,7 +23,7 @@
        --enable-plugin
        --enable-shared
        --enable-threads=posix
-@@ -131,8 +140,8 @@ package_gcc15-libs() {
+@@ -132,8 +141,8 @@ package_gcc15-libs() {
  
    cd gcc-build
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install-shared
@@ -34,16 +34,18 @@
    rm -f "$pkgdir/$_libdir/libgcc_eh.a"
  
    for lib in libasan.so \
-@@ -175,7 +184,7 @@ package_gcc15() {
+@@ -175,8 +184,8 @@ package_gcc15() {
+   install -m755 -t "$pkgdir/${_libdir}/" gcc/{cc1,cc1plus,collect2,lto1,gcov{,-tool}}
  
    make -C $CHOST/libgcc DESTDIR="$pkgdir" install
-   rm -f "${pkgdir}/${_libdir}"/../lib/libgcc_s.so*
+-  rm -f "${pkgdir}/${_libdir}"/../lib/libgcc_s.so*
 -  rmdir "${pkgdir}/${_libdir}"/../lib
-+  # rmdir "${pkgdir}/${_libdir}"/../lib
++  rm -f "${pkgdir}/${_libdir}"/libgcc_s.so*
++#  rmdir "${pkgdir}/${_libdir}"/../lib
  
    make -C $CHOST/libstdc++-v3/src DESTDIR="$pkgdir" install
    make -C $CHOST/libstdc++-v3/include DESTDIR="$pkgdir" install
-@@ -209,7 +218,7 @@ package_gcc15() {
+@@ -210,7 +219,7 @@ package_gcc15() {
    # create cc-rs compatible symlinks
    # https://github.com/rust-lang/cc-rs/blob/1.0.73/src/lib.rs#L2578-L2581
    for binary in {c++,g++,gcc,gcc-ar,gcc-nm,gcc-ranlib}; do
@@ -52,7 +54,7 @@
    done
  
    # POSIX conformance launcher scripts for c89 and c99
-@@ -247,3 +256,6 @@ package_gcc15-fortran() {
+@@ -248,3 +257,6 @@ package_gcc15-fortran() {
    ln -s /usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION \
      "$pkgdir/usr/share/licenses/$pkgname/"
  }
