@@ -1,0 +1,27 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e50e907..4434bca 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -30,7 +30,7 @@ build() {
+ }
+ 
+ check() {
+-  cd "$_pkgname-$pkgver/build/lib.linux-$CARCH-cpython-"*/
++  cd "$_pkgname-$pkgver/build/lib.linux-$(uname -m)-cpython-"*/
+   PYTHONPATH=$PWD PYTHONDONTWRITEBYTECODE=1 pytest -k 'not benchmark'
+ }
+ 
+@@ -47,3 +47,13 @@ package() {
+   install -Dm644 -t "$pkgdir/usr/share/man/man1/" "docs/man/"*.1
+   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++source+=('test_sparse_file-hugepage.patch')
++sha256sums+=('555c253da4d00816cc8a2bd6604e80e3c1369a24ba52da72b86f41a2e1e5bbf8')
++
++prepare() {
++  cd "$_pkgname-$pkgver"
++  # Fix test_sparse_file on filesystems with large allocation units (tmpfs hugepages on loong64).
++  # Upstream PR: #9842. Remove this patch once 1.4.5+ includes the backport.
++  patch -p1 -i ../test_sparse_file-hugepage.patch
++}
