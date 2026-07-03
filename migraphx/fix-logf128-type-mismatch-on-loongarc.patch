@@ -1,0 +1,40 @@
+diff --git a/external/llvm-project/llvm/lib/Analysis/ConstantFolding.cpp b/external/llvm-project/llvm/lib/Analysis/ConstantFolding.cpp
+index 5218010b..ec2f5d7d 100644
+--- a/external/llvm-project/llvm/lib/Analysis/ConstantFolding.cpp
++++ b/external/llvm-project/llvm/lib/Analysis/ConstantFolding.cpp
+@@ -2060,6 +2060,16 @@ Constant *GetConstantFoldFPValue128(float128 V, Type *Ty) {
+     return ConstantFP::get(Ty, V);
+   llvm_unreachable("Can only constant fold fp128");
+ }
++
++// On some targets (e.g., loongarch64 with clang), the math function logf128
++// takes and returns _Float128 (which may be aliased to long double), while
++// LLVM's float128 type is defined as __float128. These are different types
++// even though they have the same representation. This wrapper bridges the gap.
++namespace {
++float128 logf128_wrapper(float128 x) {
++  return static_cast<float128>(logf128(static_cast<_Float128>(x)));
++}
++} // namespace
+ #endif
+ 
+ /// Clear the floating-point exception state.
+@@ -2487,14 +2497,14 @@ static Constant *ConstantFoldScalarCall(StringRef Name, Intrinsic::ID IntrinsicI
+ #if defined(HAS_IEE754_FLOAT128) && defined(HAS_LOGF128)
+     if (Ty->isFP128Ty()) {
+       if (IntrinsicID == Intrinsic::log) {
+-        float128 Result = logf128(Op->getValueAPF().convertToQuad());
++        float128 Result = logf128_wrapper(Op->getValueAPF().convertToQuad());
+         return GetConstantFoldFPValue128(Result, Ty);
+       }
+ 
+       LibFunc Fp128Func = NotLibFunc;
+       if (TLI && TLI->getLibFunc(Name, Fp128Func) && TLI->has(Fp128Func) &&
+           Fp128Func == LibFunc_logl)
+-        return ConstantFoldFP128(logf128, Op->getValueAPF(), Ty);
++        return ConstantFoldFP128(logf128_wrapper, Op->getValueAPF(), Ty);
+     }
+ #endif
+ 
+-- 
+2.51.0

@@ -1,0 +1,26 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -44,6 +44,8 @@ options=(!lto)
+ prepare() {
+   cd $pkgname
+   patch -p1 -i "$srcdir"/0001-migraphx-check-if-use_hipblaslt-before-call-gfx_defa.patch
++  cd "$srcdir"/$pkgname-rocmlir
++  patch -p1 -i "$srcdir"/fix-logf128-type-mismatch-on-loongarc.patch
+ }
+ 
+ build() {
+@@ -85,7 +87,7 @@ build() {
+     -D MIOPEN_BACKEND=HIP 
+   )
+   cmake "${cmake_args[@]}"
+-  cmake --build build
++  LIBRARY_PATH=/opt/rocm/lib cmake --build build
+ }
+ 
+ package() {
+@@ -94,3 +96,5 @@ package() {
+   install -Dm644 "$pkgname-rocmlir"/LICENSE.TXT "$pkgdir/usr/share/licenses/$pkgname/LICENSE.rocMLIR"
+   install -Dm644 "$pkgname-rocmlir"/external/llvm-project/LICENSE.TXT "$pkgdir/usr/share/licenses/$pkgname/LICENSE.llvm-project"
+ }
++source+=("fix-logf128-type-mismatch-on-loongarc.patch")
++sha256sums+=('48cba9e17aed739cf3c007f16330a67d157cf39a3fa750f2e82aa6d0a039ef2e')
