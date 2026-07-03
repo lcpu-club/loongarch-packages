@@ -1,0 +1,12 @@
+--- borgbackup-1.4.4/src/borg/testsuite/archiver.py	2026-03-18 18:57:08.000000000 +0000
++++ borgbackup-1.4.4-patched/src/borg/testsuite/archiver.py	2026-07-03 08:50:14.037429310 +0000
+@@ -674,7 +674,8 @@
+                     try:
+                         if fd.seek(0, os.SEEK_HOLE) != 0:
+                             sparse = False
+-                        if fd.seek(0, os.SEEK_DATA) != hole_size:
++                        # fs allocation granularity may report data before the first non-zero byte
++                        if fd.seek(0, os.SEEK_DATA) > hole_size:
+                             sparse = False
+                     except OSError:
+                         # OS/FS does not really support SEEK_HOLE/SEEK_DATA
