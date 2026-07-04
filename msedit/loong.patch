@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f497947..ec90b53 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,6 +25,10 @@ sha256sums=('cab8aebba0c96dfc2362148d4c7ca1f1de72057614ac33b4d397bbe9d338547b')
+ 
+ prepare() {
+   cd "$pkgname"
++
++  # Disable unstable LoongArch SIMD intrinsics on stable Rust
++  patch -p1 -i ../fix-loongarch-simd.patch
++
+   cargo fetch --locked --target "$(rustc --print host-tuple)"
+ 
+   # patch the desktop file so it matches the alternative binary name
+@@ -48,3 +52,6 @@ package() {
+   install -Dm0644 -t "$pkgdir/usr/share/licenses/$pkgname" "LICENSE"
+   install -Dm0644 -t "$pkgdir/usr/share/applications" "assets/com.microsoft.edit.desktop"
+ }
++
++source+=('fix-loongarch-simd.patch')
++sha256sums+=('aa4247487dbbe0fb692e853d0d7086ae6ef95e11eaa97526891053a3f5b29be3')

@@ -1,0 +1,213 @@
+diff -ruN a/crates/edit/src/lib.rs b/crates/edit/src/lib.rs
+--- a/crates/edit/src/lib.rs	2026-06-27 13:18:51.324399320 +0000
++++ b/crates/edit/src/lib.rs	2026-06-27 13:19:06.655321980 +0000
+@@ -1,11 +1,12 @@
+ // Copyright (c) Microsoft Corporation.
+ // Licensed under the MIT License.
+ 
+-#![cfg_attr(
+-    target_arch = "loongarch64",
+-    feature(stdarch_loongarch, stdarch_loongarch_feature_detection, loongarch_target_feature),
+-    allow(clippy::incompatible_msrv)
+-)]
++// LoongArch SIMD intrinsics are unstable on stable Rust; rely on fallback implementations.
++// #![cfg_attr(
++//     target_arch = "loongarch64",
++//     feature(stdarch_loongarch, stdarch_loongarch_feature_detection, loongarch_target_feature),
++//     allow(clippy::incompatible_msrv)
++// )]
+ #![allow(clippy::missing_transmute_annotations, clippy::new_without_default, stable_features)]
+ 
+ pub mod base64;
+diff -ruN a/crates/edit/src/simd/lines_bwd.rs b/crates/edit/src/simd/lines_bwd.rs
+--- a/crates/edit/src/simd/lines_bwd.rs	2026-06-27 13:18:51.324760500 +0000
++++ b/crates/edit/src/simd/lines_bwd.rs	2026-06-27 13:19:06.656119640 +0000
+@@ -34,7 +34,7 @@
+     line: CoordType,
+     line_stop: CoordType,
+ ) -> (*const u8, CoordType) {
+-    #[cfg(any(target_arch = "x86_64", target_arch = "loongarch64"))]
++    #[cfg(any(target_arch = "x86_64"))]
+     return unsafe { LINES_BWD_DISPATCH(beg, end, line, line_stop) };
+ 
+     #[cfg(target_arch = "aarch64")]
+@@ -65,7 +65,7 @@
+     }
+ }
+ 
+-#[cfg(any(target_arch = "x86_64", target_arch = "loongarch64"))]
++#[cfg(any(target_arch = "x86_64"))]
+ static mut LINES_BWD_DISPATCH: unsafe fn(
+     beg: *const u8,
+     end: *const u8,
+@@ -162,7 +162,7 @@
+     }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ unsafe fn lines_bwd_dispatch(
+     beg: *const u8,
+     end: *const u8,
+@@ -182,7 +182,7 @@
+     unsafe { func(beg, end, line, line_stop) }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ #[target_feature(enable = "lasx")]
+ unsafe fn lines_bwd_lasx(
+     beg: *const u8,
+@@ -258,7 +258,7 @@
+     }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ #[target_feature(enable = "lsx")]
+ unsafe fn lines_bwd_lsx(
+     beg: *const u8,
+diff -ruN a/crates/edit/src/simd/lines_fwd.rs b/crates/edit/src/simd/lines_fwd.rs
+--- a/crates/edit/src/simd/lines_fwd.rs	2026-06-27 13:18:51.324806470 +0000
++++ b/crates/edit/src/simd/lines_fwd.rs	2026-06-27 13:19:06.656367510 +0000
+@@ -32,7 +32,7 @@
+     line: CoordType,
+     line_stop: CoordType,
+ ) -> (*const u8, CoordType) {
+-    #[cfg(any(target_arch = "x86_64", target_arch = "loongarch64"))]
++    #[cfg(any(target_arch = "x86_64"))]
+     return unsafe { LINES_FWD_DISPATCH(beg, end, line, line_stop) };
+ 
+     #[cfg(target_arch = "aarch64")]
+@@ -65,7 +65,7 @@
+     }
+ }
+ 
+-#[cfg(any(target_arch = "x86_64", target_arch = "loongarch64"))]
++#[cfg(any(target_arch = "x86_64"))]
+ static mut LINES_FWD_DISPATCH: unsafe fn(
+     beg: *const u8,
+     end: *const u8,
+@@ -169,7 +169,7 @@
+     }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ unsafe fn lines_fwd_dispatch(
+     beg: *const u8,
+     end: *const u8,
+@@ -189,7 +189,7 @@
+     unsafe { func(beg, end, line, line_stop) }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ #[target_feature(enable = "lasx")]
+ unsafe fn lines_fwd_lasx(
+     mut beg: *const u8,
+@@ -263,7 +263,7 @@
+     }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ #[target_feature(enable = "lsx")]
+ unsafe fn lines_fwd_lsx(
+     mut beg: *const u8,
+diff -ruN a/crates/edit/src/simd/memchr2.rs b/crates/edit/src/simd/memchr2.rs
+--- a/crates/edit/src/simd/memchr2.rs	2026-06-27 13:18:51.324848950 +0000
++++ b/crates/edit/src/simd/memchr2.rs	2026-06-27 13:19:06.656594740 +0000
+@@ -21,7 +21,7 @@
+ }
+ 
+ unsafe fn memchr2_raw(needle1: u8, needle2: u8, beg: *const u8, end: *const u8) -> *const u8 {
+-    #[cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "loongarch64"))]
++    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+     return unsafe { MEMCHR2_DISPATCH(needle1, needle2, beg, end) };
+ 
+     #[cfg(target_arch = "aarch64")]
+@@ -53,7 +53,7 @@
+ // itself to the correct implementation on the first call. This reduces binary size.
+ // It would also reduce branches if we had >2 implementations (a jump still needs to be predicted).
+ // NOTE that this ONLY works if Control Flow Guard is disabled on Windows.
+-#[cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "loongarch64"))]
++#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+ static mut MEMCHR2_DISPATCH: unsafe fn(
+     needle1: u8,
+     needle2: u8,
+@@ -102,7 +102,7 @@
+     }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ unsafe fn memchr2_dispatch(needle1: u8, needle2: u8, beg: *const u8, end: *const u8) -> *const u8 {
+     use std::arch::is_loongarch_feature_detected;
+ 
+@@ -117,7 +117,7 @@
+     unsafe { func(needle1, needle2, beg, end) }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ #[target_feature(enable = "lasx")]
+ unsafe fn memchr2_lasx(needle1: u8, needle2: u8, mut beg: *const u8, end: *const u8) -> *const u8 {
+     unsafe {
+@@ -152,7 +152,7 @@
+     }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ #[target_feature(enable = "lsx")]
+ unsafe fn memchr2_lsx(needle1: u8, needle2: u8, mut beg: *const u8, end: *const u8) -> *const u8 {
+     unsafe {
+diff -ruN a/crates/stdext/src/simd/memset.rs b/crates/stdext/src/simd/memset.rs
+--- a/crates/stdext/src/simd/memset.rs	2026-06-27 13:18:51.327646360 +0000
++++ b/crates/stdext/src/simd/memset.rs	2026-06-27 13:19:06.656828900 +0000
+@@ -52,7 +52,7 @@
+ 
+ #[inline(always)]
+ fn memset_raw(beg: *mut u8, end: *mut u8, val: u64) {
+-    #[cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "loongarch64"))]
++    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+     return unsafe { MEMSET_DISPATCH(beg, end, val) };
+ 
+     #[cfg(target_arch = "aarch64")]
+@@ -88,7 +88,7 @@
+     }
+ }
+ 
+-#[cfg(any(target_arch = "x86", target_arch = "x86_64", target_arch = "loongarch64"))]
++#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+ static mut MEMSET_DISPATCH: unsafe fn(beg: *mut u8, end: *mut u8, val: u64) = memset_dispatch;
+ 
+ #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+@@ -215,7 +215,7 @@
+     }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ fn memset_dispatch(beg: *mut u8, end: *mut u8, val: u64) {
+     use std::arch::is_loongarch_feature_detected;
+ 
+@@ -230,7 +230,7 @@
+     unsafe { func(beg, end, val) }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ #[target_feature(enable = "lasx")]
+ fn memset_lasx(mut beg: *mut u8, end: *mut u8, val: u64) {
+     unsafe {
+@@ -290,7 +290,7 @@
+     }
+ }
+ 
+-#[cfg(target_arch = "loongarch64")]
++#[cfg(all(target_arch = "loongarch64", feature = "loongarch_simd"))]
+ #[target_feature(enable = "lsx")]
+ unsafe fn memset_lsx(mut beg: *mut u8, end: *mut u8, val: u64) {
+     unsafe {
