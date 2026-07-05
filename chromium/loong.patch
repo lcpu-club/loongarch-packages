@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index d4a02bd..6e1b8d5 100644
+index 0e374b7..f4cf002 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -76,6 +76,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
@@ -10,7 +10,7 @@ index d4a02bd..6e1b8d5 100644
  source=(https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$pkgver-lite.tar.xz
          https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver/chromium-launcher-$_launcher_ver.tar.gz
          chromium-138-nodejs-version-check.patch
-@@ -111,6 +112,8 @@ if (( _manual_clone )); then
+@@ -117,6 +118,8 @@ if (( _manual_clone )); then
    source[0]=fetch-chromium-release
    sha256sums[0]='2e2f36e3cd1ebc4ad57fd310774a5e5e9db77883d5f9374fedeaabd3c103b819'
    makedepends+=('python-httplib2' 'python-pyparsing' 'python-six' 'npm' 'rsync')
@@ -19,15 +19,15 @@ index d4a02bd..6e1b8d5 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -264,6 +267,47 @@ prepare() {
-   python3 build/util/lastchange.py -m DAWN_COMMIT_HASH \
-     -s third_party/dawn --revision gpu/webgpu/DAWN_VERSION \
-     --header gpu/webgpu/dawn_commit_hash.h
+@@ -284,6 +287,47 @@ prepare() {
+       -s third_party/dawn --revision gpu/webgpu/DAWN_VERSION \
+       --header gpu/webgpu/dawn_commit_hash.h
+   fi
 +
 +  # Patches for loong64
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
-+  patch -Np1 -i "${srcdir}/Fix-build-for-CPU-yield-on-LoongArch.patch"
++  patch -Np1 -i "${srcdir}/libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch"
 +
 +  pushd third_party/node/
 +  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
@@ -67,7 +67,7 @@ index d4a02bd..6e1b8d5 100644
  }
  
  build() {
-@@ -371,6 +415,12 @@ build() {
+@@ -391,6 +435,12 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -80,16 +80,16 @@ index d4a02bd..6e1b8d5 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -448,4 +498,12 @@ package() {
+@@ -468,4 +518,12 @@ package() {
    install -Dvm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
-+         "Fix-build-for-CPU-yield-on-LoongArch.patch")
-+sha256sums+=('c498ad298917886739606cd8fac8f526fd05218a460997c0e9100db18b1996bb'
++         "libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch")
++sha256sums+=('941b1b63ae4e4432c9b9b6a3fea9a6f5352235c51bf7f980e5e249023fe84866'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
-+             'b88f43b6b96a6b247f4bfbb267904655f57105ffd396c73829cd07759f8b5a1b')
++             '63f6dff26b20c178ef86f9220c9f72c4da39059b9bad8c4f551c605515626300')
 +makedepends+=(jq npm rsync)
 +
  # vim:set ts=2 sw=2 et:
