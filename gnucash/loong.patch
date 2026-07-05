@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -65,6 +65,7 @@ prepare() {
+   cd $pkgbase
+   patch -Np1 < ../$pkgbase-boost-1.90-fix-filesystem-linking.patch
+   patch -Np1 < ../$pkgbase-fix-odr-violation-test-engine.patch
++  patch -Np1 < ../gnucash-fix-unused-variable-index.patch
+ }
+ 
+ build() {
+@@ -146,3 +147,6 @@ package_gnucash-docs() {
+ 
+   DESTDIR="$pkgdir" cmake --install build-docs
+ }
++
++source+=(gnucash-fix-unused-variable-index.patch)
++b2sums+=('9efc9b622921259d7c59c075602624377b34820ad7a28f8bfdd630bce976d64ee860c1dd4a7dfb5213bf8e7c50cf8e959241f3e6f3aef5d449fa4b91adda7088')
