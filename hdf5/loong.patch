@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -91,6 +91,9 @@ check() {
+   )
+   skipped_tests_pattern="${skipped_tests[0]}$(printf '|%s' "${skipped_tests[@]:1}")"
+   ctest --test-dir build --output-on-failure --parallel -E "$skipped_tests_pattern"
++  # Allow MPI to oversubscribe in chroot environment where slot detection is limited.
++  # See https://docs.open-mpi.org/en/v5.0.x/man-openmpi/man1/mpiexec.1.html
++  export PRTE_MCA_rmaps_default_mapping_policy=:OVERSUBSCRIBE
+   ctest --test-dir build-mpi --output-on-failure --parallel -E "$skipped_tests_pattern"
+ }
+ 
