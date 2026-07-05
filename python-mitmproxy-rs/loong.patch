@@ -1,6 +1,16 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -30,7 +30,7 @@ build() {
+@@ -26,11 +26,17 @@ source=("$pkgname::git+$url#tag=v$pkgver")
+ sha512sums=('04874917e053866ec0a09fc47f03a3bea457061f107baad8cfa6e5331a21defd87d18ea58b42216bd844263ebc04e6e297a147de622644f0deb3bd405988d1a5')
+ b2sums=('adb3308cde8c8a3fcb6f52e4f73f344a839e35f54099a395aac722265c95eeada45fe2d2815b1010f718a7973753268bb675dc00b915876638bf555e94a7bea0')
+ 
++prepare() {
++  cd "$pkgname"
++  # Upgrade aya dependencies to versions with loongarch64 support.
++  patch -p1 < "${srcdir}/aya-upgrade-versions.patch"
++}
++
+ build() {
    cd "$pkgname"
  
    export RUSTUP_TOOLCHAIN=nightly
@@ -9,3 +19,12 @@
  
    pushd mitmproxy-rs
    maturin build --release --strip
+@@ -62,4 +68,8 @@ package() {
+   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
+ }
+ 
++source+=("aya-upgrade-versions.patch")
++sha512sums+=('f68404c172411d1f8e0841e77c6a59ac909a51696e694c56bb60879d3c54f76a2be7d28aaaa2f39d885bcca42e8f5ebca04d31b7323491cd51168d78e87bcae6')
++b2sums+=('56d3cd86517690d5753f2299779fcb5cc695677c0e01c9154eb238a2f68f427ea68a5ed70b253d70f3c21411f28711e494b748ea5fbc439057f746e5ca8df0fc')
++
+ # vim: ts=2 sw=2 et:
