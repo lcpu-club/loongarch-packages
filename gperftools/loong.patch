@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7b53112..d58a9c7 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,7 +38,8 @@ build() {
+     --sysconfdir=/etc \
+     --localstatedir=/var \
+     --enable-frame-pointers \
+-    --enable-libunwind
++    --enable-libunwind \
++    --with-tcmalloc-pagesize=16
+   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+   make
+ }
