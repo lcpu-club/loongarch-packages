@@ -1,0 +1,63 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -55,6 +55,8 @@ b2sums=('889decf1d26f7de0821914fb85d5bc3f1f3a505f46d6e6192b7abf071b452badf382c95
+         'a29664104e1ee73ca0aee1d633e9095d92a57c92787f8d8740bdb7211ba3205782ed8677f539bdb8cae3dd75a3694be3132e185fa3fc4b3f401e1f88eb776101')
+ 
+ prepare() {
++  # apply loongarch64 specific patch
++  patch -Np1 -d $pkgname-$pkgver -i ../ipxe-la64.patch
+   # symlink header with custom configuration into place
+   ln -sv ../../../../general.h $pkgname-$pkgver/src/config/local/
+ }
+@@ -63,10 +65,7 @@ build() {
+   local _file _certs=""
+   local _options=(
+     NO_WERROR=1
+-    bin/ipxe.lkrn
+-    bin/ipxe.pxe
+-    bin-i386-efi/ipxe.efi
+-    bin-x86_64-efi/ipxe.efi
++    bin-loong64-efi/ipxe.efi
+     -C src
+   )
+ 
+@@ -84,19 +83,13 @@ build() {
+   make EMBED="$srcdir/arch.ipxe" CERT="$_certs" TRUST="$_certs" "${_options[@]}"
+ 
+   # move binaries out of the way
+-  mv -v src/bin/ipxe{,-arch}.lkrn
+-  mv -v src/bin/ipxe{,-arch}.pxe
+-  mv -v src/bin-i386-efi/ipxe{,-arch}.efi
+-  mv -v src/bin-x86_64-efi/ipxe{,-arch}.efi
++  mv -v src/bin-loong64-efi/ipxe{,-arch}.efi
+ 
+   # build remote images
+   make EMBED="$srcdir/remote.ipxe" "${_options[@]}"
+ 
+   # move binaries out of the way
+-  mv -v src/bin/ipxe{,-remote}.lkrn
+-  mv -v src/bin/ipxe{,-remote}.pxe
+-  mv -v src/bin-i386-efi/ipxe{,-remote}.efi
+-  mv -v src/bin-x86_64-efi/ipxe{,-remote}.efi
++  mv -v src/bin-loong64-efi/ipxe{,-remote}.efi
+ 
+   # build default images
+   make "${_options[@]}"
+@@ -107,8 +100,7 @@ package() {
+   local _arch
+ 
+   cd $pkgname-$pkgver
+-  install -vDm 644 src/bin/ipxe{,-arch,-remote}.{lkrn,pxe} -t "$pkgdir/usr/share/$pkgname/"
+-  for _arch in i386 x86_64; do
++  for _arch in loong64; do
+     install -vDm 644 src/bin-$_arch-efi/ipxe{,-arch,-remote}.efi -t "$pkgdir/usr/share/$pkgname/$_arch/"
+   done
+   install -vDm 644 COPYING.UBDL -t "$pkgdir/usr/share/licenses/$pkgname/"
+@@ -116,3 +108,7 @@ package() {
+ 
+   install -vDm 755 ../run_$pkgname -t "$pkgdir/usr/bin/"
+ }
++
++source+=(ipxe-la64.patch)
++sha512sums+=('4a74676c26f286811852566a7edf0b3399fd8165550848dd004c7b28bb9bf06990f4f232623ae5e2ba2edcd27b88d422225c0687d883551405e905aad7ce98a8')
++b2sums+=('a044ef24fe2de06ce371f6f8c6b9eeb736d41057f1190c5eb93fd9d91374631bd68502112492d72cf020520ecb94bf3077f163fcf3c005ad286fea979591cf8b')

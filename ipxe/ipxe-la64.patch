@@ -1,0 +1,15 @@
+diff --git a/src/arch/loong64/Makefile b/src/arch/loong64/Makefile
+index fd0bf137..ce2a7505 100644
+--- a/src/arch/loong64/Makefile
++++ b/src/arch/loong64/Makefile
+@@ -13,6 +13,10 @@ ifeq ($(CCTYPE),gcc)
+ MNER_TEST = $(CC) -mno-explicit-relocs -x c -c /dev/null -o /dev/null >/dev/null 2>&1
+ MNER_FLAGS := $(shell $(MNER_TEST) && $(ECHO) '-mno-explicit-relocs')
+ WORKAROUND_CFLAGS += $(MNER_FLAGS)
++
++MNRX_TEST = $(CC) -mno-relax -x c -c /dev/null -o /dev/null >/dev/null 2>&1
++MNRX_FLAGS := $(shell $(MNRX_TEST) && $(ECHO) '-mno-relax' || $(ECHO) '-Wa,-mno-relax' )
++WORKAROUND_CFLAGS += $(MNRX_FLAGS)
+ endif
+ 
+ # EFI requires -fshort-wchar, and nothing else currently uses wchar_t
