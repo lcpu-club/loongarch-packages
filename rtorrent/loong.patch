@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,7 @@ sha256sums=('528f6ad6ccdc0a97e681def49367e91c23fc73a7999389c4f7ff5229809e437a')
+ 
+ prepare() {
+   cd ${pkgname}
++  patch -p1 < "${srcdir}/loongarch64-cacheline.patch"
+   autoreconf -fiv
+ }
+ 
+@@ -36,3 +37,6 @@ package() {
+   make DESTDIR="${pkgdir}" install
+   install -D doc/rtorrent.rc "${pkgdir}"/usr/share/doc/rtorrent/rtorrent.rc
+ }
++
++source+=("loongarch64-cacheline.patch")
++sha256sums+=('02a6361d581d1460cbec5e522fe1de9856912c9eaf4c610cda849911514be0c7')
