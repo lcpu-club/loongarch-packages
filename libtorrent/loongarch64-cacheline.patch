@@ -1,0 +1,28 @@
+diff --git a/scripts/common.m4 b/scripts/common.m4
+index 23d12031..40a3f9e3 100644
+--- a/scripts/common.m4
++++ b/scripts/common.m4
+@@ -118,9 +118,9 @@ AC_DEFUN([TORRENT_CHECK_CACHELINE], [
+             AC_MSG_RESULT([linux fallback enterprise 128 bytes])
+             AC_DEFINE([LT_SMP_CACHE_BYTES], 128, [Fallback 128-byte alignment for Linux enterprise hardware.])
+             ;;
+-          riscv32*|riscv64*)
+-            AC_MSG_RESULT([linux fallback RISC-V 64 bytes])
+-            AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Fallback 64-byte alignment for Linux RISC-V hardware.])
++          riscv32*|riscv64*|loongarch64*)
++            AC_MSG_RESULT([linux fallback RISC-V/LoongArch 64 bytes])
++            AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Fallback 64-byte alignment for Linux RISC-V/LoongArch hardware.])
+             ;;
+           *)
+             AC_MSG_RESULT([unrecognized CPU arch on Linux header fallback])
+@@ -143,6 +143,10 @@ AC_DEFUN([TORRENT_CHECK_CACHELINE], [
+           AC_MSG_RESULT([$host_os ($host_cpu) stable enterprise 128 bytes])
+           AC_DEFINE([LT_SMP_CACHE_BYTES], 128, [Optimized 128-byte alignment for newer high-performance chipsets.])
+           ;;
++        riscv32*|riscv64*|loongarch64*)
++          AC_MSG_RESULT([$host_os ($host_cpu) RISC-V/LoongArch 64 bytes])
++          AC_DEFINE([LT_SMP_CACHE_BYTES], 64, [Fallback 64-byte alignment for Linux RISC-V/LoongArch hardware.])
++          ;;
+         *)
+           # STRICT ENFORCEMENT: Fail the build immediately if the CPU isn't explicitly known
+           AC_MSG_RESULT([unrecognized architecture])

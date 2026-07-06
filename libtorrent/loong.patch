@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,7 @@ sha256sums=('8e5d34c67e2225f8315644df7f4634879b3dae92ec302f850dfee23ee92eca8b')
+ 
+ prepare() {
+   cd ${pkgname}
++  patch -p1 < "${srcdir}/loongarch64-cacheline.patch"
+   autoreconf -fiv
+ }
+ 
+@@ -34,3 +35,6 @@ package() {
+   cd ${pkgname}
+   make DESTDIR="${pkgdir}" install
+ }
++
++source+=("loongarch64-cacheline.patch")
++sha256sums+=('3d953d965fa57f449d99016db8f4658210407ac1fa93aecbf7d88945ca4b2255')
