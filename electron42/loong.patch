@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4bfaf8f..7823458 100644
+index 0f322d7..b3f37e1 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -463,6 +463,9 @@ prepare() {
+@@ -465,6 +465,9 @@ prepare() {
    echo "Putting together electron sources"
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
@@ -12,7 +12,7 @@ index 4bfaf8f..7823458 100644
    rbash prepare-electron-source-tree.sh "$CARCH"
    mv electron src/electron
  
-@@ -476,12 +479,50 @@ prepare() {
+@@ -478,12 +481,50 @@ prepare() {
      -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
    src/build/util/lastchange.py \
      -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
@@ -65,7 +65,7 @@ index 4bfaf8f..7823458 100644
    src/electron/script/apply_all_patches.py \
        src/electron/patches/config.json
  
-@@ -544,15 +585,28 @@ prepare() {
+@@ -546,10 +587,10 @@ prepare() {
             third_party/jdk/current/bin \
             third_party/gperf/cipd/bin
  
@@ -79,8 +79,10 @@ index 4bfaf8f..7823458 100644
 +  ln -sf /usr/bin/gperf third_party/gperf/cipd/bin/
  
    # Electron specific fixes
-   patch -Np1 -i "${srcdir}/jinja-python-3.10.patch" -d "third_party/electron_node/tools/inspector_protocol/jinja2"
-   patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
+   #  fix: use GTK UI theme for Linux message boxes #52238
+@@ -563,6 +604,19 @@ prepare() {
+   sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
+     tools/generate_shim_headers/generate_shim_headers.py
  
 +  # Add loong64 support for chromium
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
@@ -95,10 +97,10 @@ index 4bfaf8f..7823458 100644
 +  rm -r node_modules # Cleaning
 +  popd
 +
-   # Allow building against system libraries in official builds
-   echo "Patching Chromium for using system libraries..."
-   sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -675,6 +729,14 @@ build() {
+   # Remove bundled libraries for which we will use the system copies; this
+   # *should* do what the remove_bundled_libraries.py script does, with the
+   # added benefit of not having to list all the remaining libraries
+@@ -681,6 +735,14 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -113,7 +115,7 @@ index 4bfaf8f..7823458 100644
    export CHROMIUM_BUILDTOOLS_PATH="${PWD}/buildtools"
    gn gen out/Release \
        --args="import(\"//electron/build/args/release.gn\") ${_flags[*]}"
-@@ -699,3 +761,11 @@ package() {
+@@ -705,3 +767,11 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
