@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index e919fac..86a36eb 100644
+index 583b0c7..49dfbce 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -462,6 +462,9 @@ prepare() {
@@ -65,7 +65,17 @@ index e919fac..86a36eb 100644
    src/electron/script/apply_all_patches.py \
        src/electron/patches/config.json
  
-@@ -542,6 +583,20 @@ prepare() {
+@@ -489,6 +530,9 @@ prepare() {
+ 
+   pushd src
+   pushd electron
++
++  # Pre-fetch Node headers so parallel node-gyp builds don't race
++  node-gyp install
+   yarn install --frozen-lockfile
+   popd
+ 
+@@ -542,6 +586,20 @@ prepare() {
    patch -Np1 -i "${srcdir}/jinja-python-3.10.patch" -d "third_party/electron_node/tools/inspector_protocol/jinja2"
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
  
@@ -86,7 +96,7 @@ index e919fac..86a36eb 100644
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -660,6 +715,13 @@ build() {
+@@ -660,6 +718,13 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -100,7 +110,7 @@ index e919fac..86a36eb 100644
    export CHROMIUM_BUILDTOOLS_PATH="${PWD}/buildtools"
    gn gen out/Release \
        --args="import(\"//electron/build/args/release.gn\") ${_flags[*]}"
-@@ -684,3 +746,13 @@ package() {
+@@ -684,3 +749,13 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
