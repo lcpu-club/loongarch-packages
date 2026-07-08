@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -64,7 +64,7 @@ build() {
+         CMAKE_INSTALL_LIBEXECDIR=/usr/lib
+         CMAKE_BUILD_TYPE=Release
+         BINARY_PACKAGE_BUILD=1
+-        USE_AI=On
++        USE_AI=Off
+         USE_COLORD=On
+         USE_LIBSECRET=On
+         USE_LUA=On
