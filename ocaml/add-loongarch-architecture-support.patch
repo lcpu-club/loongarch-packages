@@ -1689,13 +1689,15 @@ index 0535f404b0..fc01a12749 100644
    [riscv64-*-linux*],
      [has_native_backend=yes; arch=riscv; model=riscv64; system=linux],
    [x86_64-*-gnu*],
-@@ -1734,7 +1737,7 @@ default_aspp="$CC -c"
+@@ -1734,8 +1737,8 @@ default_aspp="$CC -c"
  AS_CASE([$as_target,$ocaml_cc_vendor],
    [*-*-linux*,gcc-*],
      [AS_CASE([$as_cpu],
 -      [x86_64|arm*|aarch64*|i[[3-6]]86|riscv*],
+-        [default_as="${toolpref}as"
 +      [x86_64|arm*|aarch64*|i[[3-6]]86|riscv*|loongarch*],
-         [default_as="${toolpref}as"])],
++        [default_as="${toolpref}as"
+         as_is_cc=false])],
    [i686-pc-windows,*],
      [default_as="ml -nologo -coff -Cp -c -Fo"
 diff --git a/runtime/caml/config.h b/runtime/caml/config.h
@@ -1723,7 +1725,7 @@ index 1d3f28db17..25ee9598ab 100644
 +/* Size of the gc_regs structure, in words.
 +   See loongarch64.S and loongarch64/proc.ml for the indices */
 +#define Wosize_gc_regs (2 + 23 /* int regs */ + 24 /* float regs */)
-+#define Saved_return_address(sp) *((intnat *)((sp) - 8))
++#define Saved_return_address_raw(sp) *((intnat *)((sp) - 8))
 +#define First_frame(sp) ((sp) + 16)
 +#define Saved_gc_regs(sp) (*(value **)((sp) + 24))
 +#define Stack_header_size 32
