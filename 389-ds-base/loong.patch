@@ -1,0 +1,35 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -54,8 +54,12 @@ build() {
+     --with-libldap_r=no
+   make
+ 
+-  # Build lib389
+-  make lib389
++  # Build lib389 - use --no-isolation to avoid rebuilding cryptography from source
++  # (which requires maturin -> zstd-sys which fails on loongarch64)
++  cd src/lib389
++  python3 validate_version.py
++  python3 -m build --no-isolation --skip-dependency-check
++  cd ../../
+ 
+   # Build cockpit plugin
+   cd src/cockpit/389-console
+@@ -90,3 +94,17 @@ package() {
+   # Fix warning with nonexistent jemalloc, see #3.
+   sed -i "/Environment=LD_PRELOAD/s/^/#/" "${pkgdir}/usr/lib/systemd/system/dirsrv@.service.d/custom.conf"
+ }
++
++# loongarch64: add missing dependencies for lib389 build
++# pyasn1, pyasn1-modules, distro, psutil are required by lib389's pyproject.toml
++# python-setuptools is needed for --no-isolation build
++# (maturin/zstd-sys linking fails on loongarch64, so we avoid rebuilding cryptography)
++depends+=(
++  'python-pyasn1'
++  'python-pyasn1-modules'
++  'python-distro'
++  'python-psutil'
++)
++makedepends+=(
++  'python-setuptools'
++)
