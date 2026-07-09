@@ -1,0 +1,20 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,8 @@ sha512sums=('7ceb415cad9aa3ea325d561932586b730af7ce123d4f1e69339eb2f007774abfa12
+ 
+ prepare() {
+   patch --directory="$_pkgname-$pkgver" --forward --strip=1 --input "$srcdir"/0001-Add-missing-gthread-2.0-dependency.patch
++  patch --directory="$_pkgname-$pkgver" --forward --strip=1 --input "$srcdir"/0002-Add-support-for-GLibUnix-split-from-GLib.patch
++  patch --directory="$_pkgname-$pkgver" --forward --strip=1 --input "$srcdir"/0003-Add-support-for-GioUnix-GioWin32-split.patch
+ }
+ 
+ build() {
+@@ -39,3 +41,8 @@ package() {
+ 
+   DESTDIR="$pkgdir" ninja install
+ }
++
++source+=('0002-Add-support-for-GLibUnix-split-from-GLib.patch::https://github.com/gtkd-developers/GlibD/commit/5f158f022f2765eae09f9decdf715f49dfead46b.patch'
++         '0003-Add-support-for-GioUnix-GioWin32-split.patch::https://github.com/gtkd-developers/GlibD/commit/be666daa09048a3dc71921549ef8dde417561e83.patch')
++sha512sums+=('0dca59b25656f8cb2d77901410c0a5ed7e223f3e40a09fdf11335b262812783b164a7419f81ada38f3cec8138b4b7e11ebf1fc27228311df4b779272e3837f03'
++          '446ca0479b74efbc94449e3bf831947e624dc81d9e3614993f649990dd166d4413d6f31eea8d73d5458cc5d4380631693f33c44aa68604526a5eeb9a50b6defa')
