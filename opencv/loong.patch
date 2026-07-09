@@ -1,22 +1,14 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -89,6 +89,7 @@ prepare() {
-   patch -p1 < ../fix-cuda-flags.patch
+@@ -90,6 +90,7 @@ prepare() {
    git cherry-pick -n a18356853d99a67e432e818cf0328b4690d68833 # https://github.com/opencv/opencv/issues/29292
-   git cherry-pick -n 142801f769ed4946a161f62738bac5a5fe56a60f # https://github.com/opencv/opencv/issues/29291
-+  git cherry-pick -n ee9c019556d7c3133aca55fa02ef2d6e20893f49 # https://github.com/opencv/opencv/pull/29423
+ #  git cherry-pick -n 142801f769ed4946a161f62738bac5a5fe56a60f # https://github.com/opencv/opencv/issues/29291
+ #  git cherry-pick -n 883f8d83ae1463a5f486ace784762e8c42e7ea7d # https://github.com/opencv/opencv/issues/29471
++  git cherry-pick -n ee9c019556d7c3133aca55fa02ef2d6e20893f49 # https://github.com/opencv/opencv/issues/29422
    popd
  
    pushd opencv_contrib
-@@ -114,7 +115,6 @@ build() {
-     -DINSTALL_PYTHON_EXAMPLES=ON
-     -DCMAKE_INSTALL_PREFIX=/usr
-     -DCPU_BASELINE_DISABLE=SSE3
--    -DCPU_BASELINE_REQUIRE=SSE2
-     -DOPENCV_EXTRA_MODULES_PATH="$srcdir"/opencv_contrib/modules
-     -DOPENCV_SKIP_PYTHON_LOADER=ON
-     # cmake's FindLAPACK doesn't add cblas to LAPACK_LIBRARIES, so we need to specify them manually
-@@ -133,7 +133,8 @@ build() {
+@@ -139,7 +140,8 @@ build() {
    cmake -B build -S $pkgname "${cmake_options[@]}" \
      -DBUILD_WITH_DEBUG_INFO=ON
    cmake --build build
@@ -26,7 +18,7 @@
    # In general, we want to list all real archs (sm_XX) and the latest virtual arch (compute_XX) for future PTX compatibility.
    # Valid values can be discovered from nvcc --help
    local cuda_archs="75;80;86;87;88;89;90;100;103;110;120;121;121-virtual"
-@@ -148,6 +149,7 @@ build() {
+@@ -154,6 +156,7 @@ build() {
      -DENABLE_CUDA_FIRST_CLASS_LANGUAGE=ON \
      -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
    cmake --build build-cuda --verbose
@@ -34,7 +26,7 @@
  }
  
  package_opencv() {
-@@ -231,3 +233,11 @@ package_python-opencv-cuda() {
+@@ -237,3 +240,11 @@ package_python-opencv-cuda() {
  
    DESTDIR="$pkgdir" cmake --install build-cuda/modules/python3
  }
