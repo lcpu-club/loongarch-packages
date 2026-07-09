@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 7b637a5..38eb144 100644
+index 12d6b0a..96362e8 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -20,7 +20,9 @@ build() {
@@ -19,4 +19,4 @@ index 7b637a5..38eb144 100644
  }
 +
 +source+=("add-loongarch-architecture-support.patch")
-+sha256sums+=('c28148f77af16d4029e7d72da020fd80e4a5a53a96048ee6f3d1ce84116fe3d7')
++sha256sums+=('4af2f8e7dd7e91e252a6bd5c5c1ed53c2c266056bf675e772417f555d7b3a0f9')
