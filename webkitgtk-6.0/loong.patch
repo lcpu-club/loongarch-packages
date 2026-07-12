@@ -1,15 +1,14 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -124,6 +124,8 @@ validpgpkeys=(
+@@ -124,6 +124,7 @@ validpgpkeys=(
  
  prepare() {
    cd webkitgtk-$pkgver
 +  patch -p1 -i "${srcdir}/loongarch-simde-use-a-portable-version-to-avoid-comp.patch"
-+  sed -i '/bmalloc_CopyHeaders/d' Source/JavaScriptCore/CMakeLists.txt
  }
  
  build() {
-@@ -194,4 +196,8 @@ package_webkitgtk-6.0-docs() {
+@@ -194,4 +195,8 @@ package_webkitgtk-6.0-docs() {
    mv doc/* "$pkgdir"
  }
  
