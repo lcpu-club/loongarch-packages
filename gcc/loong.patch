@@ -6,16 +6,16 @@
  
 +  # Patches for loong64
 +  # Fix libdir
-+  patch -Np1 -i "$srcdir/gcc-lib64-lib.patch"
++  patch -Np1 -i "$srcdir"/gcc-lib64-lib.patch
 +  # fix ICE with associating DOT_PROD_EXPR
 +  git cherry-pick -n 27b8544e08922d4625a4e2787bd00f36af13d12f
 +  # fix missing cpu-features.h
 +  git cherry-pick -n 7df57b3b0995562d953b0c231fa28ca8bd5df7c0
 +  # fix fixed-point builtins in C++ mode
-+  patch -Np1 -i "$srcdir/c-cppbuiltin-avoid-fixed-point-defines-in-cxx.patch"
++  patch -Np1 -i "$srcdir"/c-cppbuiltin-avoid-fixed-point-defines-in-cxx.patch
 +
-   mkdir -p "$srcdir/gcc-build"
-   mkdir -p "$srcdir/libgccjit-build"
+   mkdir -p "$srcdir"/gcc-build
+   mkdir -p "$srcdir"/libgccjit-build
  }
 @@ -132,7 +142,8 @@ build() {
        --enable-link-serialization=1
@@ -71,62 +71,71 @@
    provides=(
      $pkgname-multilib
    )
-@@ -248,42 +261,33 @@ package_gcc() {
-     cd "$pkgdir"
+@@ -253,49 +266,36 @@ package_gcc() {
+     ln -srv usr/lib/libstdc++.so $_libdir/libstdc++.so
+     ln -srv usr/lib/libgdruntime.so $_libdir/libgdruntime.so
+     ln -srv usr/lib/libgphobos.so $_libdir/libgphobos.so
+-    ln -srv usr/lib32/libatomic.so $_libdir/32/libatomic.so
+-    ln -srv usr/lib32/libstdc++.so $_libdir/32/libstdc++.so
+-    ln -srv usr/lib32/libgdruntime.so $_libdir/32/libgdruntime.so
+-    ln -srv usr/lib32/libgphobos.so $_libdir/32/libgphobos.so
  
      _pick gcc-ada usr/bin/gnat{,bind,chop,clean,kr,link,ls,make,name,prep}
--    _pick gcc-ada "$_libdir"/{,32/}ada_target_properties
--    _pick gcc-ada "$_libdir"/{,32/}ada{include,lib}/
-+    _pick gcc-ada "$_libdir"/ada_target_properties
-+    _pick gcc-ada "$_libdir"/ada{include,lib}/
-     _pick gcc-ada "$_libdir"/gnat1
+-    _pick gcc-ada $_libdir/{,32/}ada_target_properties
+-    _pick gcc-ada $_libdir/{,32/}ada{include,lib}/
++    _pick gcc-ada $_libdir/ada_target_properties
++    _pick gcc-ada $_libdir/ada{include,lib}/
+     _pick gcc-ada $_libdir/gnat1
      _pick gcc-ada usr/share/info/gnat{-style,_rm,_ugn}.info
  
-     _pick gcc-d usr/bin/{gdc,"$CHOST"-gdc}
-     _pick gcc-d "$_libdir"/d21
-     _pick gcc-d "$_libdir"/include/d/
+     _pick gcc-d usr/bin/{gdc,$CHOST-gdc}
+     _pick gcc-d $_libdir/d21
+     _pick gcc-d $_libdir/include/d/
+-    _pick gcc-d $_libdir/{,32/}libg{druntime,phobos}.so
 -    _pick gcc-d usr/lib{,32}/libg{druntime,phobos}.a
 -    _pick gcc-d usr/lib{,32}/libgphobos.spec
++    _pick gcc-d $_libdir/libg{druntime,phobos}.so
 +    _pick gcc-d usr/lib/libg{druntime,phobos}.a
 +    _pick gcc-d usr/lib/libgphobos.spec
      _pick gcc-d usr/share/info/gdc.info
      _pick gcc-d usr/share/man/man1/gdc.1
  
-     _pick gcc-fortran usr/bin/{gfortran,"$CHOST"-gfortran}
--    _pick gcc-fortran "$_libdir"/{,32/}finclude/
--    _pick gcc-fortran "$_libdir"/{,32/}libcaf_{shmem,single}.a
-+    _pick gcc-fortran "$_libdir"/finclude/
-+    _pick gcc-fortran "$_libdir"/libcaf_{shmem,single}.a
-     _pick gcc-fortran "$_libdir"/f951
-     _pick gcc-fortran "$_libdir"/include/ISO_Fortran_binding.h
+     _pick gcc-fortran usr/bin/{gfortran,$CHOST-gfortran}
+-    _pick gcc-fortran $_libdir/{,32/}finclude/
+-    _pick gcc-fortran $_libdir/{,32/}libcaf_{shmem,single}.a
++    _pick gcc-fortran $_libdir/finclude/
++    _pick gcc-fortran $_libdir/libcaf_{shmem,single}.a
+     _pick gcc-fortran $_libdir/f951
+     _pick gcc-fortran $_libdir/include/ISO_Fortran_binding.h
 -    _pick gcc-fortran usr/lib{,32}/libgfortran.spec
 +    _pick gcc-fortran usr/lib/libgfortran.spec
      _pick gcc-fortran usr/share/info/gfortran.info
      _pick gcc-fortran usr/share/man/man1/gfortran.1
  
-     _pick gcc-gcobol usr/bin/{gcobc,gcobol,"$CHOST"-{gcobc,gcobol}}
--    _pick gcc-gcobol "$_libdir"/cobol/
-     _pick gcc-gcobol "$_libdir"/cobol1
+     _pick gcc-gcobol usr/bin/{gcobc,gcobol,$CHOST-{gcobc,gcobol}}
+-    _pick gcc-gcobol $_libdir/cobol/
+     _pick gcc-gcobol $_libdir/cobol1
 -    _pick gcc-gcobol usr/lib/libgcobol.spec
      _pick gcc-gcobol usr/share/man/man1/gcobol.1
      _pick gcc-gcobol usr/share/man/man3/gcobol-io.3
  
--    _pick gcc-go usr/bin/{gccgo,go,gofmt,"$CHOST"-gccgo}
--    _pick gcc-go "$_libdir"/{buildid,cgo,go1,test2json,vet}
+-    _pick gcc-go usr/bin/{gccgo,go,gofmt,$CHOST-gccgo}
+-    _pick gcc-go $_libdir/{buildid,cgo,go1,test2json,vet}
 -    _pick gcc-go usr/lib{,32}/go/
 -    _pick gcc-go usr/lib{,32}/lib{go,gobegin,golibbegin}.a
 -    _pick gcc-go usr/share/info/gccgo.info
 -    _pick gcc-go usr/share/man/man1/{gccgo,go,gofmt}.1
 -
-     _pick gcc-m2 usr/bin/{gm2,"$CHOST"-gm2}
-     _pick gcc-m2 "$_libdir"/cc1gm2
+     _pick gcc-m2 usr/bin/{gm2,$CHOST-gm2}
+     _pick gcc-m2 $_libdir/cc1gm2
      _pick gcc-m2 usr/share/info/m2.info
-@@ -295,20 +299,6 @@ package_gcc() {
-     _pick gcc-rust usr/bin/{gccrs,"$CHOST"-gccrs}
-     _pick gcc-rust "$_libdir"/crab1
+@@ -307,21 +307,6 @@ package_gcc() {
+     _pick gcc-rust usr/bin/{gccrs,$CHOST-gccrs}
+     _pick gcc-rust $_libdir/crab1
  
 -    _pick lib32-gcc-libs usr/lib32/libasan.{a,so*}
 -    _pick lib32-gcc-libs usr/lib32/libatomic.so*
+-    _pick lib32-gcc-libs $_libdir/32/libatomic.so
 -    _pick lib32-gcc-libs usr/lib32/libgcc_s.so.*
 -    _pick lib32-gcc-libs usr/lib32/libgdruntime.so*
 -    _pick lib32-gcc-libs usr/lib32/libgfortran.{a,so*}
@@ -142,25 +151,24 @@
      _pick libasan usr/lib/libasan.{a,so*}
  
      _pick libatomic usr/lib/libatomic.so*
-@@ -319,14 +309,12 @@ package_gcc() {
+@@ -333,14 +318,10 @@ package_gcc() {
      _pick libgccjit usr/lib/libgccjit.so*
      _pick libgccjit usr/share/info/libgccjit.info
  
 -    _pick libgcobol usr/lib/libgcobol.{a,so*}
-+    #_pick libgcobol usr/lib/libgcobol.{a,so*}
- 
+-
      _pick libgfortran usr/lib/libgfortran.{a,so*}
  
--    _pick libgm2 "$_libdir"/{,32/}m2/
+-    _pick libgm2 $_libdir/{,32/}m2/
 -    _pick libgm2 usr/lib{,32}/libm2{cor,iso,log,min,pim}.{a,so*}
 -
 -    _pick libgo usr/lib/libgo.so*
-+    _pick libgm2 "$_libdir"/m2/
++    _pick libgm2 $_libdir/m2/
 +    _pick libgm2 usr/lib/libm2{cor,iso,log,min,pim}.{a,so*}
  
      _pick libgomp usr/lib/libgomp.{a,so*}
      _pick libgomp usr/share/info/libgomp.info
-@@ -334,8 +322,6 @@ package_gcc() {
+@@ -348,8 +329,6 @@ package_gcc() {
      _pick libgphobos usr/lib/libgdruntime.so*
      _pick libgphobos usr/lib/libgphobos.so*
  
@@ -169,156 +177,96 @@
      _pick libitm usr/lib/libitm.{a,so*}
      _pick libitm usr/share/info/libitm.info
  
-@@ -343,8 +329,8 @@ package_gcc() {
+@@ -357,9 +336,6 @@ package_gcc() {
  
      _pick libobjc usr/lib/libobjc.{a,so*}
  
 -    _pick libquadmath usr/lib/libquadmath.{a,so*}
 -    _pick libquadmath usr/share/info/libquadmath.info
-+    #_pick libquadmath usr/lib/libquadmath.{a,so*}
-+    #_pick libquadmath usr/share/info/libquadmath.info
- 
+-
      _pick libstdc++ usr/lib/libstdc++.so*
      _pick libstdc++ usr/share/locale/{de,fr}/LC_MESSAGES/libstdc++.mo
-@@ -371,7 +357,7 @@ package_gcc() {
+ 
+@@ -385,7 +361,7 @@ package_gcc() {
    # create cc-rs compatible symlinks
    # https://github.com/rust-lang/cc-rs/blob/1.0.73/src/lib.rs#L2578-L2581
    for binary in {c++,g++,gcc,gcc-ar,gcc-nm,gcc-ranlib}; do
--    ln -s "/usr/bin/$binary" "$pkgdir/usr/bin/$CARCH-linux-gnu-$binary"
-+    ln -s "/usr/bin/$binary" "$pkgdir/usr/bin/$(uname -m)-linux-gnu-$binary"
+-    ln -s /usr/bin/"$binary" "$pkgdir"/usr/bin/$CARCH-linux-gnu-"$binary"
++    ln -s /usr/bin/"$binary" "$pkgdir"/usr/bin/$(uname -m)-linux-gnu-"$binary"
    done
  
    # POSIX conformance launcher scripts for c89 and c99
-@@ -383,17 +369,11 @@ package_gcc() {
+@@ -397,17 +373,11 @@ package_gcc() {
  
    # move specific files into the internal "_libdir"
-   mv -v "$pkgdir"/usr/lib/libgcc_s{,_asneeded}.so "$pkgdir/$_libdir/"
--  mv -v "$pkgdir"/usr/lib32/libgcc_s{,_asneeded}.so "$pkgdir/$_libdir/32/"
-   mv -v "$pkgdir"/usr/lib/libatomic* "$pkgdir/$_libdir/"
--  mv -v "$pkgdir"/usr/lib32/libatomic* "$pkgdir/$_libdir/32/"
-   mv -v "$pkgdir"/usr/lib/*_preinit.o "$pkgdir/$_libdir/"
--  mv -v "$pkgdir"/usr/lib32/*_preinit.o "$pkgdir/$_libdir/32/"
-   mv -v "$pkgdir"/usr/lib/*.spec "$pkgdir/$_libdir/"
--  mv -v "$pkgdir"/usr/lib32/*.spec "$pkgdir/$_libdir/32/"
-   mv -v "$pkgdir"/usr/lib/libstdc++* "$pkgdir/$_libdir/"
--  mv -v "$pkgdir"/usr/lib32/libstdc++* "$pkgdir/$_libdir/32/"
-   mv -v "$pkgdir"/usr/lib/libsupc++.a "$pkgdir/$_libdir/"
--  mv -v "$pkgdir"/usr/lib32/libsupc++.a "$pkgdir/$_libdir/32/"
+   mv -v "$pkgdir"/usr/lib/libgcc_s{,_asneeded}.so "$pkgdir"/$_libdir/
+-  mv -v "$pkgdir"/usr/lib32/libgcc_s{,_asneeded}.so "$pkgdir"/$_libdir/32/
+   mv -v "$pkgdir"/usr/lib/libatomic* "$pkgdir"/$_libdir/
+-  mv -v "$pkgdir"/usr/lib32/libatomic* "$pkgdir"/$_libdir/32/
+   mv -v "$pkgdir"/usr/lib/*_preinit.o "$pkgdir"/$_libdir/
+-  mv -v "$pkgdir"/usr/lib32/*_preinit.o "$pkgdir"/$_libdir/32/
+   mv -v "$pkgdir"/usr/lib/*.spec "$pkgdir"/$_libdir/
+-  mv -v "$pkgdir"/usr/lib32/*.spec "$pkgdir"/$_libdir/32/
+   mv -v "$pkgdir"/usr/lib/libstdc++* "$pkgdir"/$_libdir/
+-  mv -v "$pkgdir"/usr/lib32/libstdc++* "$pkgdir"/$_libdir/32/
+   mv -v "$pkgdir"/usr/lib/libsupc++.a "$pkgdir"/$_libdir/
+-  mv -v "$pkgdir"/usr/lib32/libsupc++.a "$pkgdir"/$_libdir/32/
  
    # byte-compile python libraries
-   python -m compileall "$pkgdir/usr/share/gcc-${pkgver%%+*}/"
-@@ -435,12 +415,6 @@ package_gcc-ada() {
-   ln -s libgnat-${pkgver%%.*}.so "$pkgdir/usr/lib/libgnat.so"
+   python -m compileall "$pkgdir"/usr/share/gcc-${pkgver%%+*}/
+@@ -449,12 +419,6 @@ package_gcc-ada() {
+   ln -s libgnat-${pkgver%%.*}.so "$pkgdir"/usr/lib/libgnat.so
    rm -f "$pkgdir"/$_libdir/adalib/libgna{rl,t}.so
  
--  install -d "$pkgdir/usr/lib32/"
--  mv "$pkgdir"/$_libdir/32/adalib/libgna{rl,t}-${pkgver%%.*}.so "$pkgdir/usr/lib32"
--  ln -s libgnarl-${pkgver%%.*}.so "$pkgdir/usr/lib32/libgnarl.so"
--  ln -s libgnat-${pkgver%%.*}.so "$pkgdir/usr/lib32/libgnat.so"
+-  install -d "$pkgdir"/usr/lib32/
+-  mv "$pkgdir"/$_libdir/32/adalib/libgna{rl,t}-${pkgver%%.*}.so "$pkgdir"/usr/lib32
+-  ln -s libgnarl-${pkgver%%.*}.so "$pkgdir"/usr/lib32/libgnarl.so
+-  ln -s libgnat-${pkgver%%.*}.so "$pkgdir"/usr/lib32/libgnat.so
 -  rm -f "$pkgdir"/$_libdir/32/adalib/libgna{rl,t}.so
 -
    _install_runtime_library_exception
  }
  
-@@ -469,11 +443,8 @@ package_gcc-d() {
+@@ -483,11 +447,8 @@ package_gcc-d() {
    )
  
-   mv -v "$pkgname"/* "$pkgdir"
--  mkdir -v "$pkgdir/$_libdir/32"
-   mv -v "$pkgdir"/usr/lib/libg{druntime,phobos}.a "$pkgdir/$_libdir/"
--  mv -v "$pkgdir"/usr/lib32/libg{druntime,phobos}.a "$pkgdir/$_libdir/32"
-   mv -v "$pkgdir/usr/lib/libgphobos.spec" "$pkgdir/$_libdir/"
--  mv -v "$pkgdir/usr/lib32/libgphobos.spec" "$pkgdir/$_libdir/32"
+   mv -v $pkgname/* "$pkgdir"
+-  mkdir -pv "$pkgdir"/$_libdir/32
+   mv -v "$pkgdir"/usr/lib/libg{druntime,phobos}.a "$pkgdir"/$_libdir/
+-  mv -v "$pkgdir"/usr/lib32/libg{druntime,phobos}.a "$pkgdir"/$_libdir/32
+   mv -v "$pkgdir"/usr/lib/libgphobos.spec "$pkgdir"/$_libdir/
+-  mv -v "$pkgdir"/usr/lib32/libgphobos.spec "$pkgdir"/$_libdir/32
    _install_runtime_library_exception
  }
  
-@@ -500,7 +471,6 @@ package_gcc-fortran() {
-   mv -v "$pkgname"/* "$pkgdir"
-   ln -s gfortran "$pkgdir/usr/bin/f95"
-   mv -v "$pkgdir/usr/lib/libgfortran.spec" "$pkgdir/$_libdir/"
--  mv -v "$pkgdir/usr/lib32/libgfortran.spec" "$pkgdir/$_libdir/32"
+@@ -514,7 +475,6 @@ package_gcc-fortran() {
+   mv -v $pkgname/* "$pkgdir"
+   ln -s gfortran "$pkgdir"/usr/bin/f95
+   mv -v "$pkgdir"/usr/lib/libgfortran.spec "$pkgdir"/$_libdir/
+-  mv -v "$pkgdir"/usr/lib32/libgfortran.spec "$pkgdir"/$_libdir/32
    _install_runtime_library_exception
  }
  
-@@ -518,35 +488,6 @@ package_gcc-gcobol() {
-     zstd
+@@ -533,7 +493,6 @@ package_gcc-gcobol() {
    )
  
--  mv -v "$pkgname"/* "$pkgdir"
--  mv -v "$pkgdir/usr/lib/libgcobol.spec" "$pkgdir/$_libdir/"
--  _install_runtime_library_exception
--}
--
--package_gcc-go() {
--  pkgdesc='Go front-end for GCC'
--  depends=(
--    "gcc=$pkgver-$pkgrel"
--    'glibc>=2.27'
--    gmp
--    libgo
--    libisl.so
--    libmpc
--    mpfr
--    zlib
--    zstd
--  )
--  provides=(
--    "go=1.17"
--    $pkgname-multilib
--  )
--  replaces=(
--    $pkgname-multilib
--  )
--  conflicts=(
--    go
--  )
--
-   mv -v "$pkgname"/* "$pkgdir"
+   mv -v $pkgname/* "$pkgdir"
+-  mv -v "$pkgdir"/usr/lib/libgcobol.spec "$pkgdir"/$_libdir/
    _install_runtime_library_exception
  }
-@@ -560,7 +501,6 @@ package_gcc-libs() {
+ 
+@@ -574,10 +533,8 @@ package_gcc-libs() {
      libgcc
      libgfortran
      libgomp
 -    libhwasan
      liblsan
      libobjc
-     libquadmath
-@@ -632,33 +572,6 @@ package_gcc-rust() {
-   _install_runtime_library_exception
- }
- 
--package_lib32-gcc-libs() {
--  pkgdesc='32-bit runtime libraries shipped by GCC'
--  depends=(
--    'lib32-glibc>=2.27'
--  )
--  provides=(
--    libasan.so
--    libatomic.so
--    libgdruntime.so
--    libgfortran.so
--    libgo.so
--    libgomp.so
--    libgphobos.so
--    libitm.so
--    libobjc.so
--    libquadmath.so
--    libubsan.so
--  )
--  options=(
--    !emptydirs
--  )
--
--  mv -v "$pkgname"/* "$pkgdir"
--  rm -v "$pkgdir"/usr/lib32/libstdc++.so.6.0.35-gdb.py
--  _install_runtime_library_exception
--}
--
- package_libasan() {
-   pkgdesc='Address Sanitizer runtime library shipped by GCC'
-   depends=(
-@@ -727,11 +640,7 @@ package_libgcobol() {
+-    libquadmath
+     libstdc++
+     libtsan
+     libubsan
+@@ -741,11 +698,7 @@ package_libgcobol() {
      libgcc
      libstdc++
    )
@@ -326,67 +274,12 @@
 -    libgcobol.so
 -  )
  
--  mv -v "$pkgname"/* "$pkgdir"
+-  mv -v $pkgname/* "$pkgdir"
    _install_runtime_library_exception
  }
  
-@@ -766,20 +675,6 @@ package_libgm2() {
-   _install_runtime_library_exception
- }
- 
--package_libgo() {
--  pkgdesc='Go runtime libraries shipped by GCC'
--  depends=(
--    'glibc>=2.27'
--    libgcc
--  )
--  provides=(
--    libgo.so
--  )
--
--  mv -v "$pkgname"/* "$pkgdir"
--  _install_runtime_library_exception
--}
--
- package_libgomp() {
-   pkgdesc='OpenMP library shipped by GCC'
-   depends=(
-@@ -808,21 +703,6 @@ package_libgphobos() {
-   _install_runtime_library_exception
- }
- 
--package_libhwasan() {
--  pkgdesc='Hardware-assisted Address Sanitizer runtime library shipped by GCC'
--  depends=(
--    'glibc>=2.27'
--    libgcc
--    libstdc++
--  )
--  provides=(
--    libhwasan.so
--  )
--
--  mv -v "$pkgname"/* "$pkgdir"
--  _install_runtime_library_exception
--}
--
- package_libitm() {
-   pkgdesc='GNU Transactional Memory library shipped by GCC'
-   depends=(
-@@ -872,11 +752,7 @@ package_libquadmath() {
-     'glibc>=2.27'
-     libgcc
-   )
--  provides=(
--    libquadmath.so
--  )
- 
--  mv -v "$pkgname"/* "$pkgdir"
-   _install_runtime_library_exception
- }
- 
-@@ -940,3 +816,10 @@ package_lto-dump() {
-   mv -v "$pkgname"/* "$pkgdir"
+@@ -954,3 +907,10 @@ package_lto-dump() {
+   mv -v $pkgname/* "$pkgdir"
    _install_runtime_library_exception
  }
 +
@@ -395,4 +288,4 @@
 +sha256sums+=('5e8717aae7b83ed219e44fdba8379de7fb02c7c776ae6379ab26a6b22a7878d1'
 +             '00590887140f27396828b50f0bda0e0db5df8e3c86341d130f6b12788985d7f2')
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(lib32-glibc|lib32-gcc-libs)$'))
-+pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(lib32-gcc-libs|gcc-go|libgo|libhwasan)$'))
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(lib32-gcc-libs|gcc-go|libgo|libhwasan|libquadmath)$'))
