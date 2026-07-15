@@ -5,15 +5,18 @@
  prepare() {
    cd wpewebkit-$pkgver
 +  patch -p1 -i "${srcdir}/loongarch-simde-use-a-portable-version-to-avoid-comp.patch"
-+  sed -i '/bmalloc_CopyHeaders/d' Source/JavaScriptCore/CMakeLists.txt
++  patch -p1 -i "${srcdir}/loongarch-fix-cmake-in-list-empty-variable.patch"
  }
  
  build() {
-@@ -189,4 +191,7 @@ package_wpewebkit-docs() {
+@@ -189,4 +191,10 @@ package_wpewebkit-docs() {
    mv doc/* "$pkgdir"
  }
  
-+source+=("loongarch-simde-use-a-portable-version-to-avoid-comp.patch")
-+sha256sums+=('9d386e91becb40c811f67858de5857f321cedfda4b6c4b6d171fb69c8640cfbc')
-+b2sums+=('e35fc51cb8083e632928e29c4f5b484e5cdb5787b3822c3f2ce019fbb408c093365c7316a82f94afdb382ec4b521f21b44d37d26ab05c9a68e448efbe09d2b68')
++source+=("loongarch-simde-use-a-portable-version-to-avoid-comp.patch"
++         "loongarch-fix-cmake-in-list-empty-variable.patch")
++sha256sums+=('9d386e91becb40c811f67858de5857f321cedfda4b6c4b6d171fb69c8640cfbc'
++             '5cd98f189d669abd2fa381c283e9b38b5ffcf5504d2406f525d96c2ea22cfb07')
++b2sums+=('e35fc51cb8083e632928e29c4f5b484e5cdb5787b3822c3f2ce019fbb408c093365c7316a82f94afdb382ec4b521f21b44d37d26ab05c9a68e448efbe09d2b68'
++         '04b99ea58a97ee1bc2a79a31afd6754b11d2eab6e2ecde112201fae9f8898fa94406c719c3076b10f5ccf2bb661dbe35b430043ffbec75c97ddfacbd7d51a56e')
  # vim:set sw=2 sts=-1 et:
