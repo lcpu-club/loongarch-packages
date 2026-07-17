@@ -1,17 +1,15 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index eb984b0..f660e9c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -41,6 +41,7 @@ prepare() {
+@@ -50,6 +50,7 @@ prepare() {
    sed -i 's|/etc/openbao/openbao.env|/etc/default/openbao|g' .release/linux/package/usr/lib/systemd/system/openbao.service
  
    pushd ui
 +  node .yarn/releases/yarn-3.5.0.cjs set version 4.9.2
-   yarn install
+   pnpm install
    popd
  
-@@ -56,7 +57,12 @@ build() {
-   yarn run build
+@@ -64,7 +65,12 @@ build() {
+   pnpm build
    popd
  
 -  export CGO_ENABLED=0
@@ -24,7 +22,7 @@ index eb984b0..f660e9c 100644
    export GOPATH="${srcdir}"
  
    # https://openbao.org/docs/contributing/packaging/
-@@ -71,7 +77,7 @@ build() {
+@@ -79,7 +85,7 @@ build() {
      -buildmode=pie \
      -mod=readonly \
      -modcacherw \
@@ -33,7 +31,7 @@ index eb984b0..f660e9c 100644
      -tags 'openbao ui' \
      -o dist/bao \
      .
-@@ -95,3 +101,5 @@ package() {
+@@ -103,3 +109,5 @@ package() {
      install -Dm644 "${file}" "${pkgdir}/usr/share/doc/${pkgname}/${file}"
    done
  }
