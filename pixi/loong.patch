@@ -1,11 +1,11 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -39,7 +39,7 @@ check() {
-     tests::test_rust_is_in_build_requirements
-     tests::test_rust_is_not_added_if_already_present
+@@ -63,7 +63,7 @@ check() {
+     update_tests::test_update_conda_package_doesnt_update_git_pypi_pinned
+     update_tests::test_update_git_pypi_when_requested
    )
--  cargo test --frozen -- ${skipped[@]/#/--skip }
-+  cargo test --frozen -- ${skipped[@]/#/--skip } || echo "Watch out for failed tests!"
+-  cargo test --frozen --release -- ${skipped[@]/#/--skip }
++  cargo test --frozen --release -- ${skipped[@]/#/--skip } || echo "Watch out for failed tests!"
  }
  
  package() {
