@@ -1,0 +1,9 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -386,4 +386,6 @@ package_rust-aarch64-musl() {
+   _install_licenses
+ }
+ 
++source+=(link_loongarch64_musl_statically.patch)
++b2sums+=('60199f20ed3836520e286442c3cc7f4c617175251e7df41df9ed54509fdd0bfc5cbffec40e71cd58fb0dd60e8cd0ee22257518008c7e5ce197d57a601cab852a')
+ # vim:set ts=2 sw=2 et:

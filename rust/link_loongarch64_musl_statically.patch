@@ -1,0 +1,12 @@
+diff -urN a/compiler/rustc_target/src/spec/targets/loongarch64_unknown_linux_musl.rs b/compiler/rustc_target/src/spec/targets/loongarch64_unknown_linux_musl.rs
+--- a/compiler/rustc_target/src/spec/targets/loongarch64_unknown_linux_musl.rs	2026-07-14 23:13:08.000000000 +0800
++++ b/compiler/rustc_target/src/spec/targets/loongarch64_unknown_linux_musl.rs	2026-07-18 21:36:35.533857950 +0800
+@@ -21,7 +21,7 @@
+             llvm_abiname: LlvmAbi::Lp64d,
+             max_atomic_width: Some(64),
+             mcount: "_mcount".into(),
+-            crt_static_default: false,
++            crt_static_default: true,
+             supported_sanitizers: SanitizerSet::ADDRESS
+                 | SanitizerSet::CFI
+                 | SanitizerSet::LEAK
