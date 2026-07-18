@@ -1,8 +1,8 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -78,6 +78,17 @@ prepare() {
-   sed 's|${DEP_SHA1_cxxopts}|&\n\ \ \ \ \FIND_PACKAGE_ARGS NAMES cxxopts|g' \
-     -i cmake/external/onnxruntime_external_deps.cmake
+@@ -102,6 +102,17 @@ prepare() {
+ 
+   patch -Np1 -i "${srcdir}/${pkgbase}-system-dnnl.patch"
  
 +  # Find system nsync for loong64. The above sed command doesn't work for loong64.
 +  cat >> cmake/external/onnxruntime_external_deps.cmake << EOF
@@ -18,7 +18,7 @@
    patch -Np1 -i "${srcdir}/${pkgbase}-install-orttraining-files.patch"
    patch -Np1 -i "${srcdir}/${pkgbase}-system-flatbuffers.patch"
  
-@@ -92,8 +103,8 @@ prepare() {
+@@ -157,8 +168,8 @@ prepare() {
  
    cd "${srcdir}"
    cp -r "${pkgbase}" "${pkgbase}-cpu"
@@ -29,7 +29,7 @@
    cp -r "${pkgbase}" "${pkgbase}-rocm"
    cp -r "${pkgbase}" "${pkgbase}-opt-rocm"
  }
-@@ -167,6 +178,7 @@ build() {
+@@ -245,6 +256,7 @@ build() {
    cp -r build/onnxruntime/* onnxruntime
    python -m build --wheel --no-isolation
  
@@ -37,7 +37,7 @@
    ##### onnxruntime-cuda
  
    echo "Build onnxruntime with CUDA without optimization"
-@@ -191,7 +203,7 @@ build() {
+@@ -269,7 +281,7 @@ build() {
  
    cp -r build/onnxruntime/* onnxruntime
    python -m build --wheel --no-isolation
@@ -46,7 +46,7 @@
  
    ##### onnxruntime-rocm
  
-@@ -207,11 +219,11 @@ build() {
+@@ -285,11 +297,11 @@ build() {
  
    ##### onnxruntime-opt-rocm
  
@@ -61,7 +61,7 @@
      >> cmake/adjust_global_compile_flags.cmake
    cmake "${_cmake_rocm_args[@]}"
    cmake --build build
-@@ -274,7 +286,7 @@ package_onnxruntime-rocm() {
+@@ -352,7 +364,7 @@ package_onnxruntime-rocm() {
  }
  
  package_onnxruntime-opt-rocm() {
@@ -70,7 +70,7 @@
    depends+=('rocm-hip-sdk' 'roctracer' 'rccl' 'migraphx')
    provides=("${pkgbase}=${pkgver}")
    conflicts=("${pkgbase}")
-@@ -339,7 +351,7 @@ package_python-onnxruntime-rocm() {
+@@ -417,7 +429,7 @@ package_python-onnxruntime-rocm() {
  }
  
  package_python-onnxruntime-opt-rocm() {
@@ -79,10 +79,10 @@
    depends+=('rocm-hip-sdk' 'roctracer' 'rccl' 'migraphx')
    depends+=("${_pydepends[@]}")
    provides=("python-${pkgbase}=${pkgver}")
-@@ -350,3 +362,6 @@ package_python-onnxruntime-opt-rocm() {
+@@ -428,3 +440,6 @@ package_python-onnxruntime-opt-rocm() {
    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
    install -Dm644 ThirdPartyNotices.txt "${pkgdir}/usr/share/licenses/${pkgname}/ThirdPartyNotices.txt"
  }
 +
-+makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|cudnn|nccl)$'))
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|cudnn|nccl|cudnn-frontend)$'))
 +pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '(cuda)$'))
