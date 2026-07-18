@@ -1,0 +1,36 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,7 +17,12 @@ makedepends=(
+ 	gtest
+ )
+ source=("${pkgname}::git+${url}#commit=$_commit")
+-sha256sums=('879843097951d76bd8b234332ff438e2a0959e2429ddf9e74612a1558292465b')
++source+=("0001-add-loongarch64-support.patch")
++
++prepare() {
++	cd ${pkgname}
++	patch -Np1 < "${srcdir}/0001-add-loongarch64-support.patch"
++}
+ 
+ pkgver() {
+ 	cd ${pkgname}
+@@ -34,6 +39,9 @@ build() {
+ 		-D CMAKE_INSTALL_PREFIX=/usr
+ 		-D USE_SYSTEM_GOOGLETEST=ON
+ 		-D BUILD_SHARED_LIBS=ON
++		-D CPUINFO_BUILD_UNIT_TESTS=OFF
++		-D CPUINFO_BUILD_MOCK_TESTS=OFF
++		-D CPUINFO_BUILD_BENCHMARKS=OFF
+ 	)
+ 	cmake "${cmake_args[@]}"
+ 	cmake --build build
+@@ -49,6 +57,8 @@ package() {
+ 	# Delete google benchmark
+ 	find "${pkgdir}" -name "*benchmark*" -exec rm -rf {} +
+ 	# cpuinfo doesn't use cmake
+-	rmdir "${pkgdir}"/usr/lib/cmake
+ 	install -Dm644 ${pkgname}/LICENSE "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
+ }
++
++sha256sums=('879843097951d76bd8b234332ff438e2a0959e2429ddf9e74612a1558292465b')
++sha256sums+=('48b258878fcabc8e0eedeafc16165d753b98514def2f47c292e4fb3c1d1cb8e7')
