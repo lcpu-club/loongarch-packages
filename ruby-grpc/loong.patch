@@ -1,0 +1,21 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -111,6 +111,9 @@ prepare() {
+   git config submodule."third_party/zlib".url "${srcdir}/${pkgname}"-zlib
+ 
+   git -c protocol.file.allow=always submodule update --init --recursive
++
++  # Apply patches
++  patch --directory="${srcdir}/${pkgname}" --strip=1 < "${srcdir}/boringssl-loongarch64.patch"
+ }
+ 
+ build() {
+@@ -174,4 +177,8 @@ package() {
+   install --verbose -D --mode=0644 *.md --target-directory "${pkgdir}/usr/share/doc/${pkgname}"
+ }
+ 
++source+=('boringssl-loongarch64.patch')
++sha512sums+=('6dec76f675e2b8560a9ab1b349ef9b7c013f849546b78584c4054d66471e7cb5bda51226cfce2a895d63070a784079cda0174071b3b405b6f54a2ded232c4b5a')
++b2sums+=('0f16a31dfe8b1fbab6550b88a5011223acb02f669a55bd2aff815ba13975250c042b0f4ecb2140f53933a1c1271abddc091ee92f2831c4b8bbef4846585130f1')
++
+ # vim: tabstop=2 shiftwidth=2 expandtab:
