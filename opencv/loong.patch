@@ -1,14 +1,14 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -90,6 +90,7 @@ prepare() {
-   git cherry-pick -n a18356853d99a67e432e818cf0328b4690d68833 # https://github.com/opencv/opencv/issues/29292
+@@ -93,6 +93,7 @@ prepare() {
  #  git cherry-pick -n 142801f769ed4946a161f62738bac5a5fe56a60f # https://github.com/opencv/opencv/issues/29291
  #  git cherry-pick -n 883f8d83ae1463a5f486ace784762e8c42e7ea7d # https://github.com/opencv/opencv/issues/29471
+   patch -p1 < ../fix-dnn-umat-dimensions.patch # Fix face recognition in digikam
 +  git cherry-pick -n ee9c019556d7c3133aca55fa02ef2d6e20893f49 # https://github.com/opencv/opencv/issues/29422
    popd
  
    pushd opencv_contrib
-@@ -139,7 +140,8 @@ build() {
+@@ -142,7 +143,8 @@ build() {
    cmake -B build -S $pkgname "${cmake_options[@]}" \
      -DBUILD_WITH_DEBUG_INFO=ON
    cmake --build build
@@ -18,7 +18,7 @@
    # In general, we want to list all real archs (sm_XX) and the latest virtual arch (compute_XX) for future PTX compatibility.
    # Valid values can be discovered from nvcc --help
    local cuda_archs="75;80;86;87;88;89;90;100;103;110;120;121;121-virtual"
-@@ -154,6 +156,7 @@ build() {
+@@ -157,6 +159,7 @@ build() {
      -DENABLE_CUDA_FIRST_CLASS_LANGUAGE=ON \
      -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
    cmake --build build-cuda --verbose
@@ -26,7 +26,7 @@
  }
  
  package_opencv() {
-@@ -237,3 +240,11 @@ package_python-opencv-cuda() {
+@@ -240,3 +243,11 @@ package_python-opencv-cuda() {
  
    DESTDIR="$pkgdir" cmake --install build-cuda/modules/python3
  }
