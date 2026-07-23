@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 071f97e..76a641b 100644
+index 0f051ed..6d02c4e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -477,6 +477,9 @@ prepare() {
+@@ -475,6 +475,9 @@ prepare() {
    echo "Putting together electron sources"
    # Generate gclient gn args file and prepare-electron-source-tree.sh
    python makepkg-source-roller.py generate electron/DEPS $pkgname
@@ -12,7 +12,7 @@ index 071f97e..76a641b 100644
    rbash prepare-electron-source-tree.sh "$CARCH"
    mv electron src/electron
  
-@@ -490,12 +493,50 @@ prepare() {
+@@ -488,12 +491,50 @@ prepare() {
      -s src/third_party/skia --header src/skia/ext/skia_commit_hash.h
    src/build/util/lastchange.py \
      -s src/third_party/dawn --revision src/gpu/webgpu/DAWN_VERSION
@@ -65,9 +65,19 @@ index 071f97e..76a641b 100644
    src/electron/script/apply_all_patches.py \
        src/electron/patches/config.json
  
-@@ -572,10 +613,10 @@ prepare() {
-            third_party/gperf/cipd/bin \
-            third_party/rust-toolchain/bin
+@@ -502,7 +543,8 @@ prepare() {
+ 
+   pushd src
+   pushd electron
+-  yarn install --frozen-lockfile
++  # Skip build scripts for native test addons only needed for the Electron test suite and fail on loong64.
++  yarn install --frozen-lockfile --mode=skip-build
+   popd
+ 
+   echo "Applying local patches..."
+@@ -569,10 +611,10 @@ prepare() {
+            third_party/jdk/current/bin \
+            third_party/gperf/cipd/bin
  
 -  ln -s /usr/bin/node third_party/node/linux/node-linux-x64/bin/
 -  ln -s /usr/bin/rustc third_party/rust-toolchain/bin/
@@ -80,7 +90,7 @@ index 071f97e..76a641b 100644
  
    # Electron specific fixes
    #  fix: use GTK UI theme for Linux message boxes #52238
-@@ -584,6 +625,20 @@ prepare() {
+@@ -581,6 +623,20 @@ prepare() {
    patch -Np1 -i "${srcdir}/jinja-python-3.10.patch" -d "third_party/electron_node/tools/inspector_protocol/jinja2"
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
  
@@ -101,7 +111,7 @@ index 071f97e..76a641b 100644
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -707,6 +762,14 @@ build() {
+@@ -704,6 +760,14 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -116,7 +126,7 @@ index 071f97e..76a641b 100644
    export CHROMIUM_BUILDTOOLS_PATH="${PWD}/buildtools"
    gn gen out/Release \
        --args="import(\"//electron/build/args/release.gn\") ${_flags[*]}"
-@@ -731,3 +794,13 @@ package() {
+@@ -728,3 +792,13 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
