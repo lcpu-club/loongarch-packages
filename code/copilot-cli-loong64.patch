@@ -1,0 +1,17 @@
+--- a/extensions/copilot/script/postinstall.ts
++++ b/extensions/copilot/script/postinstall.ts
+@@ -105,6 +105,14 @@
+ 
+ async function resolveCopilotCliSourceDir(): Promise<string> {
+ 	const tried: string[] = [];
++	// loong64 has no platform package; allow pointing at a manually provided copy.
++	const overrideDir = process.env['COPILOT_CLI_SOURCE_DIR'];
++	if (overrideDir) {
++		tried.push(overrideDir);
++		if (fs.existsSync(path.join(overrideDir, 'sdk', 'index.js'))) {
++			return overrideDir;
++		}
++	}
+ 	for (const platformPackage of getCopilotPlatformPackageCandidates()) {
+ 		const sourceDir = path.join(REPO_ROOT, 'node_modules', '@github', `copilot-${platformPackage}`);
+ 		tried.push(sourceDir);

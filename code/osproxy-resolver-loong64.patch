@@ -1,0 +1,13 @@
+--- a/build/lib/osProxyResolver.ts
++++ b/build/lib/osProxyResolver.ts
+@@ -32,7 +32,9 @@
+ 
+ export function getOSProxyResolverPlatformFiles(platform: string, arch: string, nodeModulesRoot = 'node_modules'): string[] {
+ 	const target = toOSProxyResolverPlatform(platform, arch);
+-	return target ? [path.posix.join(nodeModulesRoot, '@vscode', `os-proxy-resolver-${target}`, '**')] : [];
++	// Platforms without a native package (e.g. loong64) contribute no files;
++	// return a non-matching glob because gulp.src rejects an empty array.
++	return target ? [path.posix.join(nodeModulesRoot, '@vscode', `os-proxy-resolver-${target}`, '**')] : [path.posix.join(nodeModulesRoot, '@vscode', 'os-proxy-resolver-unsupported', '**')];
+ }
+ 
+ export function getOSProxyResolverExcludeFilter(platform: string, arch: string): string[] {
