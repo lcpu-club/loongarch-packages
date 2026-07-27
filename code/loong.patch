@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 2afbe82..6d17bb8 100644
+index 070506e..ea50230 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -58,6 +58,10 @@ case "$CARCH" in
+@@ -65,6 +65,10 @@ case "$CARCH" in
      _vscode_arch=riscv64
      _electron_arch=riscv64
      ;;
@@ -13,7 +13,7 @@ index 2afbe82..6d17bb8 100644
    *)
      # Needed for mksrcinfo
      _vscode_arch=DUMMY
-@@ -90,7 +94,9 @@ prepare() {
+@@ -97,7 +101,9 @@ prepare() {
    patch -p0 -i ../product_json.diff
  
    # OpenVSX signature verification
@@ -24,19 +24,20 @@ index 2afbe82..6d17bb8 100644
  
    # Set the commit and build date
    local _commit _date
-@@ -126,6 +132,8 @@ prepare() {
+@@ -133,6 +139,9 @@ prepare() {
    sed -i 's|@@APPNAME@@|code-oss|g' resources/completions/{bash/code-oss,zsh/_code-oss}
  
    patch -p1 -i "$srcdir/clipath.patch"
 +  patch -p1 -i "$srcdir/gulpfile-vscode-loong64.patch"
-+  patch -p1 -i "$srcdir/tsgo-loong64.patch"
++  patch -p1 -i "$srcdir/copilot-cli-loong64.patch"
++  patch -p1 -i "$srcdir/osproxy-resolver-loong64.patch"
  
    # disable electron checksum verification as we are not bundling electron
    sed -i 's|validateChecksum: false,|validateChecksum: true,|' build/lib/electron.ts
-@@ -133,6 +141,49 @@ prepare() {
+@@ -140,14 +149,97 @@ prepare() {
    # upstream has a compatibility issue with npm but it doesn't affect packaging
    # so remove the check
-   sed -i '/Please use npm version < 11.2.0./{n;d}' build/npm/preinstall.ts
+   sed -i '/Please use npm version < 12.0.0./{n;d}' build/npm/preinstall.ts
 +
 +  if [[ "$CARCH" == "loong64" ]]; then
 +    # Use local stubs for packages without loong64 binaries.
@@ -77,14 +78,42 @@ index 2afbe82..6d17bb8 100644
 +        }' package-lock.json > package-lock.json.tmp
 +    mv package-lock.json.tmp package-lock.json
 +
++    # @github/copilot ships no loong64 platform package; fetch the x64 one
++    # (SDK is JS + wasm; its native prebuilds are unused during the build).
++    local _copilot_url _copilot_integrity
++    _copilot_url=$(jq -r '.packages["node_modules/@github/copilot-linux-x64"].resolved' extensions/copilot/package-lock.json)
++    _copilot_integrity=$(jq -r '.packages["node_modules/@github/copilot-linux-x64"].integrity' extensions/copilot/package-lock.json)
++    [[ "$_copilot_url" == http* && "$_copilot_integrity" == sha512-* ]] || return 1
++    curl -sLo "$srcdir/copilot-linux-x64.tgz" "${_copilot_url/registry.npmjs.org/registry.npmmirror.com}"
++    [[ "$(openssl dgst -sha512 -binary "$srcdir/copilot-linux-x64.tgz" | openssl base64 -A)" == "${_copilot_integrity#sha512-}" ]] || return 1
++    rm -rf "$srcdir/copilot-linux-x64"
++    mkdir -p "$srcdir/copilot-linux-x64"
++    tar xzf "$srcdir/copilot-linux-x64.tgz" -C "$srcdir/copilot-linux-x64" --strip-components=1
++
 +    # Upstream SHASUMS lacks a loong64 entry.
 +    sed -i 's|validateChecksum: true,|validateChecksum: false,|' build/lib/electron.ts
 +  fi
  }
  
  build() {
-@@ -141,6 +192,19 @@ build() {
+   cd vscode
+   export ELECTRON_SKIP_BINARY_DOWNLOAD=1 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
    export XDG_CACHE_HOME="$srcdir"
++
++  if [[ "$CARCH" == "loong64" ]]; then
++    # registry.npmjs.org is unreliable from loong64 build machines; use a mirror.
++    # Download integrity is still verified against package-lock.json hashes.
++    npm config set registry https://registry.npmmirror.com
++    npm config set replace-registry-host always
++    # The proxy layer drops connections occasionally; be generous with retries.
++    npm config set fetch-retries 5
++    npm config set fetch-retry-mintimeout 10000
++    npm config set fetch-retry-maxtimeout 180000
++
++    # Point the copilot extension's postinstall at the staged x64 SDK.
++    export COPILOT_CLI_SOURCE_DIR="$srcdir/copilot-linux-x64"
++  fi
++
    npm install --cpu=$_vscode_arch
    npm add -S "node-ovsx-sign@~1.2.0"
 +
@@ -94,30 +123,26 @@ index 2afbe82..6d17bb8 100644
 +    ln -sf /usr/bin/rg node_modules/@vscode/ripgrep-universal/bin/linux-loong64/rg
 +
 +    # Use x64 electron binaries; loong64 ones do not exist and we discard them.
-+    local _artifact_utils="node_modules/@vscode/gulp-electron/node_modules/@electron/get/dist/artifact-utils.js"
++    local _artifact_utils="node_modules/@electron/get/dist/artifact-utils.js"
 +    sed -i "/async function getArtifactRemoteURL(details) {/a \
 +      if (details.arch === 'loong64') { details.arch = 'x64'; }" \
 +      "$_artifact_utils"
 +  fi
 +
    npm run gulp \
-        --openssl-legacy-provider \
         vscode-linux-${_vscode_arch}-min
-@@ -159,8 +223,11 @@ package() {
-   # Replace statically included binary with system copy
-   # We can override the architecture-specific ones because they shouldn't be used anyway
-   for _useless_copy in "$pkgdir"/usr/lib/code/extensions/copilot/node_modules/@anthropic-ai/claude-agent-sdk/vendor/ripgrep/*/rg \
--    "$pkgdir"/usr/lib/code/node_modules/@vscode/ripgrep-universal/bin/linux-x64/rg; do
--    ln -vsf /usr/bin/rg "$_useless_copy"
-+    "$pkgdir"/usr/lib/code/node_modules/@vscode/ripgrep-universal/bin/linux-x64/rg \
-+    "$pkgdir"/usr/lib/code/node_modules/@vscode/ripgrep-universal/bin/linux-loong64/rg; do
-+    if [[ -e "$_useless_copy" ]]; then
-+      ln -vsf /usr/bin/rg "$_useless_copy"
-+    fi
-   done
+ }
+@@ -167,7 +259,8 @@ package() {
+   find "$pkgdir" -name rg -print0 | xargs --null --replace ln -s -vsf /usr/bin/rg {}
+ 
+   # Remove bundled onnxruntime and rely on system version
+-  rm --verbose "$pkgdir"/usr/lib/code/node_modules.asar.unpacked/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime*
++  # (onnxruntime-node is not shipped on loong64; tolerate its absence)
++  rm --verbose "$pkgdir"/usr/lib/code/node_modules.asar.unpacked/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime* 2>/dev/null || true
  
    # Install binary
-@@ -187,3 +254,17 @@ package() {
+   install -Dm 755 code.sh "$pkgdir"/usr/bin/code-oss
+@@ -193,3 +286,19 @@ package() {
    install -Dm 644 VSCode-linux-$_vscode_arch/resources/app/LICENSE.txt "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
    install -Dm 644 VSCode-linux-$_vscode_arch/resources/app/ThirdPartyNotices.txt "$pkgdir"/usr/share/licenses/$pkgname/ThirdPartyNotices.txt
  }
@@ -127,11 +152,13 @@ index 2afbe82..6d17bb8 100644
 +         'vsce-sign-stub-main.js'
 +         'ripgrep-stub-package.json'
 +         'ripgrep-stub-index.js'
-+         'tsgo-loong64.patch'
-+         'gulpfile-vscode-loong64.patch')
++         'gulpfile-vscode-loong64.patch'
++         'copilot-cli-loong64.patch'
++         'osproxy-resolver-loong64.patch')
 +sha512sums+=('ac170fda53ad65d06f3b4c745a482cf7b6fdb89dbf3ee2feca303d0f2422bc3c81fd527dab3f9f8c1028202e81daa77c6043dd04f5972fb0d56e907ec12e584d'
 +             '50bd72095ee1622db6fa72f47bc3770a6a1b93f4893d2221dc0dbdb86e4aac3c91b27c474969b0740dc2310705fdcb722b444d59be0586d6e2324a1ca827eff0'
 +             'f09e576a00dafe424d59121199c2bd9aadfc2be43fd96643db0e8c3e143ba059b33182a4fb4487b81145f74b74d41808057a6517d33246d5617b0fa170f1e3e8'
 +             '96c37070b5d503eb0e97c41fba05e0168837336a0bf36dfc528ce784f216591d5bd86795faf192f37e5a632b8fab108090bd84e83ef275b93525ca9f8a6f9ecc'
-+             '3f7e3a8e43f0d135131e806cd769164c59bcc06e260405255d4d60cf98bbe19176fb8ec79406fb2ecf6faba9bb51de8a574fc7b482724d80f1f0011b19187b9a'
-+             '8c54f99d73e5817eb91339e876bce428001218a68767c763fba9b43eb578989d834e106d9a2ee73d188bc8af2c096f351555c4aab6c261fcbddc1950b4120470')
++             '8be1d462ba0e56f1b91b7af5834505deab48fd0764c44a029e3307858cf1f776072be5c18c63c1c66587969fc5fc8a8a20acedab0aaeb4d63c90e9d8da44bdda'
++             'b70f22b3194aa3259dedb148384eb32408ddbdf0c2c37a0962213e3be0f19135fd7702e965bbe674d7934e1ab11255bd374c0a636f974cb651dedfead10a5ca5'
++             '3b34cea214fc0ae74880f373ddd407816f642d08f0c296b4238b600c7f4b3763ed8d676e657acc344bf881370a55230eb4f0dae1368fbfbedd520b8d6a13d699')

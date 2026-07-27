@@ -1,6 +1,6 @@
---- a/build/gulpfile.vscode.ts	2026-07-02 03:34:51.505000000 +0000
-+++ b/build/gulpfile.vscode.ts	2026-07-02 03:34:51.508000000 +0000
-@@ -618,6 +618,7 @@
+--- a/build/gulpfile.vscode.ts
++++ b/build/gulpfile.vscode.ts
+@@ -685,6 +685,7 @@
  	{ platform: 'linux', arch: 'x64' },
  	{ platform: 'linux', arch: 'armhf' },
  	{ platform: 'linux', arch: 'arm64' },
