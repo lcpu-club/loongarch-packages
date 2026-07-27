@@ -1,8 +1,19 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index bab1baf..5994774 100644
+index 71a9b37..9e81342 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -180,8 +180,11 @@ build() {
+@@ -140,8 +140,10 @@ sha512sums=('e113ddf9deb48ff1d53ddd7137677f6fd661b8315363fd55189a5b4fc44fe5a0f1c
+ prepare() {
+   cd "$pkgname"
+ 
++  export GIT_TERMINAL_PROMPT=0
+   git lfs install --local
+   git remote add network-origin https://projects.blender.org/blender/blender
++  git config --local lfs.https://projects.blender.org/blender/blender.git/info/lfs.access none
+   git lfs fetch network-origin
+   git lfs checkout
+ 
+@@ -174,8 +176,11 @@ build() {
      -D CMAKE_BUILD_TYPE=Release
      -D CMAKE_INSTALL_PREFIX=/usr
      -D WITH_LINKER_MOLD=ON
@@ -16,7 +27,7 @@ index bab1baf..5994774 100644
      -D HIP_ROOT_DIR=/opt/rocm
      -D HIPRT_INCLUDE_DIR=/opt/rocm/include
      -D HIPRT_COMPILER_PARALLEL_JOBS=8
-@@ -238,3 +241,7 @@ package() {
+@@ -232,3 +237,7 @@ package() {
  
    install -vDm 644 doc/license/{BSD-{2,3}-Clause,MIT,Zlib}-license.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
