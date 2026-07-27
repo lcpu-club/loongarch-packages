@@ -71,14 +71,12 @@
    provides=(
      $pkgname-multilib
    )
-@@ -253,49 +266,36 @@ package_gcc() {
-     ln -srv usr/lib/libstdc++.so $_libdir/libstdc++.so
-     ln -srv usr/lib/libgdruntime.so $_libdir/libgdruntime.so
-     ln -srv usr/lib/libgphobos.so $_libdir/libgphobos.so
--    ln -srv usr/lib32/libatomic.so $_libdir/32/libatomic.so
--    ln -srv usr/lib32/libstdc++.so $_libdir/32/libstdc++.so
--    ln -srv usr/lib32/libgdruntime.so $_libdir/32/libgdruntime.so
--    ln -srv usr/lib32/libgphobos.so $_libdir/32/libgphobos.so
+@@ -251,47 +264,37 @@ package_gcc() {
+     # where we ALSO ship a matching static lib in the internal _libdir
+     for _so in libatomic.so libstdc++.so libgdruntime.so libgphobos.so; do
+       ln -srv usr/lib/$_so $_libdir/$_so
+-      ln -srv usr/lib32/$_so $_libdir/32/$_so
+     done
  
      _pick gcc-ada usr/bin/gnat{,bind,chop,clean,kr,link,ls,make,name,prep}
 -    _pick gcc-ada $_libdir/{,32/}ada_target_properties
@@ -129,7 +127,7 @@
      _pick gcc-m2 usr/bin/{gm2,$CHOST-gm2}
      _pick gcc-m2 $_libdir/cc1gm2
      _pick gcc-m2 usr/share/info/m2.info
-@@ -307,21 +307,6 @@ package_gcc() {
+@@ -303,21 +306,6 @@ package_gcc() {
      _pick gcc-rust usr/bin/{gccrs,$CHOST-gccrs}
      _pick gcc-rust $_libdir/crab1
  
@@ -151,7 +149,7 @@
      _pick libasan usr/lib/libasan.{a,so*}
  
      _pick libatomic usr/lib/libatomic.so*
-@@ -333,14 +318,10 @@ package_gcc() {
+@@ -329,14 +317,10 @@ package_gcc() {
      _pick libgccjit usr/lib/libgccjit.so*
      _pick libgccjit usr/share/info/libgccjit.info
  
@@ -168,7 +166,7 @@
  
      _pick libgomp usr/lib/libgomp.{a,so*}
      _pick libgomp usr/share/info/libgomp.info
-@@ -348,8 +329,6 @@ package_gcc() {
+@@ -344,8 +328,6 @@ package_gcc() {
      _pick libgphobos usr/lib/libgdruntime.so*
      _pick libgphobos usr/lib/libgphobos.so*
  
@@ -177,7 +175,7 @@
      _pick libitm usr/lib/libitm.{a,so*}
      _pick libitm usr/share/info/libitm.info
  
-@@ -357,9 +336,6 @@ package_gcc() {
+@@ -353,9 +335,6 @@ package_gcc() {
  
      _pick libobjc usr/lib/libobjc.{a,so*}
  
@@ -187,7 +185,25 @@
      _pick libstdc++ usr/lib/libstdc++.so*
      _pick libstdc++ usr/share/locale/{de,fr}/LC_MESSAGES/libstdc++.mo
  
-@@ -385,7 +361,7 @@ package_gcc() {
+@@ -368,17 +347,11 @@ package_gcc() {
+ 
+     # move specific files into the internal "_libdir"
+     mv -v usr/lib/libgcc_s{,_asneeded}.so $_libdir/
+-    mv -v usr/lib32/libgcc_s{,_asneeded}.so $_libdir/32/
+     mv -v usr/lib/libatomic{,_asneeded}.a usr/lib/libatomic_asneeded.so $_libdir/
+-    mv -v usr/lib32/libatomic{,_asneeded}.a usr/lib32/libatomic_asneeded.so $_libdir/32/
+     mv -v usr/lib/*_preinit.o $_libdir/
+-    mv -v usr/lib32/*_preinit.o $_libdir/32/
+     mv -v usr/lib/*.spec $_libdir/
+-    mv -v usr/lib32/*.spec $_libdir/32/
+     mv -v usr/lib/libstdc++{,exp,fs}.a $_libdir/
+-    mv -v usr/lib32/libstdc++{,exp,fs}.a $_libdir/32/
+     mv -v usr/lib/libsupc++.a $_libdir/
+-    mv -v usr/lib32/libsupc++.a $_libdir/32/
+   )
+ 
+   install -d "$pkgdir"/usr/share/gdb/auto-load/usr/lib
+@@ -395,7 +368,7 @@ package_gcc() {
    # create cc-rs compatible symlinks
    # https://github.com/rust-lang/cc-rs/blob/1.0.73/src/lib.rs#L2578-L2581
    for binary in {c++,g++,gcc,gcc-ar,gcc-nm,gcc-ranlib}; do
@@ -196,25 +212,7 @@
    done
  
    # POSIX conformance launcher scripts for c89 and c99
-@@ -397,17 +373,11 @@ package_gcc() {
- 
-   # move specific files into the internal "_libdir"
-   mv -v "$pkgdir"/usr/lib/libgcc_s{,_asneeded}.so "$pkgdir"/$_libdir/
--  mv -v "$pkgdir"/usr/lib32/libgcc_s{,_asneeded}.so "$pkgdir"/$_libdir/32/
-   mv -v "$pkgdir"/usr/lib/libatomic* "$pkgdir"/$_libdir/
--  mv -v "$pkgdir"/usr/lib32/libatomic* "$pkgdir"/$_libdir/32/
-   mv -v "$pkgdir"/usr/lib/*_preinit.o "$pkgdir"/$_libdir/
--  mv -v "$pkgdir"/usr/lib32/*_preinit.o "$pkgdir"/$_libdir/32/
-   mv -v "$pkgdir"/usr/lib/*.spec "$pkgdir"/$_libdir/
--  mv -v "$pkgdir"/usr/lib32/*.spec "$pkgdir"/$_libdir/32/
-   mv -v "$pkgdir"/usr/lib/libstdc++* "$pkgdir"/$_libdir/
--  mv -v "$pkgdir"/usr/lib32/libstdc++* "$pkgdir"/$_libdir/32/
-   mv -v "$pkgdir"/usr/lib/libsupc++.a "$pkgdir"/$_libdir/
--  mv -v "$pkgdir"/usr/lib32/libsupc++.a "$pkgdir"/$_libdir/32/
- 
-   # byte-compile python libraries
-   python -m compileall "$pkgdir"/usr/share/gcc-${pkgver%%+*}/
-@@ -449,12 +419,6 @@ package_gcc-ada() {
+@@ -445,12 +418,6 @@ package_gcc-ada() {
    ln -s libgnat-${pkgver%%.*}.so "$pkgdir"/usr/lib/libgnat.so
    rm -f "$pkgdir"/$_libdir/adalib/libgna{rl,t}.so
  
@@ -227,7 +225,7 @@
    _install_runtime_library_exception
  }
  
-@@ -483,11 +447,8 @@ package_gcc-d() {
+@@ -479,11 +446,8 @@ package_gcc-d() {
    )
  
    mv -v $pkgname/* "$pkgdir"
@@ -239,7 +237,7 @@
    _install_runtime_library_exception
  }
  
-@@ -514,7 +475,6 @@ package_gcc-fortran() {
+@@ -510,7 +474,6 @@ package_gcc-fortran() {
    mv -v $pkgname/* "$pkgdir"
    ln -s gfortran "$pkgdir"/usr/bin/f95
    mv -v "$pkgdir"/usr/lib/libgfortran.spec "$pkgdir"/$_libdir/
@@ -247,7 +245,7 @@
    _install_runtime_library_exception
  }
  
-@@ -533,7 +493,6 @@ package_gcc-gcobol() {
+@@ -529,7 +492,6 @@ package_gcc-gcobol() {
    )
  
    mv -v $pkgname/* "$pkgdir"
@@ -255,7 +253,7 @@
    _install_runtime_library_exception
  }
  
-@@ -574,10 +533,8 @@ package_gcc-libs() {
+@@ -570,10 +532,8 @@ package_gcc-libs() {
      libgcc
      libgfortran
      libgomp
@@ -266,9 +264,9 @@
      libstdc++
      libtsan
      libubsan
-@@ -741,11 +698,7 @@ package_libgcobol() {
-     libgcc
+@@ -738,11 +698,7 @@ package_libgcobol() {
      libstdc++
+     libxml2
    )
 -  provides=(
 -    libgcobol.so
@@ -278,7 +276,7 @@
    _install_runtime_library_exception
  }
  
-@@ -954,3 +907,10 @@ package_lto-dump() {
+@@ -951,3 +907,10 @@ package_lto-dump() {
    mv -v $pkgname/* "$pkgdir"
    _install_runtime_library_exception
  }
