@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e447c36..273b3bc 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -37,3 +37,10 @@ package() {
+ 
+   install -Dm644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
+ }
++
++prepare() {
++  cd nbval
++  # Fix compatibility with pytest 9: pytest_report_teststatus hook now requires
++  # the config argument, otherwise pluggy raises HookCallError.
++  sed -i 's/self\.config\.hook\.pytest_report_teststatus(report=rep)/self.config.hook.pytest_report_teststatus(config=self.config, report=rep)/' nbval/nbdime_reporter.py
++}
