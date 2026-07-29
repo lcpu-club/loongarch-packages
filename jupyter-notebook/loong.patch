@@ -1,0 +1,54 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 22a6898..34be26a 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,6 +31,49 @@ replaces=(jupyter-retrolab)
+ source=(git+https://github.com/jupyter/notebook#tag=v$pkgver)
+ sha256sums=('af2f020cfe32f65047d0064ecafd6fc6651377c8a7f47f8cfccfc17dad23c35e')
+ 
++prepare() {
++# rspack has no loong64 native binding; build the frontend with webpack instead
++  cd notebook
++  sed -i 's|@jupyter/builder|@jupyterlab/builder|' app/rspack*.config.js
++  sed -i "s|const rspack = require('@rspack/core');|const webpack = require('webpack');|; s|rspack\.container|webpack.container|" app/rspack.config.js
++# workaround for khroma's tsconfig.json extending its missing devDependency tsex
++  cat >> app/rspack.config.js <<'EOF'
++
++module.exports.forEach(config => {
++  config.experiments = { ...config.experiments, typescript: false };
++});
++EOF
++  python - <<'EOF'
++import json
++
++with open('app/package.json') as f:
++    data = json.load(f)
++
++for name, cmd in data['scripts'].items():
++    data['scripts'][name] = cmd.replace('rspack', 'webpack', 1)
++
++dev = data['devDependencies']
++for pkg in ('@jupyter/builder', '@rspack/cli', '@rspack/core'):
++    dev.pop(pkg, None)
++dev['@jupyterlab/builder'] = '^4.5.10'
++dev['webpack'] = '^5.94.0'
++dev['webpack-cli'] = '^5.1.4'
++
++with open('app/package.json', 'w') as f:
++    json.dump(data, f, indent=2)
++
++with open('packages/lab-extension/package.json') as f:
++    data = json.load(f)
++
++dev = data['devDependencies']
++dev.pop('@jupyter/builder', None)
++dev['@jupyterlab/builder'] = '^4.5.10'
++
++with open('packages/lab-extension/package.json', 'w') as f:
++    json.dump(data, f, indent=2)
++EOF
++}
++
+ build() {
+   cd notebook
+   python -m build --wheel --no-isolation --skip-dependency-check
