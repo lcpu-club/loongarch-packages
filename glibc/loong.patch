@@ -1,6 +1,8 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 51f8aab..d04c222 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -46,6 +46,8 @@ pkgver() {
+@@ -46,8 +46,15 @@ pkgver() {
  prepare() {
    mkdir -p glibc-build lib32-glibc-build
  
@@ -8,8 +10,15 @@
 +
    [[ -d glibc-$pkgver ]] && ln -s glibc-$pkgver glibc
    cd glibc
++
++  # Backported fixes from upstream release/2.42/master for Linux 7.x
++  git cherry-pick -n 12feedaf67e11c4618dc50c6aab4dbfd1e6d9531 # bits/cloexec.h prerequisite
++  git cherry-pick -n 3ecfa68561d723564a1fb565366182eb4acb3e8f # OPEN_TREE_* guard (bug 33921)
++  git cherry-pick -n a56a2943d2ce541102c630142c2eae0fbfc5886b # fix tst-rseq with Linux 7.0
  }
-@@ -58,7 +60,6 @@ build() {
+ 
+ build() {
+@@ -58,7 +65,6 @@ build() {
        --enable-bind-now
        --enable-fortify-source
        --enable-kernel=4.4
@@ -17,7 +26,7 @@
        --enable-stack-protector=strong
        --enable-systemtap
        --disable-nscd
-@@ -88,7 +89,7 @@ build() {
+@@ -82,7 +88,7 @@ build() {
          --libdir=/usr/lib \
          --libexecdir=/usr/lib \
          --enable-cet \
@@ -26,7 +35,23 @@
          "${_configure_flags[@]}"
  
      make -O
-@@ -155,7 +156,7 @@ check() (
+@@ -91,6 +97,7 @@ build() {
+     make info
+   )
+ 
++  : <<COMMENT_SEPARATOR
+   (
+     cd lib32-glibc-build
+     export CC="gcc -m32 -mstackrealign"
+@@ -113,6 +120,7 @@ build() {
+ 
+     make -O
+   )
++COMMENT_SEPARATOR
+ 
+   # pregenerate locales here instead of in package
+   # functions because localedef does not like fakeroot
+@@ -148,7 +156,7 @@ check() (
    _skip_test tst-shstk-legacy-1g     sysdeps/x86_64/Makefile
    _skip_test tst-adjtime             time/Makefile
  
@@ -35,7 +60,7 @@
  )
  
  package_glibc() {
-@@ -240,3 +241,6 @@ package_glibc-locales() {
+@@ -232,3 +240,6 @@ package_glibc-locales() {
    # deduplicate locale data
    hardlink -c "${pkgdir}"/usr/lib/locale
  }
