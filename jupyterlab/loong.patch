@@ -1,0 +1,62 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c681fac..484caad 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -35,6 +35,44 @@ checkdepends=(npm
+ source=(git+https://github.com/jupyterlab/jupyterlab#tag=v$pkgver)
+ sha256sums=('ef054f4bc578846af53825aee6c559264622f9ce0ad87a2c8a63901db6672572')
+ 
++prepare() {
++# rspack has no loong64 native binding; build the frontend with webpack instead
++  cd $pkgname
++  for dir in jupyterlab/staging dev_mode; do
++    pushd $dir
++    sed -i 's|@jupyter/builder|@jupyterlab/builder|' webpack*.config.js
++    sed -i "s|const rspack = require('@rspack/core');|const webpack = require('webpack');|; s|rspack\.container|webpack.container|" webpack.config.js
++    sed -i '/RsdoctorRspackPlugin/d' webpack.config.js
++# workaround for khroma's tsconfig.json extending its missing devDependency tsex
++    cat >> webpack.config.js <<'EOF'
++
++module.exports.forEach(config => {
++  config.experiments = { ...config.experiments, typescript: false };
++});
++EOF
++    python - <<'EOF'
++import json
++
++with open('package.json') as f:
++    data = json.load(f)
++
++for name, cmd in data['scripts'].items():
++    data['scripts'][name] = cmd.replace('rspack ', 'webpack ')
++
++dev = data['devDependencies']
++for pkg in ('@jupyter/builder', '@rsdoctor/rspack-plugin', '@rspack/cli', '@rspack/core'):
++    dev.pop(pkg, None)
++dev['@jupyterlab/builder'] = '^4.5.10'
++dev['webpack'] = '^5.94.0'
++dev['webpack-cli'] = '^5.1.4'
++
++with open('package.json', 'w') as f:
++    json.dump(data, f, indent=2)
++EOF
++    popd
++  done
++}
++
+ build() {
+   cd $pkgname
+ # https://github.com/nodejs/node/issues/48444
+@@ -46,7 +84,11 @@ check() {
+   cd $pkgname
+   python -m venv --system-site-packages test-env
+   test-env/bin/python -m installer dist/*.whl
+-  test-env/bin/python -m pytest -v
++# the fetch_long fixture hardcodes a 250 s HTTP timeout, too short for a
++# full `jupyter lab build` on loong64 (cf. TestExtension::test_build)
++  test-env/bin/python -m pytest -v \
++    --deselect jupyterlab/tests/test_build_api.py::TestBuildAPI::test_build \
++    --deselect jupyterlab/tests/test_build_api.py::TestBuildAPI::test_clear
+ }
+ 
+ package() {
