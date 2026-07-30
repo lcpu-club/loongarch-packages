@@ -1,17 +1,16 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 505359b..ba6f4bb 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -52,6 +52,8 @@ b2sums=('547e757cb3ecfaa3a43d403f0bbed8d890dc6a8d9be59be1e4105d450a4ffc5892117ac
+@@ -46,7 +46,8 @@ b2sums=('cbb724d09e9c01b82d015fade3c542f977b1005ac1b51eccc019ca6528b83b30c8088e3
  
  prepare() {
    cd $pkgname
+-
 +  # generate bindgen at build time
 +  cargo add mysqlclient-sys@0.4.1 --features buildtime_bindgen
    # download dependencies
-   cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+   cargo fetch --locked --target host-tuple
  
-@@ -96,3 +98,10 @@ package() {
+@@ -93,3 +94,10 @@ package() {
    # binary
    install -vDm755 -t "$pkgdir/usr/bin" target/release*/$pkgname
  }
