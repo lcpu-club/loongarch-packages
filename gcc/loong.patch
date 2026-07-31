@@ -253,24 +253,29 @@
    _install_runtime_library_exception
  }
  
-@@ -570,10 +532,8 @@ package_gcc-libs() {
+@@ -570,7 +532,6 @@ package_gcc-libs() {
      libgcc
      libgfortran
      libgomp
 -    libhwasan
      liblsan
      libobjc
--    libquadmath
-     libstdc++
-     libtsan
-     libubsan
-@@ -738,11 +698,7 @@ package_libgcobol() {
+     libquadmath
+@@ -738,11 +699,7 @@ package_libgcobol() {
      libstdc++
      libxml2
    )
 -  provides=(
 -    libgcobol.so
 -  )
+ 
+-  mv -v $pkgname/* "$pkgdir"
+   _install_runtime_library_exception
+ }
+ 
+@@ -887,7 +844,6 @@ package_libquadmath() {
+     libquadmath.so
+   )
  
 -  mv -v $pkgname/* "$pkgdir"
    _install_runtime_library_exception
@@ -286,4 +291,4 @@
 +sha256sums+=('5e8717aae7b83ed219e44fdba8379de7fb02c7c776ae6379ab26a6b22a7878d1'
 +             '00590887140f27396828b50f0bda0e0db5df8e3c86341d130f6b12788985d7f2')
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(lib32-glibc|lib32-gcc-libs)$'))
-+pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(lib32-gcc-libs|gcc-go|libgo|libhwasan|libquadmath)$'))
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(lib32-gcc-libs|gcc-go|libgo|libhwasan)$'))
