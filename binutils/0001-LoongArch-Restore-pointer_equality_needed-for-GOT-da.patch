@@ -1,0 +1,52 @@
+From ab9ec19c2b0e4585c1c87f373438d2b7451364f4 Mon Sep 17 00:00:00 2001
+From: Pluto Yang <yangyj.ee@gmail.com>
+Date: Thu, 30 Jul 2026 17:26:50 +0800
+Subject: [PATCH] LoongArch: Restore pointer_equality_needed for GOT data
+ relocations
+
+Commit 7f9d6d6ead5 ("LoongArch: Fix Build pr29655") removed the
+setting of pointer_equality_needed for GOT relocations
+(R_LARCH_GOT_PC_HI20, R_LARCH_GOT_PCADD_HI20, R_LARCH_GOT_HI20,
+R_LARCH_SOP_PUSH_GPREL).  This was correct for function symbols to
+fix PR 29655 (function pointer equality in PIE executables), but it
+had an unintended side effect: the CRT startup code uses
+R_LARCH_GOT_PC_HI20 to access data symbols like __environ,
+__rela_iplt_start, __rela_iplt_end, and _dl_ns.  Without
+pointer_equality_needed, the GOT layout for these data symbols is
+altered, corrupting the static binary and causing runtime segfaults.
+
+Restore pointer_equality_needed for GOT relocations, but only for
+non-function symbols (h->type != STT_FUNC).  This preserves the
+PR 29655 fix for function symbols while fixing static executables
+that use data symbols accessed via GOT relocations.
+
+This bug was discovered when building GCC for loongarch64: the
+libstdc++ configure script tests TLS support by running a statically
+linked program.  The corrupted GOT caused the test to crash, leading
+to gcc_cv_have_tls=no, which disabled TLS support in libstdc++ and
+broke ABI compatibility with system libraries.
+
+Signed-off-by: Pluto Yang <yangyj.ee@gmail.com>
+---
+ bfd/elfnn-loongarch.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/bfd/elfnn-loongarch.c b/bfd/elfnn-loongarch.c
+index 4bdc3f26285..1c643c587f2 100644
+--- a/bfd/elfnn-loongarch.c
++++ b/bfd/elfnn-loongarch.c
+@@ -1249,6 +1249,11 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
+ 	case R_LARCH_GOT_PCADD_HI20:
+ 	case R_LARCH_GOT_HI20:
+ 	case R_LARCH_SOP_PUSH_GPREL:
++	  /* For la.global: set pointer_equality_needed for data symbols
++	     to ensure correct GOT layout.  Function symbols are excluded
++	     to avoid breaking function pointer equality (PR 29655).  */
++	  if (h && h->type != STT_FUNC)
++	    h->pointer_equality_needed = 1;
+ 	  if (!loongarch_elf_record_tls_and_got_reference (abfd, info, h,
+ 							   r_symndx,
+ 							   GOT_NORMAL,
+-- 
+2.55.0
+

@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index ab5dd31..115f83e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -71,6 +71,9 @@ prepare() {
+@@ -74,6 +74,9 @@ prepare() {
  
    cd binutils-gdb
  
@@ -12,7 +10,15 @@ index ab5dd31..115f83e 100644
    # Turn off development mode (-Werror, gas run-time checks, date in sonames)
    sed -i '/^development=/s/true/false/' bfd/development.sh
  
-@@ -96,7 +99,7 @@ build() {
+@@ -82,6 +85,7 @@ prepare() {
+   # unsupported targets.  This allows the binutils to be built with
+   # BPF support enabled.
+   patch -Np1 < ../gold-warn-unsupported.patch
++  patch -Np1 < ../0001-LoongArch-Restore-pointer_equality_needed-for-GOT-da.patch
+ }
+ 
+ build() {
+@@ -96,7 +100,7 @@ build() {
      --enable-colored-disassembly \
      --enable-default-execstack=no \
      --enable-deterministic-archives \
@@ -21,7 +27,7 @@ index ab5dd31..115f83e 100644
      --enable-install-libiberty \
      --enable-jansson \
      --enable-ld=default \
-@@ -105,7 +108,6 @@ build() {
+@@ -105,7 +109,6 @@ build() {
      --enable-plugins \
      --enable-relro \
      --enable-shared \
@@ -29,3 +35,10 @@ index ab5dd31..115f83e 100644
      --enable-threads \
      --disable-gdb \
      --disable-gdbserver \
+@@ -165,3 +168,6 @@ EOS
+   # install FSF All Permissive License
+   install -Dm644 -t "${pkgdir}"/usr/share/licenses/${pkgname}/ FSFAP
+ }
++
++source+=(0001-LoongArch-Restore-pointer_equality_needed-for-GOT-da.patch)
++sha256sums+=('ea3002ab39a59c4e48c1f91b0205fb5f226aa96f5039ecc440ca5b5e684613a3')
