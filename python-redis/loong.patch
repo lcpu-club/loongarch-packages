@@ -1,9 +1,10 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -192,6 +192,20 @@ check() {
- 
-     # New test failures in 8.0.0
-     --deselect tests/test_commands.py::TestRedisCommands::test_acl_getuser_setuser
+@@ -196,6 +196,21 @@ check() {
+     # New test failures in 8.1.0
+     --deselect tests/test_asyncio/test_sentinel.py::test_himport_prepare_set_survives_reconnect
+     --deselect tests/test_sentinel.py::test_himport_prepare_set_survives_reconnect
++
 +    # To build on loong64 (floating point precision issues)
 +    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_geopos
 +    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_georadius_with
