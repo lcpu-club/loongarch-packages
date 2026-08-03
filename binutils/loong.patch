@@ -14,7 +14,7 @@
    # unsupported targets.  This allows the binutils to be built with
    # BPF support enabled.
    patch -Np1 < ../gold-warn-unsupported.patch
-+  patch -Np1 < ../0001-LoongArch-Restore-pointer_equality_needed-for-GOT-da.patch
++  patch -Np1 < ../binutils-loong64-fixes.patch
  }
  
  build() {
@@ -40,5 +40,5 @@
    install -Dm644 -t "${pkgdir}"/usr/share/licenses/${pkgname}/ FSFAP
  }
 +
-+source+=(0001-LoongArch-Restore-pointer_equality_needed-for-GOT-da.patch)
-+sha256sums+=('ea3002ab39a59c4e48c1f91b0205fb5f226aa96f5039ecc440ca5b5e684613a3')
++source+=(binutils-loong64-fixes.patch)
++sha256sums+=('f93957e91e5407541aaccf6474f5c47aa44d53d46ce593ec8af5229c0dd2aaa0')

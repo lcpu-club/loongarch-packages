@@ -1,0 +1,123 @@
+diff -ruN binutils-src/bfd/elfnn-loongarch.c binutils-merged/bfd/elfnn-loongarch.c
+--- binutils-src/bfd/elfnn-loongarch.c	2026-08-03 13:36:38.557000000 +0800
++++ binutils-merged/bfd/elfnn-loongarch.c	2026-08-03 14:19:51.090160310 +0800
+@@ -3513,6 +3513,19 @@
+   return true;
+ }
+ 
++static bfd_vma
++ifunc_got_off (struct elf_link_hash_table *htab,
++	       struct elf_link_hash_entry *h)
++{
++  bfd_vma idx =
++    (h->plt.offset - (htab->splt ? PLT_HEADER_SIZE : 0)) / PLT_ENTRY_SIZE;
++
++  return sec_addr (htab->sgotplt)
++	 + (htab->splt ? GOTPLT_HEADER_SIZE : 0)
++	 + (idx * GOT_ENTRY_SIZE)
++	 - sec_addr (htab->sgot);
++}
++
+ static int
+ loongarch_elf_relocate_section (struct bfd_link_info *info,
+ 				bfd *input_bfd, asection *input_section,
+@@ -4539,25 +4552,7 @@
+ 		  /* Hidden symbol not has got entry,
+ 		   * only got.plt entry so it is (plt - got).  */
+ 		  if (h->got.offset == MINUS_ONE && h->type == STT_GNU_IFUNC)
+-		    {
+-		      bfd_vma idx;
+-		      if (htab->elf.splt != NULL)
+-			{
+-			  idx = (h->plt.offset - PLT_HEADER_SIZE)
+-			    / PLT_ENTRY_SIZE;
+-			  got_off = sec_addr (htab->elf.sgotplt)
+-			    + GOTPLT_HEADER_SIZE
+-			    + (idx * GOT_ENTRY_SIZE)
+-			    - sec_addr (htab->elf.sgot);
+-			}
+-		      else
+-			{
+-			  idx = h->plt.offset / PLT_ENTRY_SIZE;
+-			  got_off = sec_addr (htab->elf.sgotplt)
+-			    + (idx * GOT_ENTRY_SIZE)
+-			    - sec_addr (htab->elf.sgot);
+-			}
+-		    }
++		    got_off = ifunc_got_off (&htab->elf, h);
+ 
+ 		  if ((h->got.offset & 1) == 0)
+ 		    {
+@@ -4638,18 +4633,7 @@
+ 		got_off = local_got_offsets[r_symndx] & (~(bfd_vma)1);
+ 
+ 	      if (h && h->got.offset == MINUS_ONE && h->type == STT_GNU_IFUNC)
+-		{
+-		  bfd_vma idx;
+-		  if (htab->elf.splt != NULL)
+-		    idx = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
+-		  else
+-		    idx = h->plt.offset / PLT_ENTRY_SIZE;
+-
+-		  got_off = sec_addr (htab->elf.sgotplt)
+-		    + GOTPLT_HEADER_SIZE
+-		    + (idx * GOT_ENTRY_SIZE)
+-		    - sec_addr (htab->elf.sgot);
+-		}
++		got_off = ifunc_got_off (&htab->elf, h);
+ 
+ 	      relocation = got_off + sec_addr (got);
+ 	    }
+diff -ruN binutils-src/ld/testsuite/ld-loongarch-elf/ifunc.exp binutils-merged/ld/testsuite/ld-loongarch-elf/ifunc.exp
+--- binutils-src/ld/testsuite/ld-loongarch-elf/ifunc.exp	2026-08-03 13:36:40.602000000 +0800
++++ binutils-merged/ld/testsuite/ld-loongarch-elf/ifunc.exp	2026-08-03 14:28:51.963000000 +0800
+@@ -30,5 +30,13 @@
+ 	    "attr-ifunc-4" \
+ 	    "attr-ifunc-4.out" \
+ 	] \
++	[list \
++	    "Run static-ifunc" \
++	    "-static" \
++	    "" \
++	    {static-ifunc.c} \
++	    "static-ifunc" \
++	    "static-ifunc.out" \
++	] \
+     ]
+ }
+diff -ruN binutils-src/ld/testsuite/ld-loongarch-elf/static-ifunc.c binutils-merged/ld/testsuite/ld-loongarch-elf/static-ifunc.c
+--- binutils-src/ld/testsuite/ld-loongarch-elf/static-ifunc.c	1970-01-01 08:00:00.000000000 +0800
++++ binutils-merged/ld/testsuite/ld-loongarch-elf/static-ifunc.c	2026-08-03 14:28:22.198000000 +0800
+@@ -0,0 +1,27 @@
++int
++f1 ()
++{
++  return 42;
++}
++int
++f2 ()
++{
++  return 47;
++}
++
++void *
++fx ()
++{
++  return f1;
++}
++
++[[gnu::ifunc ("fx")]] int f ();
++
++int
++main ()
++{
++  int (*p) () = f;
++  asm ("# prevent optimization" : "+r"(p));
++  __builtin_printf ("%d\n", p ());
++  return 0;
++}
+diff -ruN binutils-src/ld/testsuite/ld-loongarch-elf/static-ifunc.out binutils-merged/ld/testsuite/ld-loongarch-elf/static-ifunc.out
+--- binutils-src/ld/testsuite/ld-loongarch-elf/static-ifunc.out	1970-01-01 08:00:00.000000000 +0800
++++ binutils-merged/ld/testsuite/ld-loongarch-elf/static-ifunc.out	2026-08-03 14:28:22.199058020 +0800
+@@ -0,0 +1 @@
++42
