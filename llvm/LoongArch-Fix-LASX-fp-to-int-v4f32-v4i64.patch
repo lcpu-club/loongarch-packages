@@ -1,0 +1,85 @@
+[LoongArch] Fix wrong lowering of fp_to_sint/fp_to_uint v4f32 -> v4i64 on LASX
+
+The LASX patterns for `(v4i64 (fp_to_sint (v4f32)))` and
+`(v4i64 (fp_to_uint (v4f32)))` lowered the conversion through a 128-bit
+f32->i32/u32 truncation (VFTINTRZ_W_S / VFTINTRZ_WU_S) followed by a
+sign/zero extension (VEXT2XV_D_W / VEXT2XV_DU_WU). This is only correct
+when the input floats fit in i32/u32; any finite value outside that
+range is silently clamped to INT32_MIN/MAX (or UINT32_MAX) instead of
+being converted to the correct 64-bit integer.
+
+This miscompiles, among other things, auto-vectorized
+`out[i] = (int64_t)in[i]` loops over float arrays when targeting LASX
+(e.g. google/highway's TestAllF2IPromoteUpperLowerTo/LASX test fails on
+real hardware when the test binary is built with LTO, because the LTO
+link stage re-enables the loop vectorizer).
+
+Fix the signed case by using the hardware f32->i64 converting
+instruction XVFTINTRZL_L_S, after shuffling the four f32 lanes into the
+low f32 of each 64-bit lane with XVPERMI_D (the same sequence highway
+uses in its hand-written LASX code). For the unsigned case there is no
+f32->u64 instruction, so widen f32->f64 exactly with XVFCVTL_D_S and
+then use the f64->u64 instruction XVFTINTRZ_LU_D.
+
+Both sequences were verified on real Loongson-3C5000L hardware against
+scalar conversions, including out-of-i32-range and close-to-2^64
+inputs.
+
+--- a/llvm/lib/Target/LoongArch/LoongArchLASXInstrInfo.td
++++ b/llvm/lib/Target/LoongArch/LoongArchLASXInstrInfo.td
+@@ -2018,9 +2018,10 @@
+ // XVFTINTRZ_{W_S/L_D}
+ def : Pat<(v8i32 (fp_to_sint v8f32:$vj)), (XVFTINTRZ_W_S v8f32:$vj)>;
+ def : Pat<(v4i64 (fp_to_sint v4f64:$vj)), (XVFTINTRZ_L_D v4f64:$vj)>;
+-def : Pat<(v4i64(fp_to_sint v4f32:$vj)), (VEXT2XV_D_W(SUBREG_TO_REG(i64 0),
+-                                             (VFTINTRZ_W_S v4f32:$vj),
+-                                             sub_128))>;
++def : Pat<(v4i64 (fp_to_sint v4f32:$vj)),
++          (XVFTINTRZL_L_S
++              (XVPERMI_D (SUBREG_TO_REG (i64 0), v4f32:$vj, sub_128),
++                          216))>;
+ def : Pat<(v4i32(fp_to_sint v4f64:$vj)),
+           (EXTRACT_SUBREG(XVPICKEV_W(XVPERMI_D(XVFTINTRZ_L_D v4f64:$vj), 238),
+                (XVFTINTRZ_L_D v4f64:$vj)),
+@@ -2029,9 +2030,11 @@
+ // XVFTINTRZ_{W_SU/L_DU}
+ def : Pat<(v8i32 (fp_to_uint v8f32:$vj)), (XVFTINTRZ_WU_S v8f32:$vj)>;
+ def : Pat<(v4i64 (fp_to_uint v4f64:$vj)), (XVFTINTRZ_LU_D v4f64:$vj)>;
+-def : Pat<(v4i64(fp_to_uint v4f32:$vj)), (VEXT2XV_DU_WU(SUBREG_TO_REG(i64 0),
+-                                             (VFTINTRZ_WU_S v4f32:$vj),
+-                                             sub_128))>;
++def : Pat<(v4i64 (fp_to_uint v4f32:$vj)),
++          (XVFTINTRZ_LU_D
++              (XVFCVTL_D_S
++                  (XVPERMI_D (SUBREG_TO_REG (i64 0), v4f32:$vj, sub_128),
++                              216)))>;
+ def : Pat<(v4i32(fp_to_uint v4f64:$vj)),
+           (EXTRACT_SUBREG(XVPICKEV_W(XVPERMI_D(XVFTINTRZ_LU_D v4f64:$vj), 238),
+                (XVFTINTRZ_LU_D v4f64:$vj)),
+--- a/llvm/test/CodeGen/LoongArch/lasx/ir-instruction/fptosi.ll
++++ b/llvm/test/CodeGen/LoongArch/lasx/ir-instruction/fptosi.ll
+@@ -47,8 +47,8 @@
+ ; CHECK-LABEL: fptosi_v4f32_v4i64:
+ ; CHECK:       # %bb.0:
+ ; CHECK-NEXT:    vld $vr0, $a1, 0
+-; CHECK-NEXT:    vftintrz.w.s $vr0, $vr0
+-; CHECK-NEXT:    vext2xv.d.w $xr0, $xr0
++; CHECK-NEXT:    xvpermi.d $xr0, $xr0, 216
++; CHECK-NEXT:    xvftintrzl.l.s $xr0, $xr0
+ ; CHECK-NEXT:    xvst $xr0, $a0, 0
+ ; CHECK-NEXT:    ret
+   %v0 = load <4 x float>, ptr %in
+--- a/llvm/test/CodeGen/LoongArch/lasx/ir-instruction/fptoui.ll
++++ b/llvm/test/CodeGen/LoongArch/lasx/ir-instruction/fptoui.ll
+@@ -47,8 +47,9 @@
+ ; CHECK-LABEL: fptoui_v4f32_v4i64:
+ ; CHECK:       # %bb.0:
+ ; CHECK-NEXT:    vld $vr0, $a1, 0
+-; CHECK-NEXT:    vftintrz.wu.s $vr0, $vr0
+-; CHECK-NEXT:    vext2xv.du.wu $xr0, $xr0
++; CHECK-NEXT:    xvpermi.d $xr0, $xr0, 216
++; CHECK-NEXT:    xvfcvtl.d.s $xr0, $xr0
++; CHECK-NEXT:    xvftintrz.lu.d $xr0, $xr0
+ ; CHECK-NEXT:    xvst $xr0, $a0, 0
+ ; CHECK-NEXT:    ret
+   %v0 = load <4 x float>, ptr %in

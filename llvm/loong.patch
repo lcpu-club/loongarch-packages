@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f3d6151..7bd08ce 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -61,6 +61,7 @@ _get_distribution_components() {
+ prepare() {
+   cd llvm-project-$pkgver.src/llvm
+   patch -Np2 -i "${srcdir}"/0001-SDAG-Freeze-condition-in-select-of-load-fold-208683.patch
++  patch -Np2 -i "${srcdir}"/LoongArch-Fix-LASX-fp-to-int-v4f32-v4i64.patch
+   mkdir build
+ 
+   # Remove CMake find module for zstd; breaks if out of sync with upstream zstd
+@@ -161,4 +162,7 @@ package_llvm-libs() {
+     "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
+ 
++source+=('LoongArch-Fix-LASX-fp-to-int-v4f32-v4i64.patch')
++sha256sums+=('d53e912fc5f3b31d4f0f2f1ed27991df9cc0499a7b75d673f0617c39eb0be35e')
++
+ # vim:set ts=2 sw=2 et:
