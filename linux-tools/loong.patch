@@ -14,22 +14,8 @@
    'usbip'
 -  'x86_energy_perf_policy'
  )
- pkgver=7.0.3
+ pkgver=7.1.7
  pkgrel=1
-@@ -39,11 +34,11 @@ makedepends+=('ncurses')
- # bpf deps
- makedepends+=('readline' 'zlib' 'libelf' 'libcap' 'python-docutils')
- # turbostat deps
--makedepends+=('libcap')
-+# makedepends+=('libcap')
- # bpftool
- makedepends+=('llvm' 'clang')
- # intel-speed-select
--makedepends+=('libnl')
-+# makedepends+=('libnl')
- groups=("$pkgbase")
- source=(https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/${_srcname}.tar.{xz,sign}
-         'usbipd.service'
 @@ -73,6 +68,7 @@ prepare() {
      echo ":: Applying patch $src"
      patch -p1 -N -i "$srcdir/$src"
@@ -38,29 +24,13 @@
    # force our perf version
    cat > tools/perf/util/PERF-VERSION-GEN << EOF
  #!/bin/sh
-@@ -105,10 +101,13 @@ build() {
-   make VERSION=$pkgver-$pkgrel
-   popd
- 
-+  # Use a "multi-line comment" to keep patch from rotting
+@@ -132,11 +128,12 @@ build() {
+     make
+     popd
+   fi
+-
 +  : <<COMMENT_SEPARATOR
-   echo ':: x86_energy_perf_policy'
-   pushd "$_srcname"/tools/power/x86/x86_energy_perf_policy
-   make
-   popd
-+COMMENT_SEPARATOR
- 
-   echo ':: usbip'
-   pushd "$_srcname"/tools/usb/usbip
-@@ -124,6 +123,7 @@ build() {
-   make
-   popd
- 
-+  : <<COMMENT_SEPARATOR
-   echo ':: turbostat'
-   pushd "$_srcname"/tools/power/x86/turbostat
-   make
-@@ -133,6 +133,7 @@ build() {
+   echo ':: hv'
    pushd "$_srcname"/tools/hv
    CFLAGS+=' -DKVP_SCRIPTS_PATH=\"/usr/lib/hypervkvpd/\"' make
    popd
@@ -68,38 +38,15 @@
  
    echo ':: bpf'
    pushd "$_srcname"/tools/bpf
-@@ -149,6 +150,7 @@ build() {
-   make
-   popd
- 
-+  : <<COMMENT_SEPARATOR
-   echo ':: intel-speed-select'
-   pushd "$_srcname"/tools/power/x86/intel-speed-select
-   make
-@@ -158,6 +160,7 @@ build() {
-   pushd "$_srcname"/tools/arch/x86/kcpuid
-   make
-   popd
-+COMMENT_SEPARATOR
- }
- 
- package_linux-tools-meta() {
-@@ -167,14 +170,9 @@ package_linux-tools-meta() {
+@@ -175,7 +172,6 @@ package_linux-tools-meta() {
      'bootconfig'
      'bpf'
      'cpupower'
 -    'hyperv'
--    'intel-speed-select'
--    'kcpuid'
      'perf'
      'tmon'
--    'turbostat'
      'usbip'
--    'x86_energy_perf_policy'
-   )
-   conflicts=(
-     'acpidump'
-@@ -192,7 +190,7 @@ package_perf() {
+@@ -202,7 +198,7 @@ package_perf() {
      prefix=/usr \
      lib=lib/perf \
      perfexecdir=lib/perf \
