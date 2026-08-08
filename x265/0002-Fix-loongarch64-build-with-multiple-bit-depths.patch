@@ -1,0 +1,52 @@
+commit 976539734c3113a23fcde8f0ceeccc0d143a6c55
+Author: Pluto Yang <yangyj.ee@gmail.com>
+Date:   Sat Aug 8 16:46:32 2026 +0800
+
+    LoongArch64: Fix build with multiple bit depths
+    
+    The loongarch64 assembly files are only compiled for 8-bit builds
+    (CMakeLists.txt: LOONGARCH64 AND NOT HIGH_BIT_DEPTH). However,
+    asm-primitives.cpp was compiled for all bit depths, causing compilation
+    errors in 10-bit and 12-bit builds because the assembly functions with
+    PFX() namespace prefix don't exist for those depths.
+    
+    Fix by wrapping all loongarch64-specific PFX-dependent code in #if !HIGH_BIT_DEPTH
+    guard, and providing an empty setupAssemblyPrimitives for HIGH_BIT_DEPTH builds.
+    
+    Signed-off-by: Pluto Yang <yangyj.ee@gmail.com>
+
+diff --git a/source/common/loongarch64/asm-primitives.cpp b/source/common/loongarch64/asm-primitives.cpp
+index 94e6ff4ec..8ceb0065d 100644
+--- a/source/common/loongarch64/asm-primitives.cpp
++++ b/source/common/loongarch64/asm-primitives.cpp
+@@ -39,6 +39,7 @@
+ namespace X265_NS {
+ // private x265 namespace
+ 
++#if !HIGH_BIT_DEPTH
+ template<int size>
+ int psyCost_pp_lsx(const pixel *source, intptr_t sstride, const pixel *recon, intptr_t rstride)
+ {
+@@ -324,6 +325,15 @@ all_angs_pred_lsx(32, 10)
+     p.cu[BLOCK_32x32].prim = fncdef PFX(fname ## _32x32_ ## cpu); \
+     p.cu[BLOCK_64x64].prim = fncdef PFX(fname ## _64x64_ ## cpu)
+ 
++#endif /* !HIGH_BIT_DEPTH */
++
++#if HIGH_BIT_DEPTH
++void setupAssemblyPrimitives(EncoderPrimitives &p, int cpuMask)
++{
++    (void)p;
++    (void)cpuMask;
++}
++#else
+ void setupAssemblyPrimitives(EncoderPrimitives &p, int cpuMask)
+ {
+ #if HAVE_LSX
+@@ -1427,5 +1437,5 @@ void setupAssemblyPrimitives(EncoderPrimitives &p, int cpuMask)
+     }
+ #endif /* HAVE_LASX */
+ }
+-
++#endif /* HIGH_BIT_DEPTH */
+ }
