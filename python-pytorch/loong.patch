@@ -1,6 +1,8 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 34d959b..55baf94 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -228,6 +228,11 @@ prepare() {
+@@ -229,6 +229,11 @@ prepare() {
  
    git -c protocol.file.allow=always submodule update --init --recursive
  
@@ -12,7 +14,7 @@
    # Fix cmake prefix path (FS#78665)
    patch -Np1 -i "${srcdir}"/fix_cmake_prefix_path.patch
  
-@@ -258,18 +263,18 @@ prepare() {
+@@ -260,16 +265,16 @@ prepare() {
    cd "${srcdir}"
  
    cp -r "${_pkgname}" "${_pkgname}-opt"
@@ -29,16 +31,12 @@
  
    # Handle glog 0.6 vs 0.7 mismatch
    local _suffix
--  for _suffix in xpu opt-xpu; do
--    sed -i '1s/^/#ifndef GLOG_USE_GLOG_EXPORT\n#define GLOG_USE_GLOG_EXPORT\n#endif\n\n/' ${_pkgname}-${_suffix}/c10/util/logging_is_google_glog.h
--  done
-+#  for _suffix in xpu opt-xpu; do
-+#    sed -i '1s/^/#ifndef GLOG_USE_GLOG_EXPORT\n#define GLOG_USE_GLOG_EXPORT\n#endif\n\n/' ${_pkgname}-${_suffix}/c10/util/logging_is_google_glog.h
-+#  done
+-  for _suffix in rocm opt-rocm xpu opt-xpu; do
++  for _suffix in rocm opt-rocm; do
+     sed -i '1s/^/#ifndef GLOG_USE_GLOG_EXPORT\n#define GLOG_USE_GLOG_EXPORT\n#endif\n\n/' ${_pkgname}-${_suffix}/c10/util/logging_is_google_glog.h
+   done
  }
- 
- # Common build configuration, called in the build() function.
-@@ -281,7 +286,7 @@ _prepare() {
+@@ -283,7 +288,7 @@ _prepare() {
    # Check tools/setup_helpers/cmake.py, setup.py and CMakeLists.txt for a list of flags that can be set via env vars.
    export BUILD_TEST=OFF  # do not build tests
    export ATEN_NO_TEST=ON  # do not build ATen tests
@@ -47,7 +45,7 @@
    export BUILD_CUSTOM_PROTOBUF=OFF
    export USE_GFLAGS=ON
    export USE_GLOG=ON
-@@ -289,10 +294,11 @@ _prepare() {
+@@ -291,11 +296,12 @@ _prepare() {
    export USE_OBSERVERS=ON
    # export USE_SYSTEM_LIBS=ON  # experimental, not all libs present in repos
    # USE_SYSTEM_ONNX=ON does not work and onnx itself should be removed from pytorch: https://github.com/pytorch/pytorch/issues/166546#issuecomment-3463370459
@@ -57,11 +55,12 @@
 +  # export USE_SYSTEM_NCCL=ON
    export USE_SYSTEM_PYBIND11=ON
    export USE_SYSTEM_EIGEN_INSTALL=ON
+   export USE_SYSTEM_CPUINFO=ON
 +  : <<COMMENT_SEPARATOR
    export USE_GOLD_LINKER=ON
    export NCCL_VERSION=$(pkg-config nccl --modversion)
    export NCCL_VER_CODE=$(sed -n 's/^#define NCCL_VERSION_CODE\s*\(.*\).*/\1/p' /usr/include/nccl.h)
-@@ -313,7 +319,7 @@ _prepare() {
+@@ -316,7 +322,7 @@ _prepare() {
    # https://github.com/pytorch/pytorch/blob/f9074c7332c3dfd43fe39e8733ec98f7f29b3e61/torch/utils/cpp_extension.py#L2417-L2420
    # (note that 8.8 is not supported)
    export TORCH_CUDA_ARCH_LIST="7.5 8.0 8.6 8.7 8.9 9.0 10.0 10.3 11.0 12.0 12.1"
@@ -70,16 +69,17 @@
    export ROCM_PATH=/opt/rocm
    export HIP_ROOT_DIR=/opt/rocm
    # gfx950 lacks support for 128 bit atomics
-@@ -325,7 +331,7 @@ _prepare() {
+@@ -328,7 +334,8 @@ _prepare() {
    export USE_FBGEMM_GENAI=OFF
  
    # Compile source code for supported GPU archs in parallel (but using too many jobs is not helpful)
 -  export HIPCC_COMPILE_FLAGS_APPEND="-parallel-jobs=4 --gcc-install-dir=$(dirname $($CC -print-libgcc-file-name))"
-+  export HIPCC_COMPILE_FLAGS_APPEND="-parallel-jobs=4"
++  # (-include chrono: see the comment about __noinline__ in the rocm section of build())
++  export HIPCC_COMPILE_FLAGS_APPEND="-parallel-jobs=4 -include chrono"
    export HIPCC_LINK_FLAGS_APPEND="-parallel-jobs=4"
  
    export AOTRITON_INSTALLED_PREFIX=/usr
-@@ -341,25 +347,26 @@ _prepare() {
+@@ -344,25 +351,26 @@ _prepare() {
  
  build() {
    cd "${srcdir}/${_pkgname}"
@@ -110,7 +110,7 @@
    cd "${srcdir}/${_pkgname}-cuda"
    echo "Building with cuda and without non-x86-64 optimizations"
    _prepare
-@@ -380,9 +387,10 @@ build() {
+@@ -383,34 +391,42 @@ build() {
    export USE_XPU=0
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
@@ -122,12 +122,17 @@
    # -fcf-protection is not supported by HIP, see
    # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
    CXXFLAGS+=" -fcf-protection=none"
-@@ -391,23 +399,26 @@ build() {
++  # ROCm's hip/amd_detail/host_defines.h defines __noinline__ as a macro, which
++  # breaks GCC 16's <format> and <stacktrace> headers when ROCm headers get
++  # included first. Force-include the affected std headers up front.
++  CXXFLAGS+=" -include chrono -include stacktrace"
+   _prepare
+   export USE_CUDA=0
    export USE_CUDNN=0
    export USE_ROCM=1
    export USE_XPU=0
 -  echo "add_definitions(-march=x86-64)" >> cmake/MiscCheck.cmake
-+  export MAX_JOBS=8
++  export MAX_JOBS=$(nproc)
 +  echo "add_definitions(-march=loongarch64)" >> cmake/MiscCheck.cmake
    # Conversion of CUDA to ROCm source files
    python tools/amd_build/build_amd.py
@@ -142,7 +147,7 @@
    export USE_ROCM=1
    export USE_XPU=0
 -  echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
-+  export MAX_JOBS=8
++  export MAX_JOBS=$(nproc)
 +  echo "add_definitions(-march=la464)" >> cmake/MiscCheck.cmake
    # Conversion of CUDA to ROCm source files
    python tools/amd_build/build_amd.py
@@ -152,7 +157,7 @@
    # Strip the problematic format-security flag that breaks SYCL CMake scripts
    export CFLAGS="${CFLAGS/-Werror=format-security/}"
    export CXXFLAGS="${CXXFLAGS/-Werror=format-security/}"
-@@ -433,6 +444,7 @@ build() {
+@@ -436,6 +452,7 @@ build() {
    export USE_XPU=1
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
@@ -160,7 +165,7 @@
  }
  
  _package() {
-@@ -468,7 +480,7 @@ package_python-pytorch() {
+@@ -472,7 +489,7 @@ package_python-pytorch() {
  }
  
  package_python-pytorch-opt() {
@@ -169,7 +174,7 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -498,7 +510,7 @@ package_python-pytorch-opt-cuda() {
+@@ -502,7 +519,7 @@ package_python-pytorch-opt-cuda() {
  
  package_python-pytorch-rocm() {
    pkgdesc+=" (with ROCm)"
@@ -178,7 +183,7 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -508,7 +520,7 @@ package_python-pytorch-rocm() {
+@@ -512,7 +529,7 @@ package_python-pytorch-rocm() {
  
  package_python-pytorch-opt-rocm() {
    pkgdesc+=" (with ROCm and AVX2 CPU optimizations)"
@@ -187,7 +192,7 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver} python-pytorch-rocm=${pkgver})
  
-@@ -551,4 +563,29 @@ package_python-pytorch-opt-xpu() {
+@@ -555,4 +572,29 @@ package_python-pytorch-opt-xpu() {
    _package
  }
  
