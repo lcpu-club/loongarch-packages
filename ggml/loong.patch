@@ -1,0 +1,58 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d93ec9b..c135e81 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -53,14 +53,14 @@ build() {
+       -DGGML_BACKEND_DIR=/usr/lib/ggml \
+       -DGGML_BLAS=ON \
+       -DGGML_BLAS_VENDOR=OpenBLAS \
+-      -DGGML_CPU_ALL_VARIANTS=ON \
+-      -DGGML_CUDA=ON \
+       -DGGML_HIP=ON \
+       -DGGML_VULKAN=ON
+       #-DGGML_OPENCL=ON \
+       #-DGGML_OPENCL_USE_ADRENO_KERNELS=OFF \
+   cmake --build build-all
+ 
++  # Use a "multi-line comment" to keep patch from rotting
++  : <<COMMENT_SEPARATOR
+   . /opt/intel/oneapi/setvars.sh
+ 
+   cmake -S ggml -B build-sycl -G Ninja \
+@@ -73,17 +73,17 @@ build() {
+       -DGGML_BACKEND_DIR=/usr/lib/ggml \
+       -DGGML_BLAS=ON \
+       -DGGML_BLAS_VENDOR=Intel10_64lp \
+-      -DGGML_CPU_ALL_VARIANTS=ON \
+       -DGGML_SYCL=ON \
+       -DGGML_SYCL_F16=ON
+   cmake --build build-sycl
++COMMENT_SEPARATOR
+ }
+ 
+ package_ggml() {
+   optdepends=(
+-    'cuda: CUDA backend'
++    #'cuda: CUDA backend'
+     #'ocl-icd: OpenCL backend'
+-    'nccl: CUDA backend'
++    #'nccl: CUDA backend'
+     'openblas: BLAS backend'
+     'hipblas: ROCm backend'
+     'rocblas: ROCm backend'
+@@ -91,7 +91,7 @@ package_ggml() {
+     'vulkan-icd-loader: Vulkan backend'
+   )
+   provides+=(
+-    ggml-cuda
++    #ggml-cuda
+     #ggml-opencl
+     ggml-rocm
+     ggml-vulkan
+@@ -110,3 +110,6 @@ package_ggml-sycl() {
+   DESTDIR="${pkgdir}" cmake --install build-sycl
+   install -Dm 644 ggml/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}
+ }
++
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(ggml-sycl)$'))
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|nccl|intel-oneapi-toolkit)$'))
