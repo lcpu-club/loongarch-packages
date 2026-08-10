@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 070506e..ea50230 100644
+index 5651f36..66be204 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -65,6 +65,10 @@ case "$CARCH" in
+@@ -63,6 +63,10 @@ case "$CARCH" in
      _vscode_arch=riscv64
      _electron_arch=riscv64
      ;;
@@ -13,7 +13,7 @@ index 070506e..ea50230 100644
    *)
      # Needed for mksrcinfo
      _vscode_arch=DUMMY
-@@ -97,7 +101,9 @@ prepare() {
+@@ -95,7 +99,9 @@ prepare() {
    patch -p0 -i ../product_json.diff
  
    # OpenVSX signature verification
@@ -24,7 +24,7 @@ index 070506e..ea50230 100644
  
    # Set the commit and build date
    local _commit _date
-@@ -133,6 +139,9 @@ prepare() {
+@@ -131,6 +137,9 @@ prepare() {
    sed -i 's|@@APPNAME@@|code-oss|g' resources/completions/{bash/code-oss,zsh/_code-oss}
  
    patch -p1 -i "$srcdir/clipath.patch"
@@ -34,7 +34,7 @@ index 070506e..ea50230 100644
  
    # disable electron checksum verification as we are not bundling electron
    sed -i 's|validateChecksum: false,|validateChecksum: true,|' build/lib/electron.ts
-@@ -140,14 +149,97 @@ prepare() {
+@@ -138,14 +147,97 @@ prepare() {
    # upstream has a compatibility issue with npm but it doesn't affect packaging
    # so remove the check
    sed -i '/Please use npm version < 12.0.0./{n;d}' build/npm/preinstall.ts
@@ -132,17 +132,7 @@ index 070506e..ea50230 100644
    npm run gulp \
         vscode-linux-${_vscode_arch}-min
  }
-@@ -167,7 +259,8 @@ package() {
-   find "$pkgdir" -name rg -print0 | xargs --null --replace ln -s -vsf /usr/bin/rg {}
- 
-   # Remove bundled onnxruntime and rely on system version
--  rm --verbose "$pkgdir"/usr/lib/code/node_modules.asar.unpacked/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime*
-+  # (onnxruntime-node is not shipped on loong64; tolerate its absence)
-+  rm --verbose "$pkgdir"/usr/lib/code/node_modules.asar.unpacked/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime* 2>/dev/null || true
- 
-   # Install binary
-   install -Dm 755 code.sh "$pkgdir"/usr/bin/code-oss
-@@ -193,3 +286,19 @@ package() {
+@@ -188,3 +280,19 @@ package() {
    install -Dm 644 VSCode-linux-$_vscode_arch/resources/app/LICENSE.txt "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
    install -Dm 644 VSCode-linux-$_vscode_arch/resources/app/ThirdPartyNotices.txt "$pkgdir"/usr/share/licenses/$pkgname/ThirdPartyNotices.txt
  }
