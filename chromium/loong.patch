@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index df6f7a7..1e00053 100644
+index b2265a4..88f2a3e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -76,6 +76,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
+@@ -78,6 +78,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
              'org.freedesktop.secrets: password storage backend on GNOME, KDE and Xfce'
              'upower: Battery Status API support')
  options=('!lto') # Chromium adds its own flags for ThinLTO
@@ -19,7 +19,7 @@ index df6f7a7..1e00053 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -284,6 +287,46 @@ prepare() {
+@@ -280,6 +283,47 @@ prepare() {
        -s third_party/dawn --revision gpu/webgpu/DAWN_VERSION \
        --header gpu/webgpu/dawn_commit_hash.h
    fi
@@ -27,6 +27,7 @@ index df6f7a7..1e00053 100644
 +  # Patches for loong64
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++  patch -Np1 -i "${srcdir}/dawn-add-loongarch64-support.patch"
 +
 +  pushd third_party/node/
 +  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
@@ -66,7 +67,7 @@ index df6f7a7..1e00053 100644
  }
  
  build() {
-@@ -391,6 +434,12 @@ build() {
+@@ -387,6 +431,12 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -79,14 +80,16 @@ index df6f7a7..1e00053 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -468,4 +517,10 @@ package() {
+@@ -464,4 +514,12 @@ package() {
    install -Dvm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
-+         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
++         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++         "dawn-add-loongarch64-support.patch")
 +sha256sums+=('941b1b63ae4e4432c9b9b6a3fea9a6f5352235c51bf7f980e5e249023fe84866'
-+             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
++             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
++             'cfdb92dbd54a2e4f113603ac876debd050d5e54492e516666f71bb73252d9425')
 +makedepends+=(jq npm rsync)
 +
  # vim:set ts=2 sw=2 et:

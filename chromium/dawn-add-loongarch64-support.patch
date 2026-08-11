@@ -1,0 +1,28 @@
+--- a/third_party/dawn/tools/python/cipd_deps.py
++++ b/third_party/dawn/tools/python/cipd_deps.py
+@@ -75,4 +75,8 @@
+     native_x86 = platform.machine().lower() in ('x86', 'x86_64', 'amd64')
+     if native_x86:
+         return 'amd64'
++
++    native_loong = platform.machine().lower() in ('loongarch64', 'loong64')
++    if native_loong:
++        return 'loongarch64'
+     raise ValueError('Unable to determine architecture')
+--- a/third_party/dawn/tools/generate-sources-gn.py
++++ b/third_party/dawn/tools/generate-sources-gn.py
+@@ -40,8 +40,12 @@
+ 
+ 
+ def main() -> int:
+-    go_binary = os.path.join(DAWN_ROOT, 'tools', 'golang',
+-                             cipd_deps.get_cipd_platform(), 'bin', 'go')
++    # Fallback to system go
++    if cipd_deps.get_cipd_compatible_current_arch() in ('loongarch64', 'loong64'):
++        go_binary = 'go'
++    else:
++        go_binary = os.path.join(DAWN_ROOT, 'tools', 'golang',
++                                 cipd_deps.get_cipd_platform(), 'bin', 'go')
+     if sys.platform == 'win32':
+         go_binary += '.exe'
+ 
