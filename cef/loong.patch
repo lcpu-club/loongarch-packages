@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 84a2920..53cef3b 100644
+index e2fabf0..45af2c9 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -207,6 +207,36 @@ prepare() {
+@@ -205,6 +205,36 @@ prepare() {
    # CEF: Remove libxml_visibility patch (fails with system libxml2)
    patch -Np1 -i ../cef-no-libxml-visibility-patch.patch
  
@@ -13,7 +13,7 @@ index 84a2920..53cef3b 100644
 +  patch -Np1 -i ../cef-make-distrib-loong64.patch
 +  patch -Np1 -i ../cef-build-h-loong64.patch
 +  patch -Np1 -i ../cef-make-config-header-loong64.patch
-+
++  patch -Np1 -i ../dawn-add-loongarch64-support.patch
 +  pushd third_party/node/
 +  sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
 +  local _rollup_ver="4.32.0" # Known version that supports loong64
@@ -39,7 +39,7 @@ index 84a2920..53cef3b 100644
    # CEF: Override clang_exe to use system clang
    echo 'clang_exe = "clang"' >>cef/tools/clang_util.py
  
-@@ -225,6 +255,13 @@ prepare() {
+@@ -223,6 +253,13 @@ prepare() {
    rm -f third_party/gperf/cipd/bin/gperf
    ln -s /usr/bin/gperf third_party/gperf/cipd/bin/
  
@@ -53,7 +53,7 @@ index 84a2920..53cef3b 100644
    if ((!_system_clang)); then
      # Use prebuilt rust as system rust cannot be used due to the error:
      #   error: the option `Z` is only accepted on the nightly compiler
-@@ -348,9 +385,22 @@ build() {
+@@ -346,9 +383,22 @@ build() {
      )
    fi
  
@@ -77,7 +77,7 @@ index 84a2920..53cef3b 100644
  
    # Facilitate deterministic builds (taken from build/config/compiler/BUILD.gn)
    CFLAGS+='   -Wno-builtin-macro-redefined'
-@@ -381,14 +431,23 @@ build() {
+@@ -379,14 +429,23 @@ build() {
  
    python3 cef/tools/gclient_hook.py
    sed -i '/__sanitizer_set_death_callback/d' v8/src/sandbox/testing.cc
@@ -103,7 +103,7 @@ index 84a2920..53cef3b 100644
      --minimal \
      --no-docs \
      --no-archive
-@@ -422,4 +481,18 @@ package() {
+@@ -420,4 +479,20 @@ package() {
    install -Dm644 ../chromium-$_chromium_ver/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE-CHROMIUM"
  }
  
@@ -113,12 +113,14 @@ index 84a2920..53cef3b 100644
 +         tools-gn-args-loong64.patch
 +         cef-make-distrib-loong64.patch
 +         cef-build-h-loong64.patch
-+         cef-make-config-header-loong64.patch)
++         cef-make-config-header-loong64.patch
++         dawn-add-loongarch64-support.patch)
 +sha256sums+=('941b1b63ae4e4432c9b9b6a3fea9a6f5352235c51bf7f980e5e249023fe84866'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
 +             'cd1f0d2a48b250ff52802234fe1adb3e0960d27653effc0164b1b58a5dcee33c'
-+             '43ca618cc2f06ae9eac6ade59eed70b1b3895bbe44fe358d1575c0c62e294fcc'
++             '19ed7042f7b2f35c05f70fe97937ed32bd602e9b961d77da1692e5554f823b45'
 +             '64ee44c5e488d43f87b6fbcd7f366fdf69d36c9e4c6d59ba67de756581a506ac'
-+             '7f5c8ca01dfa811ee3b207e7955e1d4216d30da3e0562cf384141f3a53665a80')
++             '7f5c8ca01dfa811ee3b207e7955e1d4216d30da3e0562cf384141f3a53665a80'
++             'cfdb92dbd54a2e4f113603ac876debd050d5e54492e516666f71bb73252d9425')
 +
  # vim:set ts=2 sw=2 et:
