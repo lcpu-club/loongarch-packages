@@ -1,0 +1,16 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -186,6 +186,7 @@ build() {
+     -D CMAKE_INSTALL_PREFIX=/usr
+     -D WZ_DISTRIBUTOR="ArchLinux"
+     -D WZ_ENABLE_WARNINGS_AS_ERRORS=Off
++    -D WZ_USE_SYSTEM_LIBJPEG_TURBO=ON
+     -W no-dev
+   )
+ 
+@@ -197,3 +198,5 @@ build() {
+ package() {
+   DESTDIR="$pkgdir" cmake --install build
+ }
++
++depends+=(libjpeg-turbo)
