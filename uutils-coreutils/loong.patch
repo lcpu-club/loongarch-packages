@@ -1,11 +1,11 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -60,7 +60,7 @@ check() {
-     --skip test_cp::test_cp_debug_reflink_never_with_hole \
+@@ -76,7 +76,7 @@ check() {
      --skip test_cp::test_cp_sparse_always_non_empty \
      --skip test_logname::test_output_format \
--    --skip test_stdbuf"
-+    --skip test_stdbuf" || echo "Watch out for failed tests!"
+     --skip test_stdbuf \
+-    --skip test_head::test_zero_bytes_with_suffix"
++    --skip test_head::test_zero_bytes_with_suffix" || echo "Watch out for failed tests!"
  }
  
  package() {
