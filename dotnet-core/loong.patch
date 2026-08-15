@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 41b9714..f5eded8 100644
+index 75fa765..16f7000 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -52,14 +52,32 @@ prepare() {
+@@ -52,14 +52,29 @@ prepare() {
    # fix bootstrap
    git remote set-url origin https://github.com/dotnet/dotnet.git
  
@@ -19,14 +19,11 @@ index 41b9714..f5eded8 100644
 +  # See: https://github.com/dotnet/runtime/issues/122845
 +  patch -p1 -i ../0004-disable-nativeaot-for-components-loongarch64.patch
 +
-+  # LoongArch64: allow missing prune package data in source-built SDK
-+  patch -p1 -i ../0005-allow-missing-prune-package-data-sdk-only.patch
-+
 +  # Force to use local SDK (there is no official release for loong64)
 +  cp -a /usr/share/dotnet .dotnet # Don't use `ln -s` here since the .dotnet dir should be writable
 +  # Get installed SDK version and update global.json to match
 +  local _installed_sdk_ver=$(dotnet --list-sdks | head -n1 | awk '{print $1}')
-+  sed -i "s/\"dotnet\": \"[^\"]*\"/\"dotnet\": \"$_installed_sdk_ver\"/" global.json
++  sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$_installed_sdk_ver\"/" global.json
 +  echo "Updated global.json to use SDK $_installed_sdk_ver"
 +
 +  mkdir -p prereqs/packages/archive/
@@ -43,7 +40,7 @@ index 41b9714..f5eded8 100644
  }
  
  build() {
-@@ -70,13 +88,24 @@ build() {
+@@ -70,13 +85,24 @@ build() {
    export OPENSSL_ENABLE_SHA1_SIGNATURES=1
  
    export PATH="/usr/lib/llvm20/bin:$PATH"
@@ -70,7 +67,7 @@ index 41b9714..f5eded8 100644
    export EXTRA_CFLAGS="$CFLAGS"
    export EXTRA_CXXFLAGS="$CXXFLAGS"
    export EXTRA_LDFLAGS="$LDFLAGS"
-@@ -84,8 +113,8 @@ build() {
+@@ -84,8 +110,8 @@ build() {
    unset CXXFLAGS
    unset LDFLAGS
  
@@ -81,7 +78,7 @@ index 41b9714..f5eded8 100644
  }
  
  package_dotnet-host() {
-@@ -97,8 +126,8 @@ package_dotnet-host() {
+@@ -98,8 +124,8 @@ package_dotnet-host() {
    optdepends=('bash-completion: Bash completion support')
  
    install -dm 755 "${pkgdir}"/usr/{bin,lib,share/{dotnet,licenses/dotnet-host}}
@@ -92,7 +89,7 @@ index 41b9714..f5eded8 100644
    ln -s /usr/share/dotnet/dotnet "${pkgdir}"/usr/bin/dotnet
    ln -s /usr/share/dotnet/host/fxr/${pkgver%.sdk*}/libhostfxr.so "${pkgdir}"/usr/lib/libhostfxr.so
    install -Dm 644 dotnet/src/sdk/scripts/register-completions.bash "${pkgdir}"/usr/share/bash-completion/completions/dotnet
-@@ -122,7 +151,7 @@ package_dotnet-runtime() {
+@@ -127,7 +153,7 @@ package_dotnet-runtime() {
    conflicts=(dotnet-runtime-${pkgver%.*.sdk*})
  
    install -dm 755 "${pkgdir}"/usr/share/{dotnet,licenses}
@@ -101,7 +98,7 @@ index 41b9714..f5eded8 100644
    ln -s dotnet-host "${pkgdir}"/usr/share/licenses/dotnet-runtime
  }
  
-@@ -133,7 +162,7 @@ package_aspnet-runtime() {
+@@ -141,7 +167,7 @@ package_aspnet-runtime() {
    conflicts=(aspnet-runtime-${pkgver%.*.sdk*})
  
    install -dm 755 "${pkgdir}"/usr/share/{dotnet,licenses}
@@ -110,16 +107,16 @@ index 41b9714..f5eded8 100644
    ln -s dotnet-host "${pkgdir}"/usr/share/licenses/aspnet-runtime
  }
  
-@@ -150,7 +179,7 @@ package_dotnet-sdk() {
+@@ -162,7 +188,7 @@ package_dotnet-sdk() {
    conflicts=(dotnet-sdk-${pkgver%.*.sdk*})
  
    install -dm 755 "${pkgdir}"/usr/share/{dotnet,licenses}
 -  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-arch-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner sdk sdk-manifests templates
 +  bsdtar -xf dotnet/artifacts/assets/Release/dotnet-sdk-${pkgver%.*.sdk*}.${pkgver#*sdk}-*.tar.gz -C "${pkgdir}"/usr/share/dotnet/ --no-same-owner sdk sdk-manifests templates
+   install -dm 755 "${pkgdir}"/usr/share/dotnet/metadata/workloads/${pkgver%.*.sdk*}.${pkgver#*.sdk}
+   touch "${pkgdir}"/usr/share/dotnet/metadata/workloads/${pkgver%.*.sdk*}.${pkgver#*.sdk}/userlocal
    ln -s dotnet-host "${pkgdir}"/usr/share/licenses/dotnet-sdk
- }
- 
-@@ -160,7 +189,7 @@ package_dotnet-targeting-pack() {
+@@ -177,7 +203,7 @@ package_dotnet-targeting-pack() {
    conflicts=(dotnet-targeting-pack-${pkgver%.*.sdk*})
  
    install -dm 755 "${pkgdir}"/usr/share/{dotnet,licenses}
@@ -128,7 +125,7 @@ index 41b9714..f5eded8 100644
    ln -s dotnet-host "${pkgdir}"/usr/share/licenses/dotnet-targeting-pack
  }
  
-@@ -171,7 +200,7 @@ package_aspnet-targeting-pack() {
+@@ -191,7 +217,7 @@ package_aspnet-targeting-pack() {
    conflicts=(aspnet-targeting-pack-${pkgver%.*.sdk*})
  
    install -dm 755 "${pkgdir}"/usr/share/{dotnet,licenses}
@@ -137,18 +134,17 @@ index 41b9714..f5eded8 100644
    ln -s dotnet-host "${pkgdir}"/usr/share/licenses/aspnet-targeting-pack
  }
  
-@@ -183,4 +212,14 @@ package_dotnet-source-built-artifacts() {
+@@ -205,3 +231,13 @@ package_dotnet-source-built-artifacts() {
+ 
    install -Dm 644 dotnet/artifacts/assets/Release/Private.SourceBuilt.Artifacts.*.tar.gz -t "${pkgdir}"/usr/share/dotnet/source-built-artifacts/
  }
- 
-+# LoongArch64: append sources at the end of PKGBUILD to avoid merge conflicts with upstream updates
++
++# aspnet-targeting-pack provides prune package data for the AspNetCore framework
++# reference during the sdk build (otherwise NETSDK1226 in src/sdk)
++makedepends+=('aspnet-targeting-pack')
 +source+=(
 +  0004-disable-nativeaot-for-components-loongarch64.patch
-+  0005-allow-missing-prune-package-data-sdk-only.patch
 +)
 +b2sums+=(
 +  '088f933d78c1b16923d485468fce3b86e8cc76788a6490c24efb48c75ee71da7fbadb22b971e7775d3c2a424f814c97e2e387ae72ce797c13b332f2fbbb289c4'
-+  'e303fe324fa4eb30079904a88a2a756f43f740929fbc9da12003665156175d5b27d512d4bd1b5e6912ddd60d41674f47fbd1e1007bcdef94dfecee94936535ac'
 +)
-+
- # vim: ts=2 sw=2 et:
