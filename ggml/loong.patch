@@ -1,58 +1,54 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index d93ec9b..c135e81 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -53,14 +53,14 @@ build() {
+@@ -54,14 +54,13 @@ build() {
        -DGGML_BACKEND_DIR=/usr/lib/ggml \
        -DGGML_BLAS=ON \
        -DGGML_BLAS_VENDOR=OpenBLAS \
 -      -DGGML_CPU_ALL_VARIANTS=ON \
 -      -DGGML_CUDA=ON \
        -DGGML_HIP=ON \
+-      -DGGML_OPENVINO=ON \
        -DGGML_VULKAN=ON
-       #-DGGML_OPENCL=ON \
-       #-DGGML_OPENCL_USE_ADRENO_KERNELS=OFF \
    cmake --build build-all
+   chrpath -d build-all/bin/libggml-*.so
  
 +  # Use a "multi-line comment" to keep patch from rotting
 +  : <<COMMENT_SEPARATOR
    . /opt/intel/oneapi/setvars.sh
  
    cmake -S ggml -B build-sycl -G Ninja \
-@@ -73,17 +73,17 @@ build() {
-       -DGGML_BACKEND_DIR=/usr/lib/ggml \
-       -DGGML_BLAS=ON \
-       -DGGML_BLAS_VENDOR=Intel10_64lp \
--      -DGGML_CPU_ALL_VARIANTS=ON \
-       -DGGML_SYCL=ON \
+@@ -79,6 +78,7 @@ build() {
        -DGGML_SYCL_F16=ON
    cmake --build build-sycl
+   chrpath -d build-sycl/bin/libggml-*.so
 +COMMENT_SEPARATOR
  }
  
  package_ggml() {
+@@ -86,8 +86,8 @@ package_ggml() {
    optdepends=(
--    'cuda: CUDA backend'
-+    #'cuda: CUDA backend'
-     #'ocl-icd: OpenCL backend'
--    'nccl: CUDA backend'
-+    #'nccl: CUDA backend'
-     'openblas: BLAS backend'
-     'hipblas: ROCm backend'
-     'rocblas: ROCm backend'
-@@ -91,7 +91,7 @@ package_ggml() {
-     'vulkan-icd-loader: Vulkan backend'
+     'ggml-blas: BLAS backend'
+     'ggml-cpu: CPU backend'
+-    'ggml-cuda: CUDA backend'
+-    'ggml-openvino: Openvino backend'
++#    'ggml-cuda: CUDA backend'
++#    'ggml-openvino: Openvino backend'
+     'ggml-hip: HIP backend'
+     'ggml-vulkan: Vulkan backend'
    )
-   provides+=(
--    ggml-cuda
-+    #ggml-cuda
-     #ggml-opencl
-     ggml-rocm
-     ggml-vulkan
-@@ -110,3 +110,6 @@ package_ggml-sycl() {
-   DESTDIR="${pkgdir}" cmake --install build-sycl
-   install -Dm 644 ggml/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}
+@@ -108,7 +108,7 @@ package_ggml-blas() {
+ }
+ 
+ package_ggml-cpu() {
+-  install -Dm 755 build-all/bin/libggml-cpu-*.so -t "${pkgdir}"/usr/lib/ggml/
++  install -Dm 755 build-all/bin/libggml-cpu.so -t "${pkgdir}"/usr/lib/ggml/
+   install -Dm 644 ggml/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
+ }
+ 
+@@ -176,3 +176,6 @@ package_ggml-vulkan() {
+   install -Dm 755 build-all/bin/libggml-vulkan.so -t "${pkgdir}"/usr/lib/ggml/
+   install -Dm 644 ggml/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
  }
 +
-+pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(ggml-sycl)$'))
-+makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|nccl|intel-oneapi-toolkit)$'))
++pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(ggml-sycl|ggml-cuda|ggml-openvino)$'))
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|nccl|intel-oneapi-toolkit|openvino)$'))
