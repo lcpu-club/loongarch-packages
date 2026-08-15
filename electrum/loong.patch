@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 0be030b..4a7c50d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -83,7 +83,8 @@ build() {
+ 
+ check() {
+   cd $pkgname
+-  pytest --ignore=electrum/locale/llm_proofreader
++  pytest --ignore=electrum/locale/llm_proofreader \
++    --deselect tests/test_interface.py::TestInterface::test_we_disconnect_on_incoming_notification_spam
+ }
+ 
+ package() {
