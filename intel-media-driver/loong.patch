@@ -1,9 +1,9 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 4164571..7064962 100644
+index 7ba736a..3df7a38 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -20,6 +20,7 @@ source=("https://github.com/intel/media-driver/archive/intel-media-${pkgver}/${p
- sha256sums=('e5cf57c66e22359d1ec07d766b04e5da43677b9330999ce0dbf686aac60cf6bb')
+ sha256sums=('a23185fca05c8fa8bdec09ea9ee8a20361163c87035ec978de4e2bb048a55534')
  
  build() {
 +    patch -Np1 -d media-driver-intel-media-${pkgver} -i "${srcdir}/add-loongarch64-build-support.patch"
@@ -15,6 +15,6 @@ index 4164571..7064962 100644
      install -D -m644 "media-driver-intel-media-${pkgver}/LICENSE.md" -t "${pkgdir}/usr/share/licenses/${pkgname}"
  }
 +
-+source+=("add-loongarch64-build-support.patch::https://github.com/wszqkzqk/media-driver/commit/7fd47d654b0630527c681a14b69e603587f764cf.diff")
-+sha256sums+=('ad1dc272238a6acdaec8f040afd4025ee534a9d1c12675063b928c16569356eb')
++source+=("add-loongarch64-build-support.patch")
++sha256sums+=('576d2122e61a47a3a020ba4c2e04ea091c83217cb53a1677c507521e0ab194bb')
 +makedepends+=(simde)
