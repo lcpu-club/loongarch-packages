@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -25,6 +25,9 @@ sha256sums=('f0e8bb1f9b7eb0b01285495a2699df3a4b766784c1765a8f1aeedf63c0806369'
+@@ -29,6 +29,9 @@ sha256sums=('f0e8bb1f9b7eb0b01285495a2699df3a4b766784c1765a8f1aeedf63c0806369'
  
  options=('!makeflags')
  
@@ -10,10 +10,10 @@
  prepare() {
  	cd "${srcdir}/${pkgname}${_pkgver}"
  	sed -e "/^CFLAGS_NOOPT =/s/\$/ $CPPFLAGS $CFLAGS/" -i unix/Makefile
-@@ -35,6 +38,7 @@ prepare() {
- 	patch -p1 -i ../zip-3.0-format-security.patch
- 	patch -p1 -i ../zipnote.patch
+@@ -41,6 +44,7 @@ prepare() {
  	patch -p1 -i ../buffer_overflow.patch
+ 	patch -p1 -i ../buffer-overflow-cve-2018-13410.patch
+ 	patch -p1 -i ../fix-command-injection.patch
 +	patch -p1 -i ../fix-config.patch
  }
  
