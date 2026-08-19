@@ -1,11 +1,10 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -8,16 +8,16 @@
- 
+@@ -9,15 +9,16 @@
  pkgname=luajit
- pkgver=2.1.1780076327+b925b3e
--_commit=${pkgver##*+}
-+_commit=f9d14713
+ pkgver=2.1.1785763465+1edc3e5
+ _commit=${pkgver##*+}
++_commit=a28f2c73
  pkgrel=1
  pkgdesc='Just-in-time compiler and drop-in replacement for Lua 5.1'
  arch=('x86_64')
@@ -13,15 +12,15 @@
  license=('MIT')
  depends=('glibc' 'libgcc')
 -source=("LuaJIT-${_commit}.tar.gz::https://github.com/LuaJIT/LuaJIT/archive/${_commit}.tar.gz")
--sha256sums=('64093b16de26069824941be6c2537e1d18b360c4b4d7117393e68d3ebeb3c51a')
--b2sums=('964d82145b29bb9c3764fb8ed6f43c9c46ee1c835209bb57c73997ba401aabe9f17beaef5c244ca0773199fa5f08c1b4f4fdd4a60ee3ca05c5226381fa0b973e')
-+source=("LuaJIT-${_commit}.tar.gz::https://github.com/setarcos/LuaJIT/archive/${_commit}.tar.gz")
-+sha256sums=('68b20b5605952591f25817feb6c8c4cc17648ffe3341ab9ed9265155592d63c6')
-+b2sums=('db02a0ccacde2ed67cf48d8b63ec89927e3d14fc18fd43cb6fff165b9d5b199c69512b7353824945415feaf0625fa9891a4793e70c31a6ae4f667789c1def23c')
+-sha256sums=('85497ea149d136afbe2d7ef222e08849248e52cecc6dc8deefd8588e551e4e00')
+-b2sums=('4ec1f829c24b9eb20904ed8949e854468bd3bdc5e613f661e5bb49bbc809d287c945553470ec158abb36a3548fdf1ce78370dc9a1e0b2f0173553558fe4dec46')
++source=("LuaJIT-${_commit}.tar.gz::https://github.com/loongson/LuaJIT/archive/${_commit}.tar.gz")
++sha256sums=('036265876655c68542edfcb57709e6c6c67fe01c246daa85e4969436cd4a9cbd')
++b2sums=('87ebab0381e87649816397037691924f11d477355d5bd3d4de2795a0f8c1f843c2f57e37562f1830483a01db9fdadd2ec66015b151386d1d8348b2983b057f6c')
  
  build() {
    cd "LuaJIT-${_commit}"*/
-@@ -31,7 +31,7 @@ check() {
+@@ -31,7 +32,7 @@ check() {
  
    # Make sure that pkgver matches packaged commit
    local _ct=${pkgver##*.}
