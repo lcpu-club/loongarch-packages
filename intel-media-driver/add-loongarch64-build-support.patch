@@ -1,0 +1,310 @@
+diff --git a/cmrtlib/build_linux.sh b/cmrtlib/build_linux.sh
+index f3f5fd0..b80460d 100644
+--- a/cmrtlib/build_linux.sh
++++ b/cmrtlib/build_linux.sh
+@@ -138,7 +138,11 @@ case $BUILD_SIZE in
+         if [[ $BUILD_64 -eq 1 ]]; then
+             CROSS_BUILD=1
+             BUILD_SIZE=64
+-            EXTRA_OPTIONS="export CFLAGS=-m64 CXXFLAGS=-m64"
++            if [ ${MACHINE_TYPE} == 'loongarch64' ]; then
++                EXTRA_OPTIONS=""
++            else
++                EXTRA_OPTIONS="export CFLAGS=-m64 CXXFLAGS=-m64"
++            fi
+         fi
+         ;;
+     64)
+diff --git a/media_driver/agnostic/common/cm/cm_mem.cpp b/media_driver/agnostic/common/cm/cm_mem.cpp
+index f40b692..799dbae 100644
+--- a/media_driver/agnostic/common/cm/cm_mem.cpp
++++ b/media_driver/agnostic/common/cm/cm_mem.cpp
+@@ -26,27 +26,40 @@
+ 
+ #include "cm_mem.h"
+ #include "cm_mem_c_impl.h"
++
++#if !defined(__loongarch64)
+ #include "cm_mem_sse2_impl.h"
++#endif
+ 
+ typedef void(*t_CmFastMemCopy)( void* dst, const   void* src, const size_t bytes );
+ typedef void(*t_CmFastMemCopyWC)( void* dst,   const void* src, const size_t bytes );
+ 
++#if !defined(__loongarch64)
+ #define CM_FAST_MEM_COPY_CPU_INIT_C(func)       (func ## _C)
+ #define CM_FAST_MEM_COPY_CPU_INIT_SSE2(func)    (func ## _SSE2)
+ #define CM_FAST_MEM_COPY_CPU_INIT(func)         (is_SSE2_available ? CM_FAST_MEM_COPY_CPU_INIT_SSE2(func) : CM_FAST_MEM_COPY_CPU_INIT_C(func))
++#endif
+ 
+ void CmFastMemCopy( void* dst, const void* src, const size_t bytes )
+ {
++#if defined(__loongarch64)
++    CmFastMemCopy_C(dst, src, bytes);
++#else
+     static const bool is_SSE2_available = (GetCpuInstructionLevel() >= CPU_INSTRUCTION_LEVEL_SSE2);
+     static const t_CmFastMemCopy CmFastMemCopy_impl = CM_FAST_MEM_COPY_CPU_INIT(CmFastMemCopy);
+ 
+     CmFastMemCopy_impl(dst, src, bytes);
++#endif
+ }
+ 
+ void CmFastMemCopyWC( void* dst, const void* src, const size_t bytes )
+ {
++#if defined(__loongarch64)
++    CmFastMemCopyWC_C(dst, src, bytes);
++#else
+     static const bool is_SSE2_available = (GetCpuInstructionLevel() >= CPU_INSTRUCTION_LEVEL_SSE2);
+     static const t_CmFastMemCopyWC CmFastMemCopyWC_impl = CM_FAST_MEM_COPY_CPU_INIT(CmFastMemCopyWC);
+ 
+     CmFastMemCopyWC_impl(dst, src, bytes);
++#endif
+ }
+diff --git a/media_driver/agnostic/common/cm/cm_mem.h b/media_driver/agnostic/common/cm/cm_mem.h
+index 67cfd75..dbbebbf 100644
+--- a/media_driver/agnostic/common/cm/cm_mem.h
++++ b/media_driver/agnostic/common/cm/cm_mem.h
+@@ -25,9 +25,14 @@
+ //!
+ #pragma once
+ 
++#if defined(__loongarch64)
++#define SIMDE_X86_SSE2_ENABLE_NATIVE_ALIASES
++#include <simde/x86/sse2.h>
++#else
+ #include <mmintrin.h>
+ #include <xmmintrin.h>
+ #include <emmintrin.h>
++#endif
+ #include "cm_debug.h"
+ #include "mos_utilities.h"
+ 
+@@ -43,7 +48,11 @@ enum CPU_INSTRUCTION_LEVEL
+     NUM_CPU_INSTRUCTION_LEVELS
+ };
+ 
++#if defined(__loongarch64)
++typedef __m128i             DQWORD;         // 128-bits,   16-bytes
++#else
+ typedef __m128              DQWORD;         // 128-bits,   16-bytes
++#endif
+ typedef uint32_t            PREFETCH[8];    //             32-bytes
+ typedef uint32_t            CACHELINE[8];   //             32-bytes
+ typedef uint16_t            DHWORD[32];     // 512-bits,   64-bytes
+@@ -230,9 +239,12 @@ inline CPU_INSTRUCTION_LEVEL GetCpuInstructionLevel( void )
+     int cpuInfo[4];
+     memset( cpuInfo, 0, 4*sizeof(int) );
+ 
++#if !defined(__loongarch64)
+     GetCPUID(cpuInfo, 1);
++#endif
+ 
+     CPU_INSTRUCTION_LEVEL cpuInstructionLevel = CPU_INSTRUCTION_LEVEL_UNKNOWN;
++#if !defined(__loongarch64)
+     if( (cpuInfo[2] & BIT(19)) && TestSSE4_1() )
+     {
+         cpuInstructionLevel = CPU_INSTRUCTION_LEVEL_SSE4_1;
+@@ -253,6 +265,7 @@ inline CPU_INSTRUCTION_LEVEL GetCpuInstructionLevel( void )
+     {
+         cpuInstructionLevel = CPU_INSTRUCTION_LEVEL_MMX;
+     }
++#endif
+ 
+     return cpuInstructionLevel;
+ }
+diff --git a/media_driver/cmake/linux/media_compile_flags_linux.cmake b/media_driver/cmake/linux/media_compile_flags_linux.cmake
+index 397e8c5..677a3b7 100755
+--- a/media_driver/cmake/linux/media_compile_flags_linux.cmake
++++ b/media_driver/cmake/linux/media_compile_flags_linux.cmake
+@@ -54,8 +54,6 @@ set(MEDIA_COMPILER_FLAGS_COMMON
+ 
+     # Enable c++14 features
+     -std=c++14
+-    # -m32 or -m64
+-    -m${ARCH}
+ 
+     # Global defines
+     -DLINUX=1
+@@ -66,6 +64,13 @@ set(MEDIA_COMPILER_FLAGS_COMMON
+     -g
+ )
+ 
++if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^loongarch")
++    list(APPEND MEDIA_COMPILER_FLAGS_COMMON "-Wno-overloaded-virtual")
++else()
++    # -m32 or -m64
++    list(APPEND MEDIA_COMPILER_FLAGS_COMMON "-m${ARCH}")
++endif()
++
+ if(MEDIA_BUILD_HARDENING)
+     set(MEDIA_COMPILER_FLAGS_COMMON
+         ${MEDIA_COMPILER_FLAGS_COMMON}
+diff --git a/media_driver/linux/common/cm/hal/osservice/cm_mem_os.cpp b/media_driver/linux/common/cm/hal/osservice/cm_mem_os.cpp
+index 97d2244..f9ab76b 100644
+--- a/media_driver/linux/common/cm/hal/osservice/cm_mem_os.cpp
++++ b/media_driver/linux/common/cm/hal/osservice/cm_mem_os.cpp
+@@ -27,18 +27,27 @@
+ #include "cm_mem.h"
+ #include "cm_mem_os.h"
+ #include "cm_mem_os_c_impl.h"
++
++#if !defined(__loongarch64)
+ #include "cm_mem_os_sse4_impl.h"
++#endif
+ 
+ typedef void(*t_CmFastMemCopyFromWC)( void* dst, const void* src, const size_t bytes );
+ 
++#if !defined(__loongarch64)
+ #define CM_FAST_MEM_COPY_CPU_INIT_C(func)       (func ## _C)
+ #define CM_FAST_MEM_COPY_CPU_INIT_SSE4(func)    (func ## _SSE4)
+ #define CM_FAST_MEM_COPY_CPU_INIT(func)         (is_SSE4_available ? CM_FAST_MEM_COPY_CPU_INIT_SSE4(func) : CM_FAST_MEM_COPY_CPU_INIT_C(func))
++#endif
+ 
+ void CmFastMemCopyFromWC( void* dst, const void* src, const size_t bytes, CPU_INSTRUCTION_LEVEL cpuInstructionLevel )
+ {
++#if defined(__loongarch64)
++    CmFastMemCopyFromWC_C(dst, src, bytes);
++#else
+     static const bool is_SSE4_available = (cpuInstructionLevel >= CPU_INSTRUCTION_LEVEL_SSE4_1);
+     static const t_CmFastMemCopyFromWC CmFastMemCopyFromWC_impl = CM_FAST_MEM_COPY_CPU_INIT(CmFastMemCopyFromWC);
+ 
+     CmFastMemCopyFromWC_impl(dst, src, bytes);
++#endif
+ }
+diff --git a/media_driver/linux/common/cm/hal/osservice/cm_mem_os.h b/media_driver/linux/common/cm/hal/osservice/cm_mem_os.h
+index e911e4e..e232a13 100644
+--- a/media_driver/linux/common/cm/hal/osservice/cm_mem_os.h
++++ b/media_driver/linux/common/cm/hal/osservice/cm_mem_os.h
+@@ -26,8 +26,13 @@
+ #pragma once
+ 
+ #include <iostream>
++#if defined(__loongarch64)
++#define SIMDE_X86_SSE2_ENABLE_NATIVE_ALIASES
++#include <simde/x86/sse2.h>
++#else
+ #include "cpuid.h"
+-#include <smmintrin.h>
++#include <emmintrin.h>
++#endif
+ 
+ typedef uintptr_t           UINT_PTR;
+ #define __fastcall
+@@ -120,6 +125,9 @@ Output:
+ \*****************************************************************************/
+ inline void GetCPUID(int cpuInfo[4], int infoType)
+ {
++#if defined(__loongarch64)
++    return;
++#else
+ #ifndef NO_EXCEPTION_HANDLING
+     __try
+     {
+@@ -135,6 +143,7 @@ inline void GetCPUID(int cpuInfo[4], int infoType)
+         return;
+     }
+ #endif  //NO_EXCEPTION_HANDLING
++#endif //defined(__loongarch64)
+ }
+ 
+ void CmFastMemCopyFromWC( void* dst, const void* src, const size_t bytes, CPU_INSTRUCTION_LEVEL cpuInstructionLevel );
+diff --git a/media_driver/media_top_cmake.cmake b/media_driver/media_top_cmake.cmake
+index 2dcd0fb..58abfbf 100755
+--- a/media_driver/media_top_cmake.cmake
++++ b/media_driver/media_top_cmake.cmake
+@@ -46,6 +46,20 @@ if(NOT DEFINED SKIP_GMM_CHECK)
+     endif()
+ endif(NOT DEFINED SKIP_GMM_CHECK)
+ 
++if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^loongarch")
++find_path(SIMDE_INCLUDE_DIR
++    NAMES simde/simde-common.h # A key SIMDE header
++    PATHS /usr/include /usr/local/include # Default paths
++    DOC "Path to SIMDE headers"
++)
++if(SIMDE_INCLUDE_DIR)
++    include_directories(${SIMDE_INCLUDE_DIR})
++    message(STATUS "Found SIMDE: ${SIMDE_INCLUDE_DIR}")
++else()
++    message(FATAL_ERROR "SIMDE not found. Install it or set SIMDE_INCLUDE_DIR manually.")
++endif()
++endif()
++
+ message("-- media -- PLATFORM = ${PLATFORM}")
+ message("-- media -- ARCH = ${ARCH}")
+ message("-- media -- CMAKE_CURRENT_LIST_DIR = ${CMAKE_CURRENT_LIST_DIR}")
+@@ -253,8 +267,11 @@ set_source_files_properties(${CP_COMMON_SHARED_SOURCES_} PROPERTIES LANGUAGE "CX
+ set_source_files_properties(${CP_COMMON_NEXT_SOURCES_} PROPERTIES LANGUAGE "CXX")
+ set_source_files_properties(${CP_SOURCES_} PROPERTIES LANGUAGE "CXX")
+ set_source_files_properties(${SOFTLET_DDI_SOURCES_} PROPERTIES LANGUAGE "CXX")
++
++if(NOT ${CMAKE_SYSTEM_PROCESSOR} MATCHES "^loongarch")
+ set_source_files_properties(${SOURCES_SSE2} PROPERTIES LANGUAGE "CXX")
+ set_source_files_properties(${SOURCES_SSE4} PROPERTIES LANGUAGE "CXX")
++endif()
+ 
+ # MHW settings
+ set(SOFTLET_MHW_PRIVATE_INCLUDE_DIRS_
+@@ -426,6 +443,7 @@ set (VP_PRIVATE_INCLUDE_DIRS_
+     ${VP_PRIVATE_INCLUDE_DIRS_}
+     ${SOFTLET_VP_PRIVATE_INCLUDE_DIRS_})
+ 
++if(NOT ${CMAKE_SYSTEM_PROCESSOR} MATCHES "^loongarch")
+ add_library(${LIB_NAME}_SSE2 OBJECT ${SOURCES_SSE2})
+     target_compile_options(${LIB_NAME}_SSE2 PRIVATE -msse2)
+     target_include_directories(${LIB_NAME}_SSE2 BEFORE PRIVATE ${SOFTLET_MOS_PREPEND_INCLUDE_DIRS_} ${MOS_PUBLIC_INCLUDE_DIRS_} ${SOFTLET_MOS_PUBLIC_INCLUDE_DIRS_} ${COMMON_PRIVATE_INCLUDE_DIRS_} ${SOFTLET_MHW_PRIVATE_INCLUDE_DIRS_} ${SOFTLET_DDI_PUBLIC_INCLUDE_DIRS_})
+@@ -435,6 +453,7 @@ add_library(${LIB_NAME}_SSE4 OBJECT ${SOURCES_SSE4})
+     target_compile_options(${LIB_NAME}_SSE4 PRIVATE -msse4.1)
+     target_include_directories(${LIB_NAME}_SSE4 BEFORE PRIVATE ${SOFTLET_MOS_PREPEND_INCLUDE_DIRS_} ${MOS_PUBLIC_INCLUDE_DIRS_} ${SOFTLET_MOS_PUBLIC_INCLUDE_DIRS_} ${COMMON_PRIVATE_INCLUDE_DIRS_} ${SOFTLET_MHW_PRIVATE_INCLUDE_DIRS_} ${SOFTLET_DDI_PUBLIC_INCLUDE_DIRS_})
+     target_link_libraries(${LIB_NAME}_SSE4 ${MEDIA_GMM_INTERFACE_LIBS})
++endif()
+ 
+ add_library(${LIB_NAME}_COMMON OBJECT ${COMMON_SOURCES_} ${SOFTLET_DDI_SOURCES_})
+ set_property(TARGET ${LIB_NAME}_COMMON PROPERTY POSITION_INDEPENDENT_CODE 1)
+@@ -593,6 +612,17 @@ ${MEDIA_SOFTLET}/linux/common/ddi
+ ############## MOS LIB END ########################################
+ 
+ ############## Media Driver Static and Shared Lib #################
++if( ${CMAKE_SYSTEM_PROCESSOR} MATCHES "^loongarch")
++add_library(${LIB_NAME} SHARED
++    $<TARGET_OBJECTS:${LIB_NAME}_mos>
++    $<TARGET_OBJECTS:${LIB_NAME}_COMMON>
++    $<TARGET_OBJECTS:${LIB_NAME}_CODEC>
++    $<TARGET_OBJECTS:${LIB_NAME}_VP>
++    $<TARGET_OBJECTS:${LIB_NAME}_CP>
++    $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_VP>
++    $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_CODEC>
++    $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_COMMON>)
++else()
+ add_library(${LIB_NAME} SHARED
+     $<TARGET_OBJECTS:${LIB_NAME}_mos>
+     $<TARGET_OBJECTS:${LIB_NAME}_COMMON>
+@@ -604,8 +634,19 @@ add_library(${LIB_NAME} SHARED
+     $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_VP>
+     $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_CODEC>
+     $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_COMMON>)
++endif()
+ 
+-
++if( ${CMAKE_SYSTEM_PROCESSOR} MATCHES "^loongarch")
++add_library(${LIB_NAME_STATIC} STATIC
++    $<TARGET_OBJECTS:${LIB_NAME}_mos>
++    $<TARGET_OBJECTS:${LIB_NAME}_COMMON>
++    $<TARGET_OBJECTS:${LIB_NAME}_CODEC>
++    $<TARGET_OBJECTS:${LIB_NAME}_VP>
++    $<TARGET_OBJECTS:${LIB_NAME}_CP>
++    $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_VP>
++    $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_CODEC>
++    $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_COMMON>)
++else()
+ add_library(${LIB_NAME_STATIC} STATIC
+     $<TARGET_OBJECTS:${LIB_NAME}_mos>
+     $<TARGET_OBJECTS:${LIB_NAME}_COMMON>
+@@ -617,6 +658,7 @@ add_library(${LIB_NAME_STATIC} STATIC
+     $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_VP>
+     $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_CODEC>
+     $<TARGET_OBJECTS:${LIB_NAME}_SOFTLET_COMMON>)
++endif()
+ 
+ set_target_properties(${LIB_NAME_STATIC} PROPERTIES OUTPUT_NAME ${LIB_NAME})
+ 
