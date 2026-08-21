@@ -1,0 +1,36 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 86d50e6..afb378f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,6 +38,31 @@ replaces=(jupyter-server-ydoc)
+ source=(git+https://github.com/jupyterlab/jupyter-collaboration#tag=v$pkgver)
+ sha256sums=('7db07a9b07df711aa7526178f84e552650a13618cc7b43d6f984bbd2782366f4')
+ 
++prepare() {
++# @jupyter/builder bundles with @rspack/core, which has no loong64 native
++# binding; build the labextensions with the legacy webpack-based
++# @jupyterlab/builder instead (same approach as the jupyterlab package)
++  cd $pkgname
++  for _ext in packages/collaboration-extension packages/docprovider-extension; do
++    python - "$_ext" <<'EOF'
++import json
++import sys
++
++path = f"{sys.argv[1]}/package.json"
++with open(path) as f:
++    data = json.load(f)
++
++dev = data["devDependencies"]
++dev.pop("@jupyter/builder", None)
++dev["@jupyterlab/builder"] = "^4.5.10"
++
++with open(path, "w") as f:
++    json.dump(data, f, indent=2)
++    f.write("\n")
++EOF
++  done
++}
++
+ build() {
+   for _proj in jupyter-server-ydoc jupyter-docprovider jupyter-collaboration-ui; do
+     cd "$srcdir"/$pkgname/projects/$_proj
