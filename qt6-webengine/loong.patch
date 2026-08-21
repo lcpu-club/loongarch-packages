@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -95,6 +95,13 @@ prepare() {
+@@ -93,6 +93,18 @@ prepare() {
    # Bump chromium to head of stable branch
    cd src/3rdparty
    [[ -n $_chromium ]] && git checkout $_chromium || true
@@ -8,20 +8,29 @@
 +  # Fix build for loong64
 +  patch -Np2 -i "$srcdir/add-loong64-support.patch"
 +  patch -Np1 -i "$srcdir/fix-para-type-in-delay.cc.patch" -d "src/3rdparty/chromium"
++  # Remove custom ArgbConstants from row_lsx.cc/row_lasx.cc (now defined in row.h)
++  patch -Np1 -i "$srcdir/libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch" -d "src/3rdparty/chromium"
++  # Use AssemblerBase::kMaximalBufferSize (public) instead of the private one
++  # shadowing it in the loong64 Assembler class
++  patch -Np1 -i "$srcdir/fix-v8-assembler-kMaximalBufferSize.patch" -d "src/3rdparty/chromium"
 +  # Temporarily switch to mold to workaround with binutils's bfd's bug
 +  export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
 +  popd
  }
  
  build() {
-@@ -116,3 +123,10 @@ package() {
+@@ -114,3 +126,14 @@ package() {
  
    install -Dm644 "$srcdir"/${_pkgfn}/src/3rdparty/chromium/LICENSE "$pkgdir"/usr/share/licenses/${pkgname}/LICENSE.chromium
  }
 +
 +source+=("add-loong64-support.patch"
-+         "fix-para-type-in-delay.cc.patch")
++         "fix-para-type-in-delay.cc.patch"
++         "libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch"
++         "fix-v8-assembler-kMaximalBufferSize.patch")
 +sha256sums+=('8592cef263fee7a8d806b2b16fb07e7296593b6a0b3c35174fd3a5f53f29bc94'
-+             '9dddd42413ce4a7b877f5778402e360cab3310a316f5209b0bcefa0d1d2d27fe')
++             '9dddd42413ce4a7b877f5778402e360cab3310a316f5209b0bcefa0d1d2d27fe'
++             '63f6dff26b20c178ef86f9220c9f72c4da39059b9bad8c4f551c605515626300'
++             'a9cbf5a1dfffbbccdb5b7527b976e3c735253d1bf497da9786ba056f2495e287')
 +# Temporarily switch to mold to workaround with binutils's bfd's bug
 +makedepends+=(mold)

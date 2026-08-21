@@ -1,0 +1,12 @@
+diff --git a/v8/src/codegen/loong64/assembler-loong64.h b/v8/src/codegen/loong64/assembler-loong64.h
+--- a/v8/src/codegen/loong64/assembler-loong64.h
++++ b/v8/src/codegen/loong64/assembler-loong64.h
+@@ -933,10 +933,7 @@ class V8_EXPORT_PRIVATE Assembler : public AssemblerBase {
+ 
+  private:
+-  // Avoid overflows for displacements etc.
+-  static const int kMaximalBufferSize = 512 * MB;
+-
+   // Buffer size and constant pool distance are checked together at regular
+   // intervals of kBufferCheckInterval emitted bytes.
+   static constexpr int kBufferCheckInterval = 1 * KB / 2;
