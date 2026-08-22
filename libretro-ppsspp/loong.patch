@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d173b8a..b765f31 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -64,6 +64,7 @@ b2sums=('bb7604eb8d2436d409eb26ca7f29d7939aa1769dae10996a2e71e0bca841bb13056d925
+ prepare() {
+   cd libretro-ppsspp
+   patch -Np1 -i ../libretro-ppsspp-assets-path.patch
++  patch -Np1 -i ../libretro-ppsspp-loong64.patch
+   for submodule in ffmpeg assets/lang ext/glslang ext/lua; do
+     git submodule init ${submodule}
+     git config submodule.${submodule}.url ../ppsspp-${submodule#*/}
+@@ -90,3 +91,6 @@ package() {
+   install -Dm 644 libretro-ppsspp/libretro/ppsspp_libretro.so -t "${pkgdir}"/usr/lib/libretro/
+   install -Dm 644 libretro-ppsspp/LICENSE.TXT -t "${pkgdir}"/usr/share/licenses/libretro-ppsspp/
+ }
++
++source+=('libretro-ppsspp-loong64.patch')
++b2sums+=('a3f138bec4f9d831b645b3a15f36f88be6a2a508deee98be986f2b70a8840584c5c32bf9d7f1b34d7dc3539d73a11f7a69640598182538cbd25b40627d6de1cf')
