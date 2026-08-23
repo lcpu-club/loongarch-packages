@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d8e48d8..667973b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -73,6 +73,10 @@ prepare() {
+   cp -r $pkgbase{,-src}
+   # Fix ssl_certificate_compression test: loop only checked first algorithm
+   sed '/\$has_zlib = 1 if \$algo == 1;/{n;/^\t\t\t\tlast;/d}' -i nginx-tests/ssl_certificate_compression.t
++
++  # loongarch64: use 64-byte cache line (fixes server_names_hash_bucket_size
++  # default of 32, which breaks ssl_store_keys.t and real-world long server names)
++  patch -d $pkgbase -Np1 -i "$srcdir"/nginx-loongarch-cacheline.patch
+ }
+ 
+ build() {
+@@ -309,3 +313,6 @@ package_nginx-mod-xslt() {
+   backup=(etc/nginx/modules.d/20-xslt.conf)
+   _package_module xslt
+ }
++
++source+=('nginx-loongarch-cacheline.patch')
++sha512sums+=('af0a50556c99bd4d4b249d33fed83ba976dfc94275ff0bc5fbf8248d10feb9ade277e02b8f1e4aad36f8b27f18073503cc4ba8eeb070afaf11dc1adde370d2e8')

@@ -1,0 +1,15 @@
+diff -upr a/auto/os/conf b/auto/os/conf
+--- a/auto/os/conf
++++ b/auto/os/conf
+@@ -125,6 +125,11 @@ case "$NGX_MACHINE" in
+         NGX_MACH_CACHE_LINE=64
+     ;;
+ 
++    loongarch64)
++        have=NGX_ALIGNMENT value=16 . auto/define
++        NGX_MACH_CACHE_LINE=64
++    ;;
++
+     s390x)
+         have=NGX_ALIGNMENT value=16 . auto/define
+         NGX_MACH_CACHE_LINE=256
