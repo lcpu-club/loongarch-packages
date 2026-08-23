@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,7 +25,7 @@ package() {
+   _kernver="$(</usr/src/linux/version)"
+   _extramodules="/usr/lib/modules/$_kernver/extramodules"
+   install -Dm644 -t "$pkgdir$_extramodules" \
+-    $pkgname/$pkgver/$_kernver/$CARCH/module/*.ko
++    $pkgname/$pkgver/$_kernver/$(uname -m)/module/*.ko
+ 
+   # compress kernel modules
+   find "$pkgdir" -name '*.ko' -exec zstd --rm -19 {} +
