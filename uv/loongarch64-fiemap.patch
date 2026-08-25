@@ -1,0 +1,33 @@
+--- a/crates/uv-fs/src/space.rs
++++ b/crates/uv-fs/src/space.rs
+@@ -9,10 +9,29 @@
+ use std::os::unix::fs::MetadataExt;
+ 
+ #[cfg(target_os = "linux")]
++use linux_raw_sys::ioctl::FS_IOC_FIEMAP;
++#[cfg(all(target_os = "linux", not(target_arch = "loongarch64")))]
+ use linux_raw_sys::ioctl::{
+     FIEMAP_EXTENT_DATA_INLINE, FIEMAP_EXTENT_DELALLOC, FIEMAP_EXTENT_ENCODED, FIEMAP_EXTENT_LAST,
+-    FIEMAP_EXTENT_NOT_ALIGNED, FIEMAP_EXTENT_SHARED, FIEMAP_EXTENT_UNKNOWN, FS_IOC_FIEMAP,
++    FIEMAP_EXTENT_NOT_ALIGNED, FIEMAP_EXTENT_SHARED, FIEMAP_EXTENT_UNKNOWN,
+ };
++// linux-raw-sys 0.12.1 does not generate the FIEMAP extent flags in its
++// loongarch64 bindings; they are arch-independent UAPI constants
++// (linux/uapi/linux/fiemap.h), so define them locally.
++#[cfg(all(target_os = "linux", target_arch = "loongarch64"))]
++const FIEMAP_EXTENT_LAST: u32 = 0x1;
++#[cfg(all(target_os = "linux", target_arch = "loongarch64"))]
++const FIEMAP_EXTENT_UNKNOWN: u32 = 0x2;
++#[cfg(all(target_os = "linux", target_arch = "loongarch64"))]
++const FIEMAP_EXTENT_DELALLOC: u32 = 0x4;
++#[cfg(all(target_os = "linux", target_arch = "loongarch64"))]
++const FIEMAP_EXTENT_ENCODED: u32 = 0x8;
++#[cfg(all(target_os = "linux", target_arch = "loongarch64"))]
++const FIEMAP_EXTENT_NOT_ALIGNED: u32 = 0x100;
++#[cfg(all(target_os = "linux", target_arch = "loongarch64"))]
++const FIEMAP_EXTENT_DATA_INLINE: u32 = 0x200;
++#[cfg(all(target_os = "linux", target_arch = "loongarch64"))]
++const FIEMAP_EXTENT_SHARED: u32 = 0x2000;
+ #[cfg(any(target_os = "linux", target_os = "macos", target_os = "ios"))]
+ use rustix::io::Errno;
+ use thiserror::Error;
