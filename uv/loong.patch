@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 442b221..1aeb4ca 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -42,6 +42,7 @@ _srcenv() {
+ 
+ prepare() {
+   _srcenv
++  patch -Np1 -i "$srcdir/loongarch64-fiemap.patch"
+   cargo fetch --locked --target host-tuple
+   mkdir -p completions
+ }
+@@ -127,4 +128,7 @@ package_python-uv-build() {
+   python -m installer -d "$pkgdir" target/wheels/uv_build-$pkgver-*.whl
+ }
+ 
++source+=('loongarch64-fiemap.patch')
++sha256sums+=('a3045ff89b47ff818ab14141d94c0a0af5e12d4649def23665ecb0873e2d81b1')
++
+ # vim: ts=2 sw=2 et:
