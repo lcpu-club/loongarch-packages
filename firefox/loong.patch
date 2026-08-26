@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 8874fa2..4945b3d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -171,7 +171,7 @@ ac_add_options --with-system-nss
+@@ -165,7 +165,7 @@ ac_add_options --with-system-nss
  # Features
  ac_add_options --enable-alsa
  ac_add_options --enable-jack
@@ -11,3 +9,14 @@ index 8874fa2..4945b3d 100644
  ac_add_options --disable-updater
  ac_add_options --disable-tests
  END
+@@ -304,4 +304,10 @@ Version=2
+ END
+ }
+ 
++# loong64: fix libyuv ArgbConstants struct layout (adapted from upstream
++# libyuv review 7997470: "loongarch: fix row_lsx.cc and row_lasx.cc")
++source+=(libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch)
++sha256sums+=('d22aa86bb60227a7d77fa109a08436345c5b342a412b215e1cbb2f9e28907555')
++b2sums+=('ad76b39d382854ba82734e1c276949ff54c372cc5981baf4456b812119b89e921b341d1f7de8c9ccc046cf15d35f79993e5ac74daa5e406bc09c9b3fbe603bda')
++
+ # vim:set sw=2 sts=-1 et:
