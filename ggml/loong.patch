@@ -1,51 +1,47 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -54,14 +54,13 @@ build() {
-       -DGGML_BACKEND_DIR=/usr/lib/ggml \
-       -DGGML_BLAS=ON \
-       -DGGML_BLAS_VENDOR=OpenBLAS \
--      -DGGML_CPU_ALL_VARIANTS=ON \
--      -DGGML_CUDA=ON \
-       -DGGML_HIP=ON \
--      -DGGML_OPENVINO=ON \
-       -DGGML_VULKAN=ON
-   cmake --build build-all
-   chrpath -d build-all/bin/libggml-*.so
+@@ -46,6 +46,10 @@ makedepends_x86_64=(
+   rocm-hip-sdk
+   rocm-toolchain
+ )
++makedepends_loong64=(
++  rocm-hip-sdk
++  rocm-toolchain
++)
+ source=(git+https://github.com/ggml-org/ggml.git#tag=v${pkgver})
+ b2sums=('8feb976772c9a02a198a4754db3562e929ca243fe51b7f92847d7c70f8d330c59919a42fdb34b0faa6533297c0bda992fde36bfcb4296d93f631f048606d1ac8')
  
-+  # Use a "multi-line comment" to keep patch from rotting
-+  : <<COMMENT_SEPARATOR
-   . /opt/intel/oneapi/setvars.sh
- 
-   cmake -S ggml -B build-sycl -G Ninja \
-@@ -79,6 +78,7 @@ build() {
-       -DGGML_SYCL_F16=ON
-   cmake --build build-sycl
-   chrpath -d build-sycl/bin/libggml-*.so
-+COMMENT_SEPARATOR
- }
- 
- package_ggml() {
-@@ -86,8 +86,8 @@ package_ggml() {
-   optdepends=(
-     'ggml-blas: BLAS backend'
-     'ggml-cpu: CPU backend'
--    'ggml-cuda: CUDA backend'
--    'ggml-openvino: Openvino backend'
-+#    'ggml-cuda: CUDA backend'
-+#    'ggml-openvino: Openvino backend'
-     'ggml-hip: HIP backend'
-     'ggml-vulkan: Vulkan backend'
+@@ -57,7 +61,6 @@ build() {
+     -DGGML_BACKEND_DIR=/usr/lib/ggml
+     -DGGML_BLAS=ON
+     -DGGML_BLAS_VENDOR=OpenBLAS
+-    -DGGML_CPU_ALL_VARIANTS=ON
+     -DGGML_VULKAN=ON
    )
-@@ -108,7 +108,7 @@ package_ggml-blas() {
- }
  
- package_ggml-cpu() {
+@@ -68,6 +71,12 @@ build() {
+       -DGGML_HIP=ON
+       -DGGML_OPENVINO=ON
+     )
++  elif [[ $CARCH == loong64 ]]; then
++    _cmake_options+=(
++      -DGGML_CUDA=OFF
++      -DGGML_HIP=ON
++      -DGGML_OPENVINO=OFF
++    )
+   else
+     _cmake_options+=(
+       -DGGML_CUDA=OFF
+@@ -123,7 +132,7 @@ package_ggml() {
+ 
+   DESTDIR="${pkgdir}" cmake --install build-all
+   rm -rf "${pkgdir}"/usr/lib/ggml
 -  install -Dm 755 build-all/bin/libggml-cpu-*.so -t "${pkgdir}"/usr/lib/ggml/
 +  install -Dm 755 build-all/bin/libggml-cpu.so -t "${pkgdir}"/usr/lib/ggml/
    install -Dm 644 ggml/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
  }
  
-@@ -176,3 +176,6 @@ package_ggml-vulkan() {
+@@ -206,3 +215,6 @@ package_ggml-vulkan() {
    install -Dm 755 build-all/bin/libggml-vulkan.so -t "${pkgdir}"/usr/lib/ggml/
    install -Dm 644 ggml/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
  }
