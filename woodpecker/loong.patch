@@ -1,0 +1,25 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -49,6 +49,13 @@ b2sums=('aef6afdc154fcdf92bda12652542c3888bf09730d064269596979c02a9d46299230e052
+ prepare() {
+   cd "$pkgbase"
+ 
++  # loong64: web UI built with vite 8 -> rolldown, which ships no loong64 native
++  # binding and its wasm32-wasi fallback deadlocks on this project
++  # (https://github.com/rolldown/rolldown/issues/10119). Pin vite 7 (esbuild +
++  # rollup, both available on loong64) and use wasm fallbacks for tailwindcss
++  # oxide and lightningcss. See woodpecker-web-loong64.patch for details.
++  patch -Np1 -i "${srcdir}/woodpecker-web-loong64.patch"
++
+   # create directory for build output
+   mkdir build
+ 
+@@ -131,3 +138,8 @@ package_woodpecker-cli() {
+   # binary
+   install -vDm755 build/cli "$pkgdir/usr/bin/woodpecker"
+ }
++
++# --- loong64 patches (see prepare) ---
++source+=("woodpecker-web-loong64.patch")
++sha512sums+=('5dbf44fdd63a59a4f1640575455dce7cf6b0a37e4f748ddbce33ca8eefeae8d7cd06d95fb533ef5f60dab9d065ad8647e0efcb377251b7fb57f3ce0174f88a6a')
++b2sums+=('292b1ef555a5c2fac5386d70d7d48e539769558b8651997ab19433d1e59d94989c27379446d2241789be37e96dca4e8dc8cf116ae930b0d6af505fe7170f9647')
