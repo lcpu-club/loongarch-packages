@@ -1,61 +1,39 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -181,7 +181,6 @@ makedepends=(
-   speex
-   srt
-   svt-av1
--  svt-hevc
-   systemd-libs
-   taglib
-   twolame
-@@ -278,6 +277,14 @@ build() {
-     -D package-origin="https://www.archlinux.org/"
-   )
+@@ -295,6 +295,11 @@ build() {
+     meson_options+=(-D gst-plugins-bad:svthevcenc=disabled)
+   fi
  
-+  # To build on loong64
 +  meson_options+=(
-+    -D gst-plugins-bad:svthevcenc=disabled # x86 only
 +    # Temporarily disable dots-viewer
 +    # dots-viewer now requires nix 0.23.2 to build, but nix 0.23.2 is too old to build on loong64
 +    -D gst-devtools:dots_viewer=disabled
 +  )
-+
    # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/issues/3197
    export GI_SCANNER_DISABLE_CACHE=1
  
-@@ -298,7 +305,7 @@ check() (
+@@ -315,7 +320,8 @@ check() (
  
    # Flaky due to timeouts
    xvfb-run -s "-nolisten local" \
 -    meson test -C build --print-errorlogs -t $CK_TIMEOUT_MULTIPLIER
-+    meson test -C build --print-errorlogs -t $CK_TIMEOUT_MULTIPLIER || echo "Watch out for failed tests!"
++    meson test -C build --print-errorlogs -t $CK_TIMEOUT_MULTIPLIER || echo "Watch out for failed tests!
++"
  )
  
  _install() {
-@@ -778,7 +785,6 @@ package_gst-plugins-bad() {
-     spandsp
-     srt
-     svt-av1
--    svt-hevc
-     webrtc-audio-processing-1
-     wildmidi
-     x265
-@@ -854,7 +860,6 @@ package_gst-plugins-bad() {
-     usr/lib/gstreamer-1.0/libgstsrt.so
-     usr/lib/gstreamer-1.0/libgstsrtp.so
-     usr/lib/gstreamer-1.0/libgstsvtav1.so
--    usr/lib/gstreamer-1.0/libgstsvthevcenc.so
-     usr/lib/gstreamer-1.0/libgstteletext.so
-     usr/lib/gstreamer-1.0/libgsttimecode.so
-     usr/lib/gstreamer-1.0/libgstttmlsubs.so
-@@ -1195,7 +1200,9 @@ package_gst-devtools() {
+@@ -1228,7 +1234,7 @@ package_gst-devtools() {
      usr/share/icons/hicolor/*/apps/gst-debug-viewer.*
      usr/share/metainfo/org.freedesktop.GstDebugViewer.appdata.xml
  
 -    usr/bin/gst-dots-viewer
-+    # Temporarily disable dots-viewer
-+    # dots-viewer now requires nix 0.23.2 to build, but nix 0.23.2 is too old to build on loong64
-+    #usr/bin/gst-dots-viewer
++    # usr/bin/gst-dots-viewer
    ); _install
  }
  
+@@ -1339,4 +1345,5 @@ package_gstreamer-docs() {
+   install -Dt "$pkgdir/usr/share/licenses/$pkgname" -m644 COPYING LICENSE*
+ }
+ 
++pkgname=(${pkgname[@]/gst-plugin-svthevcenc})
+ # vim:set sw=2 sts=-1 et:
