@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -105,6 +105,16 @@ prepare() {
+@@ -105,6 +105,17 @@ prepare() {
    # tune branch prediction cost
    patch -Np1 < ../tune_branch_prediction_cost.patch
  
@@ -13,11 +13,12 @@
 +  git cherry-pick -n 7df57b3b0995562d953b0c231fa28ca8bd5df7c0
 +  # fix fixed-point builtins in C++ mode
 +  patch -Np1 -i "$srcdir"/c-cppbuiltin-avoid-fixed-point-defines-in-cxx.patch
-+
++  # fix miscompile of both_non_zero{, _subreg} when operands[0] == operands[2]
++  patch -Np1 -i "$srcdir"/fix-miscompile-of-boolean-op.patch
    mkdir -p "$srcdir"/gcc-build
    mkdir -p "$srcdir"/libgccjit-build
  }
-@@ -132,7 +142,8 @@ build() {
+@@ -132,7 +143,8 @@ build() {
        --enable-link-serialization=1
        --enable-linker-build-id
        --enable-lto
@@ -27,7 +28,7 @@
        --enable-plugin
        --enable-shared
        --enable-threads=posix
-@@ -151,7 +162,7 @@ build() {
+@@ -151,7 +163,7 @@ build() {
    CXXFLAGS=${CXXFLAGS/-Werror=format-security/}
  
    ../gcc/configure \
@@ -36,7 +37,7 @@
      --enable-bootstrap \
      "${_confflags[@]:?_confflags unset}"
  
-@@ -195,8 +206,14 @@ _pick() {
+@@ -195,8 +207,14 @@ _pick() {
    local p="$1" f d; shift
    for f; do
      d="$srcdir/$p/${f#$pkgdir/}"
@@ -53,7 +54,7 @@
      rmdir -vp --ignore-fail-on-non-empty "$(dirname "$f")"
    done
  }
-@@ -212,7 +229,6 @@ package_gcc() {
+@@ -212,7 +230,6 @@ package_gcc() {
    depends=(
      "libasan=$pkgver-$pkgrel"
      "libgcc=$pkgver-$pkgrel"
@@ -61,7 +62,7 @@
      "liblsan=$pkgver-$pkgrel"
      "libstdc++=$pkgver-$pkgrel"
      "libtsan=$pkgver-$pkgrel"
-@@ -226,9 +242,6 @@ package_gcc() {
+@@ -226,9 +243,6 @@ package_gcc() {
      zlib
      zstd
    )
@@ -71,7 +72,7 @@
    provides=(
      $pkgname-multilib
    )
-@@ -251,47 +264,37 @@ package_gcc() {
+@@ -251,47 +265,37 @@ package_gcc() {
      # where we ALSO ship a matching static lib in the internal _libdir
      for _so in libatomic.so libstdc++.so libgdruntime.so libgphobos.so; do
        ln -srv usr/lib/$_so $_libdir/$_so
@@ -127,7 +128,7 @@
      _pick gcc-m2 usr/bin/{gm2,$CHOST-gm2}
      _pick gcc-m2 $_libdir/cc1gm2
      _pick gcc-m2 usr/share/info/m2.info
-@@ -303,21 +306,6 @@ package_gcc() {
+@@ -303,21 +307,6 @@ package_gcc() {
      _pick gcc-rust usr/bin/{gccrs,$CHOST-gccrs}
      _pick gcc-rust $_libdir/crab1
  
@@ -149,7 +150,7 @@
      _pick libasan usr/lib/libasan.{a,so*}
  
      _pick libatomic usr/lib/libatomic.so*
-@@ -329,14 +317,10 @@ package_gcc() {
+@@ -329,14 +318,10 @@ package_gcc() {
      _pick libgccjit usr/lib/libgccjit.so*
      _pick libgccjit usr/share/info/libgccjit.info
  
@@ -166,7 +167,7 @@
  
      _pick libgomp usr/lib/libgomp.{a,so*}
      _pick libgomp usr/share/info/libgomp.info
-@@ -344,8 +328,6 @@ package_gcc() {
+@@ -344,8 +329,6 @@ package_gcc() {
      _pick libgphobos usr/lib/libgdruntime.so*
      _pick libgphobos usr/lib/libgphobos.so*
  
@@ -175,7 +176,7 @@
      _pick libitm usr/lib/libitm.{a,so*}
      _pick libitm usr/share/info/libitm.info
  
-@@ -353,9 +335,6 @@ package_gcc() {
+@@ -353,9 +336,6 @@ package_gcc() {
  
      _pick libobjc usr/lib/libobjc.{a,so*}
  
@@ -185,7 +186,7 @@
      _pick libstdc++ usr/lib/libstdc++.so*
      _pick libstdc++ usr/share/locale/{de,fr}/LC_MESSAGES/libstdc++.mo
  
-@@ -368,17 +347,11 @@ package_gcc() {
+@@ -368,17 +348,11 @@ package_gcc() {
  
      # move specific files into the internal "_libdir"
      mv -v usr/lib/libgcc_s{,_asneeded}.so $_libdir/
@@ -203,7 +204,7 @@
    )
  
    install -d "$pkgdir"/usr/share/gdb/auto-load/usr/lib
-@@ -395,7 +368,7 @@ package_gcc() {
+@@ -395,7 +369,7 @@ package_gcc() {
    # create cc-rs compatible symlinks
    # https://github.com/rust-lang/cc-rs/blob/1.0.73/src/lib.rs#L2578-L2581
    for binary in {c++,g++,gcc,gcc-ar,gcc-nm,gcc-ranlib}; do
@@ -212,7 +213,7 @@
    done
  
    # POSIX conformance launcher scripts for c89 and c99
-@@ -445,12 +418,6 @@ package_gcc-ada() {
+@@ -445,12 +419,6 @@ package_gcc-ada() {
    ln -s libgnat-${pkgver%%.*}.so "$pkgdir"/usr/lib/libgnat.so
    rm -f "$pkgdir"/$_libdir/adalib/libgna{rl,t}.so
  
@@ -225,7 +226,7 @@
    _install_runtime_library_exception
  }
  
-@@ -479,11 +446,8 @@ package_gcc-d() {
+@@ -479,11 +447,8 @@ package_gcc-d() {
    )
  
    mv -v $pkgname/* "$pkgdir"
@@ -237,7 +238,7 @@
    _install_runtime_library_exception
  }
  
-@@ -510,7 +474,6 @@ package_gcc-fortran() {
+@@ -510,7 +475,6 @@ package_gcc-fortran() {
    mv -v $pkgname/* "$pkgdir"
    ln -s gfortran "$pkgdir"/usr/bin/f95
    mv -v "$pkgdir"/usr/lib/libgfortran.spec "$pkgdir"/$_libdir/
@@ -245,7 +246,7 @@
    _install_runtime_library_exception
  }
  
-@@ -529,7 +492,6 @@ package_gcc-gcobol() {
+@@ -529,7 +493,6 @@ package_gcc-gcobol() {
    )
  
    mv -v $pkgname/* "$pkgdir"
@@ -253,7 +254,7 @@
    _install_runtime_library_exception
  }
  
-@@ -570,7 +532,6 @@ package_gcc-libs() {
+@@ -570,7 +533,6 @@ package_gcc-libs() {
      libgcc
      libgfortran
      libgomp
@@ -261,7 +262,7 @@
      liblsan
      libobjc
      libquadmath
-@@ -738,11 +699,7 @@ package_libgcobol() {
+@@ -738,11 +700,7 @@ package_libgcobol() {
      libstdc++
      libxml2
    )
@@ -273,7 +274,7 @@
    _install_runtime_library_exception
  }
  
-@@ -887,7 +844,6 @@ package_libquadmath() {
+@@ -887,7 +845,6 @@ package_libquadmath() {
      libquadmath.so
    )
  
@@ -281,14 +282,16 @@
    _install_runtime_library_exception
  }
  
-@@ -951,3 +907,10 @@ package_lto-dump() {
+@@ -951,3 +908,12 @@ package_lto-dump() {
    mv -v $pkgname/* "$pkgdir"
    _install_runtime_library_exception
  }
 +
 +source+=("gcc-lib64-lib.patch"
-+         "c-cppbuiltin-avoid-fixed-point-defines-in-cxx.patch")
++         "c-cppbuiltin-avoid-fixed-point-defines-in-cxx.patch"
++         "fix-miscompile-of-boolean-op.patch")
 +sha256sums+=('5e8717aae7b83ed219e44fdba8379de7fb02c7c776ae6379ab26a6b22a7878d1'
-+             '00590887140f27396828b50f0bda0e0db5df8e3c86341d130f6b12788985d7f2')
++             '00590887140f27396828b50f0bda0e0db5df8e3c86341d130f6b12788985d7f2'
++             'df0348c039f01b404a9ac5340f88e3bb1fe5059f7724e29fd678149b962bb983')
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(lib32-glibc|lib32-gcc-libs)$'))
 +pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(lib32-gcc-libs|gcc-go|libgo|libhwasan)$'))
