@@ -1,14 +1,21 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -67,6 +67,7 @@ build() {
+@@ -71,12 +71,14 @@ prepare() {
+   cd node
+   # test: account for varied OpenSSL CCM final behaviours
+   patch --forward --strip=1 --input=../0001-test-account-for-varied-OpenSSL-CCM-final-behaviours.patch
++  patch -Np1 -d deps/v8 -i "${srcdir}/v8-use-a-zone-to-track-unresolved-branches.patch"
+ }
+ 
+ build() {
    _set_flags
    cd node
  
 +  export LDFLAGS="${LDFLAGS} -fuse-ld=mold"
    ./configure \
      --ninja \
-     --prefix=/usr \
-@@ -104,6 +105,9 @@ check() {
+     --enable-lto \
+@@ -115,6 +117,9 @@ check() {
    rm test/parallel/test-http2-reset-flood.js
    rm test/parallel/test-tls-ocsp-callback.js
  
@@ -18,17 +25,12 @@
    make test-only
  }
  
-@@ -114,4 +118,13 @@ package() {
+@@ -124,3 +129,8 @@ package() {
+   make DESTDIR="$pkgdir" install
    install -Dm644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname
  }
- 
-+prepare() {
-+  cd node
-+  patch -Np1 -d deps/v8 -i "${srcdir}/v8-use-a-zone-to-track-unresolved-branches.patch"
-+}
 +
 +source+=("v8-use-a-zone-to-track-unresolved-branches.patch::https://github.com/v8/v8/commit/144ebfdb3e25331a67aee40f58970bf0050b7b2d.diff")
 +b2sums+=('2fc4c30879225360f099b112b59d89b2ac5915b56501e5380b071b4ee139a0f158ea512486bddafaeab0727edb653af956ae5ec3653562b8e2e47f6b765b4ec4')
 +makedepends+=(mold)
 +
- # vim:set ts=2 sw=2 et:
