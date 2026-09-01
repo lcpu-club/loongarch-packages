@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -354,4 +354,7 @@ sha512sums=('aebdc5f0f4788124128a77b8a329767fa0f6d1d46c41ca6fd45889368e4e964a7a8
+             'c5f47d068ad0de536840c754e81581228360102e855a85e09d1f768e54de09dafabe2faa65c5d95b449dcb0f046e635746107d638e9066e0f04e646ed7849820'
+             'e2a74da3d0695b09d2c38040f295dd8345c884502a9d6609757eadba7d4e46a8f74aebb460f4973d11578ec2dd4fb61f1578f16bdebca9cd404a8e9e2669ba7c')
+ 
++source+=('libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch')
++sha512sums+=('332c33a5e1c05adff9fdbc458bbdb9dbfb7b4201cb50cb311e5fbce1f663faddd89ef80ba9ba9fa861f8df75065fa2bc01ce146dc538f4398341c106aa6c113c')
++
+ # vim:set sw=2 et:
