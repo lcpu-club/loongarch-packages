@@ -1,0 +1,14 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -45,3 +45,11 @@ package() {
+ 
+   make DESTDIR="$pkgdir" install
+ }
++
++source+=("fix-test-timeout.patch")
++sha512sums+=('b7fb0a3fc509a0b2dcce5801c829125b78f6f142587204cc07bc09867a76e025731d30e04fb3bd204458059b56f47598e66a41e81a479bd174c16d936f8e9593')
++
++prepare() {
++  cd $_pkgname
++  patch -Np1 -i ../fix-test-timeout.patch
++}
