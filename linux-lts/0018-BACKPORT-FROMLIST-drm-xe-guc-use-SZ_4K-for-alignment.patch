@@ -1,5 +1,5 @@
 diff --git a/drivers/gpu/drm/xe/xe_guc.c b/drivers/gpu/drm/xe/xe_guc.c
-index 270fc3792493..4804c5eb6998 100644
+index ae0c88da422b..29db40794899 100644
 --- a/drivers/gpu/drm/xe/xe_guc.c
 +++ b/drivers/gpu/drm/xe/xe_guc.c
 @@ -95,7 +95,7 @@
@@ -21,10 +21,10 @@ index 270fc3792493..4804c5eb6998 100644
  
  	return flags;
 diff --git a/drivers/gpu/drm/xe/xe_guc_ads.c b/drivers/gpu/drm/xe/xe_guc_ads.c
-index 131cfc56be00..59e6eba03fd5 100644
+index 63017ae2c381..56d4979a24bc 100644
 --- a/drivers/gpu/drm/xe/xe_guc_ads.c
 +++ b/drivers/gpu/drm/xe/xe_guc_ads.c
-@@ -144,17 +144,17 @@ static size_t guc_ads_regset_size(struct xe_guc_ads *ads)
+@@ -144,22 +144,22 @@
  
  static size_t guc_ads_golden_lrc_size(struct xe_guc_ads *ads)
  {
@@ -44,9 +44,6 @@ index 131cfc56be00..59e6eba03fd5 100644
 +	return ALIGN(ads->capture_size, SZ_4K);
  }
  
- static size_t guc_ads_um_queues_size(struct xe_guc_ads *ads)
-@@ -169,7 +169,7 @@ static size_t guc_ads_um_queues_size(struct xe_guc_ads *ads)
- 
  static size_t guc_ads_private_data_size(struct xe_guc_ads *ads)
  {
 -	return PAGE_ALIGN(ads_to_guc(ads)->fw.private_data_size);
@@ -54,7 +51,7 @@ index 131cfc56be00..59e6eba03fd5 100644
  }
  
  static size_t guc_ads_regset_offset(struct xe_guc_ads *ads)
-@@ -184,7 +184,7 @@ static size_t guc_ads_golden_lrc_offset(struct xe_guc_ads *ads)
+@@ -174,7 +174,7 @@
  	offset = guc_ads_regset_offset(ads) +
  		guc_ads_regset_size(ads);
  
@@ -63,7 +60,7 @@ index 131cfc56be00..59e6eba03fd5 100644
  }
  
  static size_t guc_ads_waklv_offset(struct xe_guc_ads *ads)
-@@ -194,7 +194,7 @@ static size_t guc_ads_waklv_offset(struct xe_guc_ads *ads)
+@@ -184,7 +184,7 @@
  	offset = guc_ads_golden_lrc_offset(ads) +
  		 guc_ads_golden_lrc_size(ads);
  
@@ -72,7 +69,7 @@ index 131cfc56be00..59e6eba03fd5 100644
  }
  
  static size_t guc_ads_capture_offset(struct xe_guc_ads *ads)
-@@ -204,7 +204,7 @@ static size_t guc_ads_capture_offset(struct xe_guc_ads *ads)
+@@ -194,7 +194,7 @@
  	offset = guc_ads_waklv_offset(ads) +
  		 guc_ads_waklv_size(ads);
  
@@ -80,26 +77,17 @@ index 131cfc56be00..59e6eba03fd5 100644
 +	return ALIGN(offset, SZ_4K);
  }
  
- static size_t guc_ads_um_queues_offset(struct xe_guc_ads *ads)
-@@ -214,7 +214,7 @@ static size_t guc_ads_um_queues_offset(struct xe_guc_ads *ads)
- 	offset = guc_ads_capture_offset(ads) +
- 		 guc_ads_capture_size(ads);
- 
--	return PAGE_ALIGN(offset);
-+	return ALIGN(offset, SZ_4K);
- }
- 
  static size_t guc_ads_private_data_offset(struct xe_guc_ads *ads)
-@@ -224,7 +224,7 @@ static size_t guc_ads_private_data_offset(struct xe_guc_ads *ads)
- 	offset = guc_ads_um_queues_offset(ads) +
- 		guc_ads_um_queues_size(ads);
+@@ -204,7 +204,7 @@
+ 	offset = guc_ads_capture_offset(ads) +
+ 		guc_ads_capture_size(ads);
  
 -	return PAGE_ALIGN(offset);
 +	return ALIGN(offset, SZ_4K);
  }
  
  static size_t guc_ads_size(struct xe_guc_ads *ads)
-@@ -277,7 +277,7 @@ static size_t calculate_golden_lrc_size(struct xe_guc_ads *ads)
+@@ -257,7 +257,7 @@
  			continue;
  
  		real_size = xe_gt_lrc_size(gt, class);
@@ -108,7 +96,7 @@ index 131cfc56be00..59e6eba03fd5 100644
  		total_size += alloc_size;
  	}
  
-@@ -647,12 +647,12 @@ static int guc_capture_prep_lists(struct xe_guc_ads *ads)
+@@ -650,12 +650,12 @@
  					 offsetof(struct __guc_ads_blob, system_info));
  
  	/* first, set aside the first page for a capture_list with zero descriptors */
@@ -123,7 +111,7 @@ index 131cfc56be00..59e6eba03fd5 100644
  
  	/*
  	 * Populate capture list : at this point adps is already allocated and
-@@ -718,8 +718,8 @@ static int guc_capture_prep_lists(struct xe_guc_ads *ads)
+@@ -721,8 +721,8 @@
  
  	if (ads->capture_size != PAGE_ALIGN(total_size))
  		xe_gt_dbg(gt, "Updated ADS capture size %d (was %d)\n",
@@ -134,7 +122,7 @@ index 131cfc56be00..59e6eba03fd5 100644
  }
  
  static void guc_mmio_regset_write_one(struct xe_guc_ads *ads,
-@@ -967,7 +967,7 @@ static void guc_golden_lrc_populate(struct xe_guc_ads *ads)
+@@ -981,7 +981,7 @@
  		xe_gt_assert(gt, gt->default_lrc[class]);
  
  		real_size = xe_gt_lrc_size(gt, class);
@@ -144,10 +132,10 @@ index 131cfc56be00..59e6eba03fd5 100644
  
  		xe_map_memcpy_to(xe, ads_to_map(ads), offset,
 diff --git a/drivers/gpu/drm/xe/xe_guc_capture.c b/drivers/gpu/drm/xe/xe_guc_capture.c
-index 243dad3e2418..548bf778d800 100644
+index 3a1613886495..9bd0655fcea8 100644
 --- a/drivers/gpu/drm/xe/xe_guc_capture.c
 +++ b/drivers/gpu/drm/xe/xe_guc_capture.c
-@@ -591,8 +591,8 @@ guc_capture_getlistsize(struct xe_guc *guc, u32 owner, u32 type,
+@@ -598,8 +598,8 @@
  		return -ENODATA;
  
  	if (size)
@@ -158,7 +146,7 @@ index 243dad3e2418..548bf778d800 100644
  
  	return 0;
  }
-@@ -739,7 +739,7 @@ size_t xe_guc_capture_ads_input_worst_size(struct xe_guc *guc)
+@@ -746,7 +746,7 @@
  	 * sequence, that is, during the pre-hwconfig phase before we have
  	 * the exact engine fusing info.
  	 */
@@ -167,7 +155,7 @@ index 243dad3e2418..548bf778d800 100644
  	for (i = 0; i < GUC_CAPTURE_LIST_INDEX_MAX; i++) {
  		for (j = 0; j < GUC_CAPTURE_LIST_CLASS_MAX; j++) {
  			if (xe_guc_capture_getlistsize(guc, i,
-@@ -759,7 +759,7 @@ size_t xe_guc_capture_ads_input_worst_size(struct xe_guc *guc)
+@@ -766,7 +766,7 @@
  		total_size += global_size;
  	}
  
@@ -177,23 +165,23 @@ index 243dad3e2418..548bf778d800 100644
  
  static int guc_capture_output_size_est(struct xe_guc *guc)
 diff --git a/drivers/gpu/drm/xe/xe_guc_ct.c b/drivers/gpu/drm/xe/xe_guc_ct.c
-index 3f4e6a46ff16..961f7c6608c1 100644
+index 4158e8af1390..eaa58a4292ec 100644
 --- a/drivers/gpu/drm/xe/xe_guc_ct.c
 +++ b/drivers/gpu/drm/xe/xe_guc_ct.c
-@@ -219,7 +219,7 @@ int xe_guc_ct_init_noalloc(struct xe_guc_ct *ct)
+@@ -226,7 +226,7 @@
  	struct xe_gt *gt = ct_to_gt(ct);
  	int err;
  
 -	xe_gt_assert(gt, !(guc_ct_size() % PAGE_SIZE));
 +	xe_gt_assert(gt, !(guc_ct_size() % SZ_4K));
  
- 	ct->g2h_wq = alloc_ordered_workqueue("xe-g2h-wq", WQ_MEM_RECLAIM);
- 	if (!ct->g2h_wq)
+ 	err = drmm_mutex_init(&xe->drm, &ct->lock);
+ 	if (err)
 diff --git a/drivers/gpu/drm/xe/xe_guc_log.c b/drivers/gpu/drm/xe/xe_guc_log.c
 index c01ccb35dc75..0f40286bc7fb 100644
 --- a/drivers/gpu/drm/xe/xe_guc_log.c
 +++ b/drivers/gpu/drm/xe/xe_guc_log.c
-@@ -58,7 +58,7 @@ static size_t guc_log_size(void)
+@@ -58,7 +58,7 @@
  	 *  |         Capture logs          |
  	 *  +===============================+ + CAPTURE_SIZE
  	 */
@@ -202,7 +190,7 @@ index c01ccb35dc75..0f40286bc7fb 100644
  		CAPTURE_BUFFER_SIZE;
  }
  
-@@ -328,7 +328,7 @@ u32 xe_guc_get_log_buffer_size(struct xe_guc_log *log, enum guc_log_buffer_type
+@@ -328,7 +328,7 @@
  u32 xe_guc_get_log_buffer_offset(struct xe_guc_log *log, enum guc_log_buffer_type type)
  {
  	enum guc_log_buffer_type i;
@@ -212,10 +200,10 @@ index c01ccb35dc75..0f40286bc7fb 100644
  	for (i = GUC_LOG_BUFFER_CRASH_DUMP; i < GUC_LOG_BUFFER_TYPE_MAX; ++i) {
  		if (i == type)
 diff --git a/drivers/gpu/drm/xe/xe_guc_pc.c b/drivers/gpu/drm/xe/xe_guc_pc.c
-index 68b192fe3b32..e9a7ac5aa646 100644
+index a3e9796e6430..f138ad3fb205 100644
 --- a/drivers/gpu/drm/xe/xe_guc_pc.c
 +++ b/drivers/gpu/drm/xe/xe_guc_pc.c
-@@ -1190,7 +1190,7 @@ int xe_guc_pc_start(struct xe_guc_pc *pc)
+@@ -1269,7 +1269,7 @@
  {
  	struct xe_device *xe = pc_to_xe(pc);
  	struct xe_gt *gt = pc_to_gt(pc);
@@ -224,7 +212,7 @@ index 68b192fe3b32..e9a7ac5aa646 100644
  	unsigned int fw_ref;
  	ktime_t earlier;
  	int ret;
-@@ -1318,7 +1318,7 @@ int xe_guc_pc_init(struct xe_guc_pc *pc)
+@@ -1406,7 +1406,7 @@
  	struct xe_tile *tile = gt_to_tile(gt);
  	struct xe_device *xe = gt_to_xe(gt);
  	struct xe_bo *bo;
@@ -235,4 +223,3 @@ index 68b192fe3b32..e9a7ac5aa646 100644
  	if (xe->info.skip_guc_pc)
 -- 
 2.51.0
-
