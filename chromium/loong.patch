@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index b2265a4..88f2a3e 100644
+index eadae1c..44a12af 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -78,6 +78,7 @@ optdepends=('pipewire: WebRTC desktop sharing under Wayland'
@@ -10,7 +10,7 @@ index b2265a4..88f2a3e 100644
  source=(https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$pkgver-lite.tar.xz
          https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver/chromium-launcher-$_launcher_ver.tar.gz
          chromium-138-nodejs-version-check.patch
-@@ -117,6 +118,8 @@ if (( _manual_clone )); then
+@@ -123,6 +124,8 @@ if (( _manual_clone )); then
    source[0]=fetch-chromium-release
    sha256sums[0]='2e2f36e3cd1ebc4ad57fd310774a5e5e9db77883d5f9374fedeaabd3c103b819'
    makedepends+=('python-httplib2' 'python-pyparsing' 'python-six' 'npm' 'rsync')
@@ -19,7 +19,7 @@ index b2265a4..88f2a3e 100644
  fi
  
  # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
-@@ -280,6 +283,47 @@ prepare() {
+@@ -291,6 +294,47 @@ prepare() {
        -s third_party/dawn --revision gpu/webgpu/DAWN_VERSION \
        --header gpu/webgpu/dawn_commit_hash.h
    fi
@@ -67,7 +67,7 @@ index b2265a4..88f2a3e 100644
  }
  
  build() {
-@@ -387,6 +431,12 @@ build() {
+@@ -398,6 +442,12 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -80,14 +80,14 @@ index b2265a4..88f2a3e 100644
    gn gen out/Release --args="${_flags[*]}"
    ninja -C out/Release chrome chrome_sandbox chromedriver.unstripped
  }
-@@ -464,4 +514,12 @@ package() {
+@@ -475,4 +525,12 @@ package() {
    install -Dvm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
  }
  
 +source+=("chromium-loong64-support.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
 +         "dawn-add-loongarch64-support.patch")
-+sha256sums+=('941b1b63ae4e4432c9b9b6a3fea9a6f5352235c51bf7f980e5e249023fe84866'
++sha256sums+=('16b3edefde7d313a4e594b58ca84960af1c79d45ffc57589f8e0babad1b6cd4b'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
 +             'cfdb92dbd54a2e4f113603ac876debd050d5e54492e516666f71bb73252d9425')
 +makedepends+=(jq npm rsync)
