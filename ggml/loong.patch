@@ -1,17 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -46,6 +46,10 @@ makedepends_x86_64=(
-   rocm-hip-sdk
-   rocm-toolchain
- )
-+makedepends_loong64=(
-+  rocm-hip-sdk
-+  rocm-toolchain
-+)
- source=(git+https://github.com/ggml-org/ggml.git#tag=v${pkgver})
- b2sums=('8feb976772c9a02a198a4754db3562e929ca243fe51b7f92847d7c70f8d330c59919a42fdb34b0faa6533297c0bda992fde36bfcb4296d93f631f048606d1ac8')
- 
-@@ -57,7 +61,6 @@ build() {
+@@ -58,7 +58,6 @@ build() {
      -DGGML_BACKEND_DIR=/usr/lib/ggml
      -DGGML_BLAS=ON
      -DGGML_BLAS_VENDOR=OpenBLAS
@@ -19,7 +8,7 @@
      -DGGML_VULKAN=ON
    )
  
-@@ -68,6 +71,12 @@ build() {
+@@ -69,6 +68,12 @@ build() {
        -DGGML_HIP=ON
        -DGGML_OPENVINO=ON
      )
@@ -32,7 +21,7 @@
    else
      _cmake_options+=(
        -DGGML_CUDA=OFF
-@@ -123,7 +132,7 @@ package_ggml() {
+@@ -124,7 +129,7 @@ package_ggml() {
  
    DESTDIR="${pkgdir}" cmake --install build-all
    rm -rf "${pkgdir}"/usr/lib/ggml
@@ -41,10 +30,14 @@
    install -Dm 644 ggml/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
  }
  
-@@ -206,3 +215,6 @@ package_ggml-vulkan() {
+@@ -207,3 +212,10 @@ package_ggml-vulkan() {
    install -Dm 755 build-all/bin/libggml-vulkan.so -t "${pkgdir}"/usr/lib/ggml/
    install -Dm 644 ggml/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
  }
 +
++makedepends_loong64=(
++  rocm-hip-sdk
++  rocm-toolchain
++)
 +pkgname=($(printf "%s\n" "${pkgname[@]}" | grep -Ev '^(ggml-sycl|ggml-cuda|ggml-openvino)$'))
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|nccl|intel-oneapi-toolkit|openvino)$'))
