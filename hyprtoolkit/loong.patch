@@ -1,0 +1,8 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -47,3 +47,5 @@ package() {
+ 	DESTDIR="$pkgdir" cmake --install build
+ 	install -Dm0644 -t "$pkgdir/usr/share/licenses/$pkgname/" LICENSE
+ }
++
++makedepends+=(hyprwayland-scanner)
