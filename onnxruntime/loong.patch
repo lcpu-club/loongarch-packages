@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -102,6 +102,17 @@ prepare() {
+@@ -100,6 +100,26 @@ prepare() {
  
    patch -Np1 -i "${srcdir}/${pkgbase}-system-dnnl.patch"
  
@@ -15,10 +15,19 @@
 +  endif()
 +EOF
 +
++  # Relax the GSL version requirement for loong64. The system microsoft-gsl is
++  # 5.x, but onnxruntime declares "FIND_PACKAGE_ARGS 4.0 NAMES Microsoft.GSL".
++  # GSL's Microsoft.GSLConfigVersion.cmake only accepts the same major version,
++  # so find_package(Microsoft.GSL 4.0) fails; FetchContent then tries to download
++  # GSL, which FETCHCONTENT_FULLY_DISCONNECTED=ON forbids, leaving the
++  # Microsoft.GSL::GSL target undefined. GSL is header-only and API compatible.
++  sed -i 's/FIND_PACKAGE_ARGS 4.0 NAMES Microsoft.GSL/FIND_PACKAGE_ARGS NAMES Microsoft.GSL/' \
++    cmake/external/onnxruntime_external_deps.cmake
++
    patch -Np1 -i "${srcdir}/${pkgbase}-install-orttraining-files.patch"
    patch -Np1 -i "${srcdir}/${pkgbase}-system-flatbuffers.patch"
  
-@@ -157,8 +168,8 @@ prepare() {
+@@ -152,8 +172,8 @@ prepare() {
  
    cd "${srcdir}"
    cp -r "${pkgbase}" "${pkgbase}-cpu"
@@ -29,7 +38,7 @@
    cp -r "${pkgbase}" "${pkgbase}-rocm"
    cp -r "${pkgbase}" "${pkgbase}-opt-rocm"
  }
-@@ -245,6 +256,7 @@ build() {
+@@ -244,6 +264,7 @@ build() {
    cp -r build/onnxruntime/* onnxruntime
    python -m build --wheel --no-isolation
  
@@ -37,7 +46,7 @@
    ##### onnxruntime-cuda
  
    echo "Build onnxruntime with CUDA without optimization"
-@@ -269,7 +281,7 @@ build() {
+@@ -268,7 +289,7 @@ build() {
  
    cp -r build/onnxruntime/* onnxruntime
    python -m build --wheel --no-isolation
@@ -46,7 +55,7 @@
  
    ##### onnxruntime-rocm
  
-@@ -285,11 +297,11 @@ build() {
+@@ -284,11 +305,11 @@ build() {
  
    ##### onnxruntime-opt-rocm
  
@@ -61,7 +70,7 @@
      >> cmake/adjust_global_compile_flags.cmake
    cmake "${_cmake_rocm_args[@]}"
    cmake --build build
-@@ -352,7 +364,7 @@ package_onnxruntime-rocm() {
+@@ -351,7 +372,7 @@ package_onnxruntime-rocm() {
  }
  
  package_onnxruntime-opt-rocm() {
@@ -70,7 +79,7 @@
    depends+=('rocm-hip-sdk' 'roctracer' 'rccl' 'migraphx')
    provides=("${pkgbase}=${pkgver}")
    conflicts=("${pkgbase}")
-@@ -417,7 +429,7 @@ package_python-onnxruntime-rocm() {
+@@ -416,7 +437,7 @@ package_python-onnxruntime-rocm() {
  }
  
  package_python-onnxruntime-opt-rocm() {
@@ -79,7 +88,7 @@
    depends+=('rocm-hip-sdk' 'roctracer' 'rccl' 'migraphx')
    depends+=("${_pydepends[@]}")
    provides=("python-${pkgbase}=${pkgver}")
-@@ -428,3 +440,6 @@ package_python-onnxruntime-opt-rocm() {
+@@ -427,3 +448,6 @@ package_python-onnxruntime-opt-rocm() {
    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
    install -Dm644 ThirdPartyNotices.txt "${pkgdir}/usr/share/licenses/${pkgname}/ThirdPartyNotices.txt"
  }
