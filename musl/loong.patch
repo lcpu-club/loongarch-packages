@@ -1,8 +1,27 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index d6c2409..26bdd61 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -60,7 +60,7 @@ package_musl() {
+@@ -40,7 +40,10 @@ build() {
+   # Copy common flags from makepkg.conf that apply to cross compilers
+   export CFLAGS="-O2 -pipe -fno-plt -fexceptions -Wformat \
+     -Werror=format-security -fstack-clash-protection -fno-omit-frame-pointer \
+-    -mno-omit-leaf-frame-pointer -g -ffat-lto-objects"
++    -g -ffat-lto-objects"
++  # -mno-omit-leaf-frame-pointer is only implemented for x86_64/aarch64/riscv64;
++  # the native loongarch64 gcc rejects it. Only use it for the cross targets.
++  CFLAGS_CROSS="$CFLAGS -mno-omit-leaf-frame-pointer"
+   export LDFLAGS="-Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro \
+     -Wl,-z,now -Wl,-z,pack-relative-relocs"
+ 
+@@ -51,7 +54,7 @@ build() {
+       --exec-prefix=/usr/${_arch}-linux-musl \
+       --enable-wrapper=all \
+       --target="${_arch}-linux-musl" \
+-      CFLAGS="$CFLAGS -ffile-prefix-map=\"$srcdir=/usr/src/debug/musl-$_arch\""
++      CFLAGS="$CFLAGS_CROSS -ffile-prefix-map=\"$srcdir=/usr/src/debug/musl-$_arch\""
+     make
+     popd
+   done
+@@ -68,7 +71,7 @@ package_musl() {
    cd $pkgname-$pkgver
    make DESTDIR="$pkgdir" install
  
@@ -11,7 +30,7 @@ index d6c2409..26bdd61 100644
  
    # configure syslibdir with /lib for PT_INTERP compat, but install to /usr/lib
    mv "$pkgdir"/lib/ld-musl*.so* "$pkgdir"/usr/lib/
-@@ -99,3 +99,22 @@ package_musl-riscv64() {
+@@ -107,3 +110,22 @@ package_musl-riscv64() {
    install -Dm0644 README "$pkgdir"/usr/share/doc/musl-riscv64/README
    install -Dm0644 COPYRIGHT "$pkgdir"/usr/share/licenses/musl-riscv64/COPYRIGHT
  }
