@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 34d959b..55baf94 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -229,6 +229,11 @@ prepare() {
+@@ -228,6 +228,11 @@ prepare() {
  
    git -c protocol.file.allow=always submodule update --init --recursive
  
@@ -14,7 +12,16 @@ index 34d959b..55baf94 100644
    # Fix cmake prefix path (FS#78665)
    patch -Np1 -i "${srcdir}"/fix_cmake_prefix_path.patch
  
-@@ -260,16 +265,16 @@ prepare() {
+@@ -253,19 +258,25 @@ prepare() {
+   # nvcc fatal   : The same GPU code (`sm_103f`) generated for non family-specific and family-specific GPU arch
+   patch -p1 -i "${srcdir}/$pkgname-187006.patch"
+ 
++  # fmt >= 12 auto-enables a C++20 module target (fmt-module) which conflicts with
++  # the ROCm CXXFLAGS workaround (-include chrono/-include stacktrace) appended in
++  # build(): GCC rejects forced includes before fmt.cc's module preamble. PyTorch
++  # only uses fmt through headers, so disable the module target.
++  patch -p1 -i "${srcdir}/fmt_disable_module.patch"
++
    cd "${srcdir}"
  
    cp -r "${_pkgname}" "${_pkgname}-opt"
@@ -36,7 +43,7 @@ index 34d959b..55baf94 100644
      sed -i '1s/^/#ifndef GLOG_USE_GLOG_EXPORT\n#define GLOG_USE_GLOG_EXPORT\n#endif\n\n/' ${_pkgname}-${_suffix}/c10/util/logging_is_google_glog.h
    done
  }
-@@ -283,7 +288,7 @@ _prepare() {
+@@ -279,7 +290,7 @@ _prepare() {
    # Check tools/setup_helpers/cmake.py, setup.py and CMakeLists.txt for a list of flags that can be set via env vars.
    export BUILD_TEST=OFF  # do not build tests
    export ATEN_NO_TEST=ON  # do not build ATen tests
@@ -45,7 +52,7 @@ index 34d959b..55baf94 100644
    export BUILD_CUSTOM_PROTOBUF=OFF
    export USE_GFLAGS=ON
    export USE_GLOG=ON
-@@ -291,11 +296,12 @@ _prepare() {
+@@ -287,11 +298,12 @@ _prepare() {
    export USE_OBSERVERS=ON
    # export USE_SYSTEM_LIBS=ON  # experimental, not all libs present in repos
    # USE_SYSTEM_ONNX=ON does not work and onnx itself should be removed from pytorch: https://github.com/pytorch/pytorch/issues/166546#issuecomment-3463370459
@@ -60,7 +67,7 @@ index 34d959b..55baf94 100644
    export USE_GOLD_LINKER=ON
    export NCCL_VERSION=$(pkg-config nccl --modversion)
    export NCCL_VER_CODE=$(sed -n 's/^#define NCCL_VERSION_CODE\s*\(.*\).*/\1/p' /usr/include/nccl.h)
-@@ -316,7 +322,7 @@ _prepare() {
+@@ -312,7 +324,7 @@ _prepare() {
    # https://github.com/pytorch/pytorch/blob/f9074c7332c3dfd43fe39e8733ec98f7f29b3e61/torch/utils/cpp_extension.py#L2417-L2420
    # (note that 8.8 is not supported)
    export TORCH_CUDA_ARCH_LIST="7.5 8.0 8.6 8.7 8.9 9.0 10.0 10.3 11.0 12.0 12.1"
@@ -69,7 +76,7 @@ index 34d959b..55baf94 100644
    export ROCM_PATH=/opt/rocm
    export HIP_ROOT_DIR=/opt/rocm
    # gfx950 lacks support for 128 bit atomics
-@@ -328,7 +334,8 @@ _prepare() {
+@@ -324,7 +336,8 @@ _prepare() {
    export USE_FBGEMM_GENAI=OFF
  
    # Compile source code for supported GPU archs in parallel (but using too many jobs is not helpful)
@@ -79,7 +86,7 @@ index 34d959b..55baf94 100644
    export HIPCC_LINK_FLAGS_APPEND="-parallel-jobs=4"
  
    export AOTRITON_INSTALLED_PREFIX=/usr
-@@ -344,25 +351,26 @@ _prepare() {
+@@ -340,25 +353,26 @@ _prepare() {
  
  build() {
    cd "${srcdir}/${_pkgname}"
@@ -110,7 +117,7 @@ index 34d959b..55baf94 100644
    cd "${srcdir}/${_pkgname}-cuda"
    echo "Building with cuda and without non-x86-64 optimizations"
    _prepare
-@@ -383,34 +391,42 @@ build() {
+@@ -379,34 +393,42 @@ build() {
    export USE_XPU=0
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
@@ -157,7 +164,7 @@ index 34d959b..55baf94 100644
    # Strip the problematic format-security flag that breaks SYCL CMake scripts
    export CFLAGS="${CFLAGS/-Werror=format-security/}"
    export CXXFLAGS="${CXXFLAGS/-Werror=format-security/}"
-@@ -436,6 +452,7 @@ build() {
+@@ -432,6 +454,7 @@ build() {
    export USE_XPU=1
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
@@ -165,7 +172,7 @@ index 34d959b..55baf94 100644
  }
  
  _package() {
-@@ -472,7 +489,7 @@ package_python-pytorch() {
+@@ -468,7 +491,7 @@ package_python-pytorch() {
  }
  
  package_python-pytorch-opt() {
@@ -174,7 +181,7 @@ index 34d959b..55baf94 100644
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -502,7 +519,7 @@ package_python-pytorch-opt-cuda() {
+@@ -498,7 +521,7 @@ package_python-pytorch-opt-cuda() {
  
  package_python-pytorch-rocm() {
    pkgdesc+=" (with ROCm)"
@@ -183,7 +190,7 @@ index 34d959b..55baf94 100644
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -512,7 +529,7 @@ package_python-pytorch-rocm() {
+@@ -508,7 +531,7 @@ package_python-pytorch-rocm() {
  
  package_python-pytorch-opt-rocm() {
    pkgdesc+=" (with ROCm and AVX2 CPU optimizations)"
@@ -192,7 +199,7 @@ index 34d959b..55baf94 100644
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver} python-pytorch-rocm=${pkgver})
  
-@@ -555,4 +572,29 @@ package_python-pytorch-opt-xpu() {
+@@ -551,4 +574,31 @@ package_python-pytorch-opt-xpu() {
    _package
  }
  
@@ -216,9 +223,11 @@ index 34d959b..55baf94 100644
 +pkgname=(${pkgname[@]/"${pkgbase}-opt-xpu"})
 +source+=("disable-aotriton.patch"
 +         "sleef_loong64.patch"
-+         "cpuinfo_loong64.patch::https://raw.githubusercontent.com/loong64/pytorch/refs/heads/main/cpuinfo/cpuinfo_loong64.patch")
++         "cpuinfo_loong64.patch::https://raw.githubusercontent.com/loong64/pytorch/refs/heads/main/cpuinfo/cpuinfo_loong64.patch"
++         "fmt_disable_module.patch")
 +b2sums+=('007a8ffef259856b57d6714e2535c579c2c00932e324eb51c505a33ae1cbe46c6223aacf89823f0e4faf0ea6a4dd595cd21f6a57ab6eccb219f6e690a1500c32'
 +         '5a06663c88476341c169dadf8a2adda13fd264fda9468bcd1e3c3d120c8ba3949e9eb6396faf824afae4b2557665f5dd4f09ccd162f08dc022cf2076fe0620fe'
-+         'b56ac09123c229431d82ef47415ef97600ceedd34576058efe3feb511fecd8ee65944f3556995d7b21c20df9d41cc1bd8768f5208831a2817a0569f0d9346824')
++         'b56ac09123c229431d82ef47415ef97600ceedd34576058efe3feb511fecd8ee65944f3556995d7b21c20df9d41cc1bd8768f5208831a2817a0569f0d9346824'
++         '9048d7e4a90a2f5447222ce824f5a2cc886e48c7829337ab8c046fdad25090ed6bec7e9ecf3775c954e1aedd09991c1ea98e94858b48fd873283e48229f50921')
 +
  # vim:set ts=2 sw=2 et:

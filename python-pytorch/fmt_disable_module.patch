@@ -1,0 +1,16 @@
+--- a/cmake/Dependencies.cmake	2026-09-09 21:02:33.572146130 +0800
++++ b/cmake/Dependencies.cmake	2026-09-09 21:02:33.572989990 +0800
+@@ -1637,6 +1637,13 @@
+ set(FMT_INSTALL ON)
+ set(TEMP_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libs" FORCE)
++# fmt >= 12 auto-enables its C++20 module target (fmt-module) when CMake/Ninja
++# and the compiler support C++20 modules. Building fmt.cc as a module is
++# incompatible with the ROCm CXXFLAGS workaround appended in the PKGBUILD
++# ("-include chrono -include stacktrace"): GCC inserts the forced includes
++# before fmt.cc's module preamble, which is rejected. PyTorch only uses {fmt}
++# through its headers and never imports the module, so disable it.
++set(FMT_MODULE OFF CACHE BOOL "Build a module library." FORCE)
+ add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/fmt)
+ 
+ # Disable compiler feature checks for `fmt`.
