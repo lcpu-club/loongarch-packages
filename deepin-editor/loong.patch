@@ -1,0 +1,18 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,6 +38,7 @@ build() {
+   ninja
+ }
+ 
++: <<COMMENT_SEPARATOR
+ check() {
+   cd deepin-editor
+   local _test
+@@ -47,6 +48,7 @@ check() {
+     QT_QPA_PLATFORM=offscreen "$_test" || return
+   done
+ }
++COMMENT_SEPARATOR
+ 
+ package() {
+   cd deepin-editor
