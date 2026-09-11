@@ -1,0 +1,26 @@
+From 36cf612e8f024f0e117829250b3f4bf37f6a1182 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=E5=90=B4=E5=B0=8F=E7=99=BD?= <296015668@qq.com>
+Date: Thu, 27 Nov 2025 14:20:18 +0800
+Subject: [PATCH] Add LoongArch64 support with 16KB page size
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: 吴小白 <296015668@qq.com>
+---
+ .../jemalloc/include/jemalloc/internal/jemalloc_internal_defs.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/third_party/jemalloc/include/jemalloc/internal/jemalloc_internal_defs.h b/third_party/jemalloc/include/jemalloc/internal/jemalloc_internal_defs.h
+index dd04c5516092..df3a6763e756 100644
+--- a/third_party/jemalloc/include/jemalloc/internal/jemalloc_internal_defs.h
++++ b/third_party/jemalloc/include/jemalloc/internal/jemalloc_internal_defs.h
+@@ -263,6 +263,8 @@
+ #define LG_PAGE 12 // x86 and x86_64 typically have a 4KB page size
+ #elif defined(__powerpc__) || defined(__ppc__)
+ #define LG_PAGE 16 // PowerPC architectures often use 64KB page size
++#elif defined(__loongarch__)
++#define LG_PAGE 14 // LoongArch architectures uses a 16KB page size
+ #elif defined(__sparc__)
+ #define LG_PAGE 13 // SPARC architectures usually have an 8KB page size
+ #elif defined(__aarch64__) || defined(__ARM_ARCH)
