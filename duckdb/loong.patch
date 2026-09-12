@@ -1,0 +1,34 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 9fbac79..3185738 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,6 +34,13 @@ prepare() {
+   git submodule init
+   git config submodule.external/duckdb.url "$srcdir/$pkgbase"
+   git -c protocol.file.allow=always submodule update
++
++  # loong64: add LoongArch support to vendored double-conversion (ICU extension)
++  patch -d "$srcdir/$pkgbase" -p1 < "$srcdir/loong64-double-conversion.patch"
++  patch -d external/duckdb -p1 < "$srcdir/loong64-double-conversion.patch"
++  # loong64: backport duckdb/duckdb@36cf612 (jemalloc 16KB page size)
++  patch -d "$srcdir/$pkgbase" -p1 < "$srcdir/loong64-jemalloc-page-size.patch"
++  patch -d external/duckdb -p1 < "$srcdir/loong64-jemalloc-page-size.patch"
+ }
+ 
+ build() {
+@@ -87,3 +94,15 @@ package_python-duckdb() {
+   # license
+   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
+ }
++
++source+=('loong64-double-conversion.patch'
++         'loong64-jemalloc-page-size.patch')
++sha512sums+=('20a56e126888108cbc861340674f6247b5f5bed374f9ac2335a318a375e122c9ea25726c9189b09a15fc5135e91f6998cbb10b5c8eb38ec38b1c19aa215fdda8'
++             '552c2087acb5793247b25a96aa0ccaf5e6b4a33967e2b6b2e88cc067576307eaf3784c6cbf6c1303d21de9b130f08382086d6373311c31537bb5db82ed668d55')
++b2sums+=('277d02405a5e7d5c43543e03128519bfebc67b908da2b81ea1b9d21574989f914ea1ce0e206f0411bf050b80cef26132cda711356cf334191f918ac716fb391b'
++         'ed2ec62ded6ca681d769473d054660fbc5c033781025c2edbd5fabccba78c3c31d4c1ae5825ff239b05dc22c57fa302080957f83f943fc53b2d987652bc88fab')
++
++# loong64: our patch dirties the python-duckdb submodule, which breaks
++# duckdb_packaging's setuptools_scm version bump; pin the version instead
++# (same mechanism as the OVERRIDE_GIT_DESCRIBE cmake option above)
++export OVERRIDE_GIT_DESCRIBE="v$pkgver"
