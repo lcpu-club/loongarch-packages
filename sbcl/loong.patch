@@ -1,0 +1,21 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -72,3 +72,18 @@ package() {
+   rm "$pkgdir/usr/share/sbcl-source/src/runtime/sbcl"
+ 
+ }
++
++# loongarch64 fixes:
++# 1. add a5 to descriptor-regs (matches riscv; avoids alloc-trampoline
++#    miscompile when an allocation result is spilled to the stack)
++# 2. dynbind: keep the bound value out of registers clobbered by the
++#    alloc-tls-index asm routine (NL2) and mark it :to :save
++prepare() {
++  cd "$srcdir/$pkgname-$pkgver"
++  patch -Np1 -i "$srcdir/a5.patch"
++  patch -Np1 -i "$srcdir/dynbind.patch"
++}
++source+=(a5.patch
++         dynbind.patch)
++sha256sums+=('3ef4a34c5562ba183437ac39d2bfca38aab7593123c03ed6902985f31624f9a8'
++             'b86837a1d21d4b378a28bd09477b283b01bb5f5508d19bef228c3a38d29fdbcc')

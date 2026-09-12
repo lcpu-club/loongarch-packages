@@ -1,0 +1,16 @@
+--- a/src/compiler/loongarch64/cell.lisp
++++ b/src/compiler/loongarch64/cell.lisp
+@@ -308,12 +308,14 @@
+ (define-vop (dynbind)
+-  (:args (value :scs (any-reg descriptor-reg zero))
++  (:args (value :scs (any-reg descriptor-reg zero) :to :save)
+          (symbol :scs (descriptor-reg) :target alloc-tls-symbol))
+   (:temporary (:scs (descriptor-reg) :offset l0-offset) alloc-tls-symbol)
+   (:temporary (:scs (descriptor-reg) :offset l1-offset) value-temp)
+   (:temporary (:scs (non-descriptor-reg) :offset nl0-offset) tls-index)
+   (:temporary (:scs (non-descriptor-reg) :offset nl1-offset) bsp-temp)
++  (:temporary (:scs (non-descriptor-reg) :offset nl2-offset) alloc-tls-const)
+   (:temporary (:sc any-reg :offset lip-offset) lip)
++  (:ignore alloc-tls-const)
+   (:generator 5
+      (load-tls-index tls-index symbol)
