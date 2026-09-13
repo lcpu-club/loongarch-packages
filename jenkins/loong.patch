@@ -1,0 +1,47 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,18 +34,34 @@ sha512sums=('9c3fe9850843521cac9f823124b180ce9dc7870636dd3ed84fd9c4f103ea4586213
+ prepare() {
+ 	cd "${pkgname}"
+ 	patch -Np1 -i "${srcdir}/skip-failing-test.patch"
++
++	# loong64: make frontend-maven-plugin use the system node/corepack.
++	# NodeInstaller skips the download when <basedir>/node/node reports the
++	# requested version, and CorepackInstaller expects the corepack module in
++	# <basedir>/node/node_modules/corepack.
++	mkdir -p node/node_modules
++	ln -sf /usr/bin/node node/node
++	ln -sf /usr/lib/node_modules/corepack node/node_modules/corepack
+ }
+ 
+ build() {
+ 	cd "${pkgname}"
+ 	export PATH="/usr/lib/jvm/java-${_java}-openjdk/bin:${PATH}"
+-	mvn -am -pl war,bom -Pquick-build -Dproject.build.outputTimestamp="${SOURCE_DATE_EPOCH}" package
++	mvn -am -pl war,bom -Pquick-build -Dproject.build.outputTimestamp="${SOURCE_DATE_EPOCH}" \
++		-Dnode.version="$(node --version | sed 's/^v//')" package
+ }
+ 
+ check() {
+ 	cd "${pkgname}"
+ 	export PATH="/usr/lib/jvm/java-${_java}-openjdk/bin:${PATH}"
+-	mvn -am -Plight-test -Dproject.build.outputTimestamp="${SOURCE_DATE_EPOCH}" test
++	# loong64: the JS unit tests (vitest -> rolldown) cannot run here, as
++	# rolldown ships no native binding for loongarch64 and does not declare the
++	# wasm32-wasi fallback as an optional dependency. -Dskip.corepack=true only
++	# drops the "yarn test" execution: "yarn install"/"yarn build" have their
++	# own explicit <skip>${skip.frontend}</skip> and the Java tests are unaffected.
++	mvn -am -Plight-test -Dproject.build.outputTimestamp="${SOURCE_DATE_EPOCH}" \
++		-Dnode.version="$(node --version | sed 's/^v//')" \
++		-Dskip.corepack=true test
+ }
+ 
+ package() {
+@@ -57,3 +73,7 @@ package() {
+ 	install -Dm 644 "${srcdir}/${pkgname}.conf" "${pkgdir}/etc/conf.d/${pkgname}"
+ 	install -Dm 644 LICENSE.txt "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+ }
++
++# loong64: use the distribution node (24.x LTS) instead of the upstream
++# prebuilt x86_64 node that frontend-maven-plugin would download.
++makedepends+=('nodejs-lts-krypton' 'corepack')
