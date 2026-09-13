@@ -1,0 +1,27 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,6 +31,24 @@ _srcenv() {
+ prepare() {
+ 	_srcenv
+ 	cargo fetch --locked --target host-tuple
++	# loong64: float16 0.1.5 unconditionally compiles LSX intrinsics on loongarch64
++	# (core::arch::loongarch64, unstable feature stdarch_loongarch), causing an
++	# E0658 failure. Disable the SIMD dispatch for loongarch64 and use the
++	# software fallback implementation instead.
++	local _float16
++	_float16=$(find "$srcdir/registry/src" -maxdepth 2 -name 'float16-*' -type d | head -1)
++	sed -i 's/target_arch = "loongarch64"/target_arch = "loongarch64_disabled"/g' \
++		"$_float16/src/binary16/arch.rs"
++
++	# loong64: with debug info enabled, cc 1.4.1 unconditionally appends the
++	# x86 clang-specific option -mno-omit-leaf-frame-pointer, which GCC/loongarch64
++	# does not support (this breaks compilation of ring's C code).
++	local _cc
++	_cc=$(find "$srcdir/registry/src" -maxdepth 2 -name 'cc-*' -type d | head -1)
++	sed -i '/-mno-omit-leaf-frame-pointer/d' "$_cc/src/tool.rs"
++	# Cargo's fingerprint for registry dependencies does not include source content,
++	# so it must be cleaned to force a rebuild of the patched cc.
++	cargo clean --offline -p cc || true
+ }
+ 
+ build() {
