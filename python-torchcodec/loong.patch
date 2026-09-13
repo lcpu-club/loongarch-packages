@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index a145805..8a5d060 100644
+index 6708ba5..ab4bdb1 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -56,7 +56,7 @@ check() {
+@@ -64,7 +64,7 @@ check() {
    cd $_name-$pkgver
    python -m venv --system-site-packages test-env
    test-env/bin/python -m installer dist/*.whl
@@ -11,9 +11,19 @@ index a145805..8a5d060 100644
  }
  
  package() {
-@@ -64,3 +64,5 @@ package() {
+@@ -72,3 +72,15 @@ package() {
    python -m installer --destdir="$pkgdir" dist/*.whl
    install -vDm 644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
  }
 +
 +makedepends+=(fmt)
++
++# use the system libavif: upstream fetches a prebuilt x86_64 binary from S3,
++# which fails to link on loong64
++source+=(use-system-libavif.patch)
++b2sums+=('c3ff2b4f77f4a79445e5d0a3e58759d7ba3cecffbaadf5a5b55c8dd02afd62a62e327a15eda2e8b6feea348d5f2e80395dc2e3ae6820130e3d96d15f33313f8c')
++
++prepare() {
++  cd $_name-$pkgver
++  patch -Np1 -i "$srcdir"/use-system-libavif.patch
++}
