@@ -1,0 +1,32 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index db2ca6e..ca46f45 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,17 +16,25 @@ options=('!lto')
+ prepare() {
+   cd "$pkgname-$pkgver"
+   sed -i '/^duckdb =/s/"bundled"/"buildtime_bindgen"/' Cargo.toml
++  # no pre-built libduckdb for loong64, link against system duckdb
++  sed -i 's/^DUCKDB_DOWNLOAD_LIB = "1"$/DUCKDB_DOWNLOAD_LIB = "0"/' .cargo/config.toml
+   cargo fetch --target "$(rustc --print host-tuple)"
+ }
+ 
+ build() {
+   cd "$pkgname-$pkgver"
+-  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 cargo build --release --frozen
++  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
++  DUCKDB_LIB_DIR=/usr/lib \
++  DUCKDB_INCLUDE_DIR=/usr/include \
++    cargo build --release --frozen
+ }
+ 
+ check() {
+   cd "$pkgname-$pkgver"
+-  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 cargo test --frozen
++  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
++  DUCKDB_LIB_DIR=/usr/lib \
++  DUCKDB_INCLUDE_DIR=/usr/include \
++    cargo test --frozen
+ }
+ 
+ package() {
