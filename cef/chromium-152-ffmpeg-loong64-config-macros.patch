@@ -1,0 +1,66 @@
+--- a/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config_components.h
++++ b/third_party/ffmpeg/chromium/config/Chrome/linux/loong64/config_components.h
+@@ -2328,4 +2328,30 @@
+ #define CONFIG_WHISPER_FILTER 0
+ #define CONFIG_XPSNR_FILTER 0
+ 
++/* Added for loong64: these components did not exist when this file was
++ * generated. Undefined CONFIG_* macros are a hard error when used in a C
++ * expression (e.g. the HWACCEL_MAX sums in libavcodec/h264_slice.c), so keep
++ * them in sync with the other architectures in config/Chrome/linux/*. */
++#define CONFIG_APV_VULKAN_ENCODER 0
++#define CONFIG_APV_VULKAN_HWACCEL 0
++#define CONFIG_AV1_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_DOVI_SPLIT_BSF 0
++#define CONFIG_H264_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_HEVC_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_ITERM2_MUXER 0
++#define CONFIG_LATTICEPAL_FILTER 0
++#define CONFIG_LCEVC_MERGE_BSF 0
++#define CONFIG_MPEG1_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_MPEG2_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_MPEG4_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_MVR_DEMUXER 0
++#define CONFIG_SHARED_PROTOCOL 0
++#define CONFIG_VC1_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_VP8_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_VP9_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_VQE_AMF_FILTER 0
++#define CONFIG_WEBP_ANIM_DECODER 0
++#define CONFIG_WEBP_ANIM_DEMUXER 0
++#define CONFIG_WMV3_NVDEC_CUARRAY_HWACCEL 0
++
+ #endif /* FFMPEG_CONFIG_COMPONENTS_H */
+--- a/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config_components.h
++++ b/third_party/ffmpeg/chromium/config/Chromium/linux/loong64/config_components.h
+@@ -2328,4 +2328,30 @@
+ #define CONFIG_WHISPER_FILTER 0
+ #define CONFIG_XPSNR_FILTER 0
+ 
++/* Added for loong64: these components did not exist when this file was
++ * generated. Undefined CONFIG_* macros are a hard error when used in a C
++ * expression (e.g. the HWACCEL_MAX sums in libavcodec/h264_slice.c), so keep
++ * them in sync with the other architectures in config/Chrome/linux/*. */
++#define CONFIG_APV_VULKAN_ENCODER 0
++#define CONFIG_APV_VULKAN_HWACCEL 0
++#define CONFIG_AV1_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_DOVI_SPLIT_BSF 0
++#define CONFIG_H264_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_HEVC_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_ITERM2_MUXER 0
++#define CONFIG_LATTICEPAL_FILTER 0
++#define CONFIG_LCEVC_MERGE_BSF 0
++#define CONFIG_MPEG1_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_MPEG2_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_MPEG4_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_MVR_DEMUXER 0
++#define CONFIG_SHARED_PROTOCOL 0
++#define CONFIG_VC1_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_VP8_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_VP9_NVDEC_CUARRAY_HWACCEL 0
++#define CONFIG_VQE_AMF_FILTER 0
++#define CONFIG_WEBP_ANIM_DECODER 0
++#define CONFIG_WEBP_ANIM_DEMUXER 0
++#define CONFIG_WMV3_NVDEC_CUARRAY_HWACCEL 0
++
+ #endif /* FFMPEG_CONFIG_COMPONENTS_H */

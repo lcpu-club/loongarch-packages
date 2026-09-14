@@ -1,13 +1,15 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 84f85ce..e695478 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -201,6 +201,36 @@ prepare() {
+@@ -212,6 +212,40 @@ prepare() {
    # CEF: Remove libxml_visibility patch (fails with system libxml2)
    patch -Np1 -i ../cef-no-libxml-visibility-patch.patch
  
 +  # Patches for loong64
 +  patch -Np1 -i ../chromium-loong64-support.patch
++  # The loong64 ffmpeg config headers are much older than the bundled FFmpeg
++  # and lack components added since, which makes files like
++  # libavcodec/h264_slice.c fail with "use of undeclared identifier CONFIG_*".
++  patch -Np1 -i ../chromium-152-ffmpeg-loong64-config-macros.patch
 +  patch -Np1 -i ../allow-sched_getaffinity-in-seccomp-for-loong64.patch
 +  patch -Np1 -i ../tools-gn-args-loong64.patch
 +  patch -Np1 -i ../cef-make-distrib-loong64.patch
@@ -39,7 +41,7 @@ index 84f85ce..e695478 100644
    # CEF: Override clang_exe to use system clang
    echo 'clang_exe = "clang"' >>cef/tools/clang_util.py
  
-@@ -224,6 +254,13 @@ prepare() {
+@@ -235,6 +269,13 @@ prepare() {
    rm -f third_party/gperf/cipd/bin/gperf
    ln -s /usr/bin/gperf third_party/gperf/cipd/bin/
  
@@ -53,7 +55,7 @@ index 84f85ce..e695478 100644
    if ((!_system_clang)); then
      # Use prebuilt rust as system rust cannot be used due to the error:
      #   error: the option `Z` is only accepted on the nightly compiler
-@@ -347,11 +384,22 @@ build() {
+@@ -358,11 +399,22 @@ build() {
      )
    fi
  
@@ -76,7 +78,7 @@ index 84f85ce..e695478 100644
    else
      export GN_OUT_CONFIGS="Release_GN_x64"
    fi
-@@ -394,6 +442,8 @@ build() {
+@@ -405,6 +457,8 @@ build() {
  
    if [[ $CARCH == "aarch64" ]]; then
      ninja -C out/Release_GN_arm64 libcef chrome_sandbox
@@ -85,7 +87,7 @@ index 84f85ce..e695478 100644
    else
      ninja -C out/Release_GN_x64 libcef chrome_sandbox
    fi
-@@ -401,6 +451,8 @@ build() {
+@@ -412,6 +466,8 @@ build() {
    # Build the CEF binary distribution
    if [[ $CARCH == "aarch64" ]]; then
      local _distrib_arch_flag="--arm64-build"
@@ -94,7 +96,7 @@ index 84f85ce..e695478 100644
    else
      local _distrib_arch_flag="--x64-build"
    fi
-@@ -443,4 +495,20 @@ package() {
+@@ -454,4 +510,23 @@ package() {
    install -Dm644 ../chromium-$_chromium_ver/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE-CHROMIUM"
  }
  
@@ -113,5 +115,8 @@ index 84f85ce..e695478 100644
 +             '64ee44c5e488d43f87b6fbcd7f366fdf69d36c9e4c6d59ba67de756581a506ac'
 +             '7f5c8ca01dfa811ee3b207e7955e1d4216d30da3e0562cf384141f3a53665a80'
 +             'cfdb92dbd54a2e4f113603ac876debd050d5e54492e516666f71bb73252d9425')
++
++source+=(chromium-152-ffmpeg-loong64-config-macros.patch)
++sha256sums+=('5ea4a30c62bd604389589bb08ae9c1ee89a213aa56764908d16789e6036c7bf2')
 +
  # vim:set ts=2 sw=2 et:
