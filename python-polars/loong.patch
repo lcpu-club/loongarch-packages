@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -90,6 +90,8 @@ check() {
+         --ignore tests/unit/io/test_iceberg.py
+         # Requires unpackaged python-connectorx
+         --deselect "tests/unit/io/database/test_read.py::test_read_database_cx_credentials"
++        # python-altair is not available for loongarch64 right now
++        --ignore tests/unit/operations/namespaces/test_plot.py
+         # Deprecation warning, yet to be fixed
+         -W ignore::DeprecationWarning
+     )
+@@ -135,3 +137,5 @@ package_python-polars-runtime-compat() {
+ package_python-polars-runtime-64() {
+     _package_runtime 64 ", large dataset support"
+ }
++
++RUSTFLAGS="${RUSTFLAGS//-C link-arg=-Wl,--icf=safe/}"
