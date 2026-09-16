@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 580b15c..1affad0 100644
+index 231957b..281fb2a 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -463,6 +463,9 @@ prepare() {
@@ -90,13 +90,16 @@ index 580b15c..1affad0 100644
  
    # Electron specific fixes
    #  fix: use GTK UI theme for Linux message boxes #52238
-@@ -561,6 +603,19 @@ prepare() {
+@@ -561,6 +603,22 @@ prepare() {
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
      tools/generate_shim_headers/generate_shim_headers.py
  
 +  # Add loong64 support for chromium
 +  patch -Np1 -i "${srcdir}/chromium-loong64-support.patch"
 +  patch -Np1 -i "${srcdir}/allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++  # Backport of upstream v8 d94af4c88880: drop the private kMaximalBufferSize
++  # shadowing AssemblerBase's public constant, fixing baseline-compiler.cc
++  patch -Np1 -i "${srcdir}/v8-loong64-fix-assembler-growbuffer-overflow.patch"
 +  # Add loong64 support for electron
 +  patch -Np1 -d electron -i "${srcdir}/electron_runtime_api_dalagate-add-loongarch64-support.patch"
 +
@@ -110,7 +113,7 @@ index 580b15c..1affad0 100644
    # Remove bundled libraries for which we will use the system copies; this
    # *should* do what the remove_bundled_libraries.py script does, with the
    # added benefit of not having to list all the remaining libraries
-@@ -679,6 +734,14 @@ build() {
+@@ -679,6 +737,14 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -125,7 +128,7 @@ index 580b15c..1affad0 100644
    export CHROMIUM_BUILDTOOLS_PATH="${PWD}/buildtools"
    gn gen out/Release \
        --args="import(\"//electron/build/args/release.gn\") ${_flags[*]}"
-@@ -703,3 +766,11 @@ package() {
+@@ -703,3 +769,13 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
@@ -133,7 +136,9 @@ index 580b15c..1affad0 100644
 +makedepends+=(jq)
 +source+=("chromium-loong64-support.patch"
 +         "electron_runtime_api_dalagate-add-loongarch64-support.patch"
-+         "allow-sched_getaffinity-in-seccomp-for-loong64.patch")
++         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
++         "v8-loong64-fix-assembler-growbuffer-overflow.patch")
 +sha256sums+=('c498ad298917886739606cd8fac8f526fd05218a460997c0e9100db18b1996bb'
 +             'de2cad8f1c8dced39a2f69e2908b173e7a27321d30d35b25acdc8f9ba3e57b50'
-+             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
++             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
++             'c59978dc7163b2afd4fcd30e7be2234b6913b70a21eb454c08c3e5cdf3730bab')
