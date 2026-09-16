@@ -1,0 +1,48 @@
+Backport of upstream v8 commit d94af4c8888079d28c770ec28e879379bfe7f069
+[loong64][codegen] Fix signed integer overflow in Assembler::GrowBuffer
+
+The M148 cherry-pick of the baseline instruction size estimation fix
+references Assembler::kMaximalBufferSize from baseline-compiler.cc, but the
+loong64 assembler header still shadows it with a private declaration,
+hiding the public AssemblerBase::kMaximalBufferSize and breaking the build:
+
+  ../../v8/src/baseline/baseline-compiler.cc:281:39: error:
+  'kMaximalBufferSize' is a private member of 'v8::internal::Assembler'
+
+Drop the shadowing private constant and use the shared
+AssemblerBase::ComputeNewBufferSize() helper, as upstream did.
+https://chromium-review.googlesource.com/c/v8/v8/+/7802499
+
+diff --git a/v8/src/codegen/loong64/assembler-loong64.cc b/v8/src/codegen/loong64/assembler-loong64.cc
+index 59921885b51e..05706516d77d 100644
+--- a/v8/src/codegen/loong64/assembler-loong64.cc
++++ b/v8/src/codegen/loong64/assembler-loong64.cc
+@@ -5624,13 +5624,7 @@ void Assembler::RelocateRelativeReference(
+ void Assembler::GrowBuffer() {
+   // Compute new buffer size.
+   int old_size = buffer_->size();
+-  int new_size = std::min(2 * old_size, old_size + 1 * MB);
+-
+-  // Some internal data structures overflow for very large buffers,
+-  // they must ensure that kMaximalBufferSize is not too large.
+-  if (new_size > kMaximalBufferSize) {
+-    V8::FatalProcessOutOfMemory(nullptr, "Assembler::GrowBuffer");
+-  }
++  int new_size = ComputeNewBufferSize(BufferGrowthStrategy::kDoubleCapped1MB);
+ 
+   // Set up new buffer.
+   std::unique_ptr<AssemblerBuffer> new_buffer = buffer_->Grow(new_size);
+diff --git a/v8/src/codegen/loong64/assembler-loong64.h b/v8/src/codegen/loong64/assembler-loong64.h
+index a65b7a9c9dcd..8c7d8f86e7dd 100644
+--- a/v8/src/codegen/loong64/assembler-loong64.h
++++ b/v8/src/codegen/loong64/assembler-loong64.h
+@@ -1613,9 +1613,6 @@ class V8_EXPORT_PRIVATE Assembler : public AssemblerBase {
+   void set_pc_for_safepoint() { pc_for_safepoint_ = pc_; }
+ 
+  private:
+-  // Avoid overflows for displacements etc.
+-  static const int kMaximalBufferSize = 512 * MB;
+-
+   // Buffer size and constant pool distance are checked together at regular
+   // intervals of kBufferCheckInterval emitted bytes.
+   static constexpr int kBufferCheckInterval = 1 * KB / 2;
