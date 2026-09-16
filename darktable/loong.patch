@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -64,7 +64,7 @@ build() {
-         CMAKE_INSTALL_LIBEXECDIR=/usr/lib
+@@ -68,7 +68,7 @@ build() {
          CMAKE_BUILD_TYPE=Release
          BINARY_PACKAGE_BUILD=1
+         ONNXRUNTIME_OFFLINE=On
 -        USE_AI=On
 +        USE_AI=Off
          USE_COLORD=On
