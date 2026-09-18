@@ -1,0 +1,79 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 11addc0..5e47278 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,11 +36,34 @@ b2sums=('ab80b17b2706b69df73e697bdbd0fb714eb0d6933b1ee6ccc3a3ed4ce194f105f151e0f
+ prepare() {
+   cd $pkgname
+   sed -i 's|"packageManager": "bun@1.4.2"|"packageManager": "bun@1.4.0"|' package.json
+-  bun install --frozen-lockfile --ignore-scripts
++  patch -Np1 -i ../wasm-css.patch
++  patch -Np1 -i ../loong64-target.patch
++  cp ../fix-oxide-worker-exit.patch ../opentui-loong64.patch patches/
++  # The lockfile records LoongArch optional dependencies with an unsupported CPU.
++  sed -i '/linux-loong64/s/"cpu": "none"/"cpu": "loong64"/' bun.lock
++  # Install Oxide's threaded WASM fallback on the host architecture.
++  sed -i '/"@tailwindcss\/oxide-wasm32-wasi":/s/"cpu": "none"/"cpu": "loong64"/' bun.lock
++  bun install --ignore-scripts
++
++  cd "$srcdir/opentui-0.5.10/packages/native"
++  bash scripts/prepare-zig-deps.sh
+ }
+ 
+ build() {
+-  cd $pkgname/packages/cli
++  # Parcel does not publish a LoongArch watcher addon; retain native inotify support.
++  cd "$srcdir/$pkgname/packages/core/node_modules/@parcel/watcher"
++  node-gyp rebuild --nodedir=/usr
++
++  # Koffi's prebuilt LoongArch addon replaces Bun's JIT-dependent FFI trampolines.
++  tar -xzf "$srcdir/koffi-linux-loong64-3.2.1.tgz" -C "$srcdir"
++  cp "$srcdir/package/linux_loong64/koffi.node" \
++    "$srcdir/$pkgname/packages/cli/node_modules/@opentui/core/"
++
++  # OpenTUI 0.5.10 does not publish a LoongArch renderer; build it with Zig.
++  cd "$srcdir/opentui-0.5.10/packages/native"
++  zig build -Doptimize=ReleaseFast -Dlibrary-target=loongarch64-linux-gnu.2.36
++
++  cd "$srcdir/$pkgname/packages/cli"
+   OPENCODE_VERSION=$pkgver bun run ./script/build.ts --single --baseline --skip-install
+ }
+ 
+@@ -61,9 +84,12 @@ package() {
+   cd $pkgname
+   case $CARCH in
+   aarch64) dir=cli-linux-arm64 ;;
++  loong64) dir=cli-linux-loong64 ;;
+   x86_64) dir=cli-linux-x64-baseline ;;
+   esac
+   install -vDm755 -t "$pkgdir/usr/bin" "packages/cli/dist/$dir/bin/opencode"
++  install -vDm755 -t "$pkgdir/usr/lib/opencode" \
++    "$srcdir/opentui-0.5.10/packages/native/lib/loongarch64-linux-gnu.2.36/libopentui.so"
+ 
+   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
+ 
+@@ -72,3 +98,24 @@ package() {
+   "$pkgdir/usr/bin/opencode" --completions zsh \
+     | install -vDm644 /dev/stdin "$pkgdir/usr/share/zsh/site-functions/_opencode"
+ }
++
++source+=(wasm-css.patch fix-oxide-worker-exit.patch loong64-target.patch
++         opentui-loong64.patch
++         'opentui-0.5.10.tar.gz::https://github.com/anomalyco/opentui/archive/refs/tags/v0.5.10.tar.gz'
++         'koffi-linux-loong64-3.2.1.tgz::https://registry.npmjs.org/@koromix/koffi-linux-loong64/-/koffi-linux-loong64-3.2.1.tgz')
++b2sums+=('94896400934a91c13f3458a25239528922c120cfa06f9b362aead83d4ea0a8f443691c46cb5d9139b9be1fc7cb609f1cd25440416d3bcc13ae4c84606be72ffb'
++         '8ccefc948e86b53c43f77cc3f3ef3de557cd4c104a444fb0eb8b2626cfc607ae20825370ffa29eab66604514c5c76eeaa0c86d45a3b65776ac15edae374278b1'
++         '0143ccc8b0467a5f3120b50e37d50206958addb2edae35f6ea4b8a834aa9491220825612268cf7de635c2c6a3447bcc97b67d994364efb098c14d37e1a44865b'
++         'ef145fd3a81cdbb511e1993782f31a5523dde2cfac454dc44e8b24643083b70758bc1129712522c6def4ff576e465560bce45ba19745d73ad2564757bfa24c87'
++         '0a4bc734cf317a88d77a82a1cdbd5e9acf4bea4eea8a009a0959a63c1bf3553f08f5d193081510f4c1874480ae684ef39c70896892977d78680d54827e0e99f2'
++         '2b993122ef63c1cea33ca57861c3b5b1087473622dee2c4654468ffbf51ce6594885b9ea18d34215351f544e9444439841ff3b7ab3f1792ecd2de25da274fb88')
++
++depends+=(
++  'libgcc'
++  'libstdc++'
++)
++makedepends+=(
++  'node-gyp'
++  'nodejs'
++  'zig'
++)

@@ -1,0 +1,41 @@
+--- a/packages/cli/script/build.ts
++++ b/packages/cli/script/build.ts
+@@ -32,10 +32,11 @@
+
+ const allTargets: {
+   os: string
+-  arch: "arm64" | "x64"
++  arch: "arm64" | "x64" | "loong64"
+   abi?: "musl"
+   avx2?: false
+ }[] = [
++  { os: "linux", arch: "loong64" },
+   { os: "linux", arch: "arm64" },
+   { os: "linux", arch: "x64" },
+   { os: "linux", arch: "x64", avx2: false },
+@@ -107,7 +108,10 @@
+       )
+     },
+   }
+-  const parcelWatcherPackage = `@parcel/watcher-${item.os}-${item.arch}${item.os === "linux" ? `-${item.abi ?? "glibc"}` : ""}`
++  const parcelWatcherPackage =
++    item.arch === "loong64"
++      ? "@parcel/watcher/build/Release/watcher.node"
++      : `@parcel/watcher-${item.os}-${item.arch}${item.os === "linux" ? `-${item.abi ?? "glibc"}` : ""}`
+   const parcelWatcherPlugin: BunPlugin = {
+     name: "parcel-watcher-binding",
+     setup(build) {
+--- a/packages/core/package.json
++++ b/packages/core/package.json
+@@ -50,9 +50,9 @@
+     },
+     "#fff": {
+       "workerd": "./src/filesystem/fff.workerd.ts",
+-      "bun": "./src/filesystem/fff.bun.ts",
++      "bun": "./src/filesystem/fff.workerd.ts",
+       "node": "./src/filesystem/fff.node.ts",
+-      "default": "./src/filesystem/fff.bun.ts"
++      "default": "./src/filesystem/fff.workerd.ts"
+     },
+     "#photon-wasm": {
+       "workerd": "./src/image/photon-wasm.workerd.ts",
