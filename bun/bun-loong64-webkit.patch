@@ -1,0 +1,29 @@
+--- a/Source/JavaScriptCore/domjit/DOMJITEffect.h
++++ b/Source/JavaScriptCore/domjit/DOMJITEffect.h
+@@ -28,6 +28,16 @@
+ #include "DFGAbstractHeap.h"
+ #include "DOMJITHeapRange.h"
+
++#if !ENABLE(DFG_JIT)
++namespace JSC { namespace DFG {
++enum AbstractHeapKind : unsigned {
++    InvalidAbstractHeap,
++    Heap,
++    SideState,
++};
++} }
++#endif
++
+ WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
+
+ namespace JSC {
+--- a/Source/JavaScriptCore/runtime/JSModuleLoader.cpp
++++ b/Source/JavaScriptCore/runtime/JSModuleLoader.cpp
+@@ -50,6 +50,7 @@
+ #include "SyntheticModuleRecord.h"
+ #include "TopExceptionScope.h"
+ #include "VMTrapsInlines.h"
++#include <wtf/Scope.h>
+ #include <wtf/text/MakeString.h>
+ 
+ namespace JSC {

@@ -1,0 +1,64 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index bd0e964..c896b04 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -60,6 +60,12 @@ prepare() {
+   # Fix https://gitlab.archlinux.org/archlinux/packaging/packages/bun/-/work_items/11
+   patch -Np1 -d $pkgname < $pkgname-41386.patch
+ 
++  if [[ "$CARCH" == loong64 ]]; then
++    patch -Np1 -d $pkgname-WebKit < $pkgname-loong64-webkit.patch
++    patch -Np1 -d $pkgname < $pkgname-loong64-src.patch
++    patch -Np1 -d $pkgname < $pkgname-loong64.patch
++  fi
++
+   cd $pkgname
+ 
+   grep -q "WEBKIT_VERSION = \"$_webkitver\"" scripts/build/deps/webkit.ts \
+@@ -82,6 +88,14 @@ prepare() {
+ build() {
+   cd $pkgname
+ 
++  if [[ "$CARCH" == loong64 ]]; then
++    # miri and other rust-toolchain.toml components are not built for loong64
++    export RUSTUP_TOOLCHAIN=nightly-2026-07-20
++    rustup toolchain install nightly-2026-07-20 --profile minimal
++    mkdir -p node_modules/.bin
++    ln -sf /usr/bin/esbuild node_modules/.bin/esbuild
++  fi
++
+   export PATH="/usr/lib/llvm21/bin:$PATH"
+   case "$CARCH" in
+     x86_64)  _bundir="bun-linux-x64" ;;
+@@ -100,7 +114,12 @@ build() {
+     bun_options+=(--baseline=on)
+   fi
+ 
+-  bun scripts/build.ts "${bun_options[@]}"
++  if [[ "$CARCH" == loong64 ]]; then
++    # bootstrap bun turns ninja's log pipe nonblocking, losing cmake output
++    node --experimental-strip-types scripts/build.ts "${bun_options[@]}"
++  else
++    bun scripts/build.ts "${bun_options[@]}"
++  fi
+ }
+ 
+ check() {
+@@ -121,3 +140,17 @@ package() {
+   install -vDm644 completions/bun.fish "$pkgdir/usr/share/fish/vendor_completions.d/bun.fish"
+   install -vDm644 completions/bun.zsh "$pkgdir/usr/share/zsh/site-functions/_bun"
+ }
++
++makedepends_loong64=(
++  bun
++  nodejs
++  esbuild
++)
++source_loong64=(
++  "$pkgname-loong64.patch"
++  "$pkgname-loong64-src.patch"
++  "$pkgname-loong64-webkit.patch"
++)
++b2sums_loong64=('eb0c48c86a468b252c7242c1e47606755ed0e231fa9750a9d7a0e0b76503b6367fdc99ac6054770701e1e31f17ab756c3e6ec1307a06d09a0d41f583d3282cff'
++                '30ecbbc295445e217ba0eed1d8ad6ae5b90783bb027c505031d99c40d61ca38cf26c94fec8359630c9daac1f51e632e8be63b150bdd5a9ebfd7f14fd0072f3f0'
++                '24cf6097f1aeec3008aa47118a897a233afb21759262f19d536489dce8d7bfb8c611df4842996b7f87ae1570564f9f79418adfad27fb3f5d19713bdede61c061')

@@ -1,0 +1,760 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 8b967bd0e23..b452854ff2a 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -204,7 +204,7 @@ warnings = { level = "deny", priority = -1 }
+ # (`--cfg=...` + `--check-cfg=cfg(...)`) by scripts/build/rust.ts; register
+ # them here so a plain `cargo build` / `cargo check` (without those flags)
+ # doesn't warn.
+-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(bun_asan)', 'cfg(bun_debug)', 'cfg(socket_fault_injection)'] }
++unexpected_cfgs = { level = "warn", check-cfg = ['cfg(bun_asan)', 'cfg(bun_debug)', 'cfg(bun_no_tinycc)', 'cfg(bun_no_wasm)', 'cfg(socket_fault_injection)'] }
+ # link.exe unconditionally prints "Creating library X.dll.lib and object
+ # X.dll.exp" to stdout when linking each proc-macro DLL on Windows hosts;
+ # there is no linker flag to suppress it. The lint already exempts itself
+diff --git a/packages/bun-usockets/src/context.c b/packages/bun-usockets/src/context.c
+index 50912b58c4c..c46bc21a30f 100644
+--- a/packages/bun-usockets/src/context.c
++++ b/packages/bun-usockets/src/context.c
+@@ -852,6 +852,10 @@ struct us_bun_verify_error_t us_socket_verify_error(struct us_socket_t *s) {
+     return (struct us_bun_verify_error_t) { .error = 0, .code = NULL, .reason = NULL };
+ }
+ 
++void us_socket_verify_error_out(struct us_socket_t *s, struct us_bun_verify_error_t *out) {
++    *out = us_socket_verify_error(s);
++}
++
+ const char *us_socket_sni_servername(struct us_socket_t *s) {
+     if (s->ssl) {
+         return us_internal_ssl_sni_servername(s);
+diff --git a/packages/bun-usockets/src/crypto/openssl.c b/packages/bun-usockets/src/crypto/openssl.c
+index cb5d8706a08..9ecdae0309f 100644
+--- a/packages/bun-usockets/src/crypto/openssl.c
++++ b/packages/bun-usockets/src/crypto/openssl.c
+@@ -1662,9 +1662,9 @@ done:
+   return ok;
+ }
+ 
+-SSL_CTX *us_ssl_ctx_from_options(struct us_bun_socket_context_options_t options,
++SSL_CTX *us_ssl_ctx_from_options(const struct us_bun_socket_context_options_t *options,
+                                  enum create_bun_socket_error_t *err) {
+-  SSL_CTX *ctx = us_ssl_ctx_build_raw(options, err);
++  SSL_CTX *ctx = us_ssl_ctx_build_raw(*options, err);
+   if (!ctx) return NULL;
+ 
+   /* SecureContext is mode-neutral (Node lets one back both tls.connect and
+@@ -1678,10 +1678,10 @@ SSL_CTX *us_ssl_ctx_from_options(struct us_bun_socket_context_options_t options,
+    * store. Packed into one ex_data slot (no malloc; the void* IS the value)
+    * so it dies with the SSL_CTX refcount. The slot was already registered in
+    * build_raw for the live counter; this just overwrites its NULL value. */
+-  if (options.client_renegotiation_limit || options.client_renegotiation_window) {
++  if (options->client_renegotiation_limit || options->client_renegotiation_window) {
+     SSL_CTX_set_ex_data(ctx, us_ssl_ctx_ex_idx(),
+-        US_RENEG_PACK(options.client_renegotiation_limit,
+-                      options.client_renegotiation_window));
++        US_RENEG_PACK(options->client_renegotiation_limit,
++                      options->client_renegotiation_window));
+   }
+ 
+   return ctx;
+@@ -1912,6 +1912,10 @@ struct us_bun_verify_error_t us_ssl_socket_verify_error_from_ssl(SSL *ssl) {
+   return (struct us_bun_verify_error_t){.error = x509_verify_error, .code = code, .reason = reason};
+ }
+ 
++void us_ssl_socket_verify_error_from_ssl_out(SSL *ssl, struct us_bun_verify_error_t *out) {
++  *out = us_ssl_socket_verify_error_from_ssl(ssl);
++}
++
+ struct us_bun_verify_error_t us_internal_ssl_verify_error(struct us_socket_t *s) {
+   if (!s->ssl || !s_ssl(s) || us_socket_is_closed(s) || us_internal_ssl_is_shut_down(s)) {
+     return (struct us_bun_verify_error_t){.error = 0, .code = NULL, .reason = NULL};
+@@ -1964,7 +1968,7 @@ static int ssl_dispatch_parked_reason(struct us_socket_t *s) {
+   loop_ssl_data->ssl_last_fatal_error_owner = NULL;
+   struct us_bun_verify_error_t verify_error = {
+       .error = -71, .code = "EPROTO", .reason = reason};
+-  us_dispatch_handshake(s, 0, verify_error);
++  us_dispatch_handshake(s, 0, &verify_error);
+   return 1;
+ }
+ 
+@@ -1988,7 +1992,8 @@ static void ssl_trigger_handshake(struct us_socket_t *s, int success) {
+       loop_ssl_data->ssl_last_fatal_error[0] = 0;
+       loop_ssl_data->ssl_last_fatal_error_owner = NULL;
+     }
+-    us_dispatch_handshake(s, 0, us_ssl_socket_verify_error_from_ssl(s_ssl(s)));
++    struct us_bun_verify_error_t verify_error = us_ssl_socket_verify_error_from_ssl(s_ssl(s));
++    us_dispatch_handshake(s, 0, &verify_error);
+     /* Nothing else will tear this connection down (the peer is still waiting
+      * for a Finished that will never come) - close unless JS already did. */
+     if (!ssl_gone(s) && !us_socket_is_closed(s)) {
+@@ -2004,7 +2009,7 @@ static void ssl_trigger_handshake(struct us_socket_t *s, int success) {
+     return;
+   }
+   struct us_bun_verify_error_t verify_error = us_internal_ssl_verify_error(s);
+-  us_dispatch_handshake(s, success, verify_error);
++  us_dispatch_handshake(s, success, &verify_error);
+ }
+ 
+ static void ssl_trigger_handshake_econnreset(struct us_socket_t *s) {
+@@ -2019,7 +2024,7 @@ static void ssl_trigger_handshake_econnreset(struct us_socket_t *s) {
+   struct us_bun_verify_error_t verify_error = {
+       .error = -46, .code = "ECONNRESET",
+       .reason = "Client network socket disconnected before secure TLS connection was established"};
+-  us_dispatch_handshake(s, 0, verify_error);
++  us_dispatch_handshake(s, 0, &verify_error);
+ }
+ 
+ /* True once a re-entrant us_socket_close() has run inside a dispatch. Any
+diff --git a/packages/bun-usockets/src/internal/internal.h b/packages/bun-usockets/src/internal/internal.h
+index c1ddb88af99..9bdc0b5fbd1 100644
+--- a/packages/bun-usockets/src/internal/internal.h
++++ b/packages/bun-usockets/src/internal/internal.h
+@@ -139,7 +139,7 @@ extern struct us_socket_t *us_dispatch_long_timeout(us_socket_r s);
+ extern struct us_socket_t *us_dispatch_end(us_socket_r s);
+ extern struct us_socket_t *us_dispatch_connect_error(us_socket_r s, int code);
+ extern struct us_connecting_socket_t *us_dispatch_connecting_error(struct us_connecting_socket_t *c, int code);
+-extern void us_dispatch_handshake(us_socket_r s, int success, struct us_bun_verify_error_t err);
++extern void us_dispatch_handshake(us_socket_r s, int success, const struct us_bun_verify_error_t *err);
+ extern void us_dispatch_session(us_socket_r s, const unsigned char *data, int length);
+ extern void us_dispatch_keylog(us_socket_r s, const unsigned char *data, int length);
+ extern struct us_socket_t *us_dispatch_ssl_raw_tap(us_socket_r s, char *data, int length);
+diff --git a/packages/bun-usockets/src/libusockets.h b/packages/bun-usockets/src/libusockets.h
+index 0a5d82ae32c..3e7ab9c0d20 100644
+--- a/packages/bun-usockets/src/libusockets.h
++++ b/packages/bun-usockets/src/libusockets.h
+@@ -307,7 +307,7 @@ struct us_socket_vtable_t {
+     struct us_socket_t *(*on_end)(us_socket_r);
+     struct us_socket_t *(*on_connect_error)(us_socket_r, int code);
+     struct us_connecting_socket_t *(*on_connecting_error)(struct us_connecting_socket_t *, int code);
+-    void (*on_handshake)(us_socket_r, int success, struct us_bun_verify_error_t, void *custom_data);
++    void (*on_handshake)(us_socket_r, int success, const struct us_bun_verify_error_t *, void *custom_data);
+ };
+ 
+ /* Mutable list-head + sweep state. Zero-initialise then us_socket_group_init().
+@@ -474,6 +474,7 @@ struct us_socket_group_t *us_connecting_socket_group(struct us_connecting_socket
+ unsigned char us_connecting_socket_kind(struct us_connecting_socket_t *c) nonnull_fn_decl;
+ 
+ struct us_bun_verify_error_t us_socket_verify_error(struct us_socket_t *s);
++void us_socket_verify_error_out(struct us_socket_t *s, struct us_bun_verify_error_t *out);
+ 
+ /* SNI hostname the peer sent in its ClientHello (server-side TLS sockets), or
+  * NULL when the socket is not TLS or no SNI extension was sent. The returned
+@@ -544,7 +545,7 @@ enum create_bun_socket_error_t {
+  * SSL_CTX never sends CertificateRequest unless options asked it to. Reneg
+  * limits attach as SSL_CTX ex_data. */
+ struct ssl_ctx_st *us_ssl_ctx_from_options(
+-    struct us_bun_socket_context_options_t options,
++    const struct us_bun_socket_context_options_t *options,
+     enum create_bun_socket_error_t *err);
+ /* SSL_CTX_up_ref / SSL_CTX_free without an OpenSSL include — for C++ callers
+  * (uWS App.h) that don't pull in BoringSSL headers. */
+diff --git a/packages/bun-uws/src/App.h b/packages/bun-uws/src/App.h
+index f2444a46bbd..e890f85d663 100644
+--- a/packages/bun-uws/src/App.h
++++ b/packages/bun-uws/src/App.h
+@@ -141,7 +141,8 @@ public:
+         /* Do nothing if not even on SSL */
+         if constexpr (SSL) {
+             enum create_bun_socket_error_t err = CREATE_BUN_SOCKET_ERROR_NONE;
+-            struct ssl_ctx_st *domainCtx = us_ssl_ctx_from_options(options, &err);
++            struct us_bun_socket_context_options_t c_options = options;
++            struct ssl_ctx_st *domainCtx = us_ssl_ctx_from_options(&c_options, &err);
+             if (!domainCtx) {
+                 if (success) *success = false;
+                 return std::move(*this);
+@@ -338,7 +339,8 @@ private:
+     TemplatedApp(SocketContextOptions options) {
+         if constexpr (SSL) {
+             enum create_bun_socket_error_t err = CREATE_BUN_SOCKET_ERROR_NONE;
+-            sslCtx = us_ssl_ctx_from_options(options, &err);
++            struct us_bun_socket_context_options_t c_options = options;
++            sslCtx = us_ssl_ctx_from_options(&c_options, &err);
+             if (!sslCtx) { httpContext = nullptr; return; }
+         }
+         httpContext = HttpContext<SSL>::create(Loop::get(), options.request_cert, options.reject_unauthorized);
+diff --git a/packages/bun-uws/src/HttpContext.h b/packages/bun-uws/src/HttpContext.h
+index c3fbda0d72c..1f2951860c2 100644
+--- a/packages/bun-uws/src/HttpContext.h
++++ b/packages/bun-uws/src/HttpContext.h
+@@ -143,7 +143,7 @@ public:
+ private:
+     /* ── vtable handlers ─────────────────────────────────────────────────── */
+ 
+-    static void onHandshake(us_socket_t *s, int success, struct us_bun_verify_error_t verify_error, void * /*custom_data*/) {
++    static void onHandshake(us_socket_t *s, int success, const struct us_bun_verify_error_t *verify_error, void * /*custom_data*/) {
+         // if we are closing or already closed, we don't need to do anything
+         if (!us_socket_is_closed(s)) {
+             HttpContextData<SSL> *httpContextData = getSocketContextDataS(s);
+@@ -154,7 +154,7 @@ private:
+             bool rejectUnauthorized = httpContextData->flags.rejectUnauthorized ||
+                 us_socket_server_name_reject_unauthorized(s);
+             if(rejectUnauthorized) {
+-                if(!success || verify_error.error != 0) {
++                if(!success || verify_error->error != 0) {
+                     // we failed to handshake, close the socket
+                     us_socket_close(s, 0, nullptr);
+                     return;
+@@ -164,13 +164,13 @@ private:
+              * JSNodeHTTPServerSocket::isAuthorized → handle.secureEstablished),
+              * i.e. "TLS handshake completed", not "peer cert verified". A
+              * server that doesn't requestCert will always see
+-             * verify_error.error != 0 (no client cert), so do NOT fold the
++             * verify_error->error != 0 (no client cert), so do NOT fold the
+              * verify result in here — that would make every HTTPS request
+              * report _secureEstablished = false. Peer-cert authorization is
+              * surfaced separately (rejectUnauthorized above / tls.authorized). */
+             httpResponseData->isAuthorized = success;
+-            httpResponseData->peerCertVerified = success && verify_error.error == 0;
+-            httpResponseData->peerCertVerifyErrorCode = verify_error.code;
++            httpResponseData->peerCertVerified = success && verify_error->error == 0;
++            httpResponseData->peerCertVerifyErrorCode = verify_error->code;
+ 
+             /* Any connected socket should timeout until it has a request */
+             ((HttpResponse<SSL> *) s)->resetTimeout();
+diff --git a/patches/boringssl/loongarch64-target.patch b/patches/boringssl/loongarch64-target.patch
+new file mode 100644
+index 00000000000..89a457b2bd1
+--- /dev/null
++++ b/patches/boringssl/loongarch64-target.patch
+@@ -0,0 +1,12 @@
++--- x/include/openssl/target.h
+++++ x/include/openssl/target.h
++@@ -43,6 +43,9 @@
++ #elif defined(__riscv) && __SIZEOF_POINTER__ == 8
++ #define OPENSSL_64_BIT
++ #define OPENSSL_RISCV64
+++#elif defined(__loongarch__) && __SIZEOF_POINTER__ == 8
+++#define OPENSSL_64_BIT
+++#define OPENSSL_LOONGARCH64
++ #elif defined(__riscv) && __SIZEOF_POINTER__ == 4
++ #define OPENSSL_32_BIT
++ #elif defined(__pnacl__)
+diff --git a/patches/mimalloc/loongarch64.patch b/patches/mimalloc/loongarch64.patch
+new file mode 100644
+index 00000000000..0f8404fa607
+--- /dev/null
++++ b/patches/mimalloc/loongarch64.patch
+@@ -0,0 +1,21 @@
++--- a/include/mimalloc/atomic.h
+++++ b/include/mimalloc/atomic.h
++@@ -405,13 +405,17 @@
++ static inline void mi_atomic_pause(void) {
++   __asm__ volatile ("isb" ::: "memory");
++ }
+++#elif (defined(__GNUC__) || defined(__clang__)) && defined(__loongarch__)
+++static inline void mi_atomic_pause(void) {
+++  __asm__ volatile ("dbar 0" ::: "memory");
+++}
++ #elif (defined(__GNUC__) || defined(__clang__)) && defined(__arm__) && (__ARM_ARCH >= 7)
++ static inline void mi_atomic_pause(void) {
++   __asm__ volatile ("yield" ::: "memory");
++ }
++ #else
++ static inline void mi_atomic_pause(void) {
++-  mi_atomic_thread_fence(mi_memory_order_seq_cst);
+++  mi_atomic_thread_fence(mi_memory_order(seq_cst));
++ }
++ #endif
++ 
+diff --git a/scripts/build/buildOptionsRs.ts b/scripts/build/buildOptionsRs.ts
+index 0ea2c440a5b..8c80b9c959b 100644
+--- a/scripts/build/buildOptionsRs.ts
++++ b/scripts/build/buildOptionsRs.ts
+@@ -69,6 +69,7 @@ export function generateBuildOptionsRs(cfg: Config): string {
+     "pub const ENABLE_TINYCC: bool = !cfg!(any(",
+     `    target_os = "android",`,
+     `    target_os = "freebsd",`,
++    `    bun_no_tinycc,`,
+     "));",
+     "",
+   ];
+diff --git a/scripts/build/bun.ts b/scripts/build/bun.ts
+index fc1a7481d7b..ed91be4cf30 100644
+--- a/scripts/build/bun.ts
++++ b/scripts/build/bun.ts
+@@ -78,10 +78,16 @@ function systemLibs(cfg: Config): string[] {
+         libs.push("-latomic");
+       }
+     }
+-    // Linux local WebKit: link system ICU (prebuilt bundles its own).
++    // Linux local WebKit: link system ICU. LoongArch64 prebuilts also use
++    // system ICU because distro static ICU archives have broken EH/COMDAT
++    // section interactions with lld on this target.
+     // Assumes system ICU is in default lib paths — true on most distros.
+     // Android: no system ICU; the local WebKit build must bundle it.
+-    if (cfg.webkit === "local" && cfg.abi !== "android") {
++    if (
++      (cfg.webkit === "local" || (cfg.linux && cfg.loongarch64 && cfg.webkit === "prebuilt")) &&
++      cfg.abi !== "android" &&
++      !(cfg.linux && cfg.loongarch64 && cfg.crossTarget !== undefined)
++    ) {
+       libs.push("-licudata", "-licui18n", "-licuuc");
+     }
+   }
+@@ -827,7 +833,7 @@ function emitSmokeTest(n: Ninja, cfg: Config, exe: string, exeName: string, stri
+   const envWrap = "env BUN_DEBUG_QUIET_LOGS=1";
+   let testCmd: string;
+   if (cfg.linux && cfg.asan) {
+-    const arch = cfg.x64 ? "x86_64" : "aarch64";
++    const arch = cfg.loongarch64 ? "loongarch64" : cfg.x64 ? "x86_64" : "aarch64";
+     testCmd = `${envWrap} setarch ${arch} -R ${exe} --revision || ${envWrap} ${exe} --revision`;
+   } else if (cfg.windows) {
+     // Windows: no setarch, no env wrapper syntax differences matter for
+diff --git a/scripts/build/codegen.ts b/scripts/build/codegen.ts
+index 36566f1e9ca..870d679883a 100644
+--- a/scripts/build/codegen.ts
++++ b/scripts/build/codegen.ts
+@@ -92,7 +92,7 @@ function codegenTarget(cfg: Config): { platform: string; arch: string } {
+           : cfg.os === "freebsd"
+             ? "freebsd"
+             : "linux";
+-  const arch = cfg.x64 ? "x64" : "arm64";
++  const arch = cfg.loongarch64 ? "loong64" : cfg.x64 ? "x64" : "arm64";
+   return { platform, arch };
+ }
+ 
+@@ -157,10 +157,12 @@ export function registerCodegenRules(n: Ninja, cfg: Config): void {
+   // CMake only tracked package.json as input; we add bun.lock so lockfile
+   // version bumps actually reinstall.
+   const touch = hostWin ? "type nul >" : "touch";
++  // no prebuilt esbuild binary for loong64; skip postinstalls (they fail)
++  const installExtra = cfg.host.arch === "loongarch64" ? " --ignore-scripts" : "";
+   n.rule("bun_install", {
+     command: hostWin
+-      ? `cmd /c "cd /d $dir && ${bun} install --frozen-lockfile && ${touch} $stamp"`
+-      : `cd $dir && ${bun} install --frozen-lockfile && ${touch} $stamp`,
++      ? `cmd /c "cd /d $dir && ${bun} install --frozen-lockfile${installExtra} && ${touch} $stamp"`
++      : `cd $dir && ${bun} install --frozen-lockfile${installExtra} && ${touch} $stamp`,
+     description: "install $dir",
+     restat: true,
+     // bun install can be memory-hungry and grabs a lockfile; serialize.
+diff --git a/scripts/build/config.ts b/scripts/build/config.ts
+index 671839b78c7..3e2c64f9efd 100644
+--- a/scripts/build/config.ts
++++ b/scripts/build/config.ts
+@@ -18,7 +18,7 @@ import { clangTargetArch, toolchainOverride } from "./tools.ts";
+ import { cyan, dim, green } from "./tty.ts";
+ 
+ export type OS = "linux" | "darwin" | "windows" | "freebsd";
+-export type Arch = "x64" | "aarch64";
++export type Arch = "x64" | "aarch64" | "loongarch64";
+ export type Abi = "gnu" | "musl" | "android";
+ export type BuildType = "Debug" | "Release" | "RelWithDebInfo" | "MinSizeRel";
+ export type BuildMode = "full" | "cpp-only" | "rust-only" | "link-only" | "rust-and-link" | "archive-link";
+@@ -80,6 +80,7 @@ export interface Config {
+   unix: boolean;
+   x64: boolean;
+   arm64: boolean;
++  loongarch64: boolean;
+ 
+   /**
+    * What's running the build. Differs from os/arch/windows (target) in
+@@ -510,9 +511,13 @@ export function detectHost(): Host {
+       ? "x64"
+       : a === "arm64"
+         ? "aarch64"
+-        : (() => {
+-            throw new BuildError(`Unsupported host architecture: ${a}`, { hint: "Bun builds on x64 or arm64" });
+-          })();
++        : a === "loong64"
++          ? "loongarch64"
++          : (() => {
++              throw new BuildError(`Unsupported host architecture: ${a}`, {
++                hint: "Bun builds on x64, arm64, or loong64",
++              });
++            })();
+ 
+   return { os, arch, exeSuffix: os === "windows" ? ".exe" : "" };
+ }
+@@ -733,6 +738,7 @@ export function resolveConfig(partial: PartialConfig, toolchain: Toolchain): Con
+   const unix = linux || darwin || freebsd;
+   const x64 = arch === "x64";
+   const arm64 = arch === "aarch64";
++  const loongarch64 = arch === "loongarch64";
+   // Darwin target on a non-darwin host (Linux CI box building macOS
+   // binaries). Same host-clang + --target/-isysroot model as Android/FreeBSD,
+   // with ld64.lld doing the Mach-O link. See the cross block further down.
+@@ -889,8 +895,9 @@ export function resolveConfig(partial: PartialConfig, toolchain: Toolchain): Con
+   const staticLibatomic = partial.staticLibatomic ?? true;
+ 
+   // TinyCC: off on Android (no upstream bionic support; FFI cc() falls back
+-  // to dlopen-only) and FreeBSD (oven-sh/tinycc has no FreeBSD target).
+-  const tinycc = partial.tinycc ?? !(abi === "android" || freebsd);
++  // to dlopen-only), FreeBSD (oven-sh/tinycc has no FreeBSD target) and
++  // loong64 (loongarch64 support only exists in a downstream tinycc fork).
++  const tinycc = partial.tinycc ?? !(abi === "android" || freebsd || loongarch64);
+ 
+   const valgrind = partial.valgrind ?? false;
+   const fuzzilli = partial.fuzzilli ?? false;
+@@ -978,6 +985,13 @@ export function resolveConfig(partial: PartialConfig, toolchain: Toolchain): Con
+     linkNdkRuntimesIntoClang(toolchain.cc, androidNdk, host, crossTarget);
+   }
+ 
++  // ─── Cross-compilation (Linux GNU LoongArch64) ───
++  // Debian's cross toolchain is enough for clang to discover crt, libgcc,
++  // libstdc++, and libc when passed --target without --sysroot.
++  if (linux && abi === "gnu" && loongarch64 && host.arch !== "loongarch64") {
++    crossTarget = "loongarch64-unknown-linux-gnu";
++  }
++
+   // ─── Cross-compilation (FreeBSD) ───
+   // Same pattern as Android: host clang + --target/--sysroot. The sysroot
+   // is an extracted base.txz (libc, libc++, headers, crt files). When
+@@ -1181,6 +1195,7 @@ export function resolveConfig(partial: PartialConfig, toolchain: Toolchain): Con
+     unix,
+     x64,
+     arm64,
++    loongarch64,
+     host,
+     canRunOnHost: os === host.os && arch === host.arch && (!linux || abi === (detectLinuxAbi() ?? abi)),
+     exeSuffix,
+diff --git a/scripts/build/configure.ts b/scripts/build/configure.ts
+index 12680d4a79a..bdb15464522 100644
+--- a/scripts/build/configure.ts
++++ b/scripts/build/configure.ts
+@@ -70,7 +70,10 @@ export function resolveToolchain(targetOs?: OS, packageManager: PackageManager =
+   // stamp, so this path will exist by the time esbuild rules fire).
+   // On Windows, bun writes `.bin/esbuild.exe` and npm writes `.bin/esbuild.cmd`.
+   const windowsBin = packageManager === "npm" ? "esbuild.cmd" : "esbuild.exe";
+-  const esbuild = resolve(repoRoot, "node_modules", ".bin", host.os === "windows" ? windowsBin : "esbuild");
++  const esbuild =
++    host.arch === "loongarch64"
++      ? "/usr/bin/esbuild"
++      : resolve(repoRoot, "node_modules", ".bin", host.os === "windows" ? windowsBin : "esbuild");
+ 
+   const bun = findBun(host.os);
+   const npm = packageManager === "npm" ? findNpm() : undefined;
+diff --git a/scripts/build/deps/boringssl.ts b/scripts/build/deps/boringssl.ts
+index 9db3b212578..625324af3d2 100644
+--- a/scripts/build/deps/boringssl.ts
++++ b/scripts/build/deps/boringssl.ts
+@@ -35,6 +35,7 @@ export const boringssl: Dependency = {
+     repo: "oven-sh/boringssl",
+     commit: BORINGSSL_COMMIT,
+   }),
++  patches: ["patches/boringssl/loongarch64-target.patch"],
+ 
+   build: cfg => {
+     // win-x64 uses NASM-syntax .asm; everything else (including win-aarch64)
+diff --git a/scripts/build/deps/highway.ts b/scripts/build/deps/highway.ts
+index f10550a0734..5bfb2b0eba5 100644
+--- a/scripts/build/deps/highway.ts
++++ b/scripts/build/deps/highway.ts
+@@ -10,6 +10,7 @@
+  * single baseline compile per .cc emits all variants.
+  */
+ 
++import type { Config } from "../config.ts";
+ import type { Dependency, DirectBuild } from "../source.ts";
+ 
+ const HIGHWAY_COMMIT = "2607d3b5b0113992fe84d3848859eae13b3b52c1";
+@@ -17,7 +18,12 @@ const HIGHWAY_COMMIT = "2607d3b5b0113992fe84d3848859eae13b3b52c1";
+ // The scalable SVE/SVE2 targets and SVE_256, which Highway starts building at clang >= 22, stay
+ // off: bun's movemask-style kernels (highway_json/xml/sourcemap.cpp) use BitsFromMask, which only
+ // fixed-width targets have. SVE2_128 (Neoverse V2/N2) is fixed-width and stays on, as before.
+-const disabledTargets = "HWY_DISABLED_TARGETS=HWY_ALL_SVE-HWY_SVE2_128";
++const disabledTargets = (cfg: Config): string =>
++  cfg.loongarch64
++    ? // HWY_LASX is bit 40 (1LL << 40); a bare number avoids the shell
++      // choking on a parenthesized form. SVE bits are irrelevant here.
++      "HWY_DISABLED_TARGETS=1099511627776"
++    : "HWY_DISABLED_TARGETS=HWY_ALL_SVE-HWY_SVE2_128";
+ 
+ export const highway: Dependency = {
+   name: "highway",
+@@ -52,7 +58,7 @@ export const highway: Dependency = {
+       // "unknown argument ignored"). globalFlags supplies /EHs-c- and /GR-
+       // on Windows; upstream's MSVC branch additionally sets the STL macro.
+       cflags: [
+-        `-D${disabledTargets}`,
++        `-D${disabledTargets(cfg)}`,
+         ...(cfg.windows ? ["-D_HAS_EXCEPTIONS=0"] : ["-fno-exceptions", "-fmath-errno"]),
+       ],
+     };
+@@ -66,11 +72,11 @@ export const highway: Dependency = {
+     return spec;
+   },
+ 
+-  provides: () => ({
++  provides: (cfg) => ({
+     libs: [],
+     // Highway's public header is <hwy/highway.h> but it includes siblings
+     // via "" paths — need both the root and the hwy/ subdir in -I.
+     includes: [".", "hwy"],
+-    defines: [disabledTargets],
++    defines: [disabledTargets(cfg)],
+   }),
+ };
+diff --git a/scripts/build/deps/libjpeg-turbo.ts b/scripts/build/deps/libjpeg-turbo.ts
+index 224d1f312df..3e103f0b1cd 100644
+--- a/scripts/build/deps/libjpeg-turbo.ts
++++ b/scripts/build/deps/libjpeg-turbo.ts
+@@ -98,7 +98,10 @@ export const libjpegTurbo: Dependency = {
+   patches: ["patches/libjpeg-turbo/8bit-only.patch", "patches/libjpeg-turbo/jbun_stubs.c"],
+ 
+   build: cfg => {
+-    const withSimd: [string, string] = ["#cmakedefine WITH_SIMD 1", "#define WITH_SIMD 1"];
++    const withSimd: [string, string] = [
++      "#cmakedefine WITH_SIMD 1",
++      cfg.arm64 || cfg.x64 ? "#define WITH_SIMD 1" : "/* #undef WITH_SIMD */",
++    ];
+     const srcDir = depSourceDir(cfg, "libjpeg-turbo");
+     const hostWin = cfg.host.os === "windows";
+     return {
+diff --git a/scripts/build/deps/mimalloc.ts b/scripts/build/deps/mimalloc.ts
+index 5e491a9abde..15df0bae194 100644
+--- a/scripts/build/deps/mimalloc.ts
++++ b/scripts/build/deps/mimalloc.ts
+@@ -24,6 +24,8 @@ export const mimalloc: Dependency = {
+     commit: MIMALLOC_COMMIT,
+   }),
+ 
++  patches: ["patches/mimalloc/loongarch64.patch"],
++
+   build: cfg => {
+     // ─── Override behavior (global malloc replacement) ───
+     //   ASAN:    OFF — ASAN interceptors must see the real malloc.
+diff --git a/scripts/build/deps/tinycc.ts b/scripts/build/deps/tinycc.ts
+index 7fa186cde0b..7c6a2004448 100644
+--- a/scripts/build/deps/tinycc.ts
++++ b/scripts/build/deps/tinycc.ts
+@@ -31,7 +31,8 @@ export const tinycc: Dependency = {
+ 
+   build: cfg => {
+     const sources = ["libtcc.c", "tccpp.c", "tccgen.c", "tccdbg.c", "tccelf.c", "tccasm.c", "tccrun.c"];
+-    if (cfg.arm64) sources.push("arm64-gen.c", "arm64-link.c", "arm64-asm.c");
++    if (cfg.loongarch64) sources.push("loongarch64-gen.c", "loongarch64-link.c", "loongarch64-asm.c");
++    else if (cfg.arm64) sources.push("arm64-gen.c", "arm64-link.c", "arm64-asm.c");
+     else sources.push("x86_64-gen.c", "x86_64-link.c", "i386-asm.c");
+     if (cfg.darwin) sources.push("tccmacho.c");
+     if (cfg.windows) sources.push("tccpe.c");
+@@ -57,6 +58,7 @@ export const tinycc: Dependency = {
+       // driver) so we leave it at the default.
+     }
+     if (cfg.windows) defines.CONFIG_WIN32 = true;
++    if (cfg.loongarch64) defines.TCC_TARGET_LOONGARCH64 = true;
+ 
+     const spec: DirectBuild = {
+       kind: "direct",
+diff --git a/scripts/build/deps/webkit.ts b/scripts/build/deps/webkit.ts
+index 7e8ddecce2a..83cee9a4a0c 100644
+--- a/scripts/build/deps/webkit.ts
++++ b/scripts/build/deps/webkit.ts
+@@ -67,7 +67,7 @@ function prebuiltSuffix(cfg: Config): string {
+ 
+ function prebuiltUrl(cfg: Config): string {
+   const os = cfg.windows ? "windows" : cfg.darwin ? "macos" : cfg.freebsd ? "freebsd" : "linux";
+-  const arch = cfg.arm64 ? "arm64" : "amd64";
++  const arch = cfg.loongarch64 ? "loongarch64" : cfg.arm64 ? "arm64" : "amd64";
+   const name = `bun-webkit-${os}-${arch}${prebuiltSuffix(cfg)}`;
+   const version = cfg.webkitVersion;
+   const tag = version.startsWith("autobuild-") ? version : `autobuild-${version}`;
+@@ -98,7 +98,7 @@ function prebuiltDestDir(cfg: Config): string {
+           : cfg.abi === "android"
+             ? "-android"
+             : "";
+-  const archKey = cfg.arm64 ? "-arm64" : "";
++  const archKey = cfg.loongarch64 ? "-loongarch64" : cfg.arm64 ? "-arm64" : "";
+   return resolve(cfg.cacheDir, `webkit-${version16}${osKey}${archKey}${prebuiltSuffix(cfg)}`);
+ }
+ 
+@@ -328,6 +328,22 @@ export const webkit: Dependency = {
+       ENABLE_STATIC_JSC: "ON",
+       USE_THIN_ARCHIVES: "OFF",
+       ENABLE_FTL_JIT: "ON",
++      // LoongArch64: interpreter-only build (C loop), no JIT or Wasm tiers.
++      // WebKit defaults USE_SYSTEM_MALLOC=ON on loong64; turn it off since
++      // bun forces USE_MIMALLOC below (bmalloc rejects both at once).
++      ...(cfg.loongarch64
++        ? {
++            ENABLE_JIT: "OFF",
++            ENABLE_DFG_JIT: "OFF",
++            ENABLE_FTL_JIT: "OFF",
++            ENABLE_C_LOOP: "ON",
++            ENABLE_WEBASSEMBLY: "OFF",
++            ENABLE_WEBASSEMBLY_BBQJIT: "OFF",
++            ENABLE_WEBASSEMBLY_OMGJIT: "OFF",
++            USE_SYSTEM_MALLOC: "OFF",
++            ENABLE_SAMPLING_PROFILER: "OFF",
++          }
++        : {}),
+       CMAKE_EXPORT_COMPILE_COMMANDS: "ON",
+       USE_BUN_JSC_ADDITIONS: "ON",
+       USE_BUN_EVENT_LOOP: "ON",
+diff --git a/scripts/build/deps/zlib.ts b/scripts/build/deps/zlib.ts
+index 2ee3470f950..4cef38d005b 100644
+--- a/scripts/build/deps/zlib.ts
++++ b/scripts/build/deps/zlib.ts
+@@ -203,6 +203,11 @@ export const zlib: Dependency = {
+       }
+       sources.push(...GENERIC.map(s => `arch/generic/${s}.c`));
+       sources.push("arch/arm/arm_features.c");
++    } else if (cfg.loongarch64) {
++      kernels = [];
++      archDir = "generic";
++      sources.push(...GENERIC.map(s => `arch/generic/${s}.c`));
++      defines.WITH_ALL_FALLBACKS = true;
+     } else {
+       throw new Error(`zlib: no SIMD kernel table for arch ${cfg.arch}`);
+     }
+diff --git a/scripts/build/flags.ts b/scripts/build/flags.ts
+index 0b377562026..e03746f3f35 100644
+--- a/scripts/build/flags.ts
++++ b/scripts/build/flags.ts
+@@ -67,6 +67,16 @@ export const cpuTargetFlags: Flag[] = [
+     when: c => c.windows && c.arm64,
+     desc: "ARM64 Windows: clang-cl prefix required (/clang: passes to clang)",
+   },
++  {
++    flag: "-march=loongarch64",
++    when: c => c.loongarch64,
++    desc: "LoongArch64: base ISA (LSX baseline), runs on every loong64 CPU",
++  },
++  {
++    flag: "-mcmodel=medium",
++    when: c => c.loongarch64,
++    desc: "LoongArch64: medium code model — bun + JSC static archives exceed the small model's jump-table range",
++  },
+   {
+     flag: "-march=nehalem",
+     when: c => c.x64,
+@@ -1212,12 +1222,6 @@ export const linkerFlags: Flag[] = [
+       "pthread_rwlock_unlock",
+       "pthread_rwlock_wrlock",
+       "pthread_setspecific",
+-      // stat-family inline → real symbol (2.33)
+-      "fstat",
+-      "fstat64",
+-      "fstatat",
+-      "fstatat64",
+-      "mknod",
+       // syscall wrappers (2.27/2.28)
+       "copy_file_range",
+       "memfd_create",
+@@ -1227,7 +1231,19 @@ export const linkerFlags: Flag[] = [
+       "posix_spawn_file_actions_addchdir_np",
+     ].map(s => `-Wl,--wrap=${s}`),
+     when: c => c.linux && c.abi === "gnu",
+-    desc: "Wrap glibc 2.18+ symbols (portable down to glibc 2.17)",
++    desc: "Wrap glibc 2.18+ symbols (portable down to glibc 2.17 where ABI exists)",
++  },
++  {
++    flag: [
++      // stat-family inline → real symbol (2.33)
++      "fstat",
++      "fstat64",
++      "fstatat",
++      "fstatat64",
++      "mknod",
++    ].map(s => `-Wl,--wrap=${s}`),
++    when: c => c.linux && c.abi === "gnu" && !c.loongarch64,
++    desc: "Wrap stat-family glibc compat symbols (not present on loong64 glibc 2.36 baseline)",
+   },
+   {
+     // c-bindings.cpp: __wrap_execve records that an exec of this process is in
+@@ -1278,6 +1294,11 @@ export const linkerFlags: Flag[] = [
+     when: c => c.linux && !(c.abi === "gnu" && c.release),
+     desc: "Keep eh_frame header (debug/musl/android; needed for DWARF backtraces)",
+   },
++  {
++    flag: c => `--target=${c.crossTarget!}`,
++    when: c => c.linux && c.abi === "gnu" && c.crossTarget !== undefined,
++    desc: "GNU Linux cross link target",
++  },
+   {
+     flag: c => `--ld-path=${c.ld}`,
+     when: c => c.linux,
+@@ -1321,8 +1342,8 @@ export const linkerFlags: Flag[] = [
+   },
+   {
+     flag: "-Wl,--gc-sections",
+-    when: c => c.linux && c.release,
+-    desc: "Garbage-collect unused sections (release only; debug keeps Zig dbHelper symbols)",
++    when: c => c.linux && c.release && !c.loongarch64,
++    desc: "Garbage-collect unused sections (release only; debug keeps Zig dbHelper symbols; loong64 ICU EH tables require keeping sections)",
+   },
+   {
+     // Always icf=safe in release. The stripped `bun` shares its build-id
+@@ -1330,7 +1351,7 @@ export const linkerFlags: Flag[] = [
+     // symbolication" would also bloat the shipped binary's .text — and
+     // `perf` symbolicates folded functions fine via the linker-map anyway.
+     flag: c => ["-Wl,-icf=safe", `-Wl,-Map=${linkerMapPath(c)}`],
+-    when: c => c.linux && c.release && !c.asan && !c.valgrind,
++    when: c => c.linux && c.release && !c.asan && !c.valgrind && !c.loongarch64,
+     desc: "Identical-code-folding (safe; perf symbolication uses the linker-map)",
+   },
+   {
+diff --git a/scripts/build/rust.ts b/scripts/build/rust.ts
+index 5e4fa5c5f0a..9d3d404acfe 100644
+--- a/scripts/build/rust.ts
++++ b/scripts/build/rust.ts
+@@ -38,7 +38,8 @@ import { streamPath } from "./stream.ts";
+ // ───────────────────────────────────────────────────────────────────────────
+ 
+ /**
+- * Rust target triple. Arch is `x86_64`/`aarch64`, not `x64`/`arm64`.
++ * Rust target triple. Arch is `x86_64`/`aarch64`/`loongarch64`,
++ * not `x64`/`arm64`/`loong64`.
+  *
+  * Passed explicitly via `--target` for two reasons:
+  *   - `-Z sanitizer=address` requires it (rustc refuses on the implicit
+@@ -51,7 +52,7 @@ export function rustTarget(cfg: Config): string {
+ 
+ /** `rustTarget()` on the bare target platform; `abi` is linux-only. */
+ export function rustTriple(os: OS, arch: Arch, abi: Abi | undefined): string {
+-  const rustArch = arch === "x64" ? "x86_64" : "aarch64";
++  const rustArch = arch === "x64" ? "x86_64" : arch === "loongarch64" ? "loongarch64" : "aarch64";
+   if (os === "darwin") return `${rustArch}-apple-darwin`;
+   if (os === "windows") return `${rustArch}-pc-windows-msvc`;
+   if (os === "freebsd") return `${rustArch}-unknown-freebsd`;
+@@ -85,6 +86,7 @@ export function cargoProfile(cfg: Config): { name: string; subdir: string } {
+ export const allRustTargets = [
+   "x86_64-unknown-linux-gnu",
+   "aarch64-unknown-linux-gnu",
++  "loongarch64-unknown-linux-gnu",
+   "x86_64-unknown-linux-musl",
+   "aarch64-unknown-linux-musl",
+   "x86_64-linux-android",
+@@ -144,13 +146,19 @@ export const cargoBuildStdArg = "-Zbuild-std=core,alloc,std,proc_macro,panic_abo
+ function rustCpuTargetFlags(cfg: Config): string[] {
+   const rustflags: string[] = [];
+   for (const clangFlag of computeCpuTargetFlags(cfg)) {
++    // C-only flag: rustc takes -Ccode-model separately and the small model
++    // is fine for the Rust half, so don't try to spell it as a rustflag.
++    if (clangFlag === "-mcmodel=medium") continue;
++    if (clangFlag.startsWith("-D")) continue;
+     const parsed = /^(?:\/clang:)?-m(cpu|tune|arch)=(.+)$/.exec(clangFlag);
+     assert(parsed !== null, `rustCpuTargetFlags() can't translate cpuTargetFlags entry '${clangFlag}'`);
+     const kind = parsed[1]!;
+     const value = parsed[2]!;
+     if (kind === "tune") {
+       rustflags.push(`-Ztune-cpu=${value}`);
+-    } else if (kind === "cpu" || cfg.x64) {
++    } else if (kind === "cpu" || cfg.x64 || cfg.loongarch64) {
++      // loongarch64: -march=loongarch64 is the generic CPU name for both
++      // clang and rustc, so the mapping is 1:1 (like x86).
+       rustflags.push(`-Ctarget-cpu=${value}`);
+     } else {
+       const [level, ...extensions] = value.split("+");
+@@ -417,6 +425,7 @@ export function cargoBuildInvocation(cfg: Config): CargoInvocation {
+   // issue 30205), turning benign at-exit state into reported leaks.
+   if (!cfg.asan) rustflags.push("-Zshare-generics=y");
+   rustflags.push(...rustCpuTargetFlags(cfg));
++  if (cfg.loongarch64) rustflags.push("--cfg=bun_no_tinycc", "--cfg=bun_no_wasm");
+   // `bun_core::build_options::ENABLE_ASAN = cfg!(bun_asan)` — must agree with
+   // the C++ `ASAN_ENABLED` macro so Global::exit() picks the same libc exit
+   // path (`exit` vs `quick_exit`) that c-bindings.cpp registered Bun__onExit on.
+diff --git a/scripts/build/source.ts b/scripts/build/source.ts
+index e57282be9a7..907adf3b6d7 100644
+--- a/scripts/build/source.ts
++++ b/scripts/build/source.ts
+@@ -1214,6 +1214,10 @@ function emitNestedCmake(
+     args.push(`-DCMAKE_EXE_LINKER_FLAGS=--ld-path=${cfg.ld}`);
+     args.push(`-DCMAKE_SHARED_LINKER_FLAGS=--ld-path=${cfg.ld}`);
+   }
++  if (cfg.linux && cfg.crossTarget !== undefined && cfg.abi === "gnu") {
++    args.push(`-DCMAKE_SYSTEM_NAME=Linux`);
++    args.push(`-DCMAKE_SYSTEM_PROCESSOR=${cfg.loongarch64 ? "loongarch64" : cfg.arm64 ? "aarch64" : "x86_64"}`);
++  }
+   if (cfg.windows) {
+     // Windows-specific toolchain forwarding. When CMAKE_C_COMPILER is
+     // an explicit path, cmake's find_program for the supporting tools
