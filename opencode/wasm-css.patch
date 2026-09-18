@@ -1,0 +1,38 @@
+--- a/package.json
++++ b/package.json
+@@ -117,6 +117,7 @@
+     "@actions/artifact": "5.0.1",
+     "@ast-grep/cli": "0.44.0",
+     "@opencode/client": "workspace:*",
++    "@rolldown/binding-wasm32-wasi": "1.2.5",
+     "@types/react": "19.2.17",
+     "@types/react-dom": "19.2.3",
+     "@tsconfig/bun": "catalog:",
+@@ -154,6 +155,7 @@
+     "electron"
+   ],
+   "overrides": {
++    "lightningcss": "npm:lightningcss-wasm@1.33.0",
+     "@opentui/core": "catalog:",
+     "@opentui/keymap": "catalog:",
+     "@opentui/solid": "catalog:",
+@@ -165,6 +167,8 @@
+     "solid-js": "catalog:"
+   },
+   "patchedDependencies": {
++    "@opentui/core@0.5.10": "patches/opentui-loong64.patch",
++    "@tailwindcss/oxide-wasm32-wasi@4.3.3": "patches/fix-oxide-worker-exit.patch",
+     "@ai-sdk/openai-compatible@2.0.41": "patches/@ai-sdk%2Fopenai-compatible@2.0.41.patch",
+     "@dnd-kit/dom@0.5.0": "patches/@dnd-kit%2Fdom@0.5.0.patch",
+     "@npmcli/agent@4.0.2": "patches/@npmcli%2Fagent@4.0.2.patch",
+--- a/packages/cli/script/app-assets.ts
++++ b/packages/cli/script/app-assets.ts
+@@ -6,7 +6,7 @@
+ export async function buildAppArchive(channel: string, options?: { skipBuild?: boolean }) {
+   if (options?.skipBuild) return "{}"
+   const root = path.resolve(import.meta.dirname, "../../app")
+-  await $`bun run build`
++  await $`node ${root}/node_modules/vite/bin/vite.js build`
+     .cwd(root)
+     .env({ ...process.env, OPENCODE_CHANNEL: channel, VITE_OPENCODE_SERVER_MODE: "origin" })
+   return JSON.stringify(
