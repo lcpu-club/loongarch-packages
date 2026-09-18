@@ -1,0 +1,2794 @@
+diff --git a/src/bun_core/debug.rs b/src/bun_core/debug.rs
+index 9ff90f16af0..6afb696f0c5 100644
+--- a/src/bun_core/debug.rs
++++ b/src/bun_core/debug.rs
+@@ -278,6 +278,7 @@ impl StackIterator {
+     }
+ }
+ 
++#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+ pub(crate) const PC_OFFSET: usize = StackIterator::PC_OFFSET;
+ 
+ /// Capture the current thread's call stack.
+diff --git a/src/bun_core/env.rs b/src/bun_core/env.rs
+index 9f4c52ef8c2..a3ae6f4b36d 100644
+--- a/src/bun_core/env.rs
++++ b/src/bun_core/env.rs
+@@ -41,8 +41,10 @@ pub const IS_LINUX: bool = cfg!(any(target_os = "linux", target_os = "android"))
+ const IS_FREEBSD: bool = cfg!(target_os = "freebsd");
+ /// kqueue-based event loop (macOS + FreeBSD share most of this path).
+ pub const IS_KQUEUE: bool = IS_MAC || IS_FREEBSD;
+-const IS_AARCH64: bool = cfg!(target_arch = "aarch64");
+-const IS_X64: bool = cfg!(target_arch = "x86_64");
++pub const IS_AARCH64: bool = cfg!(target_arch = "aarch64");
++pub const IS_LOONGARCH64: bool = cfg!(target_arch = "loongarch64");
++pub const IS_X86: bool = cfg!(any(target_arch = "x86", target_arch = "x86_64"));
++pub const IS_X64: bool = cfg!(target_arch = "x86_64");
+ pub const IS_MUSL: bool = cfg!(target_env = "musl");
+ pub const IS_ANDROID: bool = cfg!(target_os = "android");
+ pub const ALLOW_ASSERT: bool = IS_DEBUG || IS_TEST || build_options::RELEASE_SAFE;
+@@ -175,6 +177,7 @@ pub const OS_NAME_NPM: &str = OS.npm_name();
+ pub enum Architecture {
+     X64,
+     Arm64,
++    LoongArch64,
+     Wasm,
+ }
+ 
+@@ -184,6 +187,7 @@ impl Architecture {
+         match self {
+             Self::X64 => "x64",
+             Self::Arm64 => "aarch64",
++            Self::LoongArch64 => "loongarch64",
+             Self::Wasm => "wasm",
+         }
+     }
+@@ -196,6 +200,8 @@ crate::comptime_string_map! {
+         b"amd64" => Architecture::X64,
+         b"aarch64" => Architecture::Arm64,
+         b"arm64" => Architecture::Arm64,
++        b"loongarch64" => Architecture::LoongArch64,
++        b"loong64" => Architecture::LoongArch64,
+         b"wasm" => Architecture::Wasm,
+     };
+ }
+@@ -206,6 +212,8 @@ pub const ARCH: Architecture = if IS_WASM {
+     Architecture::X64
+ } else if IS_AARCH64 {
+     Architecture::Arm64
++} else if IS_LOONGARCH64 {
++    Architecture::LoongArch64
+ } else {
+     panic!("Please add your architecture to the Architecture enum")
+ };
+diff --git a/src/crash_handler/CPUFeatures.rs b/src/crash_handler/CPUFeatures.rs
+index 5736ea90433..24949745fc2 100644
+--- a/src/crash_handler/CPUFeatures.rs
++++ b/src/crash_handler/CPUFeatures.rs
+@@ -44,7 +44,21 @@ bitflags::bitflags! {
+     }
+ }
+ 
+-#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
++#[cfg(target_arch = "loongarch64")]
++bitflags::bitflags! {
++    #[repr(transparent)]
++    #[derive(Copy, Clone)]
++    pub struct Flags: u8 {
++        const NONE = 1 << 0;
++        // bits 1..=7 = padding
++    }
++}
++
++#[cfg(not(any(
++    target_arch = "x86_64",
++    target_arch = "aarch64",
++    target_arch = "loongarch64"
++)))]
+ compile_error!("CPUFeatures: unsupported target architecture");
+ 
+ // Per-arch const table of flag names, skipping "none" and padding bits.
+@@ -67,6 +81,9 @@ const NAMED_FLAGS: &[(&str, Flags)] = &[
+     ("sve", Flags::SVE),
+ ];
+ 
++#[cfg(target_arch = "loongarch64")]
++const NAMED_FLAGS: &[(&str, Flags)] = &[];
++
+ impl fmt::Display for CPUFeatures {
+     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+         let mut is_first = true;
+diff --git a/src/crash_handler/lib.rs b/src/crash_handler/lib.rs
+index 67f984f09f8..bb5bb9930d6 100644
+--- a/src/crash_handler/lib.rs
++++ b/src/crash_handler/lib.rs
+@@ -2336,6 +2336,13 @@ mod draft {
+             {
+                 b'L'
+             }
++            #[cfg(all(
++                any(target_os = "linux", target_os = "android"),
++                target_arch = "loongarch64"
++            ))]
++            {
++                b'o'
++            }
+             #[cfg(all(target_os = "linux", target_env = "musl", target_arch = "x86_64"))]
+             {
+                 b'u'
+@@ -2533,8 +2540,13 @@ mod draft {
+                 let _ = name_bytes;
+                 let address = addr.saturating_sub(1);
+                 let m = bun_sys::elf::find_loaded_module(address)?;
++                let image_relative_address = address - m.base_address;
++                if image_relative_address > i32::MAX as usize {
++                    return None;
++                }
++
+                 return Some(StackLine {
+-                    address: i32::try_from(address - m.base_address).expect("int cast"),
++                    address: i32::try_from(image_relative_address).expect("int cast"),
+                     object: None,
+                 });
+             }
+diff --git a/src/install_types/resolver_hooks.rs b/src/install_types/resolver_hooks.rs
+index 53afb6708e4..7ee555e565d 100644
+--- a/src/install_types/resolver_hooks.rs
++++ b/src/install_types/resolver_hooks.rs
+@@ -904,6 +904,7 @@ impl Architecture {
+     pub(crate) const S390X: u16 = 1 << 9;
+     pub(crate) const X32: u16 = 1 << 10;
+     pub(crate) const X64: u16 = 1 << 11;
++    pub(crate) const LOONG64: u16 = 1 << 12;
+ 
+     pub const ALL_VALUE: u16 = Self::ARM
+         | Self::ARM64
+@@ -915,10 +916,13 @@ impl Architecture {
+         | Self::S390
+         | Self::S390X
+         | Self::X32
+-        | Self::X64;
++        | Self::X64
++        | Self::LOONG64;
+ 
+     #[cfg(target_arch = "aarch64")]
+     pub const CURRENT: Self = Self(Self::ARM64);
++    #[cfg(target_arch = "loongarch64")]
++    pub const CURRENT: Self = Self(Self::LOONG64);
+     #[cfg(target_arch = "x86_64")]
+     pub const CURRENT: Self = Self(Self::X64);
+ 
+@@ -948,6 +952,7 @@ negatable_names! { Architecture: u16, ARCHITECTURE_NAMES => [
+     b"arm" => ARM, b"ppc" => PPC, b"x32" => X32, b"x64" => X64,
+     b"ia32" => IA32, b"mips" => MIPS, b"s390" => S390,
+     b"arm64" => ARM64, b"ppc64" => PPC64, b"s390x" => S390X, b"mipsel" => MIPSEL,
++    b"loong64" => LOONG64, b"loongarch64" => LOONG64,
+ ] }
+ 
+ // ─── Repository (data) ────────────────────────────────────────────────────
+diff --git a/src/js/node/os.ts b/src/js/node/os.ts
+index 3326d8093d5..08a223b8703 100644
+--- a/src/js/node/os.ts
++++ b/src/js/node/os.ts
+@@ -88,18 +88,24 @@ function lazyCpus({ cpus, hostCpuCount }) {
+ 
+ // all logic based on `process.platform` and `process.arch` is inlined at bundle time
+ function bound(binding) {
++  const currentArch = function () {
++    return globalThis["process"].arch;
++  };
++  const currentPlatform = function () {
++    return globalThis["process"].platform;
++  };
++
+   return {
+     availableParallelism: function () {
+       return navigator.hardwareConcurrency;
+     },
+     arch: function () {
+-      return process.arch;
++      return currentArch();
+     },
+     cpus: lazyCpus(binding),
+     endianness: function () {
+-      return process.arch === "arm64" || process.arch === "x64" //
+-        ? "LE"
+-        : $bundleError("TODO: endianness");
++      const arch = currentArch();
++      return arch === "arm64" || arch === "x64" || arch === "loong64" ? "LE" : "LE";
+     },
+     freemem: binding.freemem,
+     getPriority: binding.getPriority,
+@@ -108,7 +114,7 @@ function bound(binding) {
+     loadavg: binding.loadavg,
+     networkInterfaces: binding.networkInterfaces,
+     platform: function () {
+-      return process.platform;
++      return currentPlatform();
+     },
+     release: binding.release,
+     setPriority: binding.setPriority,
+@@ -117,15 +123,16 @@ function bound(binding) {
+     },
+     totalmem: binding.totalmem,
+     type: function () {
+-      return process.platform === "win32"
++      const platform = currentPlatform();
++      return platform === "win32"
+         ? "Windows_NT"
+-        : process.platform === "darwin"
++        : platform === "darwin"
+           ? "Darwin"
+-          : process.platform === "linux" || process.platform === "android"
++          : platform === "linux" || platform === "android"
+             ? "Linux"
+-            : process.platform === "freebsd"
++            : platform === "freebsd"
+               ? "FreeBSD"
+-              : $bundleError("TODO: type");
++              : "Unknown";
+     },
+     uptime: binding.uptime,
+     userInfo: binding.userInfo,
+@@ -134,19 +141,23 @@ function bound(binding) {
+       // TODO: linux arm64 should also return "aarch64" (Node/uname compat) —
+       // separate PR to avoid behavior change in the Android port.
+       // FreeBSD: uname -m returns MACHINE ("arm64"/"amd64"), not MACHINE_ARCH.
+-      return process.arch === "arm64"
+-        ? process.platform === "android"
++      const arch = currentArch();
++      const platform = currentPlatform();
++      return arch === "arm64"
++        ? platform === "android"
+           ? "aarch64"
+           : "arm64"
+-        : process.arch === "x64"
+-          ? process.platform === "freebsd"
++        : arch === "x64"
++          ? platform === "freebsd"
+             ? "amd64"
+             : "x86_64"
+-          : $bundleError("TODO: machine");
++          : arch === "loong64"
++            ? "loongarch64"
++            : arch;
+     },
+-    devNull: process.platform === "win32" ? "\\\\.\\nul" : "/dev/null",
++    devNull: currentPlatform() === "win32" ? "\\\\.\\nul" : "/dev/null",
+     get EOL() {
+-      return process.platform === "win32" ? "\r\n" : "\n";
++      return currentPlatform() === "win32" ? "\r\n" : "\n";
+     },
+     constants: $processBindingConstants.os,
+   };
+diff --git a/src/jsc/bindings/BunCPUProfiler.cpp b/src/jsc/bindings/BunCPUProfiler.cpp
+index 978ab566049..e072d79440f 100644
+--- a/src/jsc/bindings/BunCPUProfiler.cpp
++++ b/src/jsc/bindings/BunCPUProfiler.cpp
+@@ -3,6 +3,7 @@
+ #include "ZigGlobalObject.h"
+ #include "helpers.h"
+ #include "BunString.h"
++#if ENABLE(SAMPLING_PROFILER)
+ #include <JavaScriptCore/SamplingProfiler.h>
+ #include <JavaScriptCore/VM.h>
+ #include <JavaScriptCore/JSGlobalObject.h>
+@@ -17,6 +18,9 @@
+ #include <wtf/URL.h>
+ #include <algorithm>
+ #include <limits>
++#else
++#include <JavaScriptCore/VM.h>
++#endif
+ 
+ extern "C" void Bun__startCPUProfiler(JSC::VM* vm);
+ extern "C" void Bun__stopCPUProfiler(JSC::VM* vm, BunString* outJSON, BunString* outText);
+@@ -27,6 +31,7 @@ void Bun__setSamplingInterval(int intervalMicroseconds)
+     Bun::setSamplingInterval(intervalMicroseconds);
+ }
+ 
++#if ENABLE(SAMPLING_PROFILER)
+ namespace Bun {
+ 
+ // Store the profiling start time in microseconds since Unix epoch
+@@ -945,3 +950,41 @@ extern "C" void Bun__stopCPUProfiler(JSC::VM* vm, BunString* outJSON, BunString*
+     if (outText)
+         *outText = Bun::toStringRef(textResult);
+ }
++#else
++namespace Bun {
++
++void setSamplingInterval(int) {}
++
++bool isCPUProfilerRunning()
++{
++    return false;
++}
++
++void startCPUProfiler(JSC::VM&) {}
++
++void stopCPUProfiler(JSC::VM&, WTF::String* outJSON, WTF::String* outText)
++{
++    if (outJSON)
++        *outJSON = "{}"_s;
++    if (outText)
++        *outText = "CPU profiler is not available in this build"_s;
++}
++
++} // namespace Bun
++
++extern "C" void Bun__startCPUProfiler(JSC::VM* vm)
++{
++    Bun::startCPUProfiler(*vm);
++}
++
++extern "C" void Bun__stopCPUProfiler(JSC::VM* vm, BunString* outJSON, BunString* outText)
++{
++    WTF::String jsonResult;
++    WTF::String textResult;
++    Bun::stopCPUProfiler(*vm, outJSON ? &jsonResult : nullptr, outText ? &textResult : nullptr);
++    if (outJSON)
++        *outJSON = Bun::toStringRef(jsonResult);
++    if (outText)
++        *outText = Bun::toStringRef(textResult);
++}
++#endif
+diff --git a/src/jsc/bindings/BunHeapProfiler.cpp b/src/jsc/bindings/BunHeapProfiler.cpp
+index c4a0647b7eb..6b2f07dbc31 100644
+--- a/src/jsc/bindings/BunHeapProfiler.cpp
++++ b/src/jsc/bindings/BunHeapProfiler.cpp
+@@ -953,8 +953,18 @@ extern "C" BunString Bun__generateHeapProfile(JSC::VM* vm)
+     return Bun::toStringRef(result);
+ }
+ 
++extern "C" void Bun__generateHeapProfile_out(JSC::VM* vm, BunString* out)
++{
++    *out = Bun__generateHeapProfile(vm);
++}
++
+ extern "C" BunString Bun__generateHeapSnapshotV8(JSC::VM* vm)
+ {
+     WTF::String result = Bun::generateHeapSnapshotV8(*vm);
+     return Bun::toStringRef(result);
+ }
++
++extern "C" void Bun__generateHeapSnapshotV8_out(JSC::VM* vm, BunString* out)
++{
++    *out = Bun__generateHeapSnapshotV8(vm);
++}
+diff --git a/src/jsc/bindings/BunProcess.cpp b/src/jsc/bindings/BunProcess.cpp
+index 57f1b66e0ed..08f85205fcf 100644
+--- a/src/jsc/bindings/BunProcess.cpp
++++ b/src/jsc/bindings/BunProcess.cpp
+@@ -202,6 +202,8 @@ static JSValue constructArch(VM& vm, JSObject* processObject)
+     return JSC::jsString(vm, makeAtomString("x64"_s));
+ #elif CPU(ARM64)
+     return JSC::jsString(vm, makeAtomString("arm64"_s));
++#elif CPU(LOONGARCH64)
++    return JSC::jsString(vm, makeAtomString("loong64"_s));
+ #else
+ #error "Unknown architecture"
+ #endif
+@@ -2914,6 +2916,9 @@ __attribute__((minsize)) static JSValue constructProcessConfigObject(VM& vm, JSO
+ #elif CPU(ARM64)
+     putDirectNamed(vm, variables, "host_arch"_s, JSC::jsString(vm, String("arm64"_s)));
+     putDirectNamed(vm, variables, "target_arch"_s, JSC::jsString(vm, String("arm64"_s)));
++#elif CPU(LOONGARCH64)
++    putDirectNamed(vm, variables, "host_arch"_s, JSC::jsString(vm, String("loong64"_s)));
++    putDirectNamed(vm, variables, "target_arch"_s, JSC::jsString(vm, String("loong64"_s)));
+ #else
+ #error "Unsupported architecture"
+ #endif
+diff --git a/src/jsc/bindings/BunString.cpp b/src/jsc/bindings/BunString.cpp
+index b4707a62365..bf7283c517d 100644
+--- a/src/jsc/bindings/BunString.cpp
++++ b/src/jsc/bindings/BunString.cpp
+@@ -66,6 +66,11 @@ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__createAtom(const char* b
+     return { BunStringTag::WTFStringImpl, { .wtf = atom.releaseImpl().leakRef() } };
+ }
+ 
++extern "C" [[ZIG_EXPORT(nothrow)]] void BunString__createAtom_out(const char* bytes, size_t length, BunString* out)
++{
++    *out = BunString__createAtom(bytes, length);
++}
++
+ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__tryCreateAtom(const char* bytes, size_t length)
+ {
+     if (simdutf::validate_ascii(bytes, length)) {
+@@ -78,6 +83,11 @@ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__tryCreateAtom(const char
+     return { BunStringTag::Dead, {} };
+ }
+ 
++extern "C" [[ZIG_EXPORT(nothrow)]] void BunString__tryCreateAtom_out(const char* bytes, size_t length, BunString* out)
++{
++    *out = BunString__tryCreateAtom(bytes, length);
++}
++
+ extern "C" [[ZIG_EXPORT(zero_is_throw)]] JSC::EncodedJSValue BunString__createUTF8ForJS(JSC::JSGlobalObject* globalObject, const char* ptr, size_t length)
+ {
+     auto& vm = JSC::getVM(globalObject);
+@@ -398,6 +408,11 @@ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromUTF16Unitialized(siz
+     return { BunStringTag::WTFStringImpl, { .wtf = impl.leakRef() } };
+ }
+ 
++extern "C" [[ZIG_EXPORT(nothrow)]] void BunString__fromUTF16Unitialized_out(size_t length, BunString* out)
++{
++    *out = BunString__fromUTF16Unitialized(length);
++}
++
+ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromLatin1Unitialized(size_t length)
+ {
+     ASSERT(length > 0);
+@@ -409,6 +424,11 @@ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromLatin1Unitialized(si
+     return { BunStringTag::WTFStringImpl, { .wtf = impl.leakRef() } };
+ }
+ 
++extern "C" [[ZIG_EXPORT(nothrow)]] void BunString__fromLatin1Unitialized_out(size_t length, BunString* out)
++{
++    *out = BunString__fromLatin1Unitialized(length);
++}
++
+ extern "C" BunString BunString__fromUTF8(const char* bytes, size_t length)
+ {
+     ASSERT(length > 0);
+@@ -431,6 +451,11 @@ extern "C" BunString BunString__fromUTF8(const char* bytes, size_t length)
+     return Bun::toString(impl.leakRef());
+ }
+ 
++extern "C" void BunString__fromUTF8_out(const char* bytes, size_t length, BunString* out)
++{
++    *out = BunString__fromUTF8(bytes, length);
++}
++
+ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromLatin1(const char* bytes, size_t length)
+ {
+     ASSERT(length > 0);
+@@ -444,6 +469,11 @@ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromLatin1(const char* b
+     return { BunStringTag::WTFStringImpl, { .wtf = impl.leakRef() } };
+ }
+ 
++extern "C" [[ZIG_EXPORT(nothrow)]] void BunString__fromLatin1_out(const char* bytes, size_t length, BunString* out)
++{
++    *out = BunString__fromLatin1(bytes, length);
++}
++
+ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromUTF16ToLatin1(const char16_t* bytes, size_t length)
+ {
+     ASSERT(length > 0);
+@@ -460,6 +490,11 @@ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromUTF16ToLatin1(const
+     return { BunStringTag::WTFStringImpl, { .wtf = impl.leakRef() } };
+ }
+ 
++extern "C" [[ZIG_EXPORT(nothrow)]] void BunString__fromUTF16ToLatin1_out(const char16_t* bytes, size_t length, BunString* out)
++{
++    *out = BunString__fromUTF16ToLatin1(bytes, length);
++}
++
+ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromUTF16(const char16_t* bytes, size_t length)
+ {
+     ASSERT(length > 0);
+@@ -472,6 +507,11 @@ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromUTF16(const char16_t
+     return { BunStringTag::WTFStringImpl, { .wtf = impl.leakRef() } };
+ }
+ 
++extern "C" [[ZIG_EXPORT(nothrow)]] void BunString__fromUTF16_out(const char16_t* bytes, size_t length, BunString* out)
++{
++    *out = BunString__fromUTF16(bytes, length);
++}
++
+ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromBytes(const char* bytes, size_t length)
+ {
+     ASSERT(length > 0);
+@@ -482,6 +522,11 @@ extern "C" [[ZIG_EXPORT(nothrow)]] BunString BunString__fromBytes(const char* by
+     return BunString__fromUTF8(bytes, length);
+ }
+ 
++extern "C" [[ZIG_EXPORT(nothrow)]] void BunString__fromBytes_out(const char* bytes, size_t length, BunString* out)
++{
++    *out = BunString__fromBytes(bytes, length);
++}
++
+ extern "C" BunString BunString__createStaticExternal(const char* bytes, size_t length, bool isLatin1)
+ {
+     Ref<WTF::ExternalStringImpl> impl = isLatin1 ? WTF::ExternalStringImpl::createStatic({ reinterpret_cast<const Latin1Character*>(bytes), length }) :
+@@ -505,6 +550,11 @@ extern "C" BunString BunString__createStaticExternalUTF16WithHash(const char16_t
+     return { BunStringTag::WTFStringImpl, { .wtf = &impl.leakRef() } };
+ }
+ 
++extern "C" void BunString__createStaticExternal_out(const char* bytes, size_t length, bool isLatin1, BunString* out)
++{
++    *out = BunString__createStaticExternal(bytes, length, isLatin1);
++}
++
+ extern "C" BunString BunString__createExternal(const char* bytes, size_t length, bool isLatin1, void* ctx, void (*callback)(void* arg0, void* arg1, size_t arg2))
+ {
+     Ref<WTF::ExternalStringImpl> impl = isLatin1 ? WTF::ExternalStringImpl::create({ reinterpret_cast<const Latin1Character*>(bytes), length }, ctx, callback) :
+@@ -514,6 +564,11 @@ extern "C" BunString BunString__createExternal(const char* bytes, size_t length,
+     return { BunStringTag::WTFStringImpl, { .wtf = &impl.leakRef() } };
+ }
+ 
++extern "C" void BunString__createExternal_out(const char* bytes, size_t length, bool isLatin1, void* ctx, void (*callback)(void* arg0, void* arg1, size_t arg2), BunString* out)
++{
++    *out = BunString__createExternal(bytes, length, isLatin1, ctx, callback);
++}
++
+ extern "C" [[ZIG_EXPORT(zero_is_throw)]] JSC::EncodedJSValue BunString__toJSON(
+     JSC::JSGlobalObject* globalObject,
+     const BunString* bunString)
+@@ -562,6 +617,11 @@ extern "C" BunString URL__getFileURLString(const BunString* filePath)
+     return Bun::toStringRef(WTF::URL::fileURLWithFileSystemPath(filePath->toWTFString()).stringWithoutFragmentIdentifier());
+ }
+ 
++extern "C" void URL__getFileURLString_out(BunString* filePath, BunString* out)
++{
++    *out = URL__getFileURLString(filePath);
++}
++
+ extern "C" size_t URL__originLength(const char* latin1_slice, size_t len)
+ {
+     WTF::String string = WTF::StringView(latin1_slice, len, true).toString();
+@@ -623,6 +683,11 @@ extern "C" BunString URL__getHrefFromJS(EncodedJSValue encodedValue, JSC::JSGlob
+     return Bun::toStringRef(url.string());
+ }
+ 
++extern "C" void URL__getHrefFromJS_out(EncodedJSValue encodedValue, JSC::JSGlobalObject* globalObject, BunString* out)
++{
++    *out = URL__getHrefFromJS(encodedValue, globalObject);
++}
++
+ extern "C" BunString URL__getHref(const BunString* input)
+ {
+     auto&& str = input->toWTFString();
+@@ -633,6 +698,11 @@ extern "C" BunString URL__getHref(const BunString* input)
+     return Bun::toStringRef(url.string());
+ }
+ 
++extern "C" void URL__getHref_out(const BunString* input, BunString* out)
++{
++    *out = URL__getHref(input);
++}
++
+ extern "C" BunString URL__pathFromFileURL(const BunString* input)
+ {
+     auto&& str = input->toWTFString();
+@@ -643,6 +713,11 @@ extern "C" BunString URL__pathFromFileURL(const BunString* input)
+     return Bun::toStringRef(url.fileSystemPath());
+ }
+ 
++extern "C" void URL__pathFromFileURL_out(const BunString* input, BunString* out)
++{
++    *out = URL__pathFromFileURL(input);
++}
++
+ extern "C" BunString URL__getHrefJoin(const BunString* baseStr, const BunString* relativeStr)
+ {
+     auto base = baseStr->toWTFString();
+@@ -654,6 +729,11 @@ extern "C" BunString URL__getHrefJoin(const BunString* baseStr, const BunString*
+     return Bun::toStringRef(url.string());
+ }
+ 
++extern "C" void URL__getHrefJoin_out(const BunString* baseStr, const BunString* relativeStr, BunString* out)
++{
++    *out = URL__getHrefJoin(baseStr, relativeStr);
++}
++
+ extern "C" BunString URL__fragmentIdentifier(WTF::URL* url)
+ {
+     const auto& fragment = url->fragmentIdentifier().isEmpty()
+@@ -662,6 +742,11 @@ extern "C" BunString URL__fragmentIdentifier(WTF::URL* url)
+     return Bun::toStringRef(fragment);
+ }
+ 
++extern "C" void URL__fragmentIdentifier_out(WTF::URL* url, BunString* out)
++{
++    *out = URL__fragmentIdentifier(url);
++}
++
+ extern "C" WTF::URL* URL__fromString(const BunString* input)
+ {
+     auto&& str = input->toWTFString();
+@@ -677,6 +762,11 @@ extern "C" BunString URL__protocol(WTF::URL* url)
+     return Bun::toStringRef(url->protocol().toString());
+ }
+ 
++extern "C" void URL__protocol_out(WTF::URL* url, BunString* out)
++{
++    *out = URL__protocol(url);
++}
++
+ extern "C" void URL__deinit(WTF::URL* url)
+ {
+     delete url;
+@@ -687,16 +777,31 @@ extern "C" BunString URL__href(WTF::URL* url)
+     return Bun::toStringRef(url->string());
+ }
+ 
++extern "C" void URL__href_out(WTF::URL* url, BunString* out)
++{
++    *out = URL__href(url);
++}
++
+ extern "C" BunString URL__username(WTF::URL* url)
+ {
+     return Bun::toStringRef(url->user());
+ }
+ 
++extern "C" void URL__username_out(WTF::URL* url, BunString* out)
++{
++    *out = URL__username(url);
++}
++
+ extern "C" BunString URL__password(WTF::URL* url)
+ {
+     return Bun::toStringRef(url->password());
+ }
+ 
++extern "C" void URL__password_out(WTF::URL* url, BunString* out)
++{
++    *out = URL__password(url);
++}
++
+ /// Returns the host WITHOUT the port.
+ ///
+ /// Note that this does NOT match JS behavior, which returns the host with the port.
+@@ -709,6 +814,11 @@ extern "C" BunString URL__host(WTF::URL* url)
+     return Bun::toStringRef(url->host().toString());
+ }
+ 
++extern "C" void URL__host_out(WTF::URL* url, BunString* out)
++{
++    *out = URL__host(url);
++}
++
+ /// Returns the host WITH the port.
+ ///
+ /// Note that this does NOT match JS behavior which returns the host without the port.
+@@ -721,6 +831,11 @@ extern "C" BunString URL__hostname(WTF::URL* url)
+     return Bun::toStringRef(url->hostAndPort());
+ }
+ 
++extern "C" void URL__hostname_out(WTF::URL* url, BunString* out)
++{
++    *out = URL__hostname(url);
++}
++
+ extern "C" uint32_t URL__port(WTF::URL* url)
+ {
+     auto port = url->port();
+@@ -737,6 +852,11 @@ extern "C" BunString URL__pathname(WTF::URL* url)
+     return Bun::toStringRef(url->path().toString());
+ }
+ 
++extern "C" void URL__pathname_out(WTF::URL* url, BunString* out)
++{
++    *out = URL__pathname(url);
++}
++
+ WTF::String BunString::toWTFString() const
+ {
+     if (this->tag == BunStringTag::EncodedSlice) {
+@@ -838,6 +958,14 @@ extern "C" BunString BunString__createExternalGloballyAllocatedLatin1(
+     return { BunStringTag::WTFStringImpl, { .wtf = &impl.leakRef() } };
+ }
+ 
++extern "C" void BunString__createExternalGloballyAllocatedLatin1_out(
++    const Latin1Character* bytes,
++    size_t length,
++    BunString* out)
++{
++    *out = BunString__createExternalGloballyAllocatedLatin1(bytes, length);
++}
++
+ extern "C" BunString BunString__createExternalGloballyAllocatedUTF16(
+     const char16_t* bytes,
+     size_t length)
+@@ -851,6 +979,14 @@ extern "C" BunString BunString__createExternalGloballyAllocatedUTF16(
+     return { BunStringTag::WTFStringImpl, { .wtf = &impl.leakRef() } };
+ }
+ 
++extern "C" void BunString__createExternalGloballyAllocatedUTF16_out(
++    const char16_t* bytes,
++    size_t length,
++    BunString* out)
++{
++    *out = BunString__createExternalGloballyAllocatedUTF16(bytes, length);
++}
++
+ // What isolatedCopy() yields: no atom-table membership and no base impl.
+ extern "C" [[ZIG_EXPORT(nothrow)]] bool WTFStringImpl__isThreadIsolated(
+     const WTF::StringImpl* wtf)
+diff --git a/src/jsc/bindings/CPUFeatures.cpp b/src/jsc/bindings/CPUFeatures.cpp
+index 06355dcb7f4..88986c45836 100644
+--- a/src/jsc/bindings/CPUFeatures.cpp
++++ b/src/jsc/bindings/CPUFeatures.cpp
+@@ -135,6 +135,8 @@ extern "C" uint8_t bun_cpu_features()
+     return x86_cpu_features();
+ #elif CPU(ARM64)
+     return aarch64_cpu_features();
++#elif CPU(LOONGARCH64)
++    return 0;
+ #else
+ #error "Unknown architecture"
+ #endif
+diff --git a/src/jsc/bindings/ErrorCode.cpp b/src/jsc/bindings/ErrorCode.cpp
+index 9883d4c2f31..9ee3e04919e 100644
+--- a/src/jsc/bindings/ErrorCode.cpp
++++ b/src/jsc/bindings/ErrorCode.cpp
+@@ -275,7 +275,7 @@ JSObject* createError(Zig::JSGlobalObject* globalObject, ErrorCode code, JSC::JS
+ // `Bun.inspect` with `single_line` + `quote_strings` — the same renderer
+ // JSBuffer uses to inline a value into an error message; it renders objects
+ // on one line ("Received { abc: 123 }") the way Node does.
+-extern "C" BunString Bun__inspect_singleline(JSC::JSGlobalObject* globalObject, JSValue value);
++extern "C" void Bun__inspect_singleline(JSC::JSGlobalObject* globalObject, JSValue value, BunString* out);
+ 
+ // util.inspect's quoted-string escaping (https://github.com/nodejs/node/blob/main/lib/internal/util/inspect.js
+ // strEscape). Bun.inspect double-quotes; Node's messages use single quotes.
+@@ -382,7 +382,9 @@ void JSValueToStringSafe(JSC::JSGlobalObject* globalObject, WTF::StringBuilder&
+     }
+ 
+     // Node renders objects inline in error messages ("Received { abc: 123 }").
+-    builder.append(Bun__inspect_singleline(globalObject, arg).transferToWTFString());
++    BunString inspectedBunString;
++    Bun__inspect_singleline(globalObject, arg, &inspectedBunString);
++    builder.append(inspectedBunString.transferToWTFString());
+ }
+ 
+ void determineSpecificType(JSC::VM& vm, JSC::JSGlobalObject* globalObject, WTF::StringBuilder& builder, JSValue value)
+@@ -522,12 +524,12 @@ void determineSpecificType(JSC::VM& vm, JSC::JSGlobalObject* globalObject, WTF::
+     JSValueToStringSafe(globalObject, builder, value);
+ }
+ 
+-extern "C" BunString Bun__ErrorCode__determineSpecificType(JSC::JSGlobalObject* globalObject, EncodedJSValue value)
++extern "C" void Bun__ErrorCode__determineSpecificType(JSC::JSGlobalObject* globalObject, EncodedJSValue value, BunString* out)
+ {
+     JSValue jsValue = JSValue::decode(value);
+     WTF::StringBuilder builder;
+     determineSpecificType(JSC::getVM(globalObject), globalObject, builder, jsValue);
+-    return Bun::toStringRef(builder.toString());
++    *out = Bun::toStringRef(builder.toString());
+ }
+ 
+ // Node's ERR_INVALID_ARG_VALUE renders the value with `util.inspect` ('w'),
+diff --git a/src/jsc/bindings/JSBigIntBinding.cpp b/src/jsc/bindings/JSBigIntBinding.cpp
+index 18ab3b569c2..04252fe0dbf 100644
+--- a/src/jsc/bindings/JSBigIntBinding.cpp
++++ b/src/jsc/bindings/JSBigIntBinding.cpp
+@@ -80,3 +80,8 @@ extern "C" BunString JSC__JSBigInt__toString(JSBigInt* bigInt, JSGlobalObject* g
+ 
+     return toStringRef(result);
+ }
++
++extern "C" void JSC__JSBigInt__toString_out(JSBigInt* bigInt, JSGlobalObject* globalObject, BunString* out)
++{
++    *out = JSC__JSBigInt__toString(bigInt, globalObject);
++}
+diff --git a/src/jsc/bindings/JSBuffer.cpp b/src/jsc/bindings/JSBuffer.cpp
+index d66d3ba5da6..4e765fef7d1 100644
+--- a/src/jsc/bindings/JSBuffer.cpp
++++ b/src/jsc/bindings/JSBuffer.cpp
+@@ -96,8 +96,8 @@ extern "C" size_t highway_index_of_char(const uint8_t* haystack, size_t haystack
+ extern "C" size_t highway_last_index_of_char(const uint8_t* haystack, size_t haystack_len, uint8_t needle);
+ static constexpr size_t kHighwayNotFound = ~static_cast<size_t>(0);
+ 
+-// export fn Bun__inspect_singleline(globalThis: *JSGlobalObject, value: JSValue) bun.String
+-extern "C" BunString Bun__inspect_singleline(JSC::JSGlobalObject* globalObject, JSC::JSValue value);
++// export fn Bun__inspect_singleline(globalThis: *JSGlobalObject, value: JSValue, out: *bun.String) void
++extern "C" void Bun__inspect_singleline(JSC::JSGlobalObject* globalObject, JSC::JSValue value, BunString* out);
+ 
+ using namespace JSC;
+ using namespace WebCore;
+@@ -1959,7 +1959,9 @@ static JSC::EncodedJSValue jsBufferPrototypeFunction_inspectBody(JSC::JSGlobalOb
+                 result.append(": "_s);
+                 auto value = castedThis->get(globalObject, ident);
+                 RETURN_IF_EXCEPTION(scope, {});
+-                auto inspected = Bun__inspect_singleline(globalObject, value).transferToWTFString();
++                BunString inspectedBunString;
++                Bun__inspect_singleline(globalObject, value, &inspectedBunString);
++                auto inspected = inspectedBunString.transferToWTFString();
+                 RETURN_IF_EXCEPTION(scope, {});
+                 result.append(inspected);
+                 i++;
+diff --git a/src/jsc/bindings/NodeVM.cpp b/src/jsc/bindings/NodeVM.cpp
+index fafc332de4b..8ad28eedc8d 100644
+--- a/src/jsc/bindings/NodeVM.cpp
++++ b/src/jsc/bindings/NodeVM.cpp
+@@ -983,7 +983,12 @@ JSC_DEFINE_HOST_FUNCTION(jsNodeVmWasmDisallowed, (JSC::JSGlobalObject * globalOb
+ {
+     VM& vm = globalObject->vm();
+     auto scope = DECLARE_THROW_SCOPE(vm);
+-    JSObject* error = JSC::createJSWebAssemblyCompileError(globalObject, vm, "Wasm code generation disallowed by embedder"_s);
++    JSObject* error =
++#if ENABLE(WEBASSEMBLY)
++        JSC::createJSWebAssemblyCompileError(globalObject, vm, "Wasm code generation disallowed by embedder"_s);
++#else
++        JSC::createError(globalObject, "Wasm is not supported in this build"_s);
++#endif
+     RETURN_IF_EXCEPTION(scope, {});
+     scope.throwException(globalObject, error);
+     return {};
+@@ -995,7 +1000,12 @@ JSC_DEFINE_HOST_FUNCTION(jsNodeVmWasmCompileDisallowed, (JSC::JSGlobalObject * g
+ {
+     VM& vm = globalObject->vm();
+     auto scope = DECLARE_THROW_SCOPE(vm);
+-    JSObject* error = JSC::createJSWebAssemblyCompileError(globalObject, vm, "Wasm code generation disallowed by embedder"_s);
++    JSObject* error =
++#if ENABLE(WEBASSEMBLY)
++        JSC::createJSWebAssemblyCompileError(globalObject, vm, "Wasm code generation disallowed by embedder"_s);
++#else
++        JSC::createError(globalObject, "Wasm is not supported in this build"_s);
++#endif
+     RETURN_IF_EXCEPTION(scope, {});
+     RELEASE_AND_RETURN(scope, JSValue::encode(JSC::JSPromise::rejectedPromise(globalObject, error)));
+ }
+diff --git a/src/jsc/bindings/NodeVMScript.cpp b/src/jsc/bindings/NodeVMScript.cpp
+index 6f8303a8e25..fff0f4430dc 100644
+--- a/src/jsc/bindings/NodeVMScript.cpp
++++ b/src/jsc/bindings/NodeVMScript.cpp
+@@ -16,6 +16,12 @@
+ 
+ #include <bit>
+ 
++#if !ENABLE(JIT)
++namespace JSC::LLInt {
++void setEntrypoint(CodeBlock*);
++}
++#endif
++
+ namespace Bun {
+ using namespace NodeVM;
+ 
+@@ -192,6 +198,7 @@ constructScript(JSGlobalObject* globalObject, CallFrame* callFrame, JSValue newT
+                 codeBlock = JSC::ProgramCodeBlock::create(vm, executable, unlinkedBlock, jsScope);
+                 RETURN_IF_EXCEPTION(scope, {});
+             }
++#if ENABLE(JIT)
+             JSC::CompilationResult compilationResult = JIT::compileSync(vm, codeBlock, JITCompilationEffort::JITCompilationCanFail);
+             if (compilationResult != JSC::CompilationResult::CompilationFailed) {
+                 executable->installCode(codeBlock);
+@@ -199,6 +206,11 @@ constructScript(JSGlobalObject* globalObject, CallFrame* callFrame, JSValue newT
+             } else {
+                 script->cachedDataRejected(TriState::True);
+             }
++#else
++            JSC::LLInt::setEntrypoint(codeBlock);
++            executable->installCode(codeBlock);
++            script->cachedDataRejected(TriState::False);
++#endif
+         }
+     } else if (script->options().produceCachedData)
+         script->cacheBytecode();
+diff --git a/src/jsc/bindings/PathInlines.h b/src/jsc/bindings/PathInlines.h
+index 49abea253b3..927d9985069 100644
+--- a/src/jsc/bindings/PathInlines.h
++++ b/src/jsc/bindings/PathInlines.h
+@@ -55,7 +55,7 @@ ALWAYS_INLINE bool isAbsolutePath(WTF::String input)
+ #undef IS_LETTER
+ #undef IS_SLASH
+ 
+-extern "C" BunString ResolvePath__joinAbsStringBufCurrentPlatformBunString(JSC::JSGlobalObject*, const BunString*);
++extern "C" void ResolvePath__joinAbsStringBufCurrentPlatformBunString(JSC::JSGlobalObject*, const BunString*, BunString*);
+ 
+ /// CWD is determined by the global object's current cwd.
+ ALWAYS_INLINE WTF::String pathResolveWTFString(JSC::JSGlobalObject* globalToGetCwdFrom, const WTF::String& input)
+@@ -63,6 +63,7 @@ ALWAYS_INLINE WTF::String pathResolveWTFString(JSC::JSGlobalObject* globalToGetC
+     if (isAbsolutePath(input))
+         return input;
+     BunString in = Bun::toString(input);
+-    BunString out = ResolvePath__joinAbsStringBufCurrentPlatformBunString(globalToGetCwdFrom, &in);
++    BunString out;
++    ResolvePath__joinAbsStringBufCurrentPlatformBunString(globalToGetCwdFrom, &in, &out);
+     return out.transferToWTFString();
+ }
+diff --git a/src/jsc/bindings/ZigGlobalObject.cpp b/src/jsc/bindings/ZigGlobalObject.cpp
+index 1bcd27a1a07..da46419f0f8 100644
+--- a/src/jsc/bindings/ZigGlobalObject.cpp
++++ b/src/jsc/bindings/ZigGlobalObject.cpp
+@@ -146,8 +146,10 @@
+ #include "streams/JSTransformStreamDefaultController.h"
+ #include "JSURLPattern.h"
+ #include "JSURLSearchParams.h"
++#if ENABLE(WEBASSEMBLY)
+ #include "JSWasmStreamingCompiler.h"
+ #include <JavaScriptCore/WebAssemblyCompileOptions.h>
++#endif
+ #include "JSWebSocket.h"
+ #include "JSWorker.h"
+ #include "streams/JSWritableStream.h"
+@@ -230,6 +232,7 @@
+ #endif
+ 
+ #include <wtf/NumberOfCores.h>
++#include <wtf/SetForScope.h>
+ 
+ using namespace Bun;
+ 
+@@ -299,10 +302,48 @@ extern "C" void JSCInitialize(const char* envp[], size_t envc, void (*onCrash)(c
+         // useWasmFaultSignalHandler/FastMemory when ASAN_OPTIONS lacks
+         // allow_user_segv_handler=1, so we don't force it off here.
+         JSC::initialize([&] {
++#if ENABLE(WEBASSEMBLY)
+             JSC::Options::useWasm() = true;
++#else
++            JSC::Options::useWasm() = false;
++#endif
++#if ENABLE(JIT)
+             JSC::Options::useJIT() = true;
++#else
++            JSC::Options::useJIT() = false;
++#endif
++#if ENABLE(DFG_JIT)
++            JSC::Options::useDFGJIT() = true;
++#else
++            JSC::Options::useDFGJIT() = false;
++#endif
++#if ENABLE(FTL_JIT)
++            JSC::Options::useFTLJIT() = true;
++#else
++            JSC::Options::useFTLJIT() = false;
++#endif
++#if ENABLE(WEBASSEMBLY_BBQJIT)
+             JSC::Options::useBBQJIT() = true;
++#else
++            JSC::Options::useBBQJIT() = false;
++#endif
++#if ENABLE(WEBASSEMBLY)
++            JSC::Options::useWasmIPInt() = true;
++            JSC::Options::useWasmIPIntSIMD() = true;
++#else
++            JSC::Options::useWasmIPInt() = false;
++            JSC::Options::useWasmIPIntSIMD() = false;
++#endif
++#if ENABLE(WEBASSEMBLY_OMGJIT)
++            JSC::Options::useOMGJIT() = true;
++#else
++            JSC::Options::useOMGJIT() = false;
++#endif
++#if ENABLE(JIT)
+             JSC::Options::useConcurrentJIT() = true;
++#else
++            JSC::Options::useConcurrentJIT() = false;
++#endif
+             // JSC::Options::useSigillCrashAnalyzer() = true;
+             JSC::Options::useSourceProviderCache() = true;
+             // JSC::Options::useUnlinkedCodeBlockJettisoning() = false;
+@@ -968,8 +1009,13 @@ const JSC::GlobalObjectMethodTable& GlobalObject::globalObjectMethodTable()
+         &scriptExecutionStatus,
+         &unsafeEvalNoop, // reportViolationForUnsafeEval
+         nullptr, // defaultLanguage
++#if ENABLE(WEBASSEMBLY)
+         &compileStreaming,
+         &instantiateStreaming,
++#else
++        nullptr, // compileStreaming
++        nullptr, // instantiateStreaming
++#endif
+         &deriveShadowRealmGlobalObject,
+         &codeForEval, // codeForEval
+         &canCompileStrings, // canCompileStrings
+@@ -996,8 +1042,13 @@ const JSC::GlobalObjectMethodTable& EvalGlobalObject::globalObjectMethodTable()
+         &scriptExecutionStatus,
+         &unsafeEvalNoop, // reportViolationForUnsafeEval
+         nullptr, // defaultLanguage
++#if ENABLE(WEBASSEMBLY)
+         &compileStreaming,
+         &instantiateStreaming,
++#else
++        nullptr, // compileStreaming
++        nullptr, // instantiateStreaming
++#endif
+         &deriveShadowRealmGlobalObject,
+         &codeForEval, // codeForEval
+         &canCompileStrings, // canCompileStrings
+@@ -1024,8 +1075,13 @@ const JSC::GlobalObjectMethodTable& StandaloneGlobalObject::globalObjectMethodTa
+         &scriptExecutionStatus,
+         &unsafeEvalNoop, // reportViolationForUnsafeEval
+         nullptr, // defaultLanguage
++#if ENABLE(WEBASSEMBLY)
+         &compileStreaming,
+         &instantiateStreaming,
++#else
++        nullptr, // compileStreaming
++        nullptr, // instantiateStreaming
++#endif
+         &deriveShadowRealmGlobalObject,
+         &codeForEval, // codeForEval
+         &canCompileStrings, // canCompileStrings
+@@ -2592,9 +2648,11 @@ void GlobalObject::finishCreation(VM& vm)
+         { OBJECT_OFFSETOF(GlobalObject, m_utilInspectStylizeNoColorFunction), [](const LazyProperty<JSGlobalObject, JSFunction>::Initializer& init) {
+              init.set(JSC::JSFunction::create(init.vm, init.owner, utilInspectStylizeWithNoColorCodeGenerator(init.vm), init.owner));
+          } },
++#if ENABLE(WEBASSEMBLY)
+         { OBJECT_OFFSETOF(GlobalObject, m_wasmStreamingConsumeStreamFunction), [](const LazyProperty<JSGlobalObject, JSFunction>::Initializer& init) {
+              init.set(JSC::JSFunction::create(init.vm, init.owner, wasmStreamingConsumeStreamCodeGenerator(init.vm), init.owner));
+          } },
++#endif
+         { OBJECT_OFFSETOF(GlobalObject, m_nativeMicrotaskTrampoline), [](const LazyProperty<JSGlobalObject, JSFunction>::Initializer& init) {
+              init.set(JSFunction::create(init.vm, init.owner, 2, ""_s, functionNativeMicrotaskTrampoline, ImplementationVisibility::Private));
+          } },
+@@ -4027,6 +4085,7 @@ JSC::JSValue EvalGlobalObject::moduleLoaderEvaluate(JSGlobalObject* lexicalGloba
+     return result;
+ }
+ 
++#if ENABLE(WEBASSEMBLY)
+ extern "C" JSC::EncodedJSValue Zig__GlobalObject__getBodyStreamOrBytesForWasmStreaming(JSGlobalObject*, EncodedJSValue response, JSC::Wasm::StreamingCompiler* compiler);
+ 
+ extern "C" void JSC__Wasm__StreamingCompiler__addBytes(JSC::Wasm::StreamingCompiler* compiler, const uint8_t* spanPtr, size_t spanSize)
+@@ -4089,6 +4148,7 @@ void GlobalObject::instantiateStreaming(JSGlobalObject* globalObject, JSC::JSPro
+ {
+     handleResponseOnStreamingAction(globalObject, promise, source, JSC::Wasm::CompilerMode::FullCompile, importObject, WTF::move(compileOptions));
+ }
++#endif
+ 
+ GlobalObject::PromiseFunctions GlobalObject::promiseHandlerID(Zig::FFIFunction handler)
+ {
+diff --git a/src/jsc/bindings/ZigSourceProvider.cpp b/src/jsc/bindings/ZigSourceProvider.cpp
+index b7350b4b151..81882b5fe52 100644
+--- a/src/jsc/bindings/ZigSourceProvider.cpp
++++ b/src/jsc/bindings/ZigSourceProvider.cpp
+@@ -324,6 +324,11 @@ extern "C" BunString ZigSourceProvider__getSourceSlice(SourceProvider* provider)
+     return Bun::toStringView(provider->source());
+ }
+ 
++extern "C" void ZigSourceProvider__getSourceSlice_out(SourceProvider* provider, BunString* out)
++{
++    *out = ZigSourceProvider__getSourceSlice(provider);
++}
++
+ }; // namespace Zig
+ 
+ // What StringImpl::hash() returns for an 8-bit string with these bytes; `bun build --compile` records it per module.
+diff --git a/src/jsc/bindings/bindings.cpp b/src/jsc/bindings/bindings.cpp
+index 66291a065f8..6259f4babb9 100644
+--- a/src/jsc/bindings/bindings.cpp
++++ b/src/jsc/bindings/bindings.cpp
+@@ -2701,6 +2701,11 @@ BunString WebCore__DOMURL__fileSystemPath(WebCore::DOMURL* arg0, int* errorCode)
+     return BunString { BunStringTag::Dead, nullptr };
+ }
+ 
++extern "C" void WebCore__DOMURL__fileSystemPath_out(WebCore::DOMURL* arg0, int* errorCode, BunString* out)
++{
++    *out = WebCore__DOMURL__fileSystemPath(arg0, errorCode);
++}
++
+ // Taken from unwrapBoxedPrimitive in JSONObject.cpp in WebKit
+ extern "C" JSC::EncodedJSValue JSC__JSValue__unwrapBoxedPrimitive(JSGlobalObject* globalObject, EncodedJSValue encodedValue)
+ {
+diff --git a/src/jsc/bindings/libuv/generate_uv_posix_stubs_constants.ts b/src/jsc/bindings/libuv/generate_uv_posix_stubs_constants.ts
+index b28f652ed91..f60ab1f13ac 100644
+--- a/src/jsc/bindings/libuv/generate_uv_posix_stubs_constants.ts
++++ b/src/jsc/bindings/libuv/generate_uv_posix_stubs_constants.ts
+@@ -28,14 +28,17 @@ export const symbols = [
+   "uv_check_init",
+   "uv_check_start",
+   "uv_check_stop",
+-  "uv_clock_gettime",
++  // Defined in uv-posix-polyfills.cpp
++  // "uv_clock_gettime",
+   "uv_close",
+-  "uv_cond_broadcast",
+-  "uv_cond_destroy",
+-  "uv_cond_init",
+-  "uv_cond_signal",
++  // Defined in uv-posix-polyfills.cpp
++  // "uv_cond_broadcast",
++  // "uv_cond_destroy",
++  // "uv_cond_init",
++  // "uv_cond_signal",
+   "uv_cond_timedwait",
+-  "uv_cond_wait",
++  // Defined in uv-posix-polyfills.cpp
++  // "uv_cond_wait",
+   "uv_cpu_info",
+   "uv_cpumask_size",
+   "uv_cwd",
+@@ -114,7 +117,8 @@ export const symbols = [
+   "uv_getnameinfo",
+   "uv_getrusage",
+   "uv_getrusage_thread",
+-  "uv_gettimeofday",
++  // Defined in uv-posix-polyfills.cpp
++  // "uv_gettimeofday",
+   "uv_guess_handle",
+   "uv_handle_get_data",
+   "uv_handle_get_loop",
+@@ -231,19 +235,21 @@ export const symbols = [
+   "uv_req_type_name",
+   "uv_resident_set_memory",
+   "uv_run",
+-  "uv_rwlock_destroy",
+-  "uv_rwlock_init",
+-  "uv_rwlock_rdlock",
+-  "uv_rwlock_rdunlock",
+-  "uv_rwlock_tryrdlock",
+-  "uv_rwlock_trywrlock",
+-  "uv_rwlock_wrlock",
+-  "uv_rwlock_wrunlock",
+-  "uv_sem_destroy",
+-  "uv_sem_init",
+-  "uv_sem_post",
+-  "uv_sem_trywait",
+-  "uv_sem_wait",
++  // Defined in uv-posix-polyfills.cpp
++  // "uv_rwlock_destroy",
++  // "uv_rwlock_init",
++  // "uv_rwlock_rdlock",
++  // "uv_rwlock_rdunlock",
++  // "uv_rwlock_tryrdlock",
++  // "uv_rwlock_trywrlock",
++  // "uv_rwlock_wrlock",
++  // "uv_rwlock_wrunlock",
++  // Defined in uv-posix-polyfills.cpp
++  // "uv_sem_destroy",
++  // "uv_sem_init",
++  // "uv_sem_post",
++  // "uv_sem_trywait",
++  // "uv_sem_wait",
+   "uv_send_buffer_size",
+   "uv_set_process_title",
+   "uv_setup_args",
+@@ -328,8 +334,9 @@ export const symbols = [
+   "uv_uptime",
+   "uv_utf16_length_as_wtf8",
+   "uv_utf16_to_wtf8",
+-  "uv_version",
+-  "uv_version_string",
++  // Defined in uv-posix-polyfills.cpp
++  // "uv_version",
++  // "uv_version_string",
+   "uv_walk",
+   "uv_write",
+   "uv_write2",
+diff --git a/src/jsc/bindings/uv-posix-polyfills.c b/src/jsc/bindings/uv-posix-polyfills.c
+index 19ae7e5040c..0d776108ab6 100644
+--- a/src/jsc/bindings/uv-posix-polyfills.c
++++ b/src/jsc/bindings/uv-posix-polyfills.c
+@@ -3,6 +3,8 @@
+ #if OS(LINUX) || OS(DARWIN) || OS(FREEBSD)
+ 
+ #include <pthread.h>
++#include <semaphore.h>
++#include <sys/time.h>
+ #include <unistd.h>
+ #include <stdlib.h>
+ 
+@@ -54,6 +56,41 @@ UV_EXTERN uint64_t uv_hrtime(void)
+     return uv__hrtime(UV_CLOCK_PRECISE);
+ }
+ 
++UV_EXTERN int uv_clock_gettime(uv_clock_id clock_id, uv_timespec64_t* ts)
++{
++    clockid_t clock;
++
++    switch (clock_id) {
++    case UV_CLOCK_MONOTONIC:
++        clock = CLOCK_MONOTONIC;
++        break;
++    case UV_CLOCK_REALTIME:
++        clock = CLOCK_REALTIME;
++        break;
++    default:
++        return UV_EINVAL;
++    }
++
++    struct timespec time;
++    if (clock_gettime(clock, &time))
++        return UV__ERR(errno);
++
++    ts->tv_sec = time.tv_sec;
++    ts->tv_nsec = time.tv_nsec;
++    return 0;
++}
++
++UV_EXTERN int uv_gettimeofday(uv_timeval64_t* tv)
++{
++    struct timeval time;
++    if (gettimeofday(&time, NULL))
++        return UV__ERR(errno);
++
++    tv->tv_sec = time.tv_sec;
++    tv->tv_usec = time.tv_usec;
++    return 0;
++}
++
+ // Copy-pasted from libuv
+ UV_EXTERN void uv_mutex_destroy(uv_mutex_t* mutex)
+ {
+@@ -130,4 +167,136 @@ UV_EXTERN void uv_mutex_unlock(uv_mutex_t* mutex)
+         abort();
+ }
+ 
++UV_EXTERN void uv_rwlock_destroy(uv_rwlock_t* rwlock)
++{
++    if (pthread_rwlock_destroy(rwlock))
++        abort();
++}
++
++UV_EXTERN int uv_rwlock_init(uv_rwlock_t* rwlock)
++{
++    return UV__ERR(pthread_rwlock_init(rwlock, NULL));
++}
++
++UV_EXTERN void uv_rwlock_rdlock(uv_rwlock_t* rwlock)
++{
++    if (pthread_rwlock_rdlock(rwlock))
++        abort();
++}
++
++UV_EXTERN void uv_rwlock_rdunlock(uv_rwlock_t* rwlock)
++{
++    if (pthread_rwlock_unlock(rwlock))
++        abort();
++}
++
++UV_EXTERN int uv_rwlock_tryrdlock(uv_rwlock_t* rwlock)
++{
++    int err = pthread_rwlock_tryrdlock(rwlock);
++    if (err == EBUSY || err == EAGAIN)
++        return UV_EBUSY;
++    return UV__ERR(err);
++}
++
++UV_EXTERN int uv_rwlock_trywrlock(uv_rwlock_t* rwlock)
++{
++    int err = pthread_rwlock_trywrlock(rwlock);
++    if (err == EBUSY || err == EAGAIN)
++        return UV_EBUSY;
++    return UV__ERR(err);
++}
++
++UV_EXTERN void uv_rwlock_wrlock(uv_rwlock_t* rwlock)
++{
++    if (pthread_rwlock_wrlock(rwlock))
++        abort();
++}
++
++UV_EXTERN void uv_rwlock_wrunlock(uv_rwlock_t* rwlock)
++{
++    if (pthread_rwlock_unlock(rwlock))
++        abort();
++}
++
++UV_EXTERN void uv_sem_destroy(uv_sem_t* sem)
++{
++    if (sem_destroy(sem))
++        abort();
++}
++
++UV_EXTERN int uv_sem_init(uv_sem_t* sem, unsigned int value)
++{
++    if (sem_init(sem, 0, value))
++        return UV__ERR(errno);
++    return 0;
++}
++
++UV_EXTERN void uv_sem_post(uv_sem_t* sem)
++{
++    if (sem_post(sem))
++        abort();
++}
++
++UV_EXTERN int uv_sem_trywait(uv_sem_t* sem)
++{
++    if (sem_trywait(sem)) {
++        if (errno == EAGAIN)
++            return UV_EAGAIN;
++        return UV__ERR(errno);
++    }
++
++    return 0;
++}
++
++UV_EXTERN void uv_sem_wait(uv_sem_t* sem)
++{
++    int err;
++
++    do {
++        err = sem_wait(sem);
++    } while (err == -1 && errno == EINTR);
++
++    if (err)
++        abort();
++}
++
++UV_EXTERN void uv_cond_broadcast(uv_cond_t* cond)
++{
++    if (pthread_cond_broadcast(cond))
++        abort();
++}
++
++UV_EXTERN void uv_cond_destroy(uv_cond_t* cond)
++{
++    if (pthread_cond_destroy(cond))
++        abort();
++}
++
++UV_EXTERN int uv_cond_init(uv_cond_t* cond)
++{
++    return UV__ERR(pthread_cond_init(cond, NULL));
++}
++
++UV_EXTERN void uv_cond_signal(uv_cond_t* cond)
++{
++    if (pthread_cond_signal(cond))
++        abort();
++}
++
++UV_EXTERN void uv_cond_wait(uv_cond_t* cond, uv_mutex_t* mutex)
++{
++    if (pthread_cond_wait(cond, mutex))
++        abort();
++}
++
++UV_EXTERN unsigned int uv_version(void)
++{
++    return UV_VERSION_HEX;
++}
++
++UV_EXTERN const char* uv_version_string(void)
++{
++    return "1.51.0";
++}
++
+ #endif
+diff --git a/src/jsc/bindings/uv-posix-stubs.c b/src/jsc/bindings/uv-posix-stubs.c
+index 04868a91cf9..389e58a6071 100644
+--- a/src/jsc/bindings/uv-posix-stubs.c
++++ b/src/jsc/bindings/uv-posix-stubs.c
+@@ -94,42 +94,12 @@ UV_EXTERN int uv_check_stop(uv_check_t* check)
+     __builtin_unreachable();
+ }
+ 
+-UV_EXTERN int uv_clock_gettime(uv_clock_id clock_id, uv_timespec64_t* ts)
+-{
+-    __bun_throw_not_implemented("uv_clock_gettime");
+-    __builtin_unreachable();
+-}
+-
+ UV_EXTERN void uv_close(uv_handle_t* handle, uv_close_cb close_cb)
+ {
+     __bun_throw_not_implemented("uv_close");
+     __builtin_unreachable();
+ }
+ 
+-UV_EXTERN void uv_cond_broadcast(uv_cond_t* cond)
+-{
+-    __bun_throw_not_implemented("uv_cond_broadcast");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN void uv_cond_destroy(uv_cond_t* cond)
+-{
+-    __bun_throw_not_implemented("uv_cond_destroy");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN int uv_cond_init(uv_cond_t* cond)
+-{
+-    __bun_throw_not_implemented("uv_cond_init");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN void uv_cond_signal(uv_cond_t* cond)
+-{
+-    __bun_throw_not_implemented("uv_cond_signal");
+-    __builtin_unreachable();
+-}
+-
+ UV_EXTERN int uv_cond_timedwait(uv_cond_t* cond,
+     uv_mutex_t* mutex,
+     uint64_t timeout)
+@@ -138,12 +108,6 @@ UV_EXTERN int uv_cond_timedwait(uv_cond_t* cond,
+     __builtin_unreachable();
+ }
+ 
+-UV_EXTERN void uv_cond_wait(uv_cond_t* cond, uv_mutex_t* mutex)
+-{
+-    __bun_throw_not_implemented("uv_cond_wait");
+-    __builtin_unreachable();
+-}
+-
+ UV_EXTERN int uv_cpu_info(uv_cpu_info_t** cpu_infos, int* count)
+ {
+     __bun_throw_not_implemented("uv_cpu_info");
+@@ -776,12 +740,6 @@ UV_EXTERN int uv_getrusage_thread(uv_rusage_t* rusage)
+     __builtin_unreachable();
+ }
+ 
+-UV_EXTERN int uv_gettimeofday(uv_timeval64_t* tv)
+-{
+-    __bun_throw_not_implemented("uv_gettimeofday");
+-    __builtin_unreachable();
+-}
+-
+ UV_EXTERN uv_handle_type uv_guess_handle(uv_file file)
+ {
+     __bun_throw_not_implemented("uv_guess_handle");
+@@ -1423,84 +1381,6 @@ UV_EXTERN int uv_run(uv_loop_t*, uv_run_mode mode)
+     __builtin_unreachable();
+ }
+ 
+-UV_EXTERN void uv_rwlock_destroy(uv_rwlock_t* rwlock)
+-{
+-    __bun_throw_not_implemented("uv_rwlock_destroy");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN int uv_rwlock_init(uv_rwlock_t* rwlock)
+-{
+-    __bun_throw_not_implemented("uv_rwlock_init");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN void uv_rwlock_rdlock(uv_rwlock_t* rwlock)
+-{
+-    __bun_throw_not_implemented("uv_rwlock_rdlock");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN void uv_rwlock_rdunlock(uv_rwlock_t* rwlock)
+-{
+-    __bun_throw_not_implemented("uv_rwlock_rdunlock");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN int uv_rwlock_tryrdlock(uv_rwlock_t* rwlock)
+-{
+-    __bun_throw_not_implemented("uv_rwlock_tryrdlock");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN int uv_rwlock_trywrlock(uv_rwlock_t* rwlock)
+-{
+-    __bun_throw_not_implemented("uv_rwlock_trywrlock");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN void uv_rwlock_wrlock(uv_rwlock_t* rwlock)
+-{
+-    __bun_throw_not_implemented("uv_rwlock_wrlock");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN void uv_rwlock_wrunlock(uv_rwlock_t* rwlock)
+-{
+-    __bun_throw_not_implemented("uv_rwlock_wrunlock");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN void uv_sem_destroy(uv_sem_t* sem)
+-{
+-    __bun_throw_not_implemented("uv_sem_destroy");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN int uv_sem_init(uv_sem_t* sem, unsigned int value)
+-{
+-    __bun_throw_not_implemented("uv_sem_init");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN void uv_sem_post(uv_sem_t* sem)
+-{
+-    __bun_throw_not_implemented("uv_sem_post");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN int uv_sem_trywait(uv_sem_t* sem)
+-{
+-    __bun_throw_not_implemented("uv_sem_trywait");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN void uv_sem_wait(uv_sem_t* sem)
+-{
+-    __bun_throw_not_implemented("uv_sem_wait");
+-    __builtin_unreachable();
+-}
+-
+ UV_EXTERN int uv_send_buffer_size(uv_handle_t* handle, int* value)
+ {
+     __bun_throw_not_implemented("uv_send_buffer_size");
+@@ -2065,18 +1945,6 @@ UV_EXTERN int uv_utf16_to_wtf8(const uint16_t* utf16,
+     __builtin_unreachable();
+ }
+ 
+-UV_EXTERN unsigned int uv_version(void)
+-{
+-    __bun_throw_not_implemented("uv_version");
+-    __builtin_unreachable();
+-}
+-
+-UV_EXTERN const char* uv_version_string(void)
+-{
+-    __bun_throw_not_implemented("uv_version_string");
+-    __builtin_unreachable();
+-}
+-
+ UV_EXTERN void uv_walk(uv_loop_t* loop, uv_walk_cb walk_cb, void* arg)
+ {
+     __bun_throw_not_implemented("uv_walk");
+diff --git a/src/jsc/bindings/v8/V8CpuProfiler.cpp b/src/jsc/bindings/v8/V8CpuProfiler.cpp
+index c80db710ff1..ce188f10730 100644
+--- a/src/jsc/bindings/v8/V8CpuProfiler.cpp
++++ b/src/jsc/bindings/v8/V8CpuProfiler.cpp
+@@ -3,7 +3,9 @@
+ #include "V8HandleScope.h"
+ #include "shim/CpuProfiler.h"
+ 
++#if ENABLE(SAMPLING_PROFILER)
+ #include <JavaScriptCore/SamplingProfiler.h>
++#endif
+ #include <JavaScriptCore/VM.h>
+ #include <JavaScriptCore/JSGlobalObject.h>
+ #include <JavaScriptCore/ScriptExecutable.h>
+@@ -38,6 +40,7 @@ uint32_t CpuProfilerImpl::start(WTF::String&& title, bool recordSamples)
+     m_sessions.append(Session { id, WTF::move(title), nowMicroseconds(), recordSamples });
+ 
+     if (m_sessions.size() == 1) {
++#if ENABLE(SAMPLING_PROFILER)
+         auto& vm = m_isolate->vm();
+         auto stopwatch = WTF::Stopwatch::create();
+         stopwatch->start();
+@@ -45,6 +48,7 @@ uint32_t CpuProfilerImpl::start(WTF::String&& title, bool recordSamples)
+         sampler.setTimingInterval(WTF::Seconds::fromMicroseconds(m_samplingIntervalUs));
+         sampler.noticeCurrentThreadAsJSCExecutionThread();
+         sampler.start();
++#endif
+     }
+ 
+     return id;
+@@ -64,6 +68,7 @@ const CpuProfilerImpl::Session* CpuProfilerImpl::sessionWithTitle(const WTF::Str
+ // the V8 CpuProfileNode/CpuProfile object model instead.
+ static void buildProfileTree(JSC::VM& vm, CpuProfileImpl& profile, int64_t startTime, bool recordSamples)
+ {
++#if ENABLE(SAMPLING_PROFILER)
+     JSC::SamplingProfiler* sampler = vm.samplingProfiler();
+ 
+     auto makeRoot = [&]() -> CpuProfileNodeImpl* {
+@@ -273,6 +278,10 @@ static void buildProfileTree(JSC::VM& vm, CpuProfileImpl& profile, int64_t start
+     }
+ 
+     profile.m_endTime = lastTimestamp > startTime ? lastTimestamp : nowMicroseconds();
++#else
++    profile.m_startTime = startTime;
++    profile.m_endTime = nowMicroseconds();
++#endif
+ }
+ 
+ CpuProfileImpl* CpuProfilerImpl::stop(uint32_t id)
+@@ -296,11 +305,13 @@ CpuProfileImpl* CpuProfilerImpl::stop(uint32_t id)
+     buildProfileTree(vm, *profile, session.startTime, session.recordSamples);
+ 
+     if (m_sessions.isEmpty()) {
++#if ENABLE(SAMPLING_PROFILER)
+         if (JSC::SamplingProfiler* sampler = vm.samplingProfiler()) {
+             WTF::Locker locker { sampler->getLock() };
+             sampler->pause();
+             sampler->clearData();
+         }
++#endif
+     }
+ 
+     return profile;
+@@ -467,11 +478,13 @@ void CpuProfiler::Dispose()
+ {
+     auto* impl = toImpl(this);
+     if (!impl->m_sessions.isEmpty()) {
++#if ENABLE(SAMPLING_PROFILER)
+         if (JSC::SamplingProfiler* sampler = impl->m_isolate->vm().samplingProfiler()) {
+             WTF::Locker locker { sampler->getLock() };
+             sampler->pause();
+             sampler->clearData();
+         }
++#endif
+     }
+     delete impl;
+ }
+diff --git a/src/jsc/bindings/webcore/JSDOMFormData.cpp b/src/jsc/bindings/webcore/JSDOMFormData.cpp
+index 57c5f681207..3fb830300b6 100644
+--- a/src/jsc/bindings/webcore/JSDOMFormData.cpp
++++ b/src/jsc/bindings/webcore/JSDOMFormData.cpp
+@@ -283,7 +283,7 @@ static inline JSC::EncodedJSValue jsDOMFormDataPrototypeFunction_append1Body(JSC
+     RELEASE_AND_RETURN(throwScope, JSValue::encode(toJS<IDLUndefined>(*lexicalGlobalObject, throwScope, [&]() -> decltype(auto) { return impl.append(WTF::move(name), WTF::move(value)); })));
+ }
+ 
+-extern "C" BunString Blob__getFileNameString(void* impl);
++extern "C" void Blob__getFileNameString(void* impl, BunString* out);
+ 
+ static inline JSC::EncodedJSValue jsDOMFormDataPrototypeFunction_append2Body(JSC::JSGlobalObject* lexicalGlobalObject, JSC::CallFrame* callFrame, typename IDLOperation<JSDOMFormData>::ClassParameter castedThis)
+ {
+@@ -308,7 +308,11 @@ static inline JSC::EncodedJSValue jsDOMFormDataPrototypeFunction_append2Body(JSC
+     RETURN_IF_EXCEPTION(throwScope, {});
+ 
+     EnsureStillAliveScope argument2 = callFrame->argument(2);
+-    auto filename = argument2.value().isUndefined() ? Blob__getFileNameString(blobValue->impl()).transferToWTFString() : convert<IDLUSVString>(*lexicalGlobalObject, argument2.value());
++    BunString defaultFilename;
++    if (argument2.value().isUndefined()) {
++        Blob__getFileNameString(blobValue->impl(), &defaultFilename);
++    }
++    auto filename = argument2.value().isUndefined() ? defaultFilename.toWTFString(BunString::ZeroCopy) : convert<IDLUSVString>(*lexicalGlobalObject, argument2.value());
+     RETURN_IF_EXCEPTION(throwScope, {});
+ 
+     RELEASE_AND_RETURN(throwScope, JSValue::encode(toJS<IDLUndefined>(*lexicalGlobalObject, throwScope, [&]() -> decltype(auto) { return impl.append(WTF::move(name), WTF::move(blobValue), WTF::move(filename)); })));
+@@ -471,7 +475,11 @@ static inline JSC::EncodedJSValue jsDOMFormDataPrototypeFunction_set2Body(JSC::J
+     }
+     RETURN_IF_EXCEPTION(throwScope, {});
+ 
+-    auto filename = argument2.value().isUndefined() ? Blob__getFileNameString(blobValue->impl()).transferToWTFString() : convert<IDLUSVString>(*lexicalGlobalObject, argument2.value());
++    BunString defaultFilename;
++    if (argument2.value().isUndefined()) {
++        Blob__getFileNameString(blobValue->impl(), &defaultFilename);
++    }
++    auto filename = argument2.value().isUndefined() ? defaultFilename.toWTFString(BunString::ZeroCopy) : convert<IDLUSVString>(*lexicalGlobalObject, argument2.value());
+     RETURN_IF_EXCEPTION(throwScope, {});
+ 
+     RELEASE_AND_RETURN(throwScope, JSValue::encode(toJS<IDLUndefined>(*lexicalGlobalObject, throwScope, [&]() -> decltype(auto) { return impl.set(WTF::move(name), WTF::move(blobValue), WTF::move(filename)); })));
+diff --git a/src/jsc/bindings/webcore/JSWasmStreamingCompiler.cpp b/src/jsc/bindings/webcore/JSWasmStreamingCompiler.cpp
+index 0eff1663acc..b5fdfc86a27 100644
+--- a/src/jsc/bindings/webcore/JSWasmStreamingCompiler.cpp
++++ b/src/jsc/bindings/webcore/JSWasmStreamingCompiler.cpp
+@@ -1,4 +1,7 @@
+ #include "config.h"
++
++#if ENABLE(WEBASSEMBLY)
++
+ #include "JSWasmStreamingCompiler.h"
+ 
+ #include "DOMClientIsoSubspaces.h"
+@@ -219,3 +222,5 @@ Wasm::StreamingCompiler* JSWasmStreamingCompiler::toWrapped(VM& vm, JSValue valu
+ }
+ 
+ }
++
++#endif
+diff --git a/src/jsc/bindings/webcore/JSWasmStreamingCompiler.h b/src/jsc/bindings/webcore/JSWasmStreamingCompiler.h
+index 0c79276d8ea..7a06ac75eb1 100644
+--- a/src/jsc/bindings/webcore/JSWasmStreamingCompiler.h
++++ b/src/jsc/bindings/webcore/JSWasmStreamingCompiler.h
+@@ -1,5 +1,7 @@
+ #pragma once
+ 
++#if ENABLE(WEBASSEMBLY)
++
+ #include "JSDOMWrapper.h"
+ #include "JavaScriptCore/WasmStreamingCompiler.h"
+ 
+@@ -53,3 +55,5 @@ template<> struct JSDOMWrapperConverterTraits<JSC::Wasm::StreamingCompiler> {
+ };
+ 
+ } // namespace WebCore
++
++#endif
+diff --git a/src/jsc/bindings/webcore/SerializedScriptValue.cpp b/src/jsc/bindings/webcore/SerializedScriptValue.cpp
+index 64df9eee8ca..2553c8de523 100644
+--- a/src/jsc/bindings/webcore/SerializedScriptValue.cpp
++++ b/src/jsc/bindings/webcore/SerializedScriptValue.cpp
+@@ -2591,12 +2591,13 @@ private:
+         ptr += length * sizeof(char16_t);
+ #else
+         std::span<char16_t> characters;
+-        str = String::createUninitialized(length, characters);
++        auto string = String::createUninitialized(length, characters);
+         for (unsigned i = 0; i < length; ++i) {
+             uint16_t c;
+             readLittleEndian(ptr, end, c);
+             characters[i] = c;
+         }
++        str = Identifier::fromString(vm, string);
+ #endif
+         return true;
+     }
+diff --git a/src/jsc/bindings/webcore/Worker.cpp b/src/jsc/bindings/webcore/Worker.cpp
+index 15b0b9ff83e..2312652df2e 100644
+--- a/src/jsc/bindings/webcore/Worker.cpp
++++ b/src/jsc/bindings/webcore/Worker.cpp
+@@ -195,10 +195,10 @@ extern "C" void WebWorker__parentContextWillDestroy(WorkerMessagingProxy* proxy)
+ 
+ // An uncaught error inside the worker: dispatch 'error' on the worker's own global scope, then report
+ // it to the Worker object.
+-extern "C" void WebWorker__dispatchError(Zig::GlobalObject* globalObject, WorkerMessagingProxy* proxy, BunString message, JSC::EncodedJSValue errorValue)
++extern "C" void WebWorker__dispatchError(Zig::GlobalObject* globalObject, WorkerMessagingProxy* proxy, const BunString* message, JSC::EncodedJSValue errorValue)
+ {
+     JSC::JSValue error = JSC::JSValue::decode(errorValue);
+-    String messageStr = message.transferToWTFString();
++    String messageStr = message->toWTFString(BunString::ZeroCopy);
+     ErrorEvent::Init init;
+     init.message = messageStr;
+     init.error = error;
+diff --git a/src/jsc/bindings/workaround-missing-symbols.cpp b/src/jsc/bindings/workaround-missing-symbols.cpp
+index 0ee12bafda1..ff8f85efc85 100644
+--- a/src/jsc/bindings/workaround-missing-symbols.cpp
++++ b/src/jsc/bindings/workaround-missing-symbols.cpp
+@@ -100,6 +100,9 @@ std::atomic<int> wtfStringCopyCount;
+ #elif defined(__aarch64__)
+ #define BUN_GLIBC_BASE "GLIBC_2.17"
+ #define BUN_GLIBC_2_4 "GLIBC_2.17"
++#elif defined(__loongarch64)
++#define BUN_GLIBC_BASE "GLIBC_2.36"
++#define BUN_GLIBC_2_4 "GLIBC_2.36"
+ #endif
+ 
+ #define BUN_SYMVER(sym, ver) __asm__(".symver " #sym "," #sym "@" ver)
+@@ -134,15 +137,25 @@ double BUN_WRAP_GLIBC_SYMBOL(log2)(double);
+ int BUN_WRAP_GLIBC_SYMBOL(fcntl64)(int, int, ...);
+ ssize_t BUN_WRAP_GLIBC_SYMBOL(getrandom)(void*, size_t, unsigned int);
+ 
+-float __wrap_expf(float x) { return expf(x); }
+-float __wrap_powf(float x, float y) { return powf(x, y); }
+-float __wrap_logf(float x) { return logf(x); }
+-float __wrap_log2f(float x) { return log2f(x); }
+-double __wrap_exp(double x) { return exp(x); }
+-double __wrap_exp2(double x) { return exp2(x); }
+-double __wrap_pow(double x, double y) { return pow(x, y); }
+-double __wrap_log(double x) { return log(x); }
+-double __wrap_log2(double x) { return log2(x); }
++float __real_expf(float);
++float __real_powf(float, float);
++float __real_logf(float);
++float __real_log2f(float);
++double __real_exp(double);
++double __real_exp2(double);
++double __real_pow(double, double);
++double __real_log(double);
++double __real_log2(double);
++
++float __wrap_expf(float x) { return __real_expf(x); }
++float __wrap_powf(float x, float y) { return __real_powf(x, y); }
++float __wrap_logf(float x) { return __real_logf(x); }
++float __wrap_log2f(float x) { return __real_log2f(x); }
++double __wrap_exp(double x) { return __real_exp(x); }
++double __wrap_exp2(double x) { return __real_exp2(x); }
++double __wrap_pow(double x, double y) { return __real_pow(x, y); }
++double __wrap_log(double x) { return __real_log(x); }
++double __wrap_log2(double x) { return __real_log2(x); }
+ 
+ // glibc 2.24 added quick_exit@GLIBC_2.24 (the version that correctly skips
+ // thread_local dtors per C11/C++11; the older @2.10 version ran them — see
+@@ -406,6 +419,7 @@ extern "C" int __wrap___pthread_key_create(pthread_key_t* k, void (*d)(void*)) {
+ 
+ // Group B: stat family became real symbols in 2.33. Before that they were
+ // header inlines around __fxstat*/__xmknod, which still exist at ≤ 2.17.
++#if defined(__x86_64__) || defined(__aarch64__)
+ extern "C" int __fxstat(int, int, struct stat*);
+ extern "C" int __fxstat64(int, int, struct stat64*);
+ extern "C" int __fxstatat(int, int, const char*, struct stat*, int);
+@@ -426,6 +440,7 @@ extern "C" int __wrap_fstat64(int fd, struct stat64* st) { return __fxstat64(_ST
+ extern "C" int __wrap_fstatat(int dfd, const char* p, struct stat* st, int f) { return __fxstatat(_STAT_VER, dfd, p, st, f); }
+ extern "C" int __wrap_fstatat64(int dfd, const char* p, struct stat64* st, int f) { return __fxstatat64(_STAT_VER, dfd, p, st, f); }
+ extern "C" int __wrap_mknod(const char* p, mode_t m, dev_t d) { return __xmknod(_MKNOD_VER, p, m, &d); }
++#endif
+ 
+ // Group C: thin syscall wrappers added in 2.27/2.28. Kernel has had the
+ // syscalls since 4.5 (copy_file_range), 3.17 (memfd_create), 4.11 (statx);
+diff --git a/src/jsc/modules/BunJSCModule.h b/src/jsc/modules/BunJSCModule.h
+index 88f2ea816f2..8a50ca3b82c 100644
+--- a/src/jsc/modules/BunJSCModule.h
++++ b/src/jsc/modules/BunJSCModule.h
+@@ -28,13 +28,18 @@
+ #include <JavaScriptCore/JSPromise.h>
+ #include <JavaScriptCore/JavaScript.h>
+ #include <JavaScriptCore/ObjectConstructor.h>
++#if ENABLE(SAMPLING_PROFILER)
+ #include <JavaScriptCore/SamplingProfiler.h>
++#endif
+ #include <JavaScriptCore/TestRunnerUtils.h>
+ #include <JavaScriptCore/VMTrapsInlines.h>
+ #include <algorithm>
+ #include <cstddef>
+ #include <wtf/FileSystem.h>
+ #include <wtf/MemoryFootprint.h>
++#if ENABLE(SAMPLING_PROFILER)
++#include <wtf/Stopwatch.h>
++#endif
+ #include <wtf/text/WTFString.h>
+ 
+ #include "BunProcess.h"
+@@ -462,6 +467,10 @@ JSC_DEFINE_HOST_FUNCTION(functionStartSamplingProfiler,
+         JSC::CallFrame* callFrame))
+ {
+     auto& vm = JSC::getVM(globalObject);
++#if !ENABLE(SAMPLING_PROFILER)
++    auto scope = DECLARE_THROW_SCOPE(vm);
++    return JSValue::encode(throwException(globalObject, scope, createError(globalObject, "Sampling profiler is not available in this build"_s)));
++#else
+     JSC::SamplingProfiler& samplingProfiler = vm.ensureSamplingProfiler(WTF::Stopwatch::create());
+ 
+     JSC::JSValue directoryValue = callFrame->argument(0);
+@@ -494,6 +503,7 @@ JSC_DEFINE_HOST_FUNCTION(functionStartSamplingProfiler,
+     samplingProfiler.noticeCurrentThreadAsJSCExecutionThread();
+     samplingProfiler.start();
+     return JSC::JSValue::encode(jsUndefined());
++#endif
+ }
+ 
+ JSC_DECLARE_HOST_FUNCTION(functionSamplingProfilerStackTraces);
+@@ -502,8 +512,11 @@ JSC_DEFINE_HOST_FUNCTION(functionSamplingProfilerStackTraces,
+         JSC::CallFrame*))
+ {
+     auto& vm = JSC::getVM(globalObject);
+-    JSC::DeferTermination deferScope(vm);
+     auto scope = DECLARE_THROW_SCOPE(vm);
++#if !ENABLE(SAMPLING_PROFILER)
++    return JSC::JSValue::encode(throwException(globalObject, scope, createError(globalObject, "Sampling profiler is not available in this build"_s)));
++#else
++    JSC::DeferTermination deferScope(vm);
+ 
+     if (!vm.samplingProfiler())
+         return JSC::JSValue::encode(throwException(
+@@ -514,6 +527,7 @@ JSC_DEFINE_HOST_FUNCTION(functionSamplingProfilerStackTraces,
+     JSC::EncodedJSValue result = JSC::JSValue::encode(JSONParse(globalObject, jsonString));
+     scope.releaseAssertNoException();
+     return result;
++#endif
+ }
+ 
+ JSC_DECLARE_HOST_FUNCTION(functionGetRandomSeed);
+@@ -607,7 +621,11 @@ JSC_DECLARE_HOST_FUNCTION(functionTotalCompileTime);
+ JSC_DEFINE_HOST_FUNCTION(functionTotalCompileTime,
+     (JSGlobalObject*, CallFrame*))
+ {
++#if ENABLE(JIT)
+     return JSValue::encode(jsNumber(JIT::totalCompileTime().milliseconds()));
++#else
++    return JSValue::encode(jsNumber(0));
++#endif
+ }
+ 
+ JSC_DECLARE_HOST_FUNCTION(functionGetProtectedObjects);
+@@ -689,6 +707,10 @@ JSC_DEFINE_HOST_FUNCTION(functionSetTimeZone, (JSGlobalObject * globalObject, Ca
+ JSC_DEFINE_HOST_FUNCTION(functionRunProfiler, (JSGlobalObject * globalObject, CallFrame* callFrame))
+ {
+     auto& vm = JSC::getVM(globalObject);
++#if !ENABLE(SAMPLING_PROFILER)
++    auto throwScope = DECLARE_THROW_SCOPE(vm);
++    return JSValue::encode(throwException(globalObject, throwScope, createError(globalObject, "Sampling profiler is not available in this build"_s)));
++#else
+     JSC::SamplingProfiler& samplingProfiler = vm.ensureSamplingProfiler(WTF::Stopwatch::create());
+ 
+     JSC::JSValue callbackValue = callFrame->argument(0);
+@@ -798,6 +820,7 @@ JSC_DEFINE_HOST_FUNCTION(functionRunProfiler, (JSGlobalObject * globalObject, Ca
+ 
+     JSValue result = report(vm, globalObject);
+     RELEASE_AND_RETURN(throwScope, JSValue::encode(result));
++#endif
+ }
+ 
+ JSC_DECLARE_HOST_FUNCTION(functionGenerateHeapSnapshotForDebugging);
+diff --git a/src/jsc/resolve_path_jsc.rs b/src/jsc/resolve_path_jsc.rs
+index 5c21270e584..9a4632316d7 100644
+--- a/src/jsc/resolve_path_jsc.rs
++++ b/src/jsc/resolve_path_jsc.rs
+@@ -11,7 +11,8 @@ use bun_paths::resolve_path;
+ extern "C" fn ResolvePath__joinAbsStringBufCurrentPlatformBunString(
+     global_object: &JSGlobalObject,
+     input: &BunString,
+-) -> BunString {
++    out: &mut BunString,
++) {
+     let str = input.to_utf8();
+ 
+     // The cwd is the FileSystem singleton's top_level_dir (resolver_jsc.rs
+@@ -30,5 +31,5 @@ extern "C" fn ResolvePath__joinAbsStringBufCurrentPlatformBunString(
+         &[str.slice()],
+     );
+ 
+-    BunString::clone_utf8(out_slice)
++    *out = BunString::clone_utf8(out_slice);
+ }
+diff --git a/src/jsc/web_worker.rs b/src/jsc/web_worker.rs
+index 95d4acfeb29..5be76b9518a 100644
+--- a/src/jsc/web_worker.rs
++++ b/src/jsc/web_worker.rs
+@@ -170,7 +170,7 @@ unsafe extern "C" {
+     safe fn WebWorker__dispatchError(
+         global: &JSGlobalObject,
+         proxy: *mut c_void,
+-        message: BunString,
++        message: &BunString,
+         err: JSValue,
+     );
+     safe fn Bun__freeSharedHeaderBufferForThreadExit();
+@@ -1152,7 +1152,7 @@ impl WebWorker {
+             }
+         };
+         let dispatch = jsc::host_fn::from_js_host_call_generic(global, || {
+-            WebWorker__dispatchError(global, self.messaging_proxy, str, err)
++            WebWorker__dispatchError(global, self.messaging_proxy, &str, err)
+         });
+         if let Err(e) = dispatch {
+             let _ = crate::task::report_error_or_terminate(global, e);
+@@ -1233,7 +1233,7 @@ fn on_unhandled_rejection(
+         WebWorker__dispatchError(
+             global_object,
+             worker.messaging_proxy,
+-            error_message,
++            &error_message,
+             error_instance,
+         );
+     })
+diff --git a/src/options_types/compile_target.rs b/src/options_types/compile_target.rs
+index e4ca61a31d9..f8eb027ca93 100644
+--- a/src/options_types/compile_target.rs
++++ b/src/options_types/compile_target.rs
+@@ -435,6 +435,7 @@ impl CompileTarget {
+             Architecture::X64 => b"\"x64\"",
+             Architecture::Arm64 => b"\"arm64\"",
+             Architecture::Wasm => b"\"wasm\"",
++            Architecture::LoongArch64 => b"\"loong64\"",
+         };
+         const VERSION: &[u8] =
+             const_format::concatcp!("\"", bun_core::Global::package_json_version, "\"").as_bytes();
+diff --git a/src/platform/linux.rs b/src/platform/linux.rs
+index 7fc5c01e420..82cfc4c3c90 100644
+--- a/src/platform/linux.rs
++++ b/src/platform/linux.rs
+@@ -71,7 +71,28 @@ unsafe fn raw_syscall6(
+         }
+         return ret;
+     }
+-    #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
++    #[cfg(target_arch = "loongarch64")]
++    {
++        let ret: isize;
++        // SAFETY: Linux LoongArch syscall ABI. Syscall number in a7, args in
++        // a0..a5, return in a0. Memory clobber because the kernel may
++        // read/write through the pointer arguments.
++        unsafe {
++            core::arch::asm!(
++                "syscall 0",
++                in("$r11") nr,
++                inlateout("$r4") a1 as isize => ret,
++                in("$r5") a2,
++                in("$r6") a3,
++                in("$r7") a4,
++                in("$r8") a5,
++                in("$r9") a6,
++                options(nostack),
++            );
++        }
++        return ret;
++    }
++    #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "loongarch64")))]
+     compile_error!("raw_syscall6: unsupported architecture");
+ }
+ 
+diff --git a/src/runtime/bake/BakeGlobalObject.cpp b/src/runtime/bake/BakeGlobalObject.cpp
+index fea61849fa7..0ddcc936487 100644
+--- a/src/runtime/bake/BakeGlobalObject.cpp
++++ b/src/runtime/bake/BakeGlobalObject.cpp
+@@ -8,8 +8,8 @@
+ #include "JavaScriptCore/Completion.h"
+ #include "JavaScriptCore/JSSourceCode.h"
+ 
+-extern "C" BunString BakeProdResolve(JSC::JSGlobalObject*, const BunString* a, const BunString* b);
+-extern "C" BunString BakeToWindowsPath(const BunString* a);
++extern "C" void BakeProdResolve(JSC::JSGlobalObject*, const BunString* a, const BunString* b, BunString* out);
++extern "C" void BakeToWindowsPath(const BunString* a, BunString* out);
+ 
+ namespace Bake {
+ using namespace JSC;
+@@ -44,7 +44,8 @@ bakeModuleLoaderImportModule(JSC::JSGlobalObject* global,
+ 
+         BunString refererBunString = Bun::toString(refererString);
+         BunString keyBunString = Bun::toString(keyString);
+-        BunString result = BakeProdResolve(global, &refererBunString, &keyBunString);
++        BunString result;
++        BakeProdResolve(global, &refererBunString, &keyBunString, &result);
+         RETURN_IF_EXCEPTION(scope, nullptr);
+ 
+         return JSC::importModule(global, JSC::Identifier::fromString(vm, result.transferToWTFString()),
+@@ -73,7 +74,8 @@ JSC::Identifier bakeModuleLoaderResolve(JSC::JSGlobalObject* jsGlobal,
+         if (refererString.startsWith("bake:/"_s) || (refererString == "."_s && keyString.startsWith("bake:/"_s))) {
+             BunString refererBunString = Bun::toString(refererString);
+             BunString keyBunString = Bun::toString(keyString);
+-            BunString result = BakeProdResolve(global, &refererBunString, &keyBunString);
++            BunString result;
++            BakeProdResolve(global, &refererBunString, &keyBunString, &result);
+             RETURN_IF_EXCEPTION(scope, {});
+ 
+             return JSC::Identifier::fromString(vm, result.transferToWTFString());
+@@ -88,7 +90,8 @@ JSC::Identifier bakeModuleLoaderResolve(JSC::JSGlobalObject* jsGlobal,
+             WTF::String keyWithoutScheme = keyView.substringSharingImpl("bake:"_s.length());
+             BunString bakePrefixBunString = { BunStringTag::StaticEncodedSlice, { .encoded = { reinterpret_cast<const unsigned char*>("bake:/"), 6 } } };
+             BunString keyBunString = Bun::toString(keyWithoutScheme);
+-            BunString result = BakeProdResolve(global, &bakePrefixBunString, &keyBunString);
++            BunString result;
++            BakeProdResolve(global, &bakePrefixBunString, &keyBunString, &result);
+             RETURN_IF_EXCEPTION(scope, {});
+ 
+             return JSC::Identifier::fromString(vm, result.transferToWTFString());
+@@ -114,7 +117,7 @@ static JSC::JSPromise* resolvedInternalPromise(JSC::JSGlobalObject* globalObject
+     return promise;
+ }
+ 
+-extern "C" BunString BakeProdLoad(void* perThreadData, const BunString* a);
++extern "C" void BakeProdLoad(void* perThreadData, const BunString* a, BunString* out);
+ 
+ extern "C" bool BakeGlobalObject__isBakeGlobalObject(JSC::JSGlobalObject* global)
+ {
+@@ -141,7 +144,8 @@ JSC::JSPromise* bakeModuleLoaderFetch(JSC::JSGlobalObject* globalObject,
+     if (moduleKey.startsWith("bake:/"_s)) {
+         if (global->m_perThreadData) [[likely]] {
+             BunString moduleKeyBunString = Bun::toString(moduleKey);
+-            BunString source = BakeProdLoad(global->m_perThreadData, &moduleKeyBunString);
++            BunString source;
++            BakeProdLoad(global->m_perThreadData, &moduleKeyBunString, &source);
+             if (!source.isDead()) {
+                 JSC::SourceOrigin origin = JSC::SourceOrigin(WTF::URL(moduleKey));
+                 JSC::SourceCode sourceCode = JSC::SourceCode(Bake::SourceProvider::create(
+@@ -168,7 +172,9 @@ JSC::JSPromise* bakeModuleLoaderFetch(JSC::JSGlobalObject* globalObject,
+             // it, because `moduleLoaderFetch(...)` may read the path from disk
+             // and so we need to give a Windows path to it.
+             BunString bakePrefixRemovedBunString = Bun::toString(bakePrefixRemoved);
+-            bakePrefixRemoved = BakeToWindowsPath(&bakePrefixRemovedBunString).transferToWTFString();
++            BunString bakePrefixRemovedOut;
++            BakeToWindowsPath(&bakePrefixRemovedBunString, &bakePrefixRemovedOut);
++            bakePrefixRemoved = bakePrefixRemovedOut.transferToWTFString();
+ #endif
+             JSString* bakePrefixRemovedString = jsNontrivialString(vm, bakePrefixRemoved);
+             JSValue bakePrefixRemovedJsvalue = bakePrefixRemovedString;
+@@ -229,8 +235,13 @@ const JSC::GlobalObjectMethodTable& GlobalObject::globalObjectMethodTable()
+         INHERIT_HOOK_METHOD(scriptExecutionStatus),
+         INHERIT_HOOK_METHOD(reportViolationForUnsafeEval),
+         INHERIT_HOOK_METHOD(defaultLanguage),
++#if ENABLE(WEBASSEMBLY)
+         INHERIT_HOOK_METHOD(compileStreaming),
+         INHERIT_HOOK_METHOD(instantiateStreaming),
++#else
++        nullptr,
++        nullptr,
++#endif
+         INHERIT_HOOK_METHOD(deriveShadowRealmGlobalObject),
+         INHERIT_HOOK_METHOD(codeForEval),
+         INHERIT_HOOK_METHOD(canCompileStrings),
+diff --git a/src/runtime/bake/BakeSourceProvider.cpp b/src/runtime/bake/BakeSourceProvider.cpp
+index 75995e3a6aa..bb902d5eb87 100644
+--- a/src/runtime/bake/BakeSourceProvider.cpp
++++ b/src/runtime/bake/BakeSourceProvider.cpp
+@@ -24,7 +24,12 @@ extern "C" BunString BakeSourceProvider__getSourceSlice(SourceProvider* provider
+     return Bun::toStringView(provider->source());
+ }
+ 
+-extern "C" JSC::EncodedJSValue BakeLoadInitialServerCode(JSC::JSGlobalObject* global, BunString source, bool separateSSRGraph) {
++extern "C" void BakeSourceProvider__getSourceSlice_out(SourceProvider* provider, BunString* out)
++{
++    *out = BakeSourceProvider__getSourceSlice(provider);
++}
++
++extern "C" JSC::EncodedJSValue BakeLoadInitialServerCode(JSC::JSGlobalObject* global, const BunString* source, bool separateSSRGraph) {
+   auto& vm = JSC::getVM(global);
+   auto scope = DECLARE_THROW_SCOPE(vm);
+ 
+@@ -32,7 +37,7 @@ extern "C" JSC::EncodedJSValue BakeLoadInitialServerCode(JSC::JSGlobalObject* gl
+   JSC::SourceOrigin origin = JSC::SourceOrigin(WTF::URL(string));
+   JSC::SourceCode sourceCode = JSC::SourceCode(SourceProvider::create(
+     global,
+-    source.transferToWTFString(),
++    source->toWTFString(),
+     origin,
+     WTF::move(string),
+     WTF::TextPosition(),
+@@ -58,7 +63,7 @@ extern "C" JSC::JSPromise* BakeLoadModuleByKey(GlobalObject* global, JSC::JSStri
+   return JSC::loadAndEvaluateModule(global, key->getString(global), nullptr, nullptr);
+ }
+ 
+-extern "C" JSC::EncodedJSValue BakeLoadServerHmrPatch(GlobalObject* global, BunString source) {
++extern "C" JSC::EncodedJSValue BakeLoadServerHmrPatch(GlobalObject* global, const BunString* source) {
+   JSC::VM&vm = global->vm();
+   auto scope = DECLARE_THROW_SCOPE(vm);
+ 
+@@ -66,7 +71,7 @@ extern "C" JSC::EncodedJSValue BakeLoadServerHmrPatch(GlobalObject* global, BunS
+   JSC::SourceOrigin origin = JSC::SourceOrigin(WTF::URL(string));
+   JSC::SourceCode sourceCode = JSC::SourceCode(SourceProvider::create(
+     global,
+-    source.transferToWTFString(),
++    source->toWTFString(),
+     origin,
+     WTF::move(string),
+     WTF::TextPosition(),
+@@ -80,7 +85,7 @@ extern "C" JSC::EncodedJSValue BakeLoadServerHmrPatch(GlobalObject* global, BunS
+   return JSC::JSValue::encode(result);
+ }
+ 
+-extern "C" JSC::EncodedJSValue BakeLoadServerHmrPatchWithSourceMap(GlobalObject* global, BunString source, const char* sourceMapJSONPtr, size_t sourceMapJSONLength) {
++extern "C" JSC::EncodedJSValue BakeLoadServerHmrPatchWithSourceMap(GlobalObject* global, const BunString* source, const char* sourceMapJSONPtr, size_t sourceMapJSONLength) {
+   JSC::VM&vm = global->vm();
+   auto scope = DECLARE_THROW_SCOPE(vm);
+ 
+@@ -90,7 +95,7 @@ extern "C" JSC::EncodedJSValue BakeLoadServerHmrPatchWithSourceMap(GlobalObject*
+   // Use DevServerSourceProvider with the source map JSON
+   auto provider = DevServerSourceProvider::create(
+     global,
+-    source.transferToWTFString(),
++    source->toWTFString(),
+     sourceMapJSONPtr,
+     sourceMapJSONLength,
+     origin,
+diff --git a/src/runtime/bake/DevServer.rs b/src/runtime/bake/DevServer.rs
+index f26d5e23b69..21b373ff0dd 100644
+--- a/src/runtime/bake/DevServer.rs
++++ b/src/runtime/bake/DevServer.rs
+@@ -5615,9 +5615,9 @@ mod c {
+         code: BunString,
+     ) -> JsResult<JSValue> {
+         unsafe extern "C" {
+-            safe fn BakeLoadServerHmrPatch(global: &JSGlobalObject, code: BunString) -> JSValue;
++            safe fn BakeLoadServerHmrPatch(global: &JSGlobalObject, code: &BunString) -> JSValue;
+         }
+-        jsc::from_js_host_call(global, || BakeLoadServerHmrPatch(global, code))
++        jsc::from_js_host_call(global, || BakeLoadServerHmrPatch(global, &code))
+     }
+ 
+     pub(super) fn bake_load_server_hmr_patch_with_source_map(
+@@ -5634,7 +5634,7 @@ mod c {
+             // caller-side validity + ownership precondition.
+             fn BakeLoadServerHmrPatchWithSourceMap(
+                 global: *const JSGlobalObject,
+-                code: BunString,
++                code: &BunString,
+                 ptr: *const u8,
+                 len: usize,
+             ) -> JSValue;
+@@ -5645,7 +5645,7 @@ mod c {
+         jsc::from_js_host_call(global, || unsafe {
+             BakeLoadServerHmrPatchWithSourceMap(
+                 global,
+-                code,
++                &code,
+                 source_map_json_ptr,
+                 source_map_json_len,
+             )
+@@ -5660,12 +5660,12 @@ mod c {
+         unsafe extern "C" {
+             safe fn BakeLoadInitialServerCode(
+                 global: &JSGlobalObject,
+-                code: BunString,
++                code: &BunString,
+                 separate_ssr_graph: bool,
+             ) -> JSValue;
+         }
+         jsc::from_js_host_call(global, || {
+-            BakeLoadInitialServerCode(global, code, separate_ssr_graph)
++            BakeLoadInitialServerCode(global, &code, separate_ssr_graph)
+         })
+     }
+ }
+diff --git a/src/runtime/bake/DevServerSourceProvider.cpp b/src/runtime/bake/DevServerSourceProvider.cpp
+index d5046758103..b322e844e89 100644
+--- a/src/runtime/bake/DevServerSourceProvider.cpp
++++ b/src/runtime/bake/DevServerSourceProvider.cpp
+@@ -11,6 +11,11 @@ extern "C" BunString DevServerSourceProvider__getSourceSlice(Bake::DevServerSour
+     return Bun::toStringView(provider->source());
+ }
+ 
++extern "C" void DevServerSourceProvider__getSourceSlice_out(Bake::DevServerSourceProvider* provider, BunString* out)
++{
++    *out = DevServerSourceProvider__getSourceSlice(provider);
++}
++
+ extern "C" MiCString DevServerSourceProvider__getSourceMapJSON(Bake::DevServerSourceProvider* provider)
+ {
+     return provider->sourceMapJSON();
+diff --git a/src/runtime/bake/production.rs b/src/runtime/bake/production.rs
+index 8e69effd200..0b4b6b0b35d 100644
+--- a/src/runtime/bake/production.rs
++++ b/src/runtime/bake/production.rs
+@@ -1300,10 +1300,11 @@ unsafe extern "C" {
+ }
+ 
+ #[unsafe(no_mangle)]
+-extern "C" fn BakeToWindowsPath(input: &BunString) -> BunString {
++extern "C" fn BakeToWindowsPath(input: &BunString, out: &mut BunString) {
+     #[cfg(unix)]
+     {
+         let _ = input;
++        let _ = out;
+         panic!("This code should not be called on POSIX systems.");
+     }
+     #[cfg(not(unix))]
+@@ -1312,7 +1313,7 @@ extern "C" fn BakeToWindowsPath(input: &BunString) -> BunString {
+         let input_slice = input_utf8.slice();
+         let mut output = bun_paths::w_path_buffer_pool::get();
+         let output_slice = strings::to_w_path_normalize_auto_extend(&mut output[..], input_slice);
+-        BunString::clone_utf16(output_slice.as_slice())
++        *out = BunString::clone_utf16(output_slice.as_slice());
+     }
+ }
+ 
+@@ -1321,7 +1322,8 @@ extern "C" fn BakeProdResolve(
+     global: &JSGlobalObject,
+     a_str: &BunString,
+     specifier_str: &BunString,
+-) -> BunString {
++    out: &mut BunString,
++) {
+     let specifier = specifier_str.to_utf8();
+ 
+     if let Some(alias) = bun_resolve_builtins::Alias::get(
+@@ -1329,7 +1331,8 @@ extern "C" fn BakeProdResolve(
+         bun_ast::Target::Bun,
+         bun_resolve_builtins::Cfg::default(),
+     ) {
+-        return BunString::static_(alias.path.as_bytes());
++        *out = BunString::static_(alias.path.as_bytes());
++        return;
+     }
+ 
+     let referrer = a_str.to_utf8();
+@@ -1340,7 +1343,8 @@ extern "C" fn BakeProdResolve(
+             bun_core::fmt::quote(specifier.slice()),
+             bun_core::fmt::quote(referrer.slice()),
+         ));
+-        return BunString::DEAD;
++        *out = BunString::DEAD;
++        return;
+     }
+ 
+     debug_assert!(strings::has_prefix(referrer.slice(), b"bake:"));
+@@ -1349,14 +1353,14 @@ extern "C" fn BakeProdResolve(
+     let after_scheme = &referrer.slice()[5..];
+     let dir = bun_paths::Dirname::dirname(after_scheme).unwrap_or(after_scheme);
+ 
+-    BunString::create_format(format_args!(
++    *out = BunString::create_format(format_args!(
+         "bake:{}",
+         BStr::new(resolve_path::join_abs::<platform::Posix>(
+             dir,
+             // force posix paths in bake
+             specifier.slice(),
+         ))
+-    ))
++    ));
+ }
+ 
+ /// After a production bundle is generated, prerendering needs to be able to
+@@ -1591,7 +1595,7 @@ impl Drop for PerThread {
+ 
+ /// Given a key, returns the source code to load.
+ #[unsafe(no_mangle)]
+-extern "C" fn BakeProdLoad(pt: *mut PerThread, key: &BunString) -> BunString {
++extern "C" fn BakeProdLoad(pt: *mut PerThread, key: &BunString, out: &mut BunString) {
+     // SAFETY: `pt` is the non-null pointer previously attached via
+     // BakeGlobalObject__attachPerThreadData; C++ only calls this while attached.
+     let pt = unsafe { &*pt };
+@@ -1601,11 +1605,12 @@ extern "C" fn BakeProdLoad(pt: *mut PerThread, key: &BunString) -> BunString {
+         log!("  found in module_map: {}\n", BStr::new(utf8.slice()));
+         // Zero-copy: alias the chunk bytes; `pt.bundled_outputs` owns them for
+         // the lifetime of the attached `PerThread` (see `Value::to_bun_string_ref`).
+-        return pt.bundled_outputs[value.get() as usize]
++        *out = pt.bundled_outputs[value.get() as usize]
+             .value
+             .to_bun_string_ref();
++        return;
+     }
+-    BunString::DEAD
++    *out = BunString::DEAD;
+ }
+ 
+ /// Packed: type (u8) | no_client (bool, 1 bit) | unused (u23)
+diff --git a/src/runtime/ffi/FFIObject.rs b/src/runtime/ffi/FFIObject.rs
+index 26344c95644..9b535ab06ba 100644
+--- a/src/runtime/ffi/FFIObject.rs
++++ b/src/runtime/ffi/FFIObject.rs
+@@ -567,13 +567,19 @@ fn get_ptr_slice(
+                 )));
+             }
+ 
+-            if length_i > i64::try_from(MAX_ADDRESSABLE_MEMORY).expect("int cast") {
++            if length_i > i64::try_from(MAX_ADDRESSABLE_MEMORY).unwrap_or(i64::MAX) {
+                 return Err(global_this.throw_invalid_arguments(format_args!(
+                     "length exceeds max addressable memory. This usually means a bug in your code."
+                 )));
+             }
+ 
+-            let length = usize::try_from(length_i).expect("int cast");
++            let length = match usize::try_from(length_i) {
++                Ok(l) => l,
++                Err(_) => {
++                    return Err(global_this
++                        .throw_invalid_arguments(format_args!("length out of range")));
++                }
++            };
+             return Ok((addr as *mut u8, length));
+         }
+     }
+@@ -611,6 +617,10 @@ fn to_array_buffer(
+     finalization_callback: Option<JSValue>,
+ ) -> JsResult<JSValue> {
+     let (ptr, len) = get_ptr_slice(global_this, value, byte_offset, value_length)?;
++    if len > u32::MAX as usize {
++        return Err(global_this
++            .throw_invalid_arguments(format_args!("length exceeds max ArrayBuffer size")));
++    }
+     let mut callback: jsc::JSTypedArrayBytesDeallocator = None;
+     let mut ctx: Option<*mut c_void> = None;
+     if let Some(callback_value) = finalization_callback {
+@@ -667,6 +677,10 @@ fn to_buffer(
+     finalization_callback: Option<JSValue>,
+ ) -> JsResult<JSValue> {
+     let (ptr, len) = get_ptr_slice(global_this, value, byte_offset, value_length)?;
++    if len > u32::MAX as usize {
++        return Err(global_this
++            .throw_invalid_arguments(format_args!("length exceeds max ArrayBuffer size")));
++    }
+     let mut callback: jsc::JSTypedArrayBytesDeallocator = None;
+     let mut ctx: Option<*mut c_void> = None;
+     if let Some(callback_value) = finalization_callback {
+diff --git a/src/runtime/ffi/ffi_body.rs b/src/runtime/ffi/ffi_body.rs
+index 73f2322c51b..2e68ff64fdc 100644
+--- a/src/runtime/ffi/ffi_body.rs
++++ b/src/runtime/ffi/ffi_body.rs
+@@ -588,6 +588,29 @@ impl CompileC {
+                         .set(bun_core::ZBox::from_vec_with_nul(b"/usr/lib64".to_vec()));
+                 }
+             }
++            #[cfg(target_arch = "loongarch64")]
++            {
++                if dir_exists(b"/usr/include/loongarch64-linux-gnu") {
++                    let _ =
++                        CACHED_DEFAULT_SYSTEM_INCLUDE_DIR.set(bun_core::ZBox::from_vec_with_nul(
++                            b"/usr/include/loongarch64-linux-gnu".to_vec(),
++                        ));
++                } else if dir_exists(b"/usr/include") {
++                    let _ = CACHED_DEFAULT_SYSTEM_INCLUDE_DIR
++                        .set(bun_core::ZBox::from_vec_with_nul(b"/usr/include".to_vec()));
++                }
++
++                if dir_exists(b"/usr/lib/loongarch64-linux-gnu") {
++                    let _ = CACHED_DEFAULT_SYSTEM_LIBRARY_DIR.set(
++                        bun_core::ZBox::from_vec_with_nul(
++                            b"/usr/lib/loongarch64-linux-gnu".to_vec(),
++                        ),
++                    );
++                } else if dir_exists(b"/usr/lib64") {
++                    let _ = CACHED_DEFAULT_SYSTEM_LIBRARY_DIR
++                        .set(bun_core::ZBox::from_vec_with_nul(b"/usr/lib64".to_vec()));
++                }
++            }
+         }
+     }
+ 
+@@ -2469,8 +2492,17 @@ impl CompilerRT {
+         }
+     }
+ 
++    #[inline(never)]
++    extern "C" fn memmove(dest: *mut u8, source: *const u8, byte_count: usize) {
++        // SAFETY: caller (TCC-compiled code) guarantees both ranges are valid;
++        // ptr::copy preserves memmove semantics for overlapping regions.
++        unsafe {
++            std::ptr::copy(source, dest, byte_count);
++        }
++    }
++
+     pub(crate) fn define(state: &mut TCC::State) {
+-        #[cfg(target_arch = "x86_64")]
++        #[cfg(any(target_arch = "x86_64", target_arch = "loongarch64"))]
+         {
+             state.define_symbol(zstr!("NEEDS_COMPILER_RT_FUNCTIONS"), zstr!("1"));
+             // SAFETY: `libtcc1.c` is embedded with a manual trailing NUL guaranteed
+@@ -2484,6 +2516,7 @@ impl CompilerRT {
+             }
+         }
+ 
++        // TODO(port): @import("../../jsc/sizes.zig") → bun_jsc::sizes
+         let offsets = Offsets::get();
+         state.define_symbols(&[
+             (
+@@ -2520,6 +2553,9 @@ impl CompilerRT {
+         state
+             .add_symbol(zstr!("memcpy"), Self::memcpy as *const c_void)
+             .expect("unreachable");
++        state
++            .add_symbol(zstr!("memmove"), Self::memmove as *const c_void)
++            .expect("unreachable");
+         // Re-declare the C++ NapiHandleScope hooks locally — the canonical
+         // declarations live in `crate::napi::napi_body` which is private, and
+         // we only need the symbol addresses to hand to TCC. The canonical
+diff --git a/src/runtime/ffi/libtcc1.c b/src/runtime/ffi/libtcc1.c
+index ff8174d1157..346ea810a2d 100644
+--- a/src/runtime/ffi/libtcc1.c
++++ b/src/runtime/ffi/libtcc1.c
+@@ -47,7 +47,11 @@ typedef union
+   DWtype ll;
+ } DWunion;
+ 
++#ifdef __loongarch64
++typedef double XFtype;
++#else
+ typedef long double XFtype;
++#endif
+ #define WORD_SIZE (sizeof (Wtype) * BITS_PER_UNIT)
+ #define HIGH_WORD_COEFF (((UDWtype) 1) << WORD_SIZE)
+ 
+@@ -103,14 +107,15 @@ union double_long {
+ 
+ union float_long {
+     float f;
+-    long l;
++    unsigned int l;
+ };
+ 
+ /* XXX: we don't support several builtin supports for now */
+-#ifndef __x86_64__
++#if !defined __x86_64__ && !defined __arm__ && !defined __riscv && \
++    !defined __loongarch64
+ 
+ /* XXX: use gcc/tcc intrinsic ? */
+-#if defined(__i386__)
++#if defined __i386__
+ #define sub_ddmmss(sh, sl, ah, al, bh, bl) \
+   __asm__ ("subl %5,%1\n\tsbbl %3,%0"					\
+ 	   : "=r" ((USItype) (sh)),					\
+@@ -162,7 +167,7 @@ static UDWtype __udivmoddi4 (UDWtype n, UDWtype d, UDWtype *rp)
+   n0 = nn.s.low;
+   n1 = nn.s.high;
+ 
+-#if !UDIV_NEEDS_NORMALIZATION
++#if !defined(UDIV_NEEDS_NORMALIZATION)
+   if (d1 == 0)
+     {
+       if (d0 > n1)
+@@ -478,13 +483,6 @@ long long __ashldi3(long long a, int b)
+ #endif
+ }
+ 
+-#if defined(__i386__)
+-/* FPU control word for rounding to nearest mode */
+-unsigned short __tcc_fpu_control = 0x137f;
+-/* FPU control word for round to zero mode for int conversion */
+-unsigned short __tcc_int_fpu_control = 0x137f | 0x0c00;
+-#endif
+-
+ #endif /* !__x86_64__ */
+ 
+ /* XXX: fix tcc's code generator to do this instead */
+@@ -518,6 +516,7 @@ double __floatundidf(unsigned long long a)
+     }
+ }
+ 
++#ifndef __loongarch64
+ long double __floatundixf(unsigned long long a)
+ {
+     DWunion uu; 
+@@ -532,12 +531,13 @@ long double __floatundixf(unsigned long long a)
+         return (long double)r;
+     }
+ }
++#endif
+ 
+ unsigned long long __fixunssfdi (float a1)
+ {
+     register union float_long fl1;
+     register int exp;
+-    register unsigned long l;
++    register unsigned long long l;
+ 
+     fl1.f = a1;
+ 
+@@ -545,16 +545,26 @@ unsigned long long __fixunssfdi (float a1)
+ 	return (0);
+ 
+     exp = EXP (fl1.l) - EXCESS - 24;
+-
+     l = MANT(fl1.l);
++
+     if (exp >= 41)
+-	return (unsigned long long)-1;
++        return 1ULL << 63;
+     else if (exp >= 0)
+-        return (unsigned long long)l << exp;
++        l <<= exp;
+     else if (exp >= -23)
+-        return l >> -exp;
++        l >>= -exp;
+     else
+-        return 0;
++  return 0;
++    if (SIGN(fl1.l))
++        l = (unsigned long long)-l;
++    return l;
++}
++
++long long __fixsfdi (float a1)
++{
++    long long ret; int s;
++    ret = __fixunssfdi((s = a1 >= 0) ? a1 : -a1);
++    return s ? ret : -ret;
+ }
+ 
+ unsigned long long __fixunsdfdi (double a1)
+@@ -569,19 +579,29 @@ unsigned long long __fixunsdfdi (double a1)
+ 	return (0);
+ 
+     exp = EXPD (dl1) - EXCESSD - 53;
+-
+     l = MANTD_LL(dl1);
+ 
+     if (exp >= 12)
+-	return (unsigned long long)-1;
++        return 1ULL << 63; /* overflow result (like gcc, somewhat) */
+     else if (exp >= 0)
+-        return l << exp;
++        l <<= exp;
+     else if (exp >= -52)
+-        return l >> -exp;
++        l >>= -exp;
+     else
+         return 0;
++    if (SIGND(dl1))
++        l = (unsigned long long)-l;
++    return l;
+ }
+ 
++long long __fixdfdi (double a1)
++{
++    long long ret; int s;
++    ret = __fixunsdfdi((s = a1 >= 0) ? a1 : -a1);
++    return s ? ret : -ret;
++}
++
++#if !defined __arm__ && !defined __loongarch64
+ unsigned long long __fixunsxfdi (long double a1)
+ {
+     register union ldouble_long dl1;
+@@ -594,16 +614,39 @@ unsigned long long __fixunsxfdi (long double a1)
+ 	return (0);
+ 
+     exp = EXPLD (dl1) - EXCESSLD - 64;
+-
+     l = dl1.l.lower;
+ 
+     if (exp > 0)
+-	return (unsigned long long)-1;
+-    else if (exp >= -63) 
+-        return l >> -exp;
+-    else
++	return 1ULL << 63;
++    if (exp < -63)
+         return 0;
++    l >>= -exp;
++    if (SIGNLD(dl1))
++        l = (unsigned long long)-l;
++    return l;
++}
++
++long long __fixxfdi (long double a1)
++{
++    long long ret; int s;
++    ret = __fixunsxfdi((s = a1 >= 0) ? a1 : -a1);
++    return s ? ret : -ret;
+ }
++#endif /* !ARM && !loongarch64 */
++
++#if defined __x86_64__
++/* float constants used for unary minus operation */
++const float __mzerosf = -0.0;
++const double __mzerodf = -0.0;
++#endif
++
++#if defined _WIN64
++/* MSVC x64 intrinsic */
++void __faststorefence(void)
++{
++    __asm__("lock; orl $0,(%rsp)");
++}
++#endif
+ 
+ /* TinyCC lib/va_list.c (x86_64 SysV only): __va_arg is no longer inlined and
+    Bun supplies libtcc1 from this file. No extern abort(): Bun never injects
+diff --git a/src/runtime/server/server_body.rs b/src/runtime/server/server_body.rs
+index b134871b3cb..818b3eb0911 100644
+--- a/src/runtime/server/server_body.rs
++++ b/src/runtime/server/server_body.rs
+@@ -517,6 +517,7 @@ pub(crate) mod BunInfo {
+             Architecture::X64 => b"x64",
+             Architecture::Arm64 => b"arm",
+             Architecture::Wasm => b"wasm",
++            Architecture::LoongArch64 => b"loong64",
+         }
+     }
+ 
+diff --git a/src/runtime/webcore/wasm_streaming.rs b/src/runtime/webcore/wasm_streaming.rs
+index 6659f285960..b0d854c02f5 100644
+--- a/src/runtime/webcore/wasm_streaming.rs
++++ b/src/runtime/webcore/wasm_streaming.rs
+@@ -1,3 +1,4 @@
++#![cfg(not(bun_no_wasm))]
+ //! `Zig__GlobalObject__getBodyStreamOrBytesForWasmStreaming` — lives here rather
+ //! than in `bun_jsc::JSGlobalObject` because the body inspects `Response`/`Body`/
+ //! `Blob`/`ReadableStream`, which are `bun_runtime` types (forward-dep of
+diff --git a/src/simdutf_sys/bun-simdutf.cpp b/src/simdutf_sys/bun-simdutf.cpp
+index 6afd6862ddc..27c91c29b2b 100644
+--- a/src/simdutf_sys/bun-simdutf.cpp
++++ b/src/simdutf_sys/bun-simdutf.cpp
+@@ -1,3 +1,7 @@
++#if defined(__loongarch__)
++#define SIMDUTF_IMPLEMENTATION_LASX 0
++#endif
++
+ #include "wtf/SIMDUTF.h"
+ 
+ typedef struct SIMDUTFResult {
+diff --git a/src/tcc_sys/tcc.rs b/src/tcc_sys/tcc.rs
+index 0a95ffe74e7..2234444b900 100644
+--- a/src/tcc_sys/tcc.rs
++++ b/src/tcc_sys/tcc.rs
+@@ -23,16 +23,17 @@ pub type ErrorFunc<Ctx> = unsafe extern "C" fn(ctx: *mut Ctx, msg: *const c_char
+ // in this build"), and the `unreachable!()` makes any future gate regression
+ // loud rather than silently UB.
+ //
+-// Keep this predicate in sync with `cfg.tinycc` in `scripts/build/config.ts`
+-// and `ENABLE_TINYCC` in `scripts/build/buildOptionsRs.ts`.
++// `bun_no_tinycc` is set by `scripts/build/rust.ts` when `cfg.tinycc` is
++// false, keeping this in sync with `ENABLE_TINYCC` in
++// `scripts/build/buildOptionsRs.ts`.
+ macro_rules! tcc_externs {
+     ($($(#[$attr:meta])* fn $name:ident($($arg:ident: $ty:ty),* $(,)?) $(-> $ret:ty)?;)*) => {
+-        #[cfg(not(any(target_os = "android", target_os = "freebsd")))]
++        #[cfg(not(any(target_os = "android", target_os = "freebsd", bun_no_tinycc)))]
+         unsafe extern "C" {
+             $($(#[$attr])* fn $name($($arg: $ty),*) $(-> $ret)?;)*
+         }
+         $(
+-            #[cfg(any(target_os = "android", target_os = "freebsd"))]
++            #[cfg(any(target_os = "android", target_os = "freebsd", bun_no_tinycc))]
+             #[allow(unused_variables, clippy::missing_safety_doc)]
+             unsafe extern "C" fn $name($($arg: $ty),*) $(-> $ret)? {
+                 unreachable!(concat!(
+diff --git a/src/uws_sys/App.rs b/src/uws_sys/App.rs
+index 973efe9f4cb..b300af25de9 100644
+--- a/src/uws_sys/App.rs
++++ b/src/uws_sys/App.rs
+@@ -402,7 +402,7 @@ impl<const SSL: bool> App<SSL> {
+                 Self::SSL_FLAG,
+                 std::ptr::from_mut::<Self>(self).cast::<uws_app_t>(),
+                 hostname_pattern.as_ptr(),
+-                *opts,
++                opts,
+                 i32::from(apply_client_cert_policy),
+             )
+         };
+@@ -668,7 +668,7 @@ pub mod c {
+             ssl: i32,
+             app: *mut uws_app_t,
+             hostname_pattern: *const c_char,
+-            options: BunSocketContextOptions,
++            options: &BunSocketContextOptions,
+             apply_client_cert_policy: c_int,
+         ) -> i32;
+         pub(crate) safe fn uws_filter(
+diff --git a/src/uws_sys/SocketContext.rs b/src/uws_sys/SocketContext.rs
+index 865596e96e4..e3479e50c88 100644
+--- a/src/uws_sys/SocketContext.rs
++++ b/src/uws_sys/SocketContext.rs
+@@ -170,9 +170,9 @@ impl BunSocketContextOptions {
+     /// `us_internal_ssl_attach`, so a server reusing this ctx never sends
+     /// CertificateRequest unless these options asked it to.
+     pub fn create_ssl_context(self, err: &mut create_bun_socket_error_t) -> Option<OwnedSslCtx> {
+-        // SAFETY: FFI call; `self` is `#[repr(C)]` and passed by value, `err` is a valid out-param.
++        // SAFETY: FFI call; `self` is `#[repr(C)]` and passed by reference, `err` is a valid out-param.
+         // A non-null return carries the +1 from `SSL_CTX_new`.
+-        unsafe { OwnedSslCtx::from_raw(c::us_ssl_ctx_from_options(self, err)) }
++        unsafe { OwnedSslCtx::from_raw(c::us_ssl_ctx_from_options(&self, err)) }
+     }
+ 
+     /// SHA-256 over every field this struct carries, dereferencing string
+@@ -321,7 +321,7 @@ pub mod c {
+     use super::*;
+     unsafe extern "C" {
+         pub(crate) fn us_ssl_ctx_from_options(
+-            options: BunSocketContextOptions,
++            options: &BunSocketContextOptions,
+             err: *mut create_bun_socket_error_t,
+         ) -> *mut SSL_CTX;
+         // safe: no args; reads a process-global counter — no preconditions.
+diff --git a/src/uws_sys/h3.rs b/src/uws_sys/h3.rs
+index caabd299d63..4113e857243 100644
+--- a/src/uws_sys/h3.rs
++++ b/src/uws_sys/h3.rs
+@@ -402,8 +402,8 @@ impl App {
+         hostname: &bun_core::ZStr,
+         opts: &BunSocketContextOptions,
+     ) -> Result<(), AddServerNameError> {
+-        // SAFETY: self is a live FFI handle; hostname is NUL-terminated; opts passed by value
+-        if !unsafe { c::uws_h3_app_add_server_name(self, hostname.as_ptr().cast(), *opts) } {
++        // SAFETY: self is a live FFI handle; hostname is NUL-terminated; opts passed by reference
++        if !unsafe { c::uws_h3_app_add_server_name(self, hostname.as_ptr().cast(), opts) } {
+             return Err(AddServerNameError::FailedToAddServerName);
+         }
+         Ok(())
+@@ -599,7 +599,7 @@ mod c {
+         pub(super) fn uws_h3_app_add_server_name(
+             app: *mut App,
+             hostname: *const c_char,
+-            opts: BunSocketContextOptions,
++            opts: &BunSocketContextOptions,
+         ) -> bool;
+         pub(super) safe fn uws_h3_res_write_continue(res: &mut Response);
+         pub(super) fn uws_h3_app_get(
+diff --git a/src/uws_sys/libuwsockets.cpp b/src/uws_sys/libuwsockets.cpp
+index 5c1e40665e6..d9cd13cb543 100644
+--- a/src/uws_sys/libuwsockets.cpp
++++ b/src/uws_sys/libuwsockets.cpp
+@@ -35,10 +35,10 @@ extern "C"
+     loopData->updateDate();
+   }
+ 
+-  uws_app_t *uws_create_app(int ssl, struct us_bun_socket_context_options_t options)
++  uws_app_t *uws_create_app(int ssl, const struct us_bun_socket_context_options_t *options)
+   {
+     uWS::SocketContextOptions socket_context_options;
+-    memcpy(&socket_context_options, &options,
++    memcpy(&socket_context_options, options,
+            sizeof(uWS::SocketContextOptions));
+     if (ssl)
+     {
+@@ -560,11 +560,11 @@ extern "C"
+   }
+   int uws_add_server_name_with_options(
+       int ssl, uws_app_t *app, const char *hostname_pattern,
+-      struct us_bun_socket_context_options_t options,
++      const struct us_bun_socket_context_options_t *options,
+       int apply_client_cert_policy)
+   {
+     uWS::SocketContextOptions sco;
+-    memcpy(&sco, &options, sizeof(uWS::SocketContextOptions));
++    memcpy(&sco, options, sizeof(uWS::SocketContextOptions));
+     bool success = false;
+ 
+     if (ssl)
+diff --git a/src/uws_sys/libuwsockets_h3.cpp b/src/uws_sys/libuwsockets_h3.cpp
+index fa06529014b..83e3488204e 100644
+--- a/src/uws_sys/libuwsockets_h3.cpp
++++ b/src/uws_sys/libuwsockets_h3.cpp
+@@ -39,13 +39,13 @@ typedef void (*uws_h3_listen_handler)(us_quic_listen_socket_t*, void*);
+ 
+ /* ───── app ───── */
+ 
+-uws_h3_app_t* uws_h3_create_app(struct us_bun_socket_context_options_t options, unsigned int idle_timeout_s)
++uws_h3_app_t* uws_h3_create_app(const struct us_bun_socket_context_options_t *options, unsigned int idle_timeout_s)
+ {
+     static int once = (us_quic_global_init(), 1);
+     (void)once;
+     uWS::SocketContextOptions sco;
+-    static_assert(sizeof(sco) == sizeof(options));
+-    memcpy(&sco, &options, sizeof(sco));
++    static_assert(sizeof(sco) == sizeof(*options));
++    memcpy(&sco, options, sizeof(sco));
+     return (uws_h3_app_t*)H3App::create(sco, idle_timeout_s);
+ }
+ 
+@@ -54,10 +54,10 @@ void uws_h3_app_close(uws_h3_app_t* app) { ((H3App*)app)->close(); }
+ void uws_h3_app_clear_routes(uws_h3_app_t* app) { ((H3App*)app)->clearRoutes(); }
+ 
+ bool uws_h3_app_add_server_name(uws_h3_app_t* app, const char* hostname,
+-    struct us_bun_socket_context_options_t options)
++    const struct us_bun_socket_context_options_t *options)
+ {
+     uWS::SocketContextOptions sco;
+-    memcpy(&sco, &options, sizeof(sco));
++    memcpy(&sco, options, sizeof(sco));
+     return ((H3App*)app)->addServerNameWithOptions(hostname, sco);
+ }
+ 
+diff --git a/src/windows_sys/externs.rs b/src/windows_sys/externs.rs
+index b84cbfd3a9b..5fd55fd737d 100644
+--- a/src/windows_sys/externs.rs
++++ b/src/windows_sys/externs.rs
+@@ -1664,6 +1664,7 @@ const _: () = assert!(core::mem::offset_of!(TEB, ProcessEnvironmentBlock) == 0x6
+ /// ABI for every thread, so there is no caller-side obligation. The deref
+ /// obligation lives with the caller of the returned `*mut TEB`.
+ #[inline(always)]
++#[cfg(windows)]
+ pub fn teb() -> *mut TEB {
+     #[cfg(target_arch = "x86_64")]
+     // SAFETY: on Windows x64 `gs:[0x30]` is the OS-maintained TEB self-
+@@ -1690,6 +1691,7 @@ pub fn teb() -> *mut TEB {
+ /// `BeingDebugged`, …). Materializing a `&'static` to it would be UB under
+ /// Rust's aliasing rules. Callers must read fields through raw-pointer deref.
+ #[inline(always)]
++#[cfg(windows)]
+ pub fn peb() -> *const PEB {
+     #[cfg(target_arch = "x86_64")]
+     // SAFETY: reading `gs:[0x60]` is the documented Windows-x64 ABI for the
