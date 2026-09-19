@@ -1,11 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -147,3 +147,26 @@ package_comgr() {
-     cd "$pkgbase/amd/comgr"
-     install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
- }
-+
-+prepare() {
+@@ -20,6 +20,13 @@ options=(staticlibs !lto)
+ prepare() {
+     # linux/scc.h is gone from linux-api-headers >= 7.1
+     patch -Np1 -d "$pkgbase" -i "$srcdir/0001-compiler-rt-sanitizer-Remove-linux-scc.h.patch"
 +    cd $pkgbase
 +    patch -Np1 < ../0001-rocm-llvm-define-nansq.patch
 +    patch -Np1 < ../0003-rocm-llvm-loongarch64-feature-support.patch
@@ -13,7 +11,13 @@
 +    patch -Np1 < ../0005-llvm-linker-extra.patch
 +    patch -Np1 < ../0006-llvm-fix-compile-fail.patch
 +    patch -Np1 < ../0007-llvm-fix-flang-compile-fail.patch
-+}
+ }
+ 
+ build() {
+@@ -195,3 +202,16 @@ package_comgr() {
+     cd "$pkgbase/amd/comgr"
+     install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
 +
 +source+=('0001-rocm-llvm-define-nansq.patch'
 +         '0003-rocm-llvm-loongarch64-feature-support.patch'
