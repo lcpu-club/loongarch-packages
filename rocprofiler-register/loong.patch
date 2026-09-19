@@ -1,0 +1,14 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,11 @@ prepare() {
+   # find_package() calls on global scope
+   sed -i 's/add_subdirectory(external)/find_package(fmt REQUIRED)\nfind_package(glog REQUIRED)/' \
+     "$srcdir/$_dirname/CMakeLists.txt"
++  # fmt 12 no longer pulls in <fmt/format.h> via <fmt/core.h>
++  # https://github.com/fmtlib/fmt/commit/0007426c2d8d22df6e56d3b4d109415242e683e0
++  sed -i 's|#include <fmt/core.h>|#include <fmt/format.h>|' \
++    "$srcdir/$_dirname/source/lib/rocprofiler-register/details/dl.cpp" \
++    "$srcdir/$_dirname/source/lib/rocprofiler-register/details/environment.hpp"
+ }
+ 
+ build() {
