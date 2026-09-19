@@ -6,7 +6,7 @@
  }
 +
 +prepare() {
-+  cd HIPIFY-rocm-7.2.0
++  cd HIPIFY-rocm-${pkgver}
 +  patch -Np1 < ../0000-fix-undefined-symbol.patch
 +}
 +
