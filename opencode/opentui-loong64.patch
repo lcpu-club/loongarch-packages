@@ -120,3 +120,40 @@
  var isBun2 = typeof process !== "undefined" && "bun" in process.versions;
  var typeSizes = {
    u8: 1,
+--- a/index.bun.js
++++ b/index.bun.js
+@@ -12035,8 +12035,7 @@
+     return this.createChunk(text, "default");
+   }
+   createInitialStyledText(token) {
+-    if (!this._streaming)
+-      return;
++    // Loong64: no WASM tree-sitter; always keep marked fallback.
+     const chunks = [];
+     if ("tokens" in token && Array.isArray(token.tokens)) {
+       this.renderInlineContent(token.tokens, chunks);
+--- a/chunk-bun-bb3k0yt8.js
++++ b/chunk-bun-bb3k0yt8.js
+@@ -3429,7 +3429,8 @@
+           syntaxStyle: this._syntaxStyle,
+           highlights
+         };
+-        let chunks = treeSitterToTextChunks(content, highlights, this._syntaxStyle, {
++        // Loong64: reuse marked fallback when highlights are empty.
++        let chunks = highlights.length === 0 && this._initialStyledText ? this._initialStyledText.chunks : treeSitterToTextChunks(content, highlights, this._syntaxStyle, {
+           enabled: this._conceal,
+           baseHighlight: this._baseHighlight
+         });
+@@ -3461,7 +3464,11 @@
+       console.warn("Code highlighting failed, falling back to plain text:", error);
+       if (this.isDestroyed)
+         return;
+-      this.textBuffer.setText(content);
++      if (this._initialStyledText) {
++        this.textBuffer.setStyledText(this._initialStyledText);
++      } else {
++        this.textBuffer.setText(content);
++      }
+       this.setRenderedLineSources(undefined);
+       this._shouldRenderTextBuffer = true;
+       this._isHighlighting = false;
