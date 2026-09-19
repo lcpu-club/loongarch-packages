@@ -1,0 +1,11 @@
+--- a/packages/core/src/shell/parse.ts
++++ b/packages/core/src/shell/parse.ts
+@@ -167,7 +167,7 @@
+   options?: { portable?: boolean },
+ ) {
+   if (options?.portable) return yield* scanPortable(command, shell, cwd)
+-  return yield* scanLegacy(command, shell, cwd)
++  return yield* scanLegacy(command, shell, cwd).pipe(Effect.catchCause(() => scanPortable(command, shell, cwd)))
+ })
+ 
+ const scanLegacy = Effect.fnUntraced(function* (command: string, shell: string, cwd: string) {

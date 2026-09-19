@@ -1,14 +1,16 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 11addc0..5e47278 100644
+index 83ccb81..0314108 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -36,11 +36,34 @@ b2sums=('ab80b17b2706b69df73e697bdbd0fb714eb0d6933b1ee6ccc3a3ed4ce194f105f151e0f
+@@ -36,11 +36,36 @@ b2sums=('1288de1314f02a21c06406bf2f4530b849acc056431c6d73c7ce092d456be4f25ff762b
  prepare() {
    cd $pkgname
    sed -i 's|"packageManager": "bun@1.4.2"|"packageManager": "bun@1.4.0"|' package.json
 -  bun install --frozen-lockfile --ignore-scripts
 +  patch -Np1 -i ../wasm-css.patch
 +  patch -Np1 -i ../loong64-target.patch
++  # Bun on loong64 has no WebAssembly; fall back to the portable shell scanner.
++  patch -Np1 -i ../portable-shell-scanner.patch
 +  cp ../fix-oxide-worker-exit.patch ../opentui-loong64.patch patches/
 +  # The lockfile records LoongArch optional dependencies with an unsupported CPU.
 +  sed -i '/linux-loong64/s/"cpu": "none"/"cpu": "loong64"/' bun.lock
@@ -39,7 +41,7 @@ index 11addc0..5e47278 100644
    OPENCODE_VERSION=$pkgver bun run ./script/build.ts --single --baseline --skip-install
  }
  
-@@ -61,9 +84,12 @@ package() {
+@@ -61,9 +86,12 @@ package() {
    cd $pkgname
    case $CARCH in
    aarch64) dir=cli-linux-arm64 ;;
@@ -52,19 +54,20 @@ index 11addc0..5e47278 100644
  
    install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
  
-@@ -72,3 +98,24 @@ package() {
+@@ -72,3 +100,25 @@ package() {
    "$pkgdir/usr/bin/opencode" --completions zsh \
      | install -vDm644 /dev/stdin "$pkgdir/usr/share/zsh/site-functions/_opencode"
  }
 +
 +source+=(wasm-css.patch fix-oxide-worker-exit.patch loong64-target.patch
-+         opentui-loong64.patch
++         opentui-loong64.patch portable-shell-scanner.patch
 +         'opentui-0.5.10.tar.gz::https://github.com/anomalyco/opentui/archive/refs/tags/v0.5.10.tar.gz'
 +         'koffi-linux-loong64-3.2.1.tgz::https://registry.npmjs.org/@koromix/koffi-linux-loong64/-/koffi-linux-loong64-3.2.1.tgz')
 +b2sums+=('94896400934a91c13f3458a25239528922c120cfa06f9b362aead83d4ea0a8f443691c46cb5d9139b9be1fc7cb609f1cd25440416d3bcc13ae4c84606be72ffb'
 +         '8ccefc948e86b53c43f77cc3f3ef3de557cd4c104a444fb0eb8b2626cfc607ae20825370ffa29eab66604514c5c76eeaa0c86d45a3b65776ac15edae374278b1'
 +         '0143ccc8b0467a5f3120b50e37d50206958addb2edae35f6ea4b8a834aa9491220825612268cf7de635c2c6a3447bcc97b67d994364efb098c14d37e1a44865b'
 +         'ef145fd3a81cdbb511e1993782f31a5523dde2cfac454dc44e8b24643083b70758bc1129712522c6def4ff576e465560bce45ba19745d73ad2564757bfa24c87'
++         '5ceb9d6238a4834294f1ed4ff3ec9d35f101d7737794a5ee06b67a3f24677ec96569440902834a0e85eb5cdd007b7719eb8b331ccfeb3e09135f7c177afb8486'
 +         '0a4bc734cf317a88d77a82a1cdbd5e9acf4bea4eea8a009a0959a63c1bf3553f08f5d193081510f4c1874480ae684ef39c70896892977d78680d54827e0e99f2'
 +         '2b993122ef63c1cea33ca57861c3b5b1087473622dee2c4654468ffbf51ce6594885b9ea18d34215351f544e9444439841ff3b7ab3f1792ecd2de25da274fb88')
 +
