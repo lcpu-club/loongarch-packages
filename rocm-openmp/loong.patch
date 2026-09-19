@@ -1,0 +1,13 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -126,3 +126,10 @@ package() {
+     install -Dm644 openmp/LICENSE.TXT "$pkgdir/usr/share/licenses/$pkgname/openmp-LICENSE"
+     install -Dm644 llvm/LICENSE.TXT "$pkgdir/usr/share/licenses/$pkgname/llvm-LICENSE"
+ }
++
++prepare() {
++    patch -Np1 -d "$pkgname" -i "$srcdir/0001-offload-support-amdgpu-plugin-on-loongarch64.patch"
++}
++
++source+=("0001-offload-support-amdgpu-plugin-on-loongarch64.patch")
++sha256sums+=("8b27fec0f63b9dfa0b92b4b47771566fd6c2ef98f6bd87da1f975d4c14ec0a27")

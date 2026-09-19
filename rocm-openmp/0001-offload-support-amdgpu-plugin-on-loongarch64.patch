@@ -1,0 +1,21 @@
+The AMDGPU plugin is ordinary HSA host code and its sources already carry
+non-x86 fallbacks (offload/plugins-nextgen/amdgpu/src/rtl.cpp guards the
+synchronous-copy paths with __i386__/__x86_64__), but the plugin gate in
+offload/CMakeLists.txt only whitelists x86_64/ppc64le/aarch64 hosts.  On
+loongarch64 the requested plugin was therefore removed from
+LIBOMPTARGET_PLUGINS_TO_BUILD, leaving that list empty, and the unquoted
+string(STRIP) on the next lines failed with:
+  CMake Error at offload/CMakeLists.txt:214 (string):
+    string sub-command STRIP requires two arguments.
+
+--- a/offload/CMakeLists.txt
++++ b/offload/CMakeLists.txt
+@@ -187,7 +187,7 @@
+   message(STATUS "Not building host plugin: only Linux systems are supported")
+   list(REMOVE_ITEM LIBOMPTARGET_PLUGINS_TO_BUILD "host")
+ endif()
+-if(NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(ppc64le)|(aarch64)$"
++if(NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(ppc64le)|(aarch64)|(loongarch64)$"
+         AND CMAKE_SYSTEM_NAME MATCHES "Linux"))
+   if("amdgpu" IN_LIST LIBOMPTARGET_PLUGINS_TO_BUILD)
+     message(STATUS "Not building AMDGPU plugin: only support AMDGPU in "
