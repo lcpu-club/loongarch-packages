@@ -1,0 +1,15 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -81,7 +81,11 @@ build() {
+   )
+   # -fcf-protection is not supported by HIP, see
+   # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
+-  CXXFLAGS="${CXXFLAGS} -fcf-protection=none" cmake "${cmake_args[@]}"
++  # ROCm's hip/amd_detail/host_defines.h defines __noinline__ as a macro,
++  # which breaks GCC 16's <format> and <stacktrace> headers when ROCm
++  # headers get included first. Force-include the affected std headers up
++  # front (chrono transitively pulls in <format>).
++  CXXFLAGS="${CXXFLAGS} -fcf-protection=none -include chrono -include stacktrace" cmake "${cmake_args[@]}"
+   cmake --build build
+ }
+ 
