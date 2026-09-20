@@ -1,0 +1,58 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,10 +15,40 @@ source=("$pkgname-$pkgver.tar.gz::$_git/archive/rocm-$pkgver.tar.gz")
+ sha256sums=('886dc44e8133285697ab0e6a744ce0aae2c645426298808c2ca42317e243fe14')
+ _dirname="$(basename "$_git")-$(basename "${source[0]}" ".tar.gz")"
+ 
++prepare() {
++  cd "$_dirname"
++
++  # loong64: RPP's CPU kernels are written against the x86 SSE/AVX/AVX2/FMA/
++  # F16C intrinsics; the patch emulates them with SIMDe and makes the x86-only
++  # compiler options conditional.
++  patch -Np1 -i "$srcdir"/rpp-loong64-simde.patch
++
++  # loong64: FFTS' non-SSE scalar branch is broken upstream (double_t is not a
++  # type); it is only compiled on platforms without x86/ARM SIMD.
++  patch -Np1 -d "$srcdir/ffts-$_ffts_commit" -i "$srcdir"/ffts-loong64.patch
++}
++
+ build() {
+   # -fcf-protection is not supported by HIP, see
+   # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
+   CXXFLAGS+=" -fcf-protection=none"
++
++  # loong64: the third_party/ffts/lib/libffts.a shipped in the tarball is an
++  # x86_64 binary, so build FFTS from source for the host architecture and use
++  # that instead.  FFTS has no loongarch SIMD (or JIT) backend, so the portable
++  # static code path is used.
++  (
++    cd "$srcdir/ffts-$_ffts_commit"
++    ffts_cflags="-O2 -fPIC -DFFTS_BUILD -DDYNAMIC_DISABLED"
++    ffts_cflags+=" -DHAVE_STDINT_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_MALLOC_H"
++    ffts_cflags+=" -DHAVE_SYS_MMAN_H -DHAVE_UNISTD_H -DHAVE_DECL_POSIX_MEMALIGN -DHAVE_POSIX_MEMALIGN"
++    for f in ffts ffts_chirp_z ffts_nd ffts_real ffts_real_nd ffts_transpose ffts_trig ffts_static; do
++      ${CC:-cc} $ffts_cflags -Iinclude -Isrc -c "src/$f.c" -o "$f.o"
++    done
++    ar rcs libffts.a *.o
++    cp libffts.a "$srcdir/$_dirname/third_party/ffts/lib/libffts.a"
++  )
++
+   local cmake_args=(
+     -Wno-dev
+     -B build
+@@ -34,3 +64,14 @@ package() {
+   DESTDIR="$pkgdir" cmake --install build
+   install -Dm644 "$_dirname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++
++_ffts_commit=b22d839b61c5bd8a993e24ae3e01f39d9b5084fb
++
++makedepends+=('simde')
++source+=("rpp-loong64-simde.patch"
++         "ffts-loong64.patch"
++         "ffts-$_ffts_commit.tar.gz::https://github.com/anthonix/ffts/archive/$_ffts_commit.tar.gz")
++sha256sums+=('ea65e566b560c5d0defd8a5c08a20a569ac24ea001c71584197f43eaf6e17167'
++             '1f22782a1c21a9e56fb6405c714af4be249eb84b09648e7fe73888a10f5396cb'
++             'ec623a9e75cf0897370a7988206f16e47ed6e32485522a0a8cc2ae35d846612a')
