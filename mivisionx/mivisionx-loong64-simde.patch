@@ -1,0 +1,268 @@
+--- a/amd_openvx/openvx/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx/openvx/CMakeLists.txt	2026-09-20 08:41:42.191308690 +0800
+@@ -168,7 +168,10 @@
+     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd /DVX_API_ENTRY=__declspec(dllexport)")
+ else()
+     # -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation.
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++    # Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++    endif()
+     target_link_libraries(openvx dl m)
+ endif()
+ 
+--- a/amd_openvx/openvx/ago/ago_platform.cpp	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx/openvx/ago/ago_platform.cpp	2026-09-20 08:39:06.999722230 +0800
+@@ -24,7 +24,7 @@
+ #include "ago_platform.h"
+ 
+ // macro to port VisualStudio __cpuid to g++
+-#if !_WIN32
++#if !_WIN32 && (defined(__x86_64__) || defined(__i386__))
+ #define __cpuid(out, infoType) asm("cpuid": "=a" (out[0]), "=b" (out[1]), "=c" (out[2]), "=d" (out[3]): "a" (infoType));
+ #endif
+ 
+@@ -34,6 +34,7 @@
+ 
+ bool agoIsCpuHardwareSupported()
+ {
++#if defined(__x86_64__) || defined(__i386__)
+ 	bool isHardwareSupported = false;
+ 	int CPUInfo[4] = { -1 };
+ 	__cpuid(CPUInfo, 0);
+@@ -44,6 +45,11 @@
+ 			isHardwareSupported = true;
+ 	}
+ 	return isHardwareSupported;
++#else
++	// Non-x86 hosts (e.g. loongarch64) run the SIMDe-emulated CPU kernels,
++	// which are always available.
++	return true;
++#endif
+ }
+ 
+ uint32_t agoControlFpSetRoundEven()
+--- a/amd_openvx/openvx/ago/ago_platform.h	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx/openvx/ago/ago_platform.h	2026-09-20 08:39:06.999571570 +0800
+@@ -56,9 +56,27 @@
+ #include <intrin.h>
+ #else
+ #include <dlfcn.h>
++#if defined(__x86_64__) || defined(__i386__)
+ #include <x86intrin.h>
+ #include <smmintrin.h>
+ #include <immintrin.h>
++#else
++// Non-x86 hosts (e.g. loongarch64): the CPU kernels are written against the
++// x86 SSE/AVX2 intrinsics, so emulate them with SIMDe.
++#ifndef SIMDE_ENABLE_NATIVE_ALIASES
++#define SIMDE_ENABLE_NATIVE_ALIASES
++#endif
++#ifndef SIMDE_NO_NATIVE
++#define SIMDE_NO_NATIVE
++#endif
++// Some kernels pass run-time values as shift counts; the portable SIMDe
++// implementations handle those, but the compile-time check rejects them.
++#ifndef SIMDE_NO_CHECK_IMMEDIATE_CONSTANT
++#define SIMDE_NO_CHECK_IMMEDIATE_CONSTANT
++#endif
++#include <simde/x86/sse4.2.h>
++#include <simde/x86/avx2.h>
++#endif
+ #if __APPLE__
+ #include <cstdlib>
+ #include <cmath>
+--- a/amd_openvx_extensions/amd_custom/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx_extensions/amd_custom/CMakeLists.txt	2026-09-20 08:41:42.191535470 +0800
+@@ -79,7 +79,10 @@
+     include_directories(../../amd_openvx/openvx/include ${ROCM_PATH}/include include ./custom_lib)
+ 
+     # -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation.
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++    # Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++    endif()
+ 
+     link_directories(${HIP_PATH}/lib)
+     add_subdirectory(custom_lib)
+--- a/amd_openvx_extensions/amd_loomsl/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx_extensions/amd_loomsl/CMakeLists.txt	2026-09-20 08:41:42.191598620 +0800
+@@ -79,7 +79,10 @@
+     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+ else()
+ 	# -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation.
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++    # Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++    endif()
+ endif()
+ 
+ message("-- ${White}amd_loom -- CMAKE_CXX_FLAGS:${CMAKE_CXX_FLAGS}${ColourReset}")
+--- a/amd_openvx_extensions/amd_media/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx_extensions/amd_media/CMakeLists.txt	2026-09-20 08:41:42.191724470 +0800
+@@ -108,7 +108,11 @@
+ else()
+     # -Wno-deprecated-declarations -- Do not warn about uses of functions, variables, and types marked as deprecated by using the deprecated attribute.
+     # -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation. 
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -msse4.2")
++    # Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++    endif()
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+ endif()
+ 
+ message("-- ${White}amd_media -- CMAKE_CXX_FLAGS:${CMAKE_CXX_FLAGS}${ColourReset}")
+--- a/amd_openvx_extensions/amd_migraphx/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx_extensions/amd_migraphx/CMakeLists.txt	2026-09-20 08:41:42.191661300 +0800
+@@ -84,7 +84,10 @@
+         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+     else()
+         # -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation.
+-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++        # Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++        if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++        endif()
+     endif()
+ endif()
+ 
+--- a/amd_openvx_extensions/amd_nn/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx_extensions/amd_nn/CMakeLists.txt	2026-09-20 08:41:42.191469520 +0800
+@@ -149,7 +149,10 @@
+     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+ else()
+     # -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation.
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++    # Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++    endif()
+ endif()
+ 
+ message("-- ${White}amd_nn -- CMAKE_CXX_FLAGS:${CMAKE_CXX_FLAGS}${ColourReset}")
+--- a/amd_openvx_extensions/amd_rpp/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx_extensions/amd_rpp/CMakeLists.txt	2026-09-20 08:41:42.191398810 +0800
+@@ -272,7 +272,10 @@
+ else()
+     set(LINK_LIBRARY_LIST ${LINK_LIBRARY_LIST} openvx)
+     # -mavx2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 built-in functions and code generation.
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
++    # Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
++    endif()
+ endif()
+ 
+ target_link_libraries(vx_rpp ${LINK_LIBRARY_LIST})
+--- a/amd_openvx_extensions/amd_rpp/source/tensor/TensorAddTensor.cpp	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx_extensions/amd_rpp/source/tensor/TensorAddTensor.cpp	2026-09-20 08:39:06.999885880 +0800
+@@ -23,10 +23,16 @@
+ #include "internal_publishKernels.h"
+ #if _WIN32
+ #include <intrin.h>
+-#else
++#elif defined(__x86_64__) || defined(__i386__)
+ #include <immintrin.h>
+ #include <smmintrin.h>
+ #include <x86intrin.h>
++#else
++// Non-x86 hosts (e.g. loongarch64): emulate the AVX2 intrinsics with SIMDe.
++#ifndef SIMDE_ENABLE_NATIVE_ALIASES
++#define SIMDE_ENABLE_NATIVE_ALIASES
++#endif
++#include <simde/x86/avx2.h>
+ #endif
+ 
+ struct TensorAddTensorLocalData {
+--- a/amd_openvx_extensions/amd_rpp/source/tensor/TensorMulScalar.cpp	2026-02-07 05:43:15.000000000 +0800
++++ b/amd_openvx_extensions/amd_rpp/source/tensor/TensorMulScalar.cpp	2026-09-20 08:39:06.999802430 +0800
+@@ -23,10 +23,16 @@
+ #include "internal_publishKernels.h"
+ #if _WIN32
+ #include <intrin.h>
+-#else
++#elif defined(__x86_64__) || defined(__i386__)
+ #include <immintrin.h>
+ #include <smmintrin.h>
+ #include <x86intrin.h>
++#else
++// Non-x86 hosts (e.g. loongarch64): emulate the AVX2 intrinsics with SIMDe.
++#ifndef SIMDE_ENABLE_NATIVE_ALIASES
++#define SIMDE_ENABLE_NATIVE_ALIASES
++#endif
++#include <simde/x86/avx2.h>
+ #endif
+ 
+ struct TensorMulScalarLocalData {
+--- a/apps/cloud_inference/server_app/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/apps/cloud_inference/server_app/CMakeLists.txt	2026-09-20 08:41:42.192042060 +0800
+@@ -78,7 +78,10 @@
+ target_link_libraries(${PROJECT_NAME} vx_nn openvx pthread dl)
+ # -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation.
+ # -mf16c   -- Support F16C built-in functions and code generation.
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2 -mf16c")
++# Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2 -mf16c")
++endif()
+ 
+ # Link OpenCL/HIP
+ set(ENABLE_OPENCL 0)
+--- a/apps/mivisionx_openvx_classifier/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/apps/mivisionx_openvx_classifier/CMakeLists.txt	2026-09-20 08:41:42.191976190 +0800
+@@ -65,7 +65,10 @@
+ target_link_libraries(${PROJECT_NAME} openvx vx_nn caffeModels pthread)
+ # -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation.
+ # -mf16c   -- Support F16C built-in functions and code generation.
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2 -mf16c")
++# Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2 -mf16c")
++endif()
+ 
+ # OpenCV 3/4 Support
+ if(${OpenCV_VERSION_MAJOR} EQUAL 3 OR ${OpenCV_VERSION_MAJOR} EQUAL 4)
+--- a/samples/mv_objdetect/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/samples/mv_objdetect/CMakeLists.txt	2026-09-20 08:41:42.191915260 +0800
+@@ -100,6 +100,9 @@
+ endif (USE_POSTPROC)
+ # -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation.
+ # -mf16c   -- Support F16C built-in functions and code generation.
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2 -mf16c")
++# Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2 -mf16c")
++endif()
+ target_compile_definitions (mvobjdetect PRIVATE ENABLE_MVDEPLOY=1)
+ target_link_libraries(mvobjdetect openvx vx_nn vx_amd_media pthread mv_deploy ${EXTRA_LIBS} ${CMAKE_DL_LIBS})
+--- a/utilities/loom_io_media/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/utilities/loom_io_media/CMakeLists.txt	2026-09-20 08:41:42.191851530 +0800
+@@ -67,5 +67,9 @@
+ else()
+     # -Wno-deprecated-declarations -- Do not warn about uses of functions, variables, and types marked as deprecated by using the deprecated attribute.
+     # -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation.
+-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -msse4.2")
++	# Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++	if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2")
++	endif()
++	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+ endif()
+--- a/utilities/mv_deploy/CMakeLists.txt	2026-02-07 05:43:15.000000000 +0800
++++ b/utilities/mv_deploy/CMakeLists.txt	2026-09-20 08:41:42.191783650 +0800
+@@ -44,7 +44,10 @@
+ 
+ # -msse4.2 -- Support MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1 and SSE4.2 built-in functions and code generation.
+ # -mf16c   -- Support F16C built-in functions and code generation.
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2 -mf16c")
++# Non-x86 hosts (e.g. loongarch64) emulate the x86 intrinsics with SIMDe.
++if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i.86)$")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.2 -mf16c")
++endif()
+ target_link_libraries(mv_compile ${CMAKE_DL_LIBS} stdc++fs)
+ 
+ # install MIVisionX include files -- {ROCM_PATH}/include/mivisionx/

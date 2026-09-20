@@ -1,0 +1,19 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -55,3 +55,16 @@ package() {
+   DESTDIR="$pkgdir" cmake --install build
+   install -Dm644 "$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++prepare() {
++  cd "$_dirname"
++
++  # loong64: MIVisionX's CPU OpenVX kernels (and a few RPP tensor kernels) are
++  # written against the x86 SSE/AVX2 intrinsics; the patch emulates them with
++  # SIMDe and makes the x86-only compiler options conditional.
++  patch -Np1 -i "$srcdir"/mivisionx-loong64-simde.patch
++}
++
++makedepends+=('simde')
++source+=('mivisionx-loong64-simde.patch')
++sha256sums+=('57be8292e19a46c3f188cd8b643981305b2b4cd8db17fae5463d13665f9b2bc9')
