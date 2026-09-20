@@ -1,0 +1,19 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -55,6 +55,9 @@ prepare() {
+ 
+   # Rename LOG macro due to name conflict with abseil-provided one
+   git apply < "${srcdir}/rocal-abseil-log-clash.patch"
++
++  # -mavx2/-mfma/-mf16c are x86-only compiler flags
++  git apply < "${srcdir}/rocal-loong64-avx-flags.patch"
+ }
+ 
+ build() {
+@@ -93,3 +96,6 @@ package() {
+ 
+   install -Dm644 "$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++source+=("rocal-loong64-avx-flags.patch")
++sha256sums+=('32365ce05d081eb8f325c0dd1a234e816b2955bd58ba25a99ba07bbb97061a59')
