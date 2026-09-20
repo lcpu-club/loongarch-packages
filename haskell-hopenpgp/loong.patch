@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -24,9 +24,14 @@ sha512sums=('0e6dd3b89859ef9c6a429fcbc46f0be2edd4cec44425a27839b3d90b406cb502e3c
+ build() {
+     cd $_hkgname-$pkgver
+     
++    # haskell-nettle leaves nettle_sha3_{224,256,384,512}_init unresolved in
++    # libHSnettle.so (nettle 4.0 turned them into macros for nettle_sha3_init).
++    # x86_64 ghc links with ld.gold, which ignores undefined shlib symbols;
++    # loongarch64 only has ld.bfd, which rejects them, so allow them here.
+     runhaskell Setup configure -O --enable-shared --enable-debug-info --enable-executable-dynamic --disable-library-vanilla \
+         --prefix=/usr --docdir=/usr/share/doc/$pkgname --datasubdir=$pkgname --enable-tests \
+         --dynlibdir=/usr/lib --libsubdir=\$compiler/site-local/\$pkgid \
++            --ghc-options=-optl-Wl,--allow-shlib-undefined \
+             -fnetwork-uri
+     runhaskell Setup build $MAKEFLAGS
+     runhaskell Setup register --gen-script
