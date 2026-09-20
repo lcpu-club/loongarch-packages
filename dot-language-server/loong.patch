@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e1b9e22..ff443e0 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,7 +23,7 @@ build() {
+   # required for typescript when not installing dev dependencies
+   npm install --save-dev @types/node --cache "$srcdir"/npm-cache
+   tsc
+-  bun build --compile --minify src/cli.ts --target=bun-linux-x64-modern --outfile=dist/linux-x64/dot-language-server
++  bun build --compile --minify src/cli.ts --target=bun-linux-loong64 --outfile=dist/linux-loong64/dot-language-server
+ }
+ 
+ check() {
+@@ -107,3 +107,8 @@ package() {
+   install -vdm 755 "$pkgdir/usr/bin/"
+   ln -sv /usr/lib/node_modules/$pkgname/bin/server.js "$pkgdir/usr/bin/$pkgname"
+ }
++
++prepare() {
++  cd $pkgname-$pkgver
++  npm pkg delete devDependencies.bun devDependencies.oxfmt devDependencies.oxlint devDependencies.oxlint-tsgolint
++}
