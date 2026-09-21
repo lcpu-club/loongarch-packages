@@ -1,6 +1,21 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -82,10 +82,10 @@ check() {
+@@ -41,6 +41,14 @@ prepare() {
+     --replace-registry-host=always \
+     --include=optional \
+     --ignore-scripts
++  # Neither Parcel nor Tailwind publish loong64 natives on npm; drop in the
++  # community prebuilds at the paths their loader scripts expect.
++  mkdir -p node_modules/lightningcss-linux-loong64-gnu
++  tar -xf "$srcdir/lightningcss-linux-loong64-gnu-1.32.0.tgz" \
++    -C node_modules/lightningcss-linux-loong64-gnu --strip-components=1
++  mkdir -p node_modules/@tailwindcss/oxide-linux-loong64-gnu
++  tar -xf "$srcdir/tailwindcss-oxide-linux-loong64-gnu-4.3.2.tgz" \
++    -C node_modules/@tailwindcss/oxide-linux-loong64-gnu --strip-components=1
+   # Upstream postinstall applies dependency patches; install scripts are disabled above.
+   ./node_modules/.bin/patch-package
+ }
+@@ -79,12 +87,12 @@ check() {
    # mobile-mcp tests run from the workspace source tree, so point them at npm's
    # hoisted mobilecli binary instead of the package-local path used after install.
    export MOBILECLI_PATH="$PWD/node_modules/mobilecli/bin/mobilecli-linux-amd64"
@@ -8,8 +23,29 @@
 +  npm run test --workspace=@qwen-code/mobile-mcp || echo "Watch out for failed tests!"
    # mobile-mcp uses Playwright; run it above without passing Vitest-only flags.
    npm pkg set 'workspaces[]=!packages/mobile-mcp'
--  npm run test --workspaces --if-present -- --testTimeout=30000 --exclude="$test_exclude"
-+  npm run test --workspaces --if-present -- --testTimeout=30000 --exclude="$test_exclude" || echo "Watch out for failed tests!"
+   # NODE_OPTIONS gives Node's Web Storage one shared backing file; keep Vitest
+   # files serial so another jsdom test cannot clear draft storage mid-test.
+-  npm run test --workspaces --if-present -- --testTimeout=30000 --no-file-parallelism --exclude="$test_exclude"
++  npm run test --workspaces --if-present -- --testTimeout=30000 --no-file-parallelism --exclude="$test_exclude" || echo "Watch out for failed tests!"
  }
  
  package() {
+@@ -94,3 +102,18 @@ package() {
+   install -vDm644 -t "$pkgdir/usr/share/doc/$pkgname" README.md
+   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
+ }
++
++# @tailwindcss/node 4.3.2 requires lightningcss 1.32.0; @tailwindcss/vite 4.3.2
++# requires @tailwindcss/oxide 4.3.2. Keep the versions in sync with those deps.
++source+=(
++  "lightningcss-linux-loong64-gnu-1.32.0.tgz::https://github.com/loong64/lightningcss/releases/download/v1.32.0/lightningcss-linux-loong64-gnu-1.32.0.tgz"
++  "tailwindcss-oxide-linux-loong64-gnu-4.3.2.tgz::https://github.com/loong64/tailwindcss/releases/download/v4.3.2/tailwindcss-oxide-linux-loong64-gnu.tgz"
++)
++sha256sums+=(
++  'b80c0505cd472a7b67d10f75e78a04c8632928a76ce5441f44b008369fcf770c'
++  'a19d8e0df3ea6d3aa858c32a483e688a0036a20bd9cc145d78b555468130a91c'
++)
++b2sums+=(
++  'd63a1912172fc9ff8cb23d453ba11bf9f54ec2facfc4b2a484c97f16ccc284f36fd090b591bdec404071f06ceb0f304ee230cc5e247f5d1acaf23b75ca2e2177'
++  '9a24ebe618d47dc2723ba53c1e96b4b16dad38bdaeeefca8cae0c12d0f381728ddca7852c7fd71ea41036b7e980cf74928d4e5ed96f1c7890b230d22602967fe'
++)
