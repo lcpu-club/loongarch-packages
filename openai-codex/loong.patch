@@ -1,11 +1,43 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -32,7 +32,7 @@ b2sums=('077be63eaeacc94cafb3505c01f90b78947fce878be80bd040b466c0b81374d721856ca
+@@ -24,7 +24,7 @@ depends=(
+   zlib
+   zstd
+ )
+-makedepends=(cargo)
++makedepends=(cargo protobuf)
+ optdepends=(
+   'git: allow for repository actions'
+   'nodejs: enable the js_repl experimental tool'
+@@ -43,6 +43,8 @@ b2sums=('df09e2f2b063c9144975549af23a5c89ed41fa270b4bd144a1609d26dfe05fd28d50cec
  
  prepare() {
    cd codex-rust-v$pkgver/codex-rs
--
-+  export RUSTY_V8_MIRROR="https://github.com/phorcys/rusty_v8/releases/download"
++  # protoc-bin-vendored ships no loongarch64 binary, use the system protoc instead
++  sed -i '/protoc_bin_vendored::protoc_bin_path/d' code-mode-protocol/build.rs
    cargo fetch --target "$(rustc --print host-tuple)"
  }
  
+@@ -50,8 +52,8 @@ build() {
+   cd codex-rust-v$pkgver/codex-rs
+   # Used for dynamic linking
+   export LIBSQLITE3_SYS_USE_PKG_CONFIG=1
+-  export RUSTY_V8_ARCHIVE="$srcdir/librusty_v8-$_v8ver.a.gz"
+-  export RUSTY_V8_SRC_BINDING_PATH="$srcdir/src_binding-$_v8ver.rs"
++  export RUSTY_V8_ARCHIVE="$srcdir/librusty_v8-loongarch64-$_v8ver.a.gz"
++  export RUSTY_V8_SRC_BINDING_PATH="$srcdir/src_binding-loongarch64-$_v8ver.rs"
+   export RUSTONIG_DYNAMIC_LIBONIG=1
+   export ZSTD_SYS_USE_PKG_CONFIG=1
+   # Reduces build time by about 10 minutes
+@@ -78,4 +80,11 @@ package() {
+   "${pkgdir}/usr/bin/codex" completion fish > "${pkgdir}/usr/share/fish/vendor_completions.d/codex.fish"
+ }
+ 
++# loongarch64 prebuilt v8 archives (phorcys/rusty_v8 uses tag v$_v8ver, not rusty-v8-v$_v8ver)
++source+=("librusty_v8-loongarch64-$_v8ver.a.gz::https://github.com/phorcys/rusty_v8/releases/download/v$_v8ver/librusty_v8_ptrcomp_sandbox_release_loongarch64-unknown-linux-gnu.a.gz"
++         "src_binding-loongarch64-$_v8ver.rs::https://github.com/phorcys/rusty_v8/releases/download/v$_v8ver/src_binding_ptrcomp_sandbox_release_loongarch64-unknown-linux-gnu.rs")
++noextract+=("librusty_v8-loongarch64-$_v8ver.a.gz")
++b2sums+=('9dbe72d0704204842eaf799e77eaa79a2d1f6e16a4a075e9766f80b09fce0291d6eaa64b5fedf8ce50f1532ffbf22802b630260f3659923de0328ddeb6a098ca'
++         '25f88319070a86da7eb39d62f28f3c4201f8d4748363d9f8e6625b3ca97fe51ec7d000fc1794b80861b7e3603da1e0abb54a3db64e22b7e42e63d66fec19c26a')
++
+ # vim:set ts=2 sw=2 et:
