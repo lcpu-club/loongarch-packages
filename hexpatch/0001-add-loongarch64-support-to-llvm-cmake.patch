@@ -1,0 +1,11 @@
+--- a/keystone/llvm/cmake/config-ix.cmake
++++ b/keystone/llvm/cmake/config-ix.cmake
+@@ -331,6 +331,8 @@ elseif (LLVM_NATIVE_ARCH MATCHES "wasm32")
+   set(LLVM_NATIVE_ARCH WebAssembly)
+ elseif (LLVM_NATIVE_ARCH MATCHES "wasm64")
+   set(LLVM_NATIVE_ARCH WebAssembly)
++elseif (LLVM_NATIVE_ARCH MATCHES "loongarch64")
++  set(LLVM_NATIVE_ARCH AArch64)
+ else ()
+   message(FATAL_ERROR "Unknown architecture ${LLVM_NATIVE_ARCH}")
+ endif ()

@@ -1,0 +1,29 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,6 +20,19 @@ options=('!lto')
+ prepare() {
+   cd "${_pkgname}-${pkgver}"
+   cargo fetch --target "$(rustc --print host-tuple)" --locked
++  # Update config.sub and config.guess in cargo registry for loongarch64 support
++  for c_s in $(find "$HOME/.cargo/registry" -type f \( -name config.sub -o -name configure.sub \) 2>/dev/null); do
++    cp -f /usr/share/automake-1.1?/config.sub "$c_s" 2>/dev/null || true
++  done
++  for c_g in $(find "$HOME/.cargo/registry" -type f \( -name config.guess -o -name configure.guess \) 2>/dev/null); do
++    cp -f /usr/share/automake-1.1?/config.guess "$c_g" 2>/dev/null || true
++  done
++  # Apply patch to add loongarch64 support in keystone-sys LLVM cmake
++  for d in $(find "$HOME/.cargo/registry" -type d -name "hexpatch-keystone-sys-*" 2>/dev/null); do
++    cd "$d"
++    patch -p1 -i "${srcdir}/0001-add-loongarch64-support-to-llvm-cmake.patch" || true
++    cd "${srcdir}/${_pkgname}-${pkgver}"
++  done
+ }
+ 
+ build() {
+@@ -39,4 +52,6 @@ package() {
+   install -Dm 644 LICENSE -t "$pkgdir/usr/share/licenses/$pkgname"
+ }
+ 
++source+=("0001-add-loongarch64-support-to-llvm-cmake.patch")
++sha512sums+=('fd945f3fd0732eca626211c22536ffc590cff12bd34dae27405b2bc9b04ecac667a59ff1725b69058e18037ec9b51f35140612f4fc64f7133e7e742fbdf1e555')
+ # vim: ts=2 sw=2 et:
