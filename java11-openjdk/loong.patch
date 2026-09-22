@@ -1,35 +1,33 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -19,7 +19,7 @@ _securityver=29
- _updatever=7
+@@ -15,11 +15,11 @@ pkgname=(
+ )
+ _majorver=11
+ _minorver=0
+-_securityver=32.1
+-_updatever=1
++_securityver=32
++_updatever=9
  pkgver=${_majorver}.${_minorver}.${_securityver}.u${_updatever}
  pkgrel=1
 -_git_tag=jdk-${_majorver}.${_minorver}.${_securityver}+${_updatever}
-+_git_tag=jdk-${_majorver}.${_minorver}.${_securityver}+${_updatever}-ls-0
++_git_tag=jdk-${_majorver}.${_minorver}.${_securityver}+${_updatever}-ls-ga
  arch=('x86_64')
  url='https://openjdk.java.net/'
  license=('LicenseRef-Java')
-@@ -54,13 +54,13 @@ optdepends=(
- )
- options=(!lto)
- source=(
--  https://github.com/openjdk/jdk${_majorver}u/archive/${_git_tag}.tar.gz
-+  https://github.com/loongson/jdk${_majorver}u/archive/${_git_tag}.tar.gz
-   0001-java11-Build-failure-with-glibc-2.42-due-to-uabs-na.patch::https://github.com/openjdk/jdk11u-dev/commit/fa28fbdc260351ff9ae735e473b3d0d9bdc659bf.patch?full_index=1
-   freedesktop-java.desktop
-   freedesktop-jconsole.desktop
-   freedesktop-jshell.desktop
- )
--sha256sums=('ec23d97b129822744ee43581237ce42fb66854859437de6a67945ff8a35b4e0e'
-+sha256sums=('6f357d723df76ce8ec737fdeacee0269f49c0125ec4070ed343571aa9c8b5a80'
-             'ea0d37b6901d3aae64a551e19dd4f7de5d75b8d9fabc1c219bf0654f8bd70045'
-             '575587ad58dfa9908f046d307b9afc7b0b2eb20a1eb454f8fdbbd539ea7b3d01'
-             '2f57b7c7dd671eabe9fa10c4f1283573e99d7f7c36eccd82c95b705979a2e8cb'
-@@ -70,6 +70,7 @@ case "${CARCH}" in
+@@ -67,6 +67,7 @@ sha256sums=('d9a11caf637121ac7a034d882443da4119ae32c4d5b192a2350d51167ad98008'
+ case "${CARCH}" in
    x86_64) _JARCH='x86_64';;
-   i686)   _JARCH='x86';;
    aarch64)_JARCH='aarch64';;
 +  loong64) _JARCH='loongarch64';;
  esac
  
  _jvmdir=/usr/lib/jvm/java-${_majorver}-openjdk
+@@ -434,5 +435,7 @@ package_openjdk11-doc() {
+   install -dm 755 "${pkgdir}/usr/share/licenses"
+   ln -s ${pkgbase} "${pkgdir}/usr/share/licenses/${pkgname}"
+ }
++source[0]="https://github.com/loongson/jdk${_majorver}u/archive/${_git_tag}.tar.gz"
++sha256sums[0]="40f8cf67f944c27bf21a968ac32b56fd14936386f42c7c4e47926ba8ab271167"
+ 
+ # vim: ts=2 sw=2 et:
