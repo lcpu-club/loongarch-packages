@@ -1,0 +1,16 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,6 +22,13 @@ prepare() {
+ 
+   # download dependencies
+   npm ci --no-audit --no-fund --no-update-notifier
++
++  # loong64: sass-embedded has no native compiler for loongarch64, so it falls back to
++  # running the pure-JS `sass` CLI with `--embedded`, which exits immediately with
++  # "sass --embedded is unavailable in pure JS mode.". sass-loader then waits forever for
++  # a reply that never arrives and webpack hangs with no output. Without sass-embedded,
++  # sass-loader falls back to the pure-JS `sass` implementation (modern API) and builds.
++  rm -rf node_modules/sass-embedded node_modules/sass-embedded-all-unknown
+ }
+ 
+ build() {
