@@ -1,5 +1,3 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index ee3b38f..73319de 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -72,6 +72,7 @@ case "${CARCH}" in
@@ -16,12 +14,12 @@ index ee3b38f..73319de 100644
  
 +# We cannot use upstream's version control
 +# Reset some versions
-+_loongfixver=27
-+pkgver=${_majorver}.u${_loongfixver}ls0
-+_jdkdir=jdk-jdk-${_majorver}-${_loongfixver}-ls-0
++_loongfixver=21
++pkgver=${_majorver}.u${_loongfixver}ls1
++_jdkdir=jdk-jdk-${_majorver}-${_loongfixver}-ls-1
 +_imgdir=${_jdkdir}/build/linux-${_JARCH}-server-release/images
 +
-+source+=("https://github.com/loongson/jdk/archive//refs/tags/jdk-${_majorver}+${_loongfixver}-ls-0.tar.gz")
-+sha256sums+=('50e6c172b66633b06fc2ce143ffc434bf1d44a53a9fe08eb1ff1a73fd423c345')
++source+=("https://github.com/loongson/jdk/archive//refs/tags/jdk-${_majorver}+${_loongfixver}-ls-1.tar.gz")
++sha256sums+=('1394ffabc979335b2d97c195b571714089aa5a582ed68831dd8caf140ac75528')
 +
  # vim: ts=2 sw=2 et:
