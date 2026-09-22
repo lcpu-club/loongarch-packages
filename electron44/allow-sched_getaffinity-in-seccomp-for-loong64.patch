@@ -1,0 +1,16 @@
+diff --git a/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc b/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
+index 7bde501115bdf..027738ea01793 100644
+--- a/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
++++ b/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
+@@ -229,7 +229,11 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
+   // abseil. See for example https://crbug.com/1370394.
+   if (sysno == __NR_sched_getaffinity || sysno == __NR_sched_getparam ||
+       sysno == __NR_sched_getscheduler || sysno == __NR_sched_setscheduler) {
++#if defined(ARCH_CPU_LOONGARCH64)
++    return Allow();
++#else
+     return RestrictSchedTarget(current_pid, sysno);
++#endif
+   }
+ 
+   if (sysno == __NR_getrandom) {
