@@ -1,0 +1,28 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -3,7 +3,7 @@
+ 
+ pkgname=afl++
+ pkgver=5.00c
+-pkgrel=1
++pkgrel=1.1
+ pkgdesc='instrumentation-driven fuzzer for binary format'
+ url='https://aflplus.plus/'
+ arch=(x86_64)
+@@ -92,4 +92,16 @@ package() {
+   install -Dm 644 README.md -t "${pkgdir}/usr/share/doc/${pkgname}"
+ }
+ 
++source+=(
++  "fix-allocsize-stack-gating.patch"
++  "fix-unicorn-mode-loongarch64.patch"
++)
++sha256sums+=(
++  '0c0beb763b4d64e60af0f267befe1571e8f08027e086bac4d52f68f783328886'
++  '35dd554833d328800b738274c6b5bb9fa809453772bff34b3a69a4afd30b33c1'
++)
++b2sums+=(
++  '3a231bceebe270f21a1a76bee2ae0d50d55e5d2c317cb550ba241ea5ae2f64045e7ed71a3421b6b1ad11d6d53eff70378b004d65e4386879072e02dcd4961617'
++  '497f00ee4552a216c7f4dd3d17068d9ef876b6cb4bcbd81582b405a0ab19908cabacb5057d46addabb1e0e19c88f68d95b31e8598de1bb1b78294d729c9cdde1'
++)
+ # vim: ts=2 sw=2 et:

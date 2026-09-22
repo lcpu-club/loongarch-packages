@@ -1,0 +1,16 @@
+--- a/test/test-unicorn-mode.sh
++++ b/test/test-unicorn-mode.sh
+@@ -3,6 +3,13 @@
+ . ./test-pre.sh
+
+ test -f ../unicorn_mode/.venv/bin/activate && { $ECHO "$GREY[*] Loading python venv for Unicorn"; . ../unicorn_mode/.venv/bin/activate ; }
++
++# loongarch64: QEMU user mode does not support this target, and the Rust
++# libafl_bolts crate lacks loongarch64 signal handling (write_crash,
++# dump_registers).  Skip the unicorn_mode test entirely.
++case "$SYS" in
++  loongarch64) $ECHO "$YELLOW[-] unicorn_mode is not supported on loongarch64, skipping"; INCOMPLETE=1; . ./test-post.sh; exit 0;;
++esac
+
+ $ECHO "$BLUE[*] Testing: unicorn_mode"
+ DIR=`ls -d ../unicorn_mode/.venv/lib/python*/site-packages/unicorn 2>/dev/null | tail -n 1

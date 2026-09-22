@@ -1,0 +1,11 @@
+--- a/test/test-bug-pass.sh
++++ b/test/test-bug-pass.sh
+@@ -919,7 +919,7 @@
+ # Gating: AFL_LLVM_BUG_ALLOCSIZE_STACK=0 must restore pre-fix behavior.
+ # Rebuild the TP source with the opt-out; OOB must slip past silently.
+ AFL_QUIET=1 AFL_LLVM_BUG_ALLOCSIZE=1 AFL_LLVM_BUG_ALLOCSIZE_STACK=0 "$CC" -O0 \
+-  "$SCRIPT_DIR/test-bug-allocsize-stack-oob.c" -o "$TMP/aso_off"
++  -fno-stack-protector "$SCRIPT_DIR/test-bug-allocsize-stack-oob.c" -o "$TMP/aso_off"
+ set +e
+ printf '\x00\x00\x00\x00' | "$TMP/aso_off" 2>"$TMP/aso_off.err"
+ aso_off_rc=$?
