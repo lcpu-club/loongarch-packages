@@ -1,21 +1,45 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 6eb2f7f..94207ae 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -34,6 +34,7 @@ prepare() {
+@@ -34,6 +34,23 @@ prepare() {
    cd $pkgname-$pkgver
  
    patch -Np1 -i "$srcdir"/pin-java-version.patch
 +  patch -Np1 -i "$srcdir"/use-system-node.patch
++  patch -Np1 -i "$srcdir"/use-prebuilt-admin-client.patch
++  patch -Np1 -i "$srcdir"/use-loong64-js-deps.patch
++
++  # loong64 has no kiota (.NET tool is not available for this architecture),
++  # so use the prebuilt lib/ shipped in the official npm package instead
++  install -d "$srcdir"/admin-client-npm
++  tar xf "$srcdir"/keycloak-admin-client-$pkgver.tgz -C "$srcdir"/admin-client-npm
++  cp -rT "$srcdir"/admin-client-npm/package/lib js/libs/keycloak-admin-client/prebuilt-lib
++
++  # loong64 has no native @swc/core binding, so set up the @swc/wasm fallback;
++  # keep the swc-wasm version in sync with @swc/core in pnpm-lock.yaml
++  install -d js/loong64-js-deps
++  rm -rf js/loong64-js-deps/wasm
++  tar xf "$srcdir"/swc-wasm-1.15.8.tgz -C js/loong64-js-deps
++  mv js/loong64-js-deps/package js/loong64-js-deps/wasm
++  install -Dm 755 "$srcdir"/fix-js-deps.sh js/loong64-js-deps/fix-js-deps.sh
  }
  
  build() {
-@@ -83,4 +84,8 @@ package() {
+@@ -83,4 +100,18 @@ package() {
    install -Dm 644 LICENSE.txt "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.txt"
  }
  
 +makedepends+=('nodejs' 'npm' 'pnpm')
-+source+=(use-system-node.patch)
-+sha512sums+=('dc8df0c48091dd9e5cc57b6e0d2b4ad4d608274390734d4ba125ce3a5d5307d64da5da9b942a514231a86a530c148a348780313f864f1ae92a6a0fe75f16fe8b')
++source+=(use-system-node.patch
++         use-prebuilt-admin-client.patch
++         keycloak-admin-client-$pkgver.tgz::https://registry.npmjs.org/@keycloak/keycloak-admin-client/-/keycloak-admin-client-$pkgver.tgz
++         fix-js-deps.sh
++         use-loong64-js-deps.patch
++         swc-wasm-1.15.8.tgz::https://registry.npmjs.org/@swc/wasm/-/wasm-1.15.8.tgz)
++sha512sums+=('ba7ab1647b3b2981d6ba9b77ed6278aca4c2970a853d7fb7bff53d4981d8a17bdcc080f6455e20e69102500bcf5b15fff10a2b4e487238abfbf3c493c6ac79f7'
++             'cfbcd266392dd3829e7a32b19a769d68cb84588cbc6b60a5601984b46d8c96b073705d069391e1f2d26cd520d4013e665f84874c58dc8ce615117a0a9fadf5e7'
++             '66b8eddd2a8c5e4fda5022d6621c436cd97f592ce7b371ebf88ac93764f0e2b12c457a4b0b50015210759fb9a3c3e3acc43bf156117c42dc07b80500f2d42693'
++             '8278e41891ef047bef1e05ff29dbea16178a6304673440a42f4b359e110657e9ec6abd5756cecc113b94891dad346fcb8a97824364cd1df156ce36ab4f0174f2'
++             '42b014151cc966687d2c87e5116f307b2ed6f9615c87f095136f145b2bdf3192138b8d8e554ee88851ce1394e7852a16b1a30595a97327505c9e4a0d0a050969'
++             '446d81c466dbb23b5d7450a8d6084a1fa03f04c5db63578c05fa72b15d2524c0a92380d93a35b504d067c6f06ded8b189a526d9b2e545c883dff87a405314569')
 +
  # vim: ts=2 sw=2 et:

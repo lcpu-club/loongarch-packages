@@ -1,5 +1,4 @@
 diff --git a/.mvn/maven-build-cache-config.xml b/.mvn/maven-build-cache-config.xml
-index fc667dca1a..b1dcb12e3e 100644
 --- a/.mvn/maven-build-cache-config.xml
 +++ b/.mvn/maven-build-cache-config.xml
 @@ -27,22 +27,11 @@
@@ -33,10 +32,9 @@ index fc667dca1a..b1dcb12e3e 100644
 \ No newline at end of file
 +</cache>
 diff --git a/js/apps/account-ui/pom.xml b/js/apps/account-ui/pom.xml
-index bec5ec69b4..0d7026aa04 100644
 --- a/js/apps/account-ui/pom.xml
 +++ b/js/apps/account-ui/pom.xml
-@@ -37,26 +37,33 @@
+@@ -37,26 +37,34 @@
              <build>
                  <plugins>
                      <plugin>
@@ -47,6 +45,7 @@ index bec5ec69b4..0d7026aa04 100644
                          <executions>
                              <execution>
                                  <id>pnpm-build-lib</id>
++                                <phase>generate-resources</phase>
                                  <goals>
 -                                    <goal>pnpm</goal>
 +                                    <goal>exec</goal>
@@ -76,7 +75,7 @@ index bec5ec69b4..0d7026aa04 100644
                                  </configuration>
                              </execution>
                          </executions>
-@@ -81,4 +88,4 @@
+@@ -81,4 +89,4 @@
              </plugin>
          </plugins>
      </build>
@@ -84,10 +83,9 @@ index bec5ec69b4..0d7026aa04 100644
 \ No newline at end of file
 +</project>
 diff --git a/js/apps/admin-ui/pom.xml b/js/apps/admin-ui/pom.xml
-index 7cc0f8988a..39497063f8 100644
 --- a/js/apps/admin-ui/pom.xml
 +++ b/js/apps/admin-ui/pom.xml
-@@ -37,26 +37,33 @@
+@@ -37,26 +37,34 @@
              <build>
                  <plugins>
                      <plugin>
@@ -98,6 +96,7 @@ index 7cc0f8988a..39497063f8 100644
                          <executions>
                              <execution>
                                  <id>pnpm-build-lib</id>
++                                <phase>generate-resources</phase>
                                  <goals>
 -                                    <goal>pnpm</goal>
 +                                    <goal>exec</goal>
@@ -127,7 +126,7 @@ index 7cc0f8988a..39497063f8 100644
                                  </configuration>
                              </execution>
                          </executions>
-@@ -81,4 +88,4 @@
+@@ -81,4 +89,4 @@
              </plugin>
          </plugins>
      </build>
@@ -135,10 +134,9 @@ index 7cc0f8988a..39497063f8 100644
 \ No newline at end of file
 +</project>
 diff --git a/js/apps/create-keycloak-theme/templates/pom.xml.mu b/js/apps/create-keycloak-theme/templates/pom.xml.mu
-index 0892fbaa95..bc8fc82a4d 100644
 --- a/js/apps/create-keycloak-theme/templates/pom.xml.mu
 +++ b/js/apps/create-keycloak-theme/templates/pom.xml.mu
-@@ -26,39 +26,37 @@
+@@ -26,39 +26,39 @@
  
          <plugins>
              <plugin>
@@ -149,13 +147,14 @@ index 0892fbaa95..bc8fc82a4d 100644
 +                <artifactId>exec-maven-plugin</artifactId>
 +                <version>3.5.0</version>
                  <executions>
--                    <execution>
+                     <execution>
 -                        <goals>
 -                            <goal>install-node-and-npm</goal>
 -                        </goals>
 -                    </execution>
-                     <execution>
+-                    <execution>
                          <id>npm-install</id>
++                        <phase>generate-resources</phase>
                          <goals>
 -                            <goal>npm</goal>
 +                            <goal>exec</goal>
@@ -171,6 +170,7 @@ index 0892fbaa95..bc8fc82a4d 100644
                      </execution>
                      <execution>
                          <id>npm-build</id>
++                        <phase>generate-resources</phase>
                          <goals>
 -                            <goal>npm</goal>
 +                            <goal>exec</goal>
@@ -193,7 +193,6 @@ index 0892fbaa95..bc8fc82a4d 100644
          </plugins>
      </build>
 diff --git a/js/libs/keycloak-admin-client/pom.xml b/js/libs/keycloak-admin-client/pom.xml
-index b796d0a104..107a91370f 100644
 --- a/js/libs/keycloak-admin-client/pom.xml
 +++ b/js/libs/keycloak-admin-client/pom.xml
 @@ -39,17 +39,21 @@
@@ -223,7 +222,6 @@ index b796d0a104..107a91370f 100644
                              </execution>
                          </executions>
 diff --git a/js/libs/ui-shared/pom.xml b/js/libs/ui-shared/pom.xml
-index ecd11567ff..5eff501cf6 100644
 --- a/js/libs/ui-shared/pom.xml
 +++ b/js/libs/ui-shared/pom.xml
 @@ -39,17 +39,21 @@
@@ -253,10 +251,9 @@ index ecd11567ff..5eff501cf6 100644
                              </execution>
                          </executions>
 diff --git a/js/pom.xml b/js/pom.xml
-index 194718c076..4c49dca04b 100644
 --- a/js/pom.xml
 +++ b/js/pom.xml
-@@ -34,22 +34,6 @@
+@@ -48,22 +48,6 @@
      </properties>
  
      <build>
@@ -278,32 +275,32 @@ index 194718c076..4c49dca04b 100644
 -
          <plugins>
              <plugin>
-                 <!-- Clean child modules from parent, as we trigger the build here for parallelization. -->
-@@ -69,32 +53,35 @@
+                 <groupId>org.keycloak</groupId>
+@@ -96,53 +80,40 @@
                  </configuration>
              </plugin>
              <plugin>
 -                <groupId>com.github.eirslett</groupId>
 -                <artifactId>frontend-maven-plugin</artifactId>
--                <version>${frontend.plugin.version}</version>
 +                <groupId>org.codehaus.mojo</groupId>
 +                <artifactId>exec-maven-plugin</artifactId>
-+                <version>${exec.plugin.version}</version>
                  <inherited>false</inherited>
                  <executions>
--                    <execution>
+                     <execution>
 -                        <goals>
 -                            <goal>install-node-and-pnpm</goal>
 -                        </goals>
+-                        <phase>initialize</phase>
 -                    </execution>
-                     <execution>
+-                    <execution>
                          <id>pnpm-install</id>
++                        <phase>generate-resources</phase>
                          <goals>
 -                            <goal>pnpm</goal>
 +                            <goal>exec</goal>
                          </goals>
                          <configuration>
--                            <arguments>install --prefer-offline --frozen-lockfile --ignore-scripts</arguments>
+-                            <arguments>install --prefer-offline --frozen-lockfile --ignore-scripts --config.confirmModulesPurge=false</arguments>
 +                            <executable>pnpm</executable>
 +                            <arguments>
 +                                <argument>install</argument>
@@ -314,6 +311,7 @@ index 194718c076..4c49dca04b 100644
                      </execution>
                      <execution>
                          <id>pnpm-build</id>
++                        <phase>generate-resources</phase>
                          <goals>
 -                            <goal>pnpm</goal>
 +                            <goal>exec</goal>
@@ -327,15 +325,24 @@ index 194718c076..4c49dca04b 100644
                          </configuration>
                      </execution>
                  </executions>
-diff --git a/pom.xml b/pom.xml
-index cbb44ed569..33a50d9f2b 100644
---- a/pom.xml
-+++ b/pom.xml
-@@ -196,6 +196,7 @@
-         <nexus.staging.plugin.version>1.6.13</nexus.staging.plugin.version>
-         <nexus3.staging.plugin.version>1.0.7</nexus3.staging.plugin.version>
-         <frontend.plugin.version>1.15.0</frontend.plugin.version>
-+        <exec.plugin.version>3.5.0</exec.plugin.version>
-         <docker.maven.plugin.version>0.40.3</docker.maven.plugin.version>
-         <verifier.plugin.version>1.1</verifier.plugin.version>
-         <shade.plugin.version>3.4.1</shade.plugin.version>
+             </plugin>
+-            <!-- newer versions of pnpm do not have an executable cjs file, see https://github.com/eirslett/frontend-maven-plugin/issues/1224 -->
+-            <plugin>
+-                <artifactId>maven-antrun-plugin</artifactId>
+-                <executions>
+-                    <execution>
+-                        <phase>initialize</phase>
+-                        <configuration>
+-                            <target>
+-                                <chmod file="${maven.multiModuleProjectDirectory}/js/node/node_modules/pnpm/bin/pnpm.cjs" perm="755"/>
+-                            </target>
+-                        </configuration>
+-                        <goals>
+-                            <goal>run</goal>
+-                        </goals>
+-                    </execution>
+-                </executions>
+-            </plugin>
+         </plugins>
+     </build>
+ </project>

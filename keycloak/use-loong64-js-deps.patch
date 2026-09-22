@@ -1,0 +1,44 @@
+--- a/js/pom.xml
++++ b/js/pom.xml
+@@ -100,6 +100,19 @@
+                         </configuration>
+                     </execution>
+                     <execution>
++                        <id>loong64-js-deps-fix</id>
++                        <phase>generate-resources</phase>
++                        <goals>
++                            <goal>exec</goal>
++                        </goals>
++                        <configuration>
++                            <executable>bash</executable>
++                            <arguments>
++                                <argument>loong64-js-deps/fix-js-deps.sh</argument>
++                            </arguments>
++                        </configuration>
++                    </execution>
++                    <execution>
+                         <id>pnpm-build</id>
+                         <phase>generate-resources</phase>
+                         <goals>
+--- a/js/apps/admin-ui/vite.config.ts
++++ b/js/apps/admin-ui/vite.config.ts
+@@ -70,7 +70,7 @@
+       sourcemap: true,
+       target: "esnext",
+       modulePreload: false,
+-      cssMinify: "lightningcss",
++      cssMinify: "esbuild",
+       manifest: true,
+       rollupOptions: {
+         input,
+--- a/js/apps/account-ui/vite.config.ts
++++ b/js/apps/account-ui/vite.config.ts
+@@ -38,7 +38,7 @@
+       sourcemap: true,
+       target: "esnext",
+       modulePreload: false,
+-      cssMinify: "lightningcss",
++      cssMinify: "esbuild",
+       manifest: true,
+       rollupOptions: {
+         input,

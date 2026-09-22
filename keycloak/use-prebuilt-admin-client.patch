@@ -1,0 +1,15 @@
+--- a/js/libs/keycloak-admin-client/package.json
++++ b/js/libs/keycloak-admin-client/package.json
+@@ -23,11 +23,7 @@
+   },
+   "wireit": {
+     "build": {
+-      "command": "tsc --pretty",
+-      "dependencies": [
+-        "generate:openapi",
+-        "generate:doc-examples"
+-      ],
++      "command": "cp -rT prebuilt-lib lib",
+       "files": [
+         "src",
+         "tsconfig.json"
