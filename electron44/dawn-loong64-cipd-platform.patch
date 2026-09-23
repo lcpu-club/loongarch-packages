@@ -1,0 +1,11 @@
+--- a/third_party/dawn/tools/python/cipd_deps.py
++++ b/third_party/dawn/tools/python/cipd_deps.py
+@@ -75,4 +75,8 @@
+     native_x86 = platform.machine().lower() in ('x86', 'x86_64', 'amd64')
+     if native_x86:
+         return 'amd64'
++    # loong64: the PKGBUILD symlinks the system Go toolchain into
++    # tools/golang/linux-amd64, so reuse that cipd platform directory.
++    if platform.machine().lower() in ('loongarch64', 'loong64'):
++        return 'amd64'
+     raise ValueError('Unable to determine architecture')
