@@ -1,0 +1,10 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index abbf129..5e80d39 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -99,3 +99,5 @@ package() {
+ }
+ 
+ # vim: tabstop=2 shiftwidth=2 expandtab:
++
++checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^ruby-sass-embedded$'))
