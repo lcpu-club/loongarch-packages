@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 1e38d13..4d137d5 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,7 +38,8 @@ build() {
+ 
+ check() {
+   cd $_name/packages/language-server
+-  pnpm run test --no-experimental-strip-types
++  # loong64: @typescript/native-preview has no linux-loong64 binary, skip its tests
++  pnpm run test --no-experimental-strip-types --timeout 1000000 --ignore "test/plugins/typescript-go/**/*.test.ts"
+ }
+ 
+ package() {
