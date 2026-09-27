@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6b41d70..cf82f7e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -29,9 +29,6 @@ build() {
@@ -10,9 +12,15 @@
    )
    cmake "${cmake_options[@]}"
    ninja -C build
-@@ -49,3 +46,5 @@ package() {
+@@ -49,3 +46,11 @@ package() {
    DESTDIR="$pkgdir"/ ninja -C build install
    install -v -Dm 644 -t "$pkgdir"/usr/share/licenses/"$pkgname" LICENSE
  }
-+makedepends=(${makedepends[@]/cuda})
-+makedepends=(${makedepends[@]/cudnn})
++
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|cudnn|nvidia-utils)$'))
++source+=('pocl-loongarch-llvm-init.patch::https://github.com/pocl/pocl/commit/b66c180200356cac801f128e586301328eda2eed.diff')
++sha512sums+=('811630c748e240d6307a5c3d8112fbc1c0c721358fb1bfadea1894e367704b12e429e93fe0f9c7c86d5a2c359b8a47c3f8355e3d53d757a36f6550096cb2e641')
++prepare() {
++  cd "$pkgname"
++  patch -Np1 -i ../pocl-loongarch-llvm-init.patch
++}
