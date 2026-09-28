@@ -1,27 +1,19 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -58,7 +58,6 @@ build() {
+@@ -60,10 +60,9 @@ build() {
      -DGGML_BACKEND_DIR=/usr/lib/ggml
      -DGGML_BLAS=ON
      -DGGML_BLAS_VENDOR=OpenBLAS
 -    -DGGML_CPU_ALL_VARIANTS=ON
+-    -DGGML_CUDA=ON
++    -DGGML_CUDA=OFF
+     -DGGML_HIP=ON
+-    -DGGML_OPENVINO=ON
++    -DGGML_OPENVINO=OFF
      -DGGML_VULKAN=ON
-   )
- 
-@@ -69,6 +68,12 @@ build() {
-       -DGGML_HIP=ON
-       -DGGML_OPENVINO=ON
+     "-DAMDGPU_TARGETS=$(rocm-supported-gfx)"
      )
-+  elif [[ $CARCH == loong64 ]]; then
-+    _cmake_options+=(
-+      -DGGML_CUDA=OFF
-+      -DGGML_HIP=ON
-+      -DGGML_OPENVINO=OFF
-+    )
-   else
-     _cmake_options+=(
-       -DGGML_CUDA=OFF
-@@ -124,7 +129,7 @@ package_ggml() {
+@@ -113,7 +112,7 @@ package_ggml() {
  
    DESTDIR="${pkgdir}" cmake --install build-all
    rm -rf "${pkgdir}"/usr/lib/ggml
@@ -30,7 +22,7 @@
    install -Dm 644 ggml/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
  }
  
-@@ -207,3 +212,10 @@ package_ggml-vulkan() {
+@@ -194,3 +193,10 @@ package_ggml-vulkan() {
    install -Dm 755 build-all/bin/libggml-vulkan.so -t "${pkgdir}"/usr/lib/ggml/
    install -Dm 644 ggml/LICENSE -t "${pkgdir}"/usr/share/licenses/${pkgname}/
  }
