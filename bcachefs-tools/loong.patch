@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index cf64834..eb60383 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -68,7 +68,10 @@ build() {
+ 
+ check() {
+   cd ${pkgname}
+-  cargo test --profile release -- --no-capture
++  # loong64: only run the tools crate tests. The bcachefs-kernel test
++  # harness pulls in C symbols it never links, which GNU ld silently
++  # drops but LLD (the default linker here) rejects.
++  cargo test --profile release -p bcachefs-tools -- --no-capture
+ }
+ 
+ package_bcachefs-tools() {
