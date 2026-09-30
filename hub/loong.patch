@@ -1,0 +1,27 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3167653..d130879 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,6 +25,11 @@ b2sums=('b0ff7bcebca7f4b515acf412b756da8512dad7c89f1976cc749c68d70303ff7172b6817
+ prepare() {
+     cd "${pkgname}-${pkgver}"
+     patch -Np1 < "$srcdir/fix-tests.patch"
++
++    go mod edit -replace=golang.org/x/sys=golang.org/x/sys@v0.26.0
++    go mod edit -go=1.21
++    go mod tidy
++    go mod vendor
+ }
+ 
+ build() {
+@@ -43,6 +48,10 @@ build() {
+ check() {
+   cd "$srcdir"/hub-$pkgver
+ 
++  # makepkg exports GIT_CONFIG_GLOBAL/SYSTEM=/dev/null (/usr/share/makepkg/source/git.sh);
++  # git >= 2.55 refuses to lock /dev/null, breaking tests that use `git config --global`.
++  # Tests override HOME with a temp dir, so restore default config lookup here.
++  unset GIT_CONFIG_GLOBAL GIT_CONFIG_SYSTEM
+   make test
+ }
+ 
