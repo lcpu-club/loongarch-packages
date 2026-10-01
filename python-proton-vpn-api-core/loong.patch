@@ -1,0 +1,28 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -71,11 +71,24 @@ prepare() {
+ build() {
+   cd "$pkgname"
+ 
++  # Standalone binaries must NOT be built with the 'python' feature: pyo3's
++  # 'extension-module' feature (pulled in by 'python') then suppresses the
++  # libpython link lines and the Python C-API symbols stay undefined, making
++  # ld.lld fail. On x86_64 those objects happen to be dropped by
++  # --gc-sections, but on loongarch64 they are kept.
++  # 'test_only' is upstream's feature set for exactly this: everything the
++  # binaries need, without 'python'.
+   CARGO_REGISTRIES_PROTON_INDEX="sparse+https://rust-registry.proton.me/index/" \
+     cargo build --release --locked \
++      --no-default-features \
++      --features 'test_only' \
+       --bin nm-protun-service \
+       --bin nm-protun-auth-dialog \
+-      --bin proton-vpn-kill-switch-service \
++      --bin proton-vpn-kill-switch-service
++
++  # Python extension module (the cdylib) is the only target that needs pyo3.
++  CARGO_REGISTRIES_PROTON_INDEX="sparse+https://rust-registry.proton.me/index/" \
++    cargo build --release --locked \
+       --lib \
+       --features 'protun,nm_protun_auth_dialog,python,core,local_agent,kill_switch'
+ 
