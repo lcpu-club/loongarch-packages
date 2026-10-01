@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index dd99c36..ad3096a 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -30,7 +30,8 @@ build() {
+ 
+ check() {
+   cd $pkgname
+-  make test
++  # task runner lacks loong64 binaries; run go test directly
++  go test ./...
+ }
+ 
+ package() {
