@@ -1,0 +1,16 @@
+--- a/DEPS
++++ b/DEPS
+@@ -185,13 +185,6 @@
+     "url": Var("dart_internal_git") + "/benchmarks-internal.git" +
+            "@" + Var("benchmarks_internal_rev"),
+     "condition": "checkout_benchmarks_internal",
+-  },
+-  Var("dart_root") + "/tools/sdks/dart-sdk": {
+-      "packages": [{
+-          "package": "dart/dart-sdk/${{platform}}",
+-          "version": Var("sdk_tag"),
+-      }],
+-      "dep_type": "cipd",
+   },
+   Var("dart_root") + "/third_party/d8/linux/x64": {
+       "packages": [{

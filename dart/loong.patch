@@ -1,0 +1,72 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -57,11 +57,17 @@ solutions = [
+ EOF
+ 
+   export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
++  # loong64: depot_tools' vpython3 cannot bootstrap its own interpreter here.
++  export VPYTHON_BYPASS="manually managed python not supported by chrome operations"
+ 
+   cd sdk
+ 
+   patch -Np 1 --input="$srcdir/DEPS.patch"
+ 
++  # loong64: CIPD has no linux-loong64 dart-sdk, the prebuilt host SDK is
++  # provided by the packaged dart below instead.
++  patch -Np 1 --input="$srcdir/loong64-dart-sdk-stage0.patch"
++
+   # Fix for https://github.com/dart-lang/sdk/issues/63406
+   patch -Np 1 --input="$srcdir/0001-ignore-warnings-in-binaryen.patch"
+ 
+@@ -70,10 +76,21 @@ EOF
+       --no-history \
+       --shallow
+ 
++  # loong64: prebuilt Dart SDK used to compile the SDK itself.
++  mkdir -p tools/sdks
++  rm -rf tools/sdks/dart-sdk
++  ln -sfn /opt/dart-sdk tools/sdks/dart-sdk
++
++  # loong64: BoringSSL needs to know about LoongArch64.
++  if ! grep -q OPENSSL_LOONGARCH64 third_party/boringssl/src/include/openssl/target.h; then
++    perl -0pi -e 's/#elif defined\(__riscv\) && __SIZEOF_POINTER__ == 8/#elif defined(__loongarch64) || (defined(__loongarch__) \&\& __loongarch_grlen == 64)\n#define OPENSSL_64_BIT\n#define OPENSSL_LOONGARCH64\n#elif defined(__riscv) \&\& __SIZEOF_POINTER__ == 8/' \
++      third_party/boringssl/src/include/openssl/target.h
++  fi
++
+   dart tools/generate_package_config.dart
+   python tools/generate_sdk_version_file.py
+ 
+-  sed -i 's|prefix = "x86_64-linux-gnu-"|prefix = ""|g' build/toolchain/linux/BUILD.gn
++  sed -i 's|prefix = "loongarch64-linux-gnu-"|prefix = ""|g' build/toolchain/linux/BUILD.gn
+ }
+ 
+ build() {
+@@ -82,7 +99,7 @@ build() {
+   # gn args --list out
+ 
+   /usr/bin/gn gen -qv out --args='
+-                        target_cpu = "x64"
++                        target_cpu = "loong64"
+                         is_debug = false
+                         is_release = true
+                         is_clang = false
+@@ -112,4 +129,19 @@ package() {
+   install -Dm644 ../LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
+ 
++# ----------------------------------------------------------------------------
++# loong64: upstream dart-lang/sdk has no LoongArch backend (dart-lang/sdk#53480),
++# the tree comes from the Flutter-Dart-loong64 port and is compiled by the
++# packaged dart itself, which is used as the prebuilt host SDK.
++#   https://github.com/Flutter-Dart-loong64
++# ----------------------------------------------------------------------------
++_loong64_commit='2ea45c8966a8f1769ce4313a80cd829f46144583'  # Dart 3.13.0-edge
++
++pkgver="3.13.0_edge.${_loong64_commit:0:10}"
++
++source[0]="git+https://github.com/Flutter-Dart-loong64/sdk.git#commit=$_loong64_commit"
++sha256sums[0]='SKIP'
++source+=("loong64-dart-sdk-stage0.patch")
++sha256sums+=('38c3afbeda4b5109ce8821e335a50a7e0912a2c5c8b64a217ae7c332669c2d85')
++
+ # vim:set ts=2 sw=2 et:
