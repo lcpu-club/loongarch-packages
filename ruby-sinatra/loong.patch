@@ -10,24 +10,10 @@
    # update gemspec to allow newer version of the dependencies
    sed --in-place --regexp-extended 's|~>|>=|g' sinatra.gemspec */*.gemspec
  
-@@ -67,6 +70,12 @@ prepare() {
-          -e '/yard/d' \
-          Gemfile
- 
-+  # loong64: ruby-sass-embedded is not packaged, remove it from the Gemfile so
-+  # that `require "bundler/setup"` works in the integration tests
-+  sed -i \
-+         -e '/sass-embedded/d' \
-+         Gemfile
-+
-   # remove unpackaged hamlet from sinatra-contribs's Gemfile that causes test failures from `require "bundler/setup"`
-   sed -i \
-     -e  '/hamlit/d' \
-@@ -226,3 +235,7 @@ _package() {
+@@ -226,3 +229,6 @@ _package() {
    install --verbose -D --mode=0644 "${_licensefile}" --target-directory "${pkgdir}/usr/share/licenses/ruby-${_gemname}/"
    install --verbose -D --mode=0644 *.md --target-directory "${pkgdir}/usr/share/doc/ruby-${_gemname}"
  }
 +
-+checkdepends=(${checkdepends[@]/ruby-sass-embedded})
 +source+=("haml-7.patch")
 +sha512sums+=('eecfef3e61e3b306f6458af3fceff42c800a164d91630e055008c7b1df39196fb47384528b72e2ae3d99ba1336b7ec6407ab7344f4db569f76efba7fcfc4a9f6')
