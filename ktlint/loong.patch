@@ -1,0 +1,26 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d4fad3d..d567876 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -14,7 +14,20 @@ depends=('java-runtime>=8')
+ makedepends=('jdk21-openjdk' 'git' 'gradle')
+ source=("git+https://github.com/pinterest/ktlint.git#tag=${pkgver}")
+ validpgpkeys=(ADBC987D1A7B91DB6B0AAA81995EFBF4A3D20BEB)
+-sha256sums=('edeebc15b83f120486881d95e8995807cb763c8cf95b0a7c690fea2e0002826f')
++sha256sums=('e36028bf7ee643344504dfc612cea7b04f0aaa28938b02dfaf2f948082a1cc45')
++
++prepare() {
++  cd ktlint
++  # No JDK 24 on loong64 and foojay can't provision it; use JDK 21 from makedepends
++  sed -i 's/^java-compilation = "24"/java-compilation = "21"/' gradle/libs.versions.toml
++  # System Gradle 9.7 ships Kotlin 2.4 metadata unreadable by the project's Kotlin 2.2 plugin
++  cat >> build-logic/build.gradle.kts <<'EOF'
++
++tasks.withType<KotlinCompile>().configureEach {
++    compilerOptions.freeCompilerArgs.add("-Xskip-metadata-version-check")
++}
++EOF
++}
+ 
+ build() {
+   cd "ktlint"
