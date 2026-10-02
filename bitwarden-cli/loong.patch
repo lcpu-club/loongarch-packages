@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index e5cf503..ae471ff 100644
+index e32e015..ca08c6e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -22,6 +22,9 @@ prepare() {
+@@ -24,6 +24,9 @@ prepare() {
  	export npm_config_build_from_source=true
  	export npm_config_cache="$srcdir/npm_cache"
  
@@ -10,5 +10,5 @@ index e5cf503..ae471ff 100644
 +	sed -i '/electron/d' package.json
 +
  	npm ci
- 	patch -p1 -i "$srcdir/system-libargon2.patch"
  }
+ 
