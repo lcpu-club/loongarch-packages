@@ -1,0 +1,31 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -32,6 +32,10 @@ prepare() {
+   # disable analytics
+   dart --disable-analytics
+ 
++  # the loong64 dart SDK is a prerelease (3.13.0-edge.<hash>), which pub_semver
++  # sorts below 3.13.0, so relax the SDK constraint to accept it
++  sed -i 's|sdk: ">=3.13.0 <4.0.0"|sdk: ">=3.13.0-edge <4.0.0"|' pubspec.yaml
++
+   # download dependencies
+   dart pub get
+ }
+@@ -39,7 +43,16 @@ prepare() {
+ build() {
+   cd "$pkgname"
+ 
+-  UPDATE_SASS_PROTOCOL=false dart run grinder protobuf
++  # grinder can't run at all here because cli_pkg (which it loads) doesn't know
++  # the loong64 architecture, so invoke its protobuf task's steps directly. The
++  # task's updateLanguageRepo dependency is a no-op anyway, as build/language is
++  # already pinned to the embedded-protocol tag.
++  cat > build/protoc-gen-dart <<'EOF'
++#!/bin/sh
++dart run protoc_plugin "$@"
++EOF
++  chmod a+x build/protoc-gen-dart
++  PATH="$PWD/build:$PATH" buf generate
+   dart compile exe \
+     -Dversion=$pkgver \
+     -Dprotocol-version=$(cat build/language/spec/EMBEDDED_PROTOCOL_VERSION) \
