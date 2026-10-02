@@ -1,0 +1,32 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -63,6 +63,22 @@ _srcenv() {
+ 
+ prepare() {
+ 	_srcenv
++	# minidumper/minidump-writer have no loongarch64 support; patch zed's crash
++	# reporting crate to a no-op on that architecture.
++	patch -Np1 -i "$srcdir/zed-loongarch64-no-crash-reports.patch"
++	# No prebuilt libwebrtc for loongarch64 (upstream release assets only cover
++	# x64/arm64), so reuse the WebRTC-free path upstream already ships for FreeBSD
++	# (mock livekit client + fake echo canceller).
++	sed -i 's/any(all(target_os = "windows", target_env = "gnu"), target_os = "freebsd")/any(all(target_os = "windows", target_env = "gnu"), target_os = "freebsd", target_arch = "loongarch64")/' \
++		crates/audio/Cargo.toml \
++		crates/audio/src/audio_pipeline/echo_canceller.rs \
++		crates/livekit_client/Cargo.toml
++	sed -i 's/target_os = "freebsd"/target_os = "freebsd", target_arch = "loongarch64"/' \
++		crates/livekit_client/src/lib.rs \
++		crates/call/src/call_impl/diagnostics.rs
++	sed -i 's/cfg(target_os = "linux")/cfg(all(target_os = "linux", not(target_arch = "loongarch64")))/' \
++		crates/livekit_client/Cargo.toml
++
+ 	cargo fetch --locked --target host-tuple
+ 	export DO_STARTUP_NOTIFY="true"
+ 	export APP_ICON="zed"
+@@ -117,3 +133,6 @@ package() {
+ 	install -Dm0644 completions.fish "$pkgdir/usr/share/fish/vendor_completions.d/$_binname.fish"
+ 	install -Dm0644 completions.zsh "$pkgdir/usr/share/zsh/site-functions/_$_binname"
+ }
++
++source+=('zed-loongarch64-no-crash-reports.patch')
++sha256sums+=('51f322ee24e8177b81830dc4795d5d5d59a0ade3934c098a727aacd4ad236562')

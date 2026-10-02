@@ -1,0 +1,157 @@
+--- a/crates/crashes/Cargo.toml
++++ b/crates/crashes/Cargo.toml
+@@ -9,13 +9,16 @@
+ async-process.workspace = true
+ crash-handler.workspace = true
+ log.workspace = true
+-minidumper.workspace = true
+ parking_lot.workspace = true
+ serde.workspace = true
+ serde_json.workspace = true
+ system_specs.workspace = true
+ zstd.workspace = true
+ 
++# `minidumper` pulls in `minidump-writer`, which has no loongarch64 support.
++[target.'cfg(not(target_arch = "loongarch64"))'.dependencies]
++minidumper.workspace = true
++
+ [target.'cfg(target_os = "linux")'.dependencies]
+ libc.workspace = true
+ 
+--- a/crates/crashes/src/crashes.rs
++++ b/crates/crashes/src/crashes.rs
+@@ -1,10 +1,87 @@
++#[cfg(not(target_arch = "loongarch64"))]
+ use crash_handler::{CrashEventResult, CrashHandler};
+ use log::info;
++#[cfg(not(target_arch = "loongarch64"))]
+ use minidumper::{LoopAction, MinidumpBinary, Server, SocketName};
+ use parking_lot::Mutex;
+ use serde::{Deserialize, Serialize};
+ use std::{panic::Location, pin::Pin};
+ 
++/// Stand-in for the `minidumper` crate. Crash reporting needs `minidumper`,
++/// which depends on `minidump-writer`, and that crate only implements the
++/// minidump CPU contexts of x86, arm and aarch64, so it cannot be built for
++/// loongarch64. Providing the same API as a no-op keeps the rest of this crate
++/// compiling unchanged; see [`init`] for what that means at runtime.
++#[cfg(target_arch = "loongarch64")]
++mod minidumper {
++    use std::{fs::File, path::PathBuf, sync::atomic::AtomicBool, time::Duration};
++
++    #[derive(Debug)]
++    pub enum Error {
++        Unsupported,
++    }
++
++    #[derive(Copy, Clone)]
++    pub enum SocketName<'scope> {
++        Path(&'scope std::path::Path),
++    }
++
++    #[derive(Copy, Clone, PartialEq, Eq)]
++    pub enum LoopAction {
++        Exit,
++        Continue,
++    }
++
++    pub struct MinidumpBinary {
++        pub file: File,
++        pub path: PathBuf,
++        pub contents: Option<Vec<u8>>,
++    }
++
++    pub trait ServerHandler: Send + Sync {
++        fn create_minidump_file(&self) -> Result<(File, PathBuf), std::io::Error>;
++        fn on_minidump_created(&self, result: Result<MinidumpBinary, Error>) -> LoopAction;
++        fn on_message(&self, kind: u32, buffer: Vec<u8>);
++        fn on_client_connected(&self, _num_clients: usize) -> LoopAction {
++            LoopAction::Continue
++        }
++        fn on_client_disconnected(&self, _num_clients: usize) -> LoopAction {
++            LoopAction::Continue
++        }
++    }
++
++    /// Never succeeds, so [`super::crash_server`] gives up before running a
++    /// message loop it could not serve anyway.
++    pub struct Server;
++
++    impl Server {
++        pub fn with_name(_name: SocketName<'_>) -> Result<Self, Error> {
++            Err(Error::Unsupported)
++        }
++
++        pub fn run(
++            self,
++            _handler: Box<dyn ServerHandler>,
++            _shutdown: &AtomicBool,
++            _timeout: Option<Duration>,
++        ) -> Result<(), Error> {
++            Ok(())
++        }
++    }
++
++    /// Drops every message; implements the [`super::CrashServerMessage`] API
++    /// used by this crate without an IPC connection to an actual server.
++    pub struct Client;
++
++    impl Client {
++        pub fn send_message(&self, _kind: u32, _buffer: Vec<u8>) -> Result<(), Error> {
++            Ok(())
++        }
++    }
++}
++#[cfg(target_arch = "loongarch64")]
++use minidumper::{LoopAction, MinidumpBinary, Server, SocketName};
++
+ use system_specs::GpuSpecs;
+ 
+ use std::{
+@@ -40,11 +117,29 @@
+     }));
+ }
+ 
++/// Crash reporting is disabled on loongarch64, see [`minidumper`].
++#[cfg(target_arch = "loongarch64")]
++pub fn init<F, S, C, P>(
++    _crash_init: InitCrashHandler,
++    _spawn: S,
++    _socket_path: P,
++    _wait_timer: C,
++) -> impl Future<Output = Arc<Client>> + use<F, C, S, P>
++where
++    F: Future<Output = ()> + Send + Sync + 'static,
++    C: (Fn(Duration) -> F) + Send + Sync + 'static,
++    S: FnOnce(Pin<Box<dyn Future<Output = ()> + Send + 'static>>),
++    P: FnOnce(u32) -> PathBuf,
++{
++    async { Arc::new(Client) }
++}
++
+ /// Install crash signal handlers and spawn the crash-handler subprocess.
+ ///
+ /// All work happens lazily in the returned future, so it runs on whichever
+ /// executor polls it. The keepalive task is passed to `spawn` so the caller
+ /// decides which executor to schedule it on.
++#[cfg(not(target_arch = "loongarch64"))]
+ pub fn init<F, S, C, P>(
+     crash_init: InitCrashHandler,
+     spawn: S,
+@@ -63,6 +158,7 @@
+ /// Spawn the crash-handler subprocess, connect the IPC client, and run the
+ /// keepalive ping loop. This is the future returned by [`init`], so it runs on
+ /// whichever executor the caller polls it with.
++#[cfg(not(target_arch = "loongarch64"))]
+ async fn connect_and_keepalive<F, C, S, P>(
+     crash_init: InitCrashHandler,
+     socket_path: P,
+@@ -641,7 +737,7 @@
+         }
+     }
+ }
+-#[cfg(not(target_os = "windows"))]
++#[cfg(not(any(target_os = "windows", target_arch = "loongarch64")))]
+ fn spawn_crash_handler(exe: &Path, socket_name: &Path) -> async_process::Child {
+     async_process::Command::new(exe)
+         .arg("--crash-handler")
