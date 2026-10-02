@@ -1,0 +1,75 @@
+From: Patrik Ragnarsson <patrik@starkast.net>
+Date: Sun, 28 Jun 2026 12:11:42 -0300
+Subject: Update tests for Haml v7
+
+Origin: upstream
+Forwarded: yes
+Applied-Upstream: 0135c85402f08e8a82dc3d270d9ba5a87b13aa40
+Reviewed-by: Simon Quigley <tsimonq2@debian.org>
+Last-Update: 2026-02-22
+---
+ sinatra-contrib/spec/haml_helpers_spec.rb | 8 +++++---
+ test/haml_test.rb                         | 3 ++-
+ 2 files changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/sinatra-contrib/spec/haml_helpers_spec.rb b/sinatra-contrib/spec/haml_helpers_spec.rb
+index 0de49e6..f7204bd 100644
+--- a/sinatra-contrib/spec/haml_helpers_spec.rb
++++ b/sinatra-contrib/spec/haml_helpers_spec.rb
+@@ -3,6 +3,8 @@ require 'spec_helper'
+ require 'sinatra/haml_helpers'
+ 
+ RSpec.describe Sinatra::HamlHelpers do
++  let(:quote_char) { Haml::VERSION >= "7.0.0" ? "\"" : "'" }
++
+   describe "#surround" do
+     it "renders correctly" do
+       mock_app do
+@@ -20,7 +22,7 @@ RSpec.describe Sinatra::HamlHelpers do
+       get "/"
+       html_code = <<~HTML
+         <p>
+-        (<a href='https://example.org/'>surrounded</a>)
++        (<a href=#{quote_char}https://example.org/#{quote_char}>surrounded</a>)
+         </p>
+       HTML
+       expect(body).to eq(html_code)
+@@ -44,7 +46,7 @@ RSpec.describe Sinatra::HamlHelpers do
+       get "/"
+       html_code = <<~HTML
+         <p>
+-        * <a href='https://example.org/'>preceded</a>
++        * <a href=#{quote_char}https://example.org/#{quote_char}>preceded</a>
+         </p>
+       HTML
+       expect(body).to eq(html_code)
+@@ -68,7 +70,7 @@ RSpec.describe Sinatra::HamlHelpers do
+       get "/"
+       html_code = <<~HTML
+         <p>
+-        <a href='https://example.org/'>succeeded</a>.
++        <a href=#{quote_char}https://example.org/#{quote_char}>succeeded</a>.
+         </p>
+       HTML
+       expect(body).to eq(html_code)
+diff --git a/test/haml_test.rb b/test/haml_test.rb
+index 766d3d9..f73665a 100644
+--- a/test/haml_test.rb
++++ b/test/haml_test.rb
+@@ -65,6 +65,7 @@ class HAMLTest < Minitest::Test
+   end
+ 
+   it "merges the default HAML options with the overrides and passes them to the Haml engine" do
++    quote_char = Haml::VERSION >= "7.0.0" ? "\"" : "'"
+     mock_app do
+       set :haml, {:format => :html5}
+       get('/') { haml "!!!\n%h1{:class => :header} Hello World" }
+@@ -74,7 +75,7 @@ class HAMLTest < Minitest::Test
+     end
+     get '/'
+     assert ok?
+-    assert_equal "<!DOCTYPE html>\n<h1 class='header'>Hello World</h1>\n", body
++    assert_equal "<!DOCTYPE html>\n<h1 class=#{quote_char}header#{quote_char}>Hello World</h1>\n", body
+     get '/html4'
+     assert ok?
+     assert_match(/^<!DOCTYPE html PUBLIC (.*) HTML 4.01/, body)
