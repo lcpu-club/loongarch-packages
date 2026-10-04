@@ -1,0 +1,11 @@
+--- a/qmk_id.c
++++ b/qmk_id.c
+@@ -49,6 +49,8 @@
+ #    define SECCOMP_ARCH_NATIVE AUDIT_ARCH_ARM
+ #elif __aarch64__
+ #    define SECCOMP_ARCH_NATIVE AUDIT_ARCH_AARCH64
++#elif __loongarch_lp64
++#    define SECCOMP_ARCH_NATIVE AUDIT_ARCH_LOONGARCH64
+ #elif __riscv
+ #    if __riscv_xlen == 32
+ #        define SECCOMP_ARCH_NATIVE AUDIT_ARCH_RISCV32

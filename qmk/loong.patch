@@ -1,0 +1,23 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index ee715d8..a363604 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -29,6 +29,11 @@ source=("https://files.pythonhosted.org/packages/source/q/qmk/qmk-${pkgver}.tar.
+ sha256sums=('2efe3c752230c6ba24b8719c3b6e85a5644bf8f7d0dd237757eda9b7b7e60b11'
+             'e6cde001890e1d030d13bbe18799b76754aaea8a6d1309ce8c7956d713714920')
+ 
++prepare() {
++  cd qmk_udev-${_qmk_udev_pkgver}
++  patch -Np1 -i ../qmk-loongarch-support.patch
++}
++
+ build() {
+   make -C qmk_udev-${_qmk_udev_pkgver}
+   cd "${pkgname}-${pkgver}"
+@@ -41,3 +46,6 @@ package() {
+   python -m installer --destdir="$pkgdir" --compile-bytecode=1 dist/*.whl
+   install -Dm644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+ }
++
++source+=('qmk-loongarch-support.patch')
++sha256sums+=('b6a933ea8106180ebf27565f630cbb2b1ce771a6a970457908569221380b735c')
