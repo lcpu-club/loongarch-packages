@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a71631c..8419204 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,6 +15,7 @@ sha256sums=('140051ca273d806279598c087ebdbf426ca90af3ab80279082db3a25d1d5120b')
+ prepare() {
+   cd "${srcdir}"/nelhage-$pkgname-*
+ 
++  patch -Np1 -i ../reptyr-loongarch-support.patch
+   sed -i 's|etc/bash_completion.d|usr/share/bash-completion/completions|' Makefile
+ }
+ 
+@@ -30,3 +31,6 @@ package() {
+   make DESTDIR="${pkgdir}" PREFIX=/usr install
+   install -Dm644 COPYING "${pkgdir}"/usr/share/licenses/reptyr/LICENSE
+ }
++
++source+=('reptyr-loongarch-support.patch')
++sha256sums+=('48c15fa8c11ccc66bdbe89cd3cb556a4a2e02037f6667d004af141a6119c4d0a')
