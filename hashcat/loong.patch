@@ -1,0 +1,38 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f44ae83..b8f84a7 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -24,6 +24,7 @@ validpgpkeys=('A70833229D040B4199CC00523C17DA8B8A16544F') # Hashcat signing key
+ prepare() {
+   cd ${pkgname}-${pkgver}
+   patch -Np1 < ../hashcat-fix-wrong-crc-include-on-m17220_a3-pure.cl.patch
++  patch -Np1 -i ../hashcat-loongarch-support.patch
+   sed -ri 's!^(HASHCAT_ROOT=).*!\1\"/usr/bin\"!' extra/tab_completion/${pkgname}.sh
+ }
+ 
+@@ -35,7 +36,7 @@ build() {
+   make \
+     PREFIX=/usr \
+     SHARED=1 \
+-    MAINTAINER_MODE=1 \
++    MAINTAINER_MODE=0 \
+     USE_SYSTEM_XXHASH=1 \
+     USE_SYSTEM_OPENCL=1 \
+     USE_SYSTEM_ZLIB=1
+@@ -47,7 +48,7 @@ package() {
+     DESTDIR="${pkgdir}" \
+     PREFIX=/usr \
+     SHARED=1 \
+-    MAINTAINER_MODE=1 \
++    MAINTAINER_MODE=0 \
+     USE_SYSTEM_XXHASH=1 \
+     USE_SYSTEM_OPENCL=1 \
+     USE_SYSTEM_ZLIB=1 \
+@@ -56,4 +57,7 @@ package() {
+   install -Dm 644 docs/license.txt -t "${pkgdir}/usr/share/licenses/${pkgname}"
+ }
+ 
++source+=('hashcat-loongarch-support.patch')
++sha512sums+=('2a47414b5eda0bef11211bf7a7869fc910ff090dcbd65136e8e34cf189da103c9739f09fdfcba0882823fa0dc0ed9fa206afb014ea9410bf1aa5e8e0b9b6235d')
++
+ # vim: ts=2 sw=2 et:
