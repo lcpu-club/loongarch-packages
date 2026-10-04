@@ -1,0 +1,29 @@
+--- a/src/gallium/auxiliary/gallivm/lp_bld_init_orc.cpp
++++ b/src/gallium/auxiliary/gallivm/lp_bld_init_orc.cpp
+@@ -341,15 +341,24 @@
+          .setJITTargetMachineBuilder(std::move(JTMB))
+ #ifdef USE_JITLINK
+          .setObjectLinkingLayerCreator(
+-#if LLVM_VERSION_MAJOR >= 21
++#if LLVM_VERSION_MAJOR >= 23
++            /* LLVM 23 passes a JITLinkMemoryManager instead of the Triple */
++            [&](ExecutionSession &ES,
++                llvm::jitlink::JITLinkMemoryManager &MemMgr) {
++               return std::make_unique<ObjectLinkingLayer>(ES, MemMgr);
++            })
++#elif LLVM_VERSION_MAJOR >= 21
+             /* LLVM 21 removed the Triple argument */
+             [&](ExecutionSession &ES) {
++               return std::make_unique<ObjectLinkingLayer>(
++                  ES, ExitOnErr(llvm::jitlink::InProcessMemoryManager::Create()));
++            })
+ #else
+             [&](ExecutionSession &ES, const llvm::Triple &TT) {
+-#endif
+                return std::make_unique<ObjectLinkingLayer>(
+                   ES, ExitOnErr(llvm::jitlink::InProcessMemoryManager::Create()));
+             })
++#endif
+ #else
+ #if LLVM_USE_INTEL_JITEVENTS
+          .RegisterJITEventListener(

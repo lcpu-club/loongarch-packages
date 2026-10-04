@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -816,4 +816,8 @@ package_mesa-docs() {
+   install -Dm644 mesa-$_pkgver/docs/license.rst -t "$pkgdir/usr/share/licenses/$pkgname"
+ }
+ 
++source+=("llvm23-support.patch")
++sha256sums+=('2d7a1df77f51576172b65a4c899b807f4a19f9e11fb002d4f88d58be819b1f18')
++b2sums+=('02bf78086bf73ced44f9c903e335b0ac93244c699b40fb3b33b9431557f6c452d14016b49f80441ac016b22349b4f6bc86cfdfe4a513ee94ee5ddd22166b8da9')
++
+ # vim:set sw=2 sts=-1 et:
