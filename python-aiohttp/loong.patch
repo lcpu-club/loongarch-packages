@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -90,6 +90,9 @@ check() {
+     --deselect=tests/test_proxy_functional.py::test_uvloop_secure_https_proxy
+     --deselect='tests/test_client_functional.py::test_invalid_idna[pyloop]'
+ 
++    # Fails on loongarch64, import time is above the upstream 300ms threshold
++    --deselect=tests/test_imports.py::test_import_time
++
+     # Fails, calls the Python interpreter without -P, deselect to enable
+     # venv-based testing.
+     --deselect=tests/test_circular_imports.py::test_no_warnings
