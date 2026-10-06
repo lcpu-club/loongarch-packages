@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 953cff5..d6f1418 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,6 +17,9 @@ options=('!lto')
+ 
+ prepare() {
+   cd "$pkgname-$pkgver"
++  # nix<0.29 ioctl consts lack loong64; netlink-request only uses sysconf
++  sed -i 's/nix = { version = "0.25"/nix = { version = "0.29"/' netlink-request/Cargo.toml
++  cargo update -p netlink-request
+   cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+ }
+ 
