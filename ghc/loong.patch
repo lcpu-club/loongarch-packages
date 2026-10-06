@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 69700b6..967eaf8 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -40,6 +40,13 @@ prepare() {
+@@ -53,6 +53,13 @@ prepare() {
  
    # detects GCC correctly
    sed -i 's/grep -q gcc/grep -qi gcc/' m4/fp_gcc_version.m4
@@ -16,7 +14,7 @@ index 69700b6..967eaf8 100644
  }
  
  build() {
-@@ -79,7 +86,7 @@ package_ghc-static() {
+@@ -92,7 +99,7 @@ package_ghc-static() {
  
  package_ghc() {
    pkgdesc='The Glasgow Haskell Compiler'
@@ -25,28 +23,30 @@ index 69700b6..967eaf8 100644
    provides=('haskell-haddock=2.29.2'
              'haskell-hp2ps=0.1'
              'haskell-hpc-bin=0.68'
-@@ -102,7 +109,7 @@ package_ghc() {
+@@ -115,7 +122,7 @@ package_ghc() {
    rm "$pkgdir"/usr/lib/ghc-$pkgver/bin/ghc-pkg*
    rm "$pkgdir"/usr/bin/ghc-pkg*
-   (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib; rm -r package.conf.d)
+   (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib; rm -r package.conf.d settings)
 -  (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib/$CARCH-linux-ghc-$pkgver; rm -r !(ghc-$pkgver|libHSghc-$pkgver-ghc$pkgver.so))
 +  (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib/$(uname -m)-linux-ghc-$pkgver; rm -r !(ghc-$pkgver|libHSghc-$pkgver-ghc$pkgver.so))
  
    # docs moved to ghc-static
    rm -r "$pkgdir"/usr/share/doc
-@@ -195,9 +202,9 @@ package_ghc-libs() {
+@@ -208,11 +215,11 @@ package_ghc-libs() {
    find "$pkgdir"/usr/lib \( -name "*.a" -o -name "*.o" -o -name "*.p_o" -o -name "*.p_hi" -o -name "*.hi" \) -delete
  
    # ghc library, headers, and other exes are in the ghc package
 -  rm -r "$pkgdir"/usr/lib/ghc-$pkgver/lib/$CARCH-linux-ghc-$pkgver/{ghc-$pkgver,libHSghc-$pkgver-ghc$pkgver.so}
 +  rm -r "$pkgdir"/usr/lib/ghc-$pkgver/lib/$(uname -m)-linux-ghc-$pkgver/{ghc-$pkgver,libHSghc-$pkgver-ghc$pkgver.so}
    (cd "$pkgdir"/usr/lib/ghc-$pkgver/bin; rm !(ghc-pkg*))
--  (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib; rm -r !(package.conf.d|$CARCH-linux-ghc-$pkgver))
-+  (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib; rm -r !(package.conf.d|$(uname -m)-linux-ghc-$pkgver))
+   # ghc-pkg needs settings even when the compiler package is not installed.
+   # https://gitlab.archlinux.org/archlinux/packaging/packages/ghc/-/work_items/5
+-  (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib; rm -r !(package.conf.d|settings|$CARCH-linux-ghc-$pkgver))
++  (cd "$pkgdir"/usr/lib/ghc-$pkgver/lib; rm -r !(package.conf.d|settings|$(uname -m)-linux-ghc-$pkgver))
    rm "$pkgdir"/usr/lib/ghc-$pkgver/lib/package.conf.d/*.copy
    (cd "$pkgdir"/usr/bin; rm !(ghc-pkg*))
  
-@@ -211,3 +218,8 @@ package_ghc-libs() {
+@@ -226,3 +233,8 @@ package_ghc-libs() {
  
    install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
  }
