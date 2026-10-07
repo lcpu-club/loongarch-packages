@@ -1,0 +1,28 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b668bf0..c4dc256 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -13,13 +13,22 @@ source=("${pkgname}-${pkgver}.tar.gz::https://github.com/bcicen/ctop/archive/ref
+ b2sums=('21bcc7a7996cf8cd1bfb87da30bbccd3f1c9a257b1140a81795186c466c7e499233e691eca3dac2e953fb9e46d0cacd78ee87abcbfd01965401d3666f3ff8eff')
+ 
+ 
++prepare() {
++  cd ${pkgname}-${pkgver}
++  go mod edit -replace=golang.org/x/sys=golang.org/x/sys@v0.26.0
++  go mod edit -go=1.21
++  go mod tidy
++  go mod vendor
++  sed -i -e 's/|| s390x)/|| s390x || loong64)/' -e 's/ppc64le riscv64 s390x/ppc64le riscv64 s390x loong64/' vendor/github.com/opencontainers/runc/libcontainer/system/syscall_linux_64.go
++}
++
+ build() {
+   cd ${pkgname}-${pkgver}
+   export CGO_LDFLAGS="${LDFLAGS}"
+   export CGO_CFLAGS="${CFLAGS}"
+   export CGO_CPPFLAGS="${CPPFLAGS}"
+   export CGO_CXXFLAGS="${CXXFLAGS}"
+-  export GOFLAGS="-buildmode=pie -trimpath -ldflags=-linkmode=external -mod=readonly -modcacherw"
++  export GOFLAGS="-buildmode=pie -trimpath -ldflags=-linkmode=external -mod=vendor -modcacherw"
+   go build .
+ }
+ 
