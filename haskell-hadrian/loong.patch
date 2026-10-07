@@ -1,8 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 3c6a835..b009133 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -20,7 +20,9 @@ sha256sums=('008f7a04d89ad10baae6486c96645d7d726aaac7e1476199f6dd86c6bd9977ad'
+@@ -20,7 +20,9 @@ sha256sums=('d053bf6ce1d588a75cfe8c9316269486e9d8fb89dcdf6fd92836fa2e3df61305'
  prepare() {
    cd ghc-$_ghcver
    # apply patch to enable ghci for riscv64
@@ -10,10 +8,10 @@ index 3c6a835..b009133 100644
 +  #patch -p1 < "$srcdir"/ghc-enable-ghci-for-riscv64.patch
 +  # Always enable ghci like Debian
 +  patch -p1 < "$srcdir"/hadrian-enable-interpreter.patch
-   uusi -u Cabal -u QuickCheck hadrian/hadrian.cabal
- }
- 
-@@ -44,3 +46,6 @@ package() {
+   # Allow GHC 9.6's bundled directory on Linux; the newer minimum fixes a Windows-only race.
+   # https://gitlab.haskell.org/ghc/ghc/-/issues/24382
+   uusi -u QuickCheck -u 'directory:>=1.3.8.5 && <1.4' hadrian/hadrian.cabal
+@@ -46,3 +48,6 @@ package() {
    install -D -m644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
    rm -f "$pkgdir"/usr/share/doc/$pkgname/LICENSE
  }
