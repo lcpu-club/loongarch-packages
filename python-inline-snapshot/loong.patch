@@ -1,0 +1,14 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -59,3 +59,11 @@ package() {
+   python -m installer --destdir="$pkgdir" dist/*.whl
+   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
+ }
++
++source+=("fix-black-26.10-project-root.patch")
++sha256sums+=('8a6860c7ead80733d3c3b1201b9697305069a60cedac71c0c537e4a75d0dbf07')
++
++prepare() {
++  cd ${pkgname#python-}-$pkgver
++  patch -Np1 -i "$srcdir/fix-black-26.10-project-root.patch"
++}

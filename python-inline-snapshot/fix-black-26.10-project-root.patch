@@ -1,0 +1,19 @@
+diff --git a/tests/conftest.py b/tests/conftest.py
+index b044a58..0888081 100644
+--- a/tests/conftest.py
++++ b/tests/conftest.py
+@@ -15,7 +15,13 @@ pytest_plugins = "pytester"
+ 
+ pytest.register_assert_rewrite("tests.example")
+ 
+-black.files.find_project_root = black.files.find_project_root.__wrapped__  # type: ignore
++if hasattr(black.files.find_project_root, "__wrapped__"):
++    black.files.find_project_root = black.files.find_project_root.__wrapped__  # type: ignore
++else:
++    # black >= 26.10.0: the caches moved into private helpers
++    for _name in ("_find_project_root_cached", "_cached_resolve", "_load_toml"):
++        _func = getattr(black.files, _name)
++        setattr(black.files, _name, getattr(_func, "__wrapped__", _func))
+ 
+ 
+ @pytest.fixture(autouse=True)
