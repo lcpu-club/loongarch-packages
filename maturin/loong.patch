@@ -1,0 +1,13 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -55,6 +55,10 @@ check() {
+     --skip=integration_wasm_hello_world
+     # Relies on downloading the internet: https://github.com/PyO3/maturin/issues/3239
+     --skip=integration_cases
++    # Requires a prebuilt uv wheel; uv cannot be built from source on loongarch64
++    --skip=develop_uv_cases
++    # Assumes a PyPI-supported architecture; loong64 is rejected before wheel audit
++    --skip=pypi_compatibility_linux_tag
+   )
+   # Using --all-features here causes test failures due to:
+   #   Cause: unsupported Zip archive: Unsupported compression level
