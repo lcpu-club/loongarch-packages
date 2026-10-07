@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -71,11 +71,24 @@ prepare() {
+@@ -70,10 +70,23 @@ prepare() {
  build() {
    cd "$pkgname"
  
@@ -16,7 +16,6 @@
 +      --no-default-features \
 +      --features 'test_only' \
        --bin nm-protun-service \
-       --bin nm-protun-auth-dialog \
 -      --bin proton-vpn-kill-switch-service \
 +      --bin proton-vpn-kill-switch-service
 +
@@ -24,5 +23,5 @@
 +  CARGO_REGISTRIES_PROTON_INDEX="sparse+https://rust-registry.proton.me/index/" \
 +    cargo build --release --locked \
        --lib \
-       --features 'protun,nm_protun_auth_dialog,python,core,local_agent,kill_switch'
+       --features 'protun,python,core,local_agent,kill_switch,telemetry'
  
