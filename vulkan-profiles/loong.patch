@@ -1,0 +1,14 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -51,6 +51,11 @@ build() {
+ 		-D CMAKE_SKIP_INSTALL_RPATH=ON
+ 	)
+ 
++	# PyInstaller provides no prebuilt bootloader for loong64, so it compiles one
++	# from source. Its build system passes -D_FORTIFY_SOURCE=2 together with -Werror,
++	# which conflicts with the _FORTIFY_SOURCE=3 in our CFLAGS.
++	export CFLAGS="${CFLAGS/_FORTIFY_SOURCE=3/_FORTIFY_SOURCE=2}"
++
+ 	cmake -S Vulkan-Profiles -B build -G Ninja "${cmake_options[@]}"
+ 	cmake --build build
+ }
