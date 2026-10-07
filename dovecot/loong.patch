@@ -1,0 +1,23 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -107,6 +107,11 @@ validpgpkeys=(
+ prepare() {
+   cd "${pkgname}-${pkgver}"
+ 
++  # Fix infinite busy-loop (and unbounded data stack growth) in the
++  # ostream-multiplex STREAM format on 16 KB page systems, which makes
++  # test-lib hang in the "ostream multiplex stream (backpressure)" test
++  patch -p1 -i "${srcdir}/fix-ostream-multiplex-busy-loop.patch"
++
+   # Fix path in helper script
+   sed -i 's:OPENSSLCONFIG=${OPENSSLCONFIG-dovecot-openssl.cnf}:OPENSSLCONFIG=${OPENSSLCONFIG-/etc/ssl/dovecot-openssl.cnf}:' doc/mkcert.sh
+ 
+@@ -213,3 +218,8 @@ package() {
+   # License
+   install -vDm644 -t "${pkgdir}/usr/share/licenses/${pkgname}" COPYING.MIT
+ }
++
++source+=(
++  "fix-ostream-multiplex-busy-loop.patch"
++)
++sha256sums+=('945dd47bd631298437263b09aaa3d00621cf6ea691a466a74a5962215089d573')

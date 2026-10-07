@@ -1,0 +1,36 @@
+Fix an infinite busy-loop in the ostream-multiplex STREAM format
+
+o_stream_multiplex_send_stream() jumps back to retry sending the remaining
+data whenever the parent ostream accepts only part of it.  If the parent
+accepts nothing at all, the loop makes no forward progress and spins
+forever.  That happens on loong64, where IO_BLOCK_SIZE (8192) is smaller
+than the page size (16384): once every pipe buffer is in use, the kernel
+rejects a whole 8192-byte write with EAGAIN even though the last buffer
+still has 8188 bytes free, so the multiplex channel leaves the parent
+buffer full with data still pending.  Each iteration also allocates a write
+error string on the data stack, so the stuck process grows without bound.
+
+Return to the caller when the parent accepts nothing - it retries once the
+parent has drained.  Fixes the test-lib "ostream multiplex stream
+(backpressure)" hang/failure on loong64.
+
+--- a/src/lib/ostream-multiplex.c
++++ b/src/lib/ostream-multiplex.c
+@@ -247,8 +247,16 @@
+ 	total_sent += ret;
+ 	buffer_set_used_size(mstream->pending_buf, 0);
+ 
+-	if (size > 0)
++	if (size > 0) {
++		if (ret == 0) {
++			/* The parent accepted none of the data, so there is
++			   no forward progress to be made here. Return
++			   instead of busy-looping: the caller will retry
++			   once the parent has drained. */
++			return total_sent;
++		}
+ 		goto again;
++	}
+ 	i_assert(total_sent > 0);
+ 	return total_sent;
+ }
