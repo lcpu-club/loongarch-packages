@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -10,7 +10,7 @@
+@@ -10,7 +10,7 @@ pkgname=(
    qemu-chardev-{baum,spice}
    qemu-docs
    qemu-guest-agent
@@ -9,7 +9,7 @@
    qemu-hw-s390x-virtio-gpu-ccw
    qemu-hw-uefi-vars
    qemu-hw-usb-{host,redirect,smartcard}
-@@ -111,7 +111,6 @@
+@@ -111,7 +111,6 @@ makedepends=(
    python-sphinx
    python-sphinx_rtd_theme
    rdma-core
@@ -17,7 +17,7 @@
    sdl2
    sdl2_image
    snappy
-@@ -234,13 +233,10 @@
+@@ -234,13 +233,10 @@ _qemu_base_optdepends=(
    'qemu-hw-display-qxl: for the QXL display device'
    'qemu-hw-display-virtio-vga: for the virtio-vga display device'
    'qemu-hw-display-virtio-vga-gl: for the virtio-vga-gl display device'
@@ -31,17 +31,7 @@
    'qemu-hw-uefi-vars: for UEFI variable support'
    'qemu-hw-usb-host: for host USB support'
    'qemu-hw-usb-redirect: for USB redirect support'
-@@ -275,6 +271,9 @@
- }
- 
- prepare() {
-+  # Recognize LSX/LASX stores when handling translated-code write faults.
-+  patch -Np1 -d $pkgbase-$pkgver -i ../loongarch-vector-store-signals.patch
-+
-   # extract licenses for TCG
-   sed -n '1,23p' $pkgbase-$pkgver/tcg/tcg-internal.h > tcg.LICENSE.MIT.txt
-   sed -n '1,23p' $pkgbase-$pkgver/tcg/tci/tcg-target.h > tci.LICENSE.MIT.txt
-@@ -307,7 +306,6 @@
+@@ -307,7 +303,6 @@ build() {
      --enable-sdl
      --enable-slirp
      --enable-tpm
@@ -49,7 +39,7 @@
      --smbd=/usr/bin/smbd
      --with-coroutine=ucontext
    )
-@@ -398,10 +396,8 @@
+@@ -398,10 +393,8 @@ package_qemu-common() {
    done
    # modify and rename binfmt.d configs to prevent name conflicts
    for _conf in "$pkgdir/usr/lib/binfmt.d/"*; do
@@ -61,7 +51,7 @@
    done
  
    # install default binaries
-@@ -466,13 +462,10 @@
+@@ -466,13 +459,10 @@ package_qemu-common() {
      _pick qemu-hw-display-qxl usr/lib/qemu/hw-display-qxl.so
      _pick qemu-hw-display-virtio-gpu usr/lib/qemu/hw-display-virtio-gpu.so
      _pick qemu-hw-display-virtio-gpu-gl usr/lib/qemu/hw-display-virtio-gpu-gl.so
@@ -75,7 +65,7 @@
  
      _pick qemu-hw-usb-host usr/lib/qemu/hw-usb-host.so
      _pick qemu-hw-usb-redirect usr/lib/qemu/hw-usb-redirect.so
-@@ -890,7 +883,7 @@
+@@ -890,7 +880,7 @@ package_qemu-system-hppa-firmware() {
  
  package_qemu-system-loongarch64() {
    pkgdesc="QEMU system emulator for LoongArch64"
@@ -84,7 +74,7 @@
    mv -v $pkgname/* "$pkgdir"
    _install_licenses
  }
-@@ -1215,7 +1208,7 @@
+@@ -1215,7 +1205,7 @@ package_qemu-base() {
    depends=(
      qemu-common=$pkgver-$pkgrel
      qemu-img=$pkgver-$pkgrel
@@ -93,7 +83,7 @@
      virtiofsd
    )
    optdepends=("${_qemu_base_optdepends[@]}")
-@@ -1231,8 +1224,8 @@
+@@ -1231,8 +1221,8 @@ package_qemu-desktop() {
      qemu-audio-{alsa,dbus,jack,oss,pa,pipewire,sdl,spice}=$pkgver-$pkgrel
      qemu-block-{curl,dmg,nfs,ssh}=$pkgver-$pkgrel
      qemu-chardev-spice=$pkgver-$pkgrel
@@ -104,14 +94,11 @@
      qemu-hw-uefi-vars=$pkgver-$pkgrel
      qemu-hw-usb-{host,redirect,smartcard}=$pkgver-$pkgrel
      qemu-ui-{curses,dbus,egl-headless,gtk,opengl,sdl,spice-{app,core}}=$pkgver-$pkgrel
-@@ -1274,4 +1267,10 @@
+@@ -1274,4 +1264,7 @@ package_qemu-full() {
    _install_licenses
  }
  
 +_qemu_desktop_optdepends+=("qemu-system-x86: for x86 system emulator")
 +pkgname=(${pkgname[@]/qemu-vmsr-helper})
- # vim:set ts=2 sw=2 et:
 +
-+source+=(loongarch-vector-store-signals.patch)
-+sha512sums+=('85eadcbc57c54b23b78a115483ee956ee928d04c2e0ce802e48ea6420ed39188493612cf3264c0029bd8ed9dbcc8c9d6e5cb057273ebf2dec2917d21b3b80a36')
-+b2sums+=('b62a6cf7b83926ef63f32c56d5bb65977f0e69da51999bd5d642369bbe9e3929e5f2dacc1d8d9b874ec1ab27b972e91238f4b953f0cf45b8893ce9e57494b750')
+ # vim:set ts=2 sw=2 et:
