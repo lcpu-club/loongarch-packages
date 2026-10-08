@@ -1,0 +1,18 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -67,6 +67,7 @@ b2sums=('43c1faea91a60412cb0894cf7ece49b7514faa97797be6a69729778dd9a4c1cfc3b66bc
+ 
+ prepare() {
+   cd $pkgbase
++  patch -Np1 -i "$srcdir/test-cal-cache-search-fix-invalid-time.patch"
+ }
+ 
+ build() {
+@@ -156,4 +157,7 @@ package_evolution-data-server-docs() {
+   mv docs/* "$pkgdir"
+ }
+ 
++source+=("test-cal-cache-search-fix-invalid-time.patch")
++b2sums+=('2d7ad7694684ff373437b319aa9377125e6666113b79e000b3060f9b933ff3cce71765bf2016ad1ec502409a0bb24b019e229ceb7f97a1ab91d7e7d741d16f56')
++
+ # vim:set sw=2 sts=-1 et:

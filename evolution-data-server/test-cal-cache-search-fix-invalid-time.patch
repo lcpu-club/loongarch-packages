@@ -1,0 +1,23 @@
+Subject: [PATCH] tests: Use valid ISO time in cal-cache-search test
+
+The make-time sexp function parses the time manually and sets the fields
+on an ICalTime without validating them.  The string "20111231T595959Z"
+contains an invalid hour (59).  Older libical versions silently accepted
+it, but libical 4.0 returns a null time, i.e. time_t 0, so the range
+becomes 2011-12-31 → 1970-01-01 and e_cal_recur_generate_instances_sync()
+aborts on the "interval_start < interval_end" assertion.
+
+Use a valid time instead; the resulting range still covers the yearly
+event-5 occurrence on 2011-12-31.
+
+--- a/tests/libedata-cal/test-cal-cache-search.c
++++ b/tests/libedata-cal/test-cal-cache-search.c
+@@ -253,7 +253,7 @@
+ 	test_search (fixture, "(occur-in-time-range? (make-time \"20010101T000000Z\") (make-time \"20010101T010000Z\"))", "!event-1");
+ 	test_search (fixture, "(occur-in-time-range? (make-time \"20170209T000000Z\") (make-time \"20170210T000000Z\"))", "event-1");
+ 	test_search (fixture, "(occur-in-time-range? (make-time \"20170209T020000Z\") (make-time \"20170209T023000Z\"))", "event-1");
+-	test_search (fixture, "(occur-in-time-range? (make-time \"20111231T000000Z\") (make-time \"20111231T595959Z\"))", "event-5");
++	test_search (fixture, "(occur-in-time-range? (make-time \"20111231T000000Z\") (make-time \"20120101T000000Z\"))", "event-5");
+ 	test_search (fixture, "(occur-in-time-range? (make-time \"20170225T210100Z\") (make-time \"20170225T210200Z\") \"America/New_York\")", "event-8");
+ 	test_search (fixture, "(occur-in-time-range? (make-time \"20170225T150100Z\") (make-time \"20170225T150200Z\") \"Europe/Berlin\")", "event-8");
+ 	test_search (fixture, "(occur-in-time-range? (make-time \"20170225T160100Z\") (make-time \"20170225T160200Z\") \"UTC\")", "event-8");
