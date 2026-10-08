@@ -1,0 +1,24 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3481842..2ec26ac 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -16,6 +16,9 @@ sha256sums=('1429e8546dcafe508c2f9f94a51d65aea64c8049619fef971997ae9e0fdbc79a')
+ 
+ prepare() {
+   cd "$pkgname-$pkgver"
++  # nix<0.29 ioctl consts lack loong64; netlink-request only uses sysconf
++  sed -i 's/nix = { version = "0.25"/nix = { version = "0.29"/' netlink-request/Cargo.toml
++  cargo update -p netlink-request
+   cargo fetch --locked --target "$(rustc --print host-tuple)"
+ }
+ 
+@@ -26,7 +29,8 @@ build() {
+ 
+ check() {
+   cd "$pkgname-$pkgver"
+-  cargo test --frozen
++  # lld can't link debug proc-macros on loong64; use bfd for tests
++  RUSTFLAGS="${RUSTFLAGS//-C link-arg=-Wl,--icf=safe} -C link-arg=-fuse-ld=bfd" cargo test --frozen
+ }
+ 
+ package() {
