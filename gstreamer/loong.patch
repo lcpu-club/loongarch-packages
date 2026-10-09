@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -295,6 +295,11 @@ build() {
+@@ -298,6 +298,11 @@ build() {
      meson_options+=(-D gst-plugins-bad:svthevcenc=disabled)
    fi
  
@@ -9,20 +9,19 @@
 +    # dots-viewer now requires nix 0.23.2 to build, but nix 0.23.2 is too old to build on loong64
 +    -D gst-devtools:dots_viewer=disabled
 +  )
-   # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/issues/3197
-   export GI_SCANNER_DISABLE_CACHE=1
- 
-@@ -315,7 +320,8 @@ check() (
+   arch-meson gstreamer build "${meson_options[@]}"
+   meson compile -C build
+ }
+@@ -311,7 +316,7 @@ check() (
  
    # Flaky due to timeouts
    xvfb-run -s "-nolisten local" \
--    meson test -C build --print-errorlogs -t $CK_TIMEOUT_MULTIPLIER
-+    meson test -C build --print-errorlogs -t $CK_TIMEOUT_MULTIPLIER || echo "Watch out for failed tests!
-+"
+-    meson test -C build --no-rebuild --print-errorlogs -t $CK_TIMEOUT_MULTIPLIER
++    meson test -C build --no-rebuild --print-errorlogs -t $CK_TIMEOUT_MULTIPLIER || echo "Watch out for failed tests!"
  )
  
  _install() {
-@@ -1228,7 +1234,7 @@ package_gst-devtools() {
+@@ -1204,7 +1209,7 @@ package_gst-devtools() {
      usr/share/icons/hicolor/*/apps/gst-debug-viewer.*
      usr/share/metainfo/org.freedesktop.GstDebugViewer.appdata.xml
  
@@ -31,7 +30,7 @@
    ); _install
  }
  
-@@ -1339,4 +1345,5 @@ package_gstreamer-docs() {
+@@ -1315,4 +1320,5 @@ package_gstreamer-docs() {
    install -Dt "$pkgdir/usr/share/licenses/$pkgname" -m644 COPYING LICENSE*
  }
  
