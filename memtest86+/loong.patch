@@ -1,40 +1,45 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -20,11 +20,13 @@ sha512sums=('1d32fc828a6cab878374a19c5b63e934214ae2101116d27854bd3b19ebfcd27dac4
-             '926f5a7ef54e706c977bc03ca66a9e5ec3aa5ca119359c6e6bfdf83834ff5097689b312032cdf7661afab6baa04867e25792f27dd665fc89a061f2a9e39cf97e')
+@@ -20,14 +20,13 @@ sha512sums=('2a8d2384a87fb474e6658bf02d86f40652e079f690e90481ae9b40d2b19e2f09024
+             '7ac3717b53a06c4c192275bba6f2b58ac38fada26433f752234e426d75a29707ab179c1f5619e8ff5722f70f68cbb7f5e0850f978ff8a96947d92eddfeb9e50e')
  
  build() {
--  cd "memtest86plus"/build64
-+  cd "memtest86plus"/build64/la64
+-  cd "memtest86plus"/build/x86_64
++  cd "memtest86plus"/build/loongarch64
 +  sed -i 's/-part_like_isohybrid//g' Makefile
    make
    make iso
+-
+-  cd "${srcdir}/memtest86plus"/build/i586
+-  make
  }
  
-+  : <<COMMENT_SEPARATOR
++: <<COMMENT_SEPARATOR
  # Do not remove the space before the () or commitpkg will
  # accidentally to run this function on the system (!!!) 
  # see devtools gitlab issue #87
-@@ -35,18 +37,20 @@ package_memtest86+ () {
-   install -Dm644 memtest.bin "$pkgdir"/boot/memtest86+/memtest.bin
+@@ -38,19 +37,21 @@ package_memtest86+ () {
+   install -Dm644 mt86plus "$pkgdir"/boot/memtest86+/memtest.bin
    install -Dm 755 "${srcdir}/60_memtest86+" "${pkgdir}/etc/grub.d/60_memtest86+"
  }
 +COMMENT_SEPARATOR
  package_memtest86+-efi() {
    pkgdesc+=" EFI version"
+   install="${pkgname}.install"
  
--  cd "memtest86plus"/build64
-+  cd "memtest86plus"/build64/la64
-   install -Dm644 memtest.efi "$pkgdir"/boot/memtest86+/memtest.efi
+-  install -Dm644 "memtest86plus/build/x86_64/mt86plus" "$pkgdir"/boot/memtest86+/memtest86x64.efi
+-  install -Dm644 "memtest86plus/build/i586/mt86plus" "$pkgdir"/boot/memtest86+/memtest86ia32.efi
++  install -Dm644 "memtest86plus/build/loongarch64/mt86plus" "$pkgdir"/boot/memtest86+/memtest86x64.efi
    install -Dm 755 "${srcdir}/60_memtest86+-efi" "${pkgdir}/etc/grub.d/60_memtest86+-efi"
  }
  package_memtest86+-iso() {
    pkgdesc+=" ISO image"
  
--  cd "memtest86plus"/build64
-+  cd "memtest86plus"/build64/la64
+-  cd "memtest86plus"/build/x86_64
++  cd "memtest86plus"/build/loongarch64
    install -Dm644 memtest.iso "$pkgdir"/usr/share/memtest86+/memtest.iso
  }
  
 +pkgname=(${pkgname[@]:1})
++makedepends=(${makedepends[@]/lib32-glibc})
  # vim: ts=2 sw=2 et:
