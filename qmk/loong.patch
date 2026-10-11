@@ -1,10 +1,10 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index ee715d8..a363604 100644
+index 426e360..7817efe 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -29,6 +29,11 @@ source=("https://files.pythonhosted.org/packages/source/q/qmk/qmk-${pkgver}.tar.
- sha256sums=('2efe3c752230c6ba24b8719c3b6e85a5644bf8f7d0dd237757eda9b7b7e60b11'
-             'e6cde001890e1d030d13bbe18799b76754aaea8a6d1309ce8c7956d713714920')
+ sha256sums=('164bd16c4c401b2b765ee4f017bcfa8141942ddf362961c4cba1975d8cb28a48'
+             'd5f3ba2ba97f1e70aec1c49cd8054577e35dcc436b310190dbbb1aa8296ff0e1')
  
 +prepare() {
 +  cd qmk_udev-${_qmk_udev_pkgver}
@@ -20,4 +20,4 @@ index ee715d8..a363604 100644
  }
 +
 +source+=('qmk-loongarch-support.patch')
-+sha256sums+=('b6a933ea8106180ebf27565f630cbb2b1ce771a6a970457908569221380b735c')
++sha256sums+=('39c62e51f2f92fcc36c4d96be17512e50c090b5cc252800b3ae822afed061353')
