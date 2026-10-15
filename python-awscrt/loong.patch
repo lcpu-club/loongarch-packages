@@ -1,0 +1,19 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -37,6 +37,9 @@ b2sums=('501ccdf9f36ccbccad91d10bde250d3be030f371be64ad9ee11329041eda05661159b9f
+ prepare() {
+   cd $pkgname
+   sed -i "s/^__version__ = .*/__version__ = '$pkgver'/" awscrt/__init__.py
++  # loong64: test_h2_client downloads the whole 14 MiB CloudFront test file and
++  # cannot finish within its hardcoded 80s timeout on high-latency networks.
++  patch -Np1 -i "$srcdir/skip-network-test.patch"
+ }
+ 
+ build() {
+@@ -57,3 +60,6 @@ package() {
+   cd $pkgname
+   python -m installer --destdir="$pkgdir" dist/*.whl
+ }
++
++source+=('skip-network-test.patch')
++b2sums+=('23c54917168a9abea3c8ae259a36daf7aff17f7b615b5e95d7474cd582ea16df73d2d20e78c3659b62ba1182564f536e8043d63c0809c7076d354a59233389e2')
