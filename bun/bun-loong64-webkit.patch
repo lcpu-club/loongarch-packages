@@ -1,9 +1,28 @@
+diff --git a/Source/JavaScriptCore/CMakeLists.txt b/Source/JavaScriptCore/CMakeLists.txt
+index 5092085..174f860 100644
+--- a/Source/JavaScriptCore/CMakeLists.txt
++++ b/Source/JavaScriptCore/CMakeLists.txt
+@@ -2401,6 +2401,12 @@ if(NOT USE_BUN_JSC_ADDITIONS)
+         DIRS jit dfg ftl bytecode bytecompiler llint lol tools)
+ endif()
+ 
++if (USE_BUN_JSC_ADDITIONS AND WTF_CPU_LOONGARCH64)
++    find_package(PkgConfig REQUIRED)
++    pkg_check_modules(BUN_FFI REQUIRED IMPORTED_TARGET libffi)
++    list(APPEND JavaScriptCore_LIBRARIES PkgConfig::BUN_FFI)
++endif ()
++
+ WEBKIT_FRAMEWORK(JavaScriptCore)
+ 
+ if (USE_APPLE_INTERNAL_SDK)
+diff --git a/Source/JavaScriptCore/domjit/DOMJITEffect.h b/Source/JavaScriptCore/domjit/DOMJITEffect.h
+index 6ba8511..943754f 100644
 --- a/Source/JavaScriptCore/domjit/DOMJITEffect.h
 +++ b/Source/JavaScriptCore/domjit/DOMJITEffect.h
 @@ -28,6 +28,16 @@
  #include "DFGAbstractHeap.h"
  #include "DOMJITHeapRange.h"
-
+ 
 +#if !ENABLE(DFG_JIT)
 +namespace JSC { namespace DFG {
 +enum AbstractHeapKind : unsigned {
@@ -15,8 +34,530 @@
 +#endif
 +
  WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
-
+ 
  namespace JSC {
+diff --git a/Source/JavaScriptCore/ffi/BunFFI.cpp b/Source/JavaScriptCore/ffi/BunFFI.cpp
+index 5fabf84..731a041 100644
+--- a/Source/JavaScriptCore/ffi/BunFFI.cpp
++++ b/Source/JavaScriptCore/ffi/BunFFI.cpp
+@@ -141,10 +141,13 @@ JSFFICallback* createCallback(JSGlobalObject* globalObject, Ref<Signature>&& sig
+         return nullptr;
+     }
+ 
++#if FFI_CALLBACK_THUNK_SUPPORTED
++    // JIT-generated callback thunks; libffi closures (FFI_CALLBACK_LIBFFI) need no JIT
+     if (!Options::useJIT()) [[unlikely]] {
+         throwTypeError(globalObject, scope, "bun:ffi requires the JIT"_s);
+         return nullptr;
+     }
++#endif
+ 
+     RELEASE_AND_RETURN(scope, JSFFICallback::create(vm, globalObject, globalObject->ffiCallbackStructure(), callable, WTF::move(signature), threadsafe, embedderContext));
+ }
+diff --git a/Source/JavaScriptCore/ffi/FFICallHost.cpp b/Source/JavaScriptCore/ffi/FFICallHost.cpp
+index f8e046f..4ac8a1d 100644
+--- a/Source/JavaScriptCore/ffi/FFICallHost.cpp
++++ b/Source/JavaScriptCore/ffi/FFICallHost.cpp
+@@ -41,10 +41,58 @@
+ #include "JSGlobalObject.h"
+ #include "TopExceptionScope.h"
+ 
++#if CPU(LOONGARCH64)
++#include <ffi.h>
++#endif
++
+ namespace JSC {
+ 
+ namespace FFI {
+ 
++#if CPU(LOONGARCH64)
++static ffi_type* nativeType(Type type)
++{
++    switch (type) {
++    case Type::Char:
++    case Type::Int8:
++        return &ffi_type_sint8;
++    case Type::Uint8:
++    case Type::Bool:
++        return &ffi_type_uint8;
++    case Type::Int16:
++        return &ffi_type_sint16;
++    case Type::Uint16:
++        return &ffi_type_uint16;
++    case Type::Int32:
++        return &ffi_type_sint32;
++    case Type::Uint32:
++        return &ffi_type_uint32;
++    case Type::Int64:
++    case Type::Int64Fast:
++        return &ffi_type_sint64;
++    case Type::Uint64:
++    case Type::Uint64Fast:
++    case Type::BufferLength:
++    case Type::JSValue:
++        return &ffi_type_uint64;
++    case Type::Float:
++        return &ffi_type_float;
++    case Type::Double:
++        return &ffi_type_double;
++    case Type::Pointer:
++    case Type::CString:
++    case Type::Function:
++    case Type::Buffer:
++        return &ffi_type_pointer;
++    case Type::Void:
++        return &ffi_type_void;
++    case Type::RESERVED_WasNapiEnv:
++        RELEASE_ASSERT_NOT_REACHED();
++    }
++    RELEASE_ASSERT_NOT_REACHED();
++}
++#endif
++
+ static ALWAYS_INLINE EncodedJSValue ffiCall(JSGlobalObject* globalObject, CallFrame* callFrame)
+ {
+     VM& vm = globalObject->vm();
+@@ -66,11 +114,31 @@ static ALWAYS_INLINE EncodedJSValue ffiCall(JSGlobalObject* globalObject, CallFr
+     }
+     slots[argumentCount] = 0;
+ 
++#if CPU(LOONGARCH64)
++    ffi_cif cif;
++    ffi_type* argumentTypes[Signature::maxArguments];
++    void* argumentValues[Signature::maxArguments];
++    for (unsigned i = 0; i < argumentCount; ++i) {
++        argumentTypes[i] = nativeType(signature.argumentType(i));
++        argumentValues[i] = &slots[i];
++    }
++    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, argumentCount, nativeType(signature.returnType()), argumentTypes) != FFI_OK) [[unlikely]] {
++        throwTypeError(globalObject, scope, "bun:ffi: native ABI rejected the signature"_s);
++        return { };
++    }
++    auto invoke = [&] {
++        ffi_call(&cif, FFI_FN(function->target()), &slots[argumentCount], argumentValues);
++    };
++#else
+     CodePtr<JITThunkPtrTag> thunk = signature.invokeThunk();
+     if (!thunk) [[unlikely]] {
+         throwOutOfMemoryError(globalObject, scope, "bun:ffi failed to allocate executable memory for the invoke thunk"_s);
+         return { };
+     }
++    auto invoke = [&] {
++        thunk.taggedPtr<InvokeThunkFunction>()(function->target(), slots);
++    };
++#endif
+ 
+     if (const CallHooks* hooks = function->hooks()) [[unlikely]] {
+         Exception* pending = nullptr;
+@@ -78,7 +146,7 @@ static ALWAYS_INLINE EncodedJSValue ffiCall(JSGlobalObject* globalObject, CallFr
+             auto hookScope = DECLARE_TOP_EXCEPTION_SCOPE(vm);
+             void* hookToken = hooks->before ? hooks->before(globalObject, callFrame) : nullptr;
+             if (!hookScope.exception()) [[likely]]
+-                thunk.taggedPtr<InvokeThunkFunction>()(function->target(), slots);
++                invoke();
+             pending = hookScope.exception(); // from a throwing before-hook or an in-call callback
+             if (pending) [[unlikely]]
+                 hookScope.clearException();
+@@ -98,7 +166,7 @@ static ALWAYS_INLINE EncodedJSValue ffiCall(JSGlobalObject* globalObject, CallFr
+             return { };
+         }
+     } else
+-        thunk.taggedPtr<InvokeThunkFunction>()(function->target(), slots);
++        invoke();
+     RETURN_IF_EXCEPTION(scope, { });
+ 
+     RELEASE_AND_RETURN(scope, JSValue::encode(jsValueFromSlot(globalObject, context, signature.returnType(), slots[argumentCount])));
+diff --git a/Source/JavaScriptCore/ffi/FFICallbackThunk.cpp b/Source/JavaScriptCore/ffi/FFICallbackThunk.cpp
+index 4b89755..4fcd45f 100644
+--- a/Source/JavaScriptCore/ffi/FFICallbackThunk.cpp
++++ b/Source/JavaScriptCore/ffi/FFICallbackThunk.cpp
+@@ -48,6 +48,10 @@
+ #include "Options.h"
+ #include <wtf/MathExtras.h>
+ 
++#if FFI_CALLBACK_LIBFFI
++#include <ffi.h>
++#endif
++
+ namespace JSC {
+ 
+ #if FFI_CALLBACK_THUNK_SUPPORTED
+@@ -310,6 +314,10 @@ MacroAssemblerCodeRef<JITThunkPtrTag> generateCallbackThunk(VM&, JSFFICallback&
+ 
+ } // namespace FFI
+ 
++#endif // FFI_CALLBACK_THUNK_SUPPORTED
++
++#if FFI_CALLBACK_SUPPORTED
++
+ namespace FFI {
+ 
+ class CallbackEntryScope {
+@@ -484,7 +492,188 @@ void runThreadsafeInvocation(ThreadsafeInvocation& invocation)
+ 
+ } // namespace FFI
+ 
+-#else // !FFI_CALLBACK_THUNK_SUPPORTED
++#if FFI_CALLBACK_LIBFFI
++
++namespace FFI {
++
++namespace {
++
++struct LibffiCallback {
++    WTF_DEPRECATED_MAKE_STRUCT_FAST_ALLOCATED(LibffiCallback);
++    ffi_cif cif;
++    ffi_type* argumentTypes[Signature::maxArguments];
++    ffi_closure* closure { nullptr };
++};
++
++ffi_type* libffiType(Type type)
++{
++    switch (type) {
++    case Type::Char:
++    case Type::Int8:
++        return &ffi_type_sint8;
++    case Type::Uint8:
++    case Type::Bool:
++        return &ffi_type_uint8;
++    case Type::Int16:
++        return &ffi_type_sint16;
++    case Type::Uint16:
++        return &ffi_type_uint16;
++    case Type::Int32:
++        return &ffi_type_sint32;
++    case Type::Uint32:
++        return &ffi_type_uint32;
++    case Type::Int64:
++    case Type::Int64Fast:
++        return &ffi_type_sint64;
++    case Type::Uint64:
++    case Type::Uint64Fast:
++    case Type::BufferLength:
++    case Type::JSValue:
++        return &ffi_type_uint64;
++    case Type::Float:
++        return &ffi_type_float;
++    case Type::Double:
++        return &ffi_type_double;
++    case Type::Pointer:
++    case Type::CString:
++    case Type::Function:
++    case Type::Buffer:
++        return &ffi_type_pointer;
++    case Type::Void:
++        return &ffi_type_void;
++    case Type::RESERVED_WasNapiEnv:
++        RELEASE_ASSERT_NOT_REACHED();
++    }
++    RELEASE_ASSERT_NOT_REACHED();
++}
++
++// The slot encoding of generateCallbackThunk's emitStoreIncomingArgument*:
++// integers extended to 64 bits by their signedness, bool as 0/1, float in the
++// low 32 bits with the high half zero, everything else the raw 64 bits.
++uint64_t slotFromArgument(Type type, const void* value)
++{
++    switch (type) {
++    case Type::Char:
++    case Type::Int8:
++        return static_cast<uint64_t>(static_cast<int64_t>(*static_cast<const int8_t*>(value)));
++    case Type::Uint8:
++        return *static_cast<const uint8_t*>(value);
++    case Type::Bool:
++        return *static_cast<const uint8_t*>(value) ? 1 : 0;
++    case Type::Int16:
++        return static_cast<uint64_t>(static_cast<int64_t>(*static_cast<const int16_t*>(value)));
++    case Type::Uint16:
++        return *static_cast<const uint16_t*>(value);
++    case Type::Int32:
++        return static_cast<uint64_t>(static_cast<int64_t>(*static_cast<const int32_t*>(value)));
++    case Type::Uint32:
++        return *static_cast<const uint32_t*>(value);
++    case Type::Float: {
++        uint32_t bits;
++        memcpy(&bits, value, sizeof(bits));
++        return bits;
++    }
++    default: {
++        uint64_t bits;
++        memcpy(&bits, value, sizeof(bits));
++        return bits;
++    }
++    }
++}
++
++// libffi wants integral results narrower than ffi_arg widened to ffi_arg.
++void storeResult(Type type, uint64_t slot, void* result)
++{
++    switch (type) {
++    case Type::Void:
++        return;
++    case Type::Char:
++    case Type::Int8:
++        *static_cast<ffi_sarg*>(result) = static_cast<int8_t>(slot);
++        return;
++    case Type::Int16:
++        *static_cast<ffi_sarg*>(result) = static_cast<int16_t>(slot);
++        return;
++    case Type::Int32:
++        *static_cast<ffi_sarg*>(result) = static_cast<int32_t>(slot);
++        return;
++    case Type::Uint8:
++        *static_cast<ffi_arg*>(result) = static_cast<uint8_t>(slot);
++        return;
++    case Type::Bool:
++        *static_cast<ffi_arg*>(result) = slot ? 1 : 0;
++        return;
++    case Type::Uint16:
++        *static_cast<ffi_arg*>(result) = static_cast<uint16_t>(slot);
++        return;
++    case Type::Uint32:
++        *static_cast<ffi_arg*>(result) = static_cast<uint32_t>(slot);
++        return;
++    case Type::Float: {
++        uint32_t bits = static_cast<uint32_t>(slot);
++        memcpy(result, &bits, sizeof(bits));
++        return;
++    }
++    default:
++        memcpy(result, &slot, sizeof(slot));
++        return;
++    }
++}
++
++void libffiCallbackHandler(ffi_cif*, void* result, void** arguments, void* userData)
++{
++    JSFFICallback* callback = static_cast<JSFFICallback*>(userData);
++    Signature& signature = callback->signature();
++    const unsigned argumentCount = signature.argumentCount();
++    uint64_t slots[Signature::maxArguments + 1];
++    for (unsigned i = 0; i < argumentCount; ++i)
++        slots[i] = slotFromArgument(signature.argumentType(i), arguments[i]);
++    slots[argumentCount] = 0;
++    if (callback->isThreadsafe())
++        ffiCallbackDispatchThreadsafe(callback, slots);
++    else
++        ffiCallbackDispatch(callback, slots);
++    storeResult(signature.returnType(), slots[argumentCount], result);
++}
++
++} // anonymous namespace
++
++void* createLibffiCallback(JSFFICallback& callback, void** entrypoint)
++{
++    Signature& signature = callback.signature();
++    const unsigned argumentCount = signature.argumentCount();
++    RELEASE_ASSERT(argumentCount <= Signature::maxArguments);
++    auto entry = makeUnique<LibffiCallback>();
++    for (unsigned i = 0; i < argumentCount; ++i)
++        entry->argumentTypes[i] = libffiType(signature.argumentType(i));
++    if (ffi_prep_cif(&entry->cif, FFI_DEFAULT_ABI, argumentCount, libffiType(signature.returnType()), entry->argumentTypes) != FFI_OK)
++        return nullptr;
++    void* code = nullptr;
++    entry->closure = static_cast<ffi_closure*>(ffi_closure_alloc(sizeof(ffi_closure), &code));
++    if (!entry->closure)
++        return nullptr;
++    if (ffi_prep_closure_loc(entry->closure, &entry->cif, libffiCallbackHandler, &callback, code) != FFI_OK) {
++        ffi_closure_free(entry->closure);
++        return nullptr;
++    }
++    *entrypoint = code;
++    return entry.release();
++}
++
++void destroyLibffiCallback(void* handle)
++{
++    auto* entry = static_cast<LibffiCallback*>(handle);
++    if (!entry)
++        return;
++    ffi_closure_free(entry->closure);
++    delete entry;
++}
++
++} // namespace FFI
++
++#endif // FFI_CALLBACK_LIBFFI
++
++#else // !FFI_CALLBACK_SUPPORTED
+ 
+ namespace FFI {
+ void runThreadsafeInvocation(ThreadsafeInvocation&)
+@@ -493,7 +682,7 @@ void runThreadsafeInvocation(ThreadsafeInvocation&)
+ }
+ } // namespace FFI
+ 
+-#endif // FFI_CALLBACK_THUNK_SUPPORTED
++#endif // FFI_CALLBACK_SUPPORTED
+ 
+ } // namespace JSC
+ 
+diff --git a/Source/JavaScriptCore/ffi/FFICallbackThunk.h b/Source/JavaScriptCore/ffi/FFICallbackThunk.h
+index 9978c7c..98725cd 100644
+--- a/Source/JavaScriptCore/ffi/FFICallbackThunk.h
++++ b/Source/JavaScriptCore/ffi/FFICallbackThunk.h
+@@ -39,6 +39,16 @@
+ #define FFI_CALLBACK_THUNK_SUPPORTED 0
+ #endif
+ 
++// LoongArch64 has no JIT tier: callbacks are libffi closures that fill the
++// same slot buffer the generated thunk would and call the same dispatch.
++#if !FFI_CALLBACK_THUNK_SUPPORTED && CPU(LOONGARCH64)
++#define FFI_CALLBACK_LIBFFI 1
++#else
++#define FFI_CALLBACK_LIBFFI 0
++#endif
++
++#define FFI_CALLBACK_SUPPORTED (FFI_CALLBACK_THUNK_SUPPORTED || FFI_CALLBACK_LIBFFI)
++
+ namespace JSC {
+ 
+ class JSFFICallback;
+@@ -50,12 +60,19 @@ namespace FFI {
+ MacroAssemblerCodeRef<JITThunkPtrTag> generateCallbackThunk(VM&, JSFFICallback&);
+ #endif // FFI_CALLBACK_THUNK_SUPPORTED
+ 
++#if FFI_CALLBACK_LIBFFI
++// Returns an opaque closure handle (nullptr on allocation failure) and its
++// native entry point in *entrypoint.
++void* createLibffiCallback(JSFFICallback&, void** entrypoint);
++void destroyLibffiCallback(void*);
++#endif // FFI_CALLBACK_LIBFFI
++
+ } // namespace FFI
+ 
+-#if FFI_CALLBACK_THUNK_SUPPORTED
++#if FFI_CALLBACK_SUPPORTED
+ JSC_DECLARE_JIT_OPERATION(ffiCallbackDispatch, EncodedJSValue, (JSFFICallback*, uint64_t*));
+ JSC_DECLARE_JIT_OPERATION(ffiCallbackDispatchThreadsafe, EncodedJSValue, (JSFFICallback*, uint64_t*));
+-#endif // FFI_CALLBACK_THUNK_SUPPORTED
++#endif // FFI_CALLBACK_SUPPORTED
+ 
+ } // namespace JSC
+ 
+diff --git a/Source/JavaScriptCore/ffi/JSFFICallback.cpp b/Source/JavaScriptCore/ffi/JSFFICallback.cpp
+index ec525ef..bdab922 100644
+--- a/Source/JavaScriptCore/ffi/JSFFICallback.cpp
++++ b/Source/JavaScriptCore/ffi/JSFFICallback.cpp
+@@ -60,7 +60,12 @@ JSFFICallback::JSFFICallback(VM& vm, Structure* structure, Ref<FFI::Signature>&&
+ {
+ }
+ 
+-JSFFICallback::~JSFFICallback() = default;
++JSFFICallback::~JSFFICallback()
++{
++#if FFI_CALLBACK_LIBFFI
++    FFI::destroyLibffiCallback(m_libffiCallback);
++#endif
++}
+ 
+ void JSFFICallback::destroy(JSCell* cell)
+ {
+@@ -86,12 +91,14 @@ JSFFICallback* JSFFICallback::create(VM& vm, JSGlobalObject* globalObject, Struc
+ 
+     auto scope = DECLARE_THROW_SCOPE(vm);
+ 
++#if FFI_CALLBACK_THUNK_SUPPORTED
+     if (!Options::useJIT()) [[unlikely]] {
+         throwTypeError(globalObject, scope, "bun:ffi requires the JIT"_s);
+         return nullptr;
+     }
++#endif
+ 
+-#if !FFI_CALLBACK_THUNK_SUPPORTED
++#if !FFI_CALLBACK_SUPPORTED
+     UNUSED_PARAM(structure);
+     UNUSED_PARAM(callable);
+     UNUSED_PARAM(signature);
+@@ -110,7 +117,11 @@ JSFFICallback* JSFFICallback::create(VM& vm, JSGlobalObject* globalObject, Struc
+     callback->m_embedderContext = embedderContext;
+     callback->finishCreation(vm, callable);
+     RETURN_IF_EXCEPTION(scope, nullptr);
++#if FFI_CALLBACK_LIBFFI
++    if (!callback->m_libffiEntrypoint) [[unlikely]] {
++#else
+     if (!callback->m_entryCode) [[unlikely]] {
++#endif
+         throwOutOfMemoryError(globalObject, scope);
+         return nullptr;
+     }
+@@ -126,10 +137,18 @@ void JSFFICallback::finishCreation(VM& vm, JSObject* callable)
+ 
+     m_callable.set(vm, this, callable);
+ 
+-#if FFI_CALLBACK_THUNK_SUPPORTED
++#if FFI_CALLBACK_SUPPORTED
++#if FFI_CALLBACK_LIBFFI
++    m_libffiCallback = FFI::createLibffiCallback(*this, &m_libffiEntrypoint);
++    if (!m_libffiCallback) [[unlikely]] {
++        m_libffiEntrypoint = nullptr;
++        return; // create() throws the OutOfMemoryError.
++    }
++#else
+     m_entryCode = FFI::generateCallbackThunk(vm, *this);
+     if (!m_entryCode) [[unlikely]]
+         return; // create() throws the OutOfMemoryError.
++#endif
+ 
+     if (Options::verboseFFI()) [[unlikely]]
+         dataLogLn("FFI: created JSFFICallback ", RawPointer(this), " signature ", m_signature->toString(), " entrypoint ", RawPointer(nativeEntrypoint()));
+@@ -142,7 +161,11 @@ void JSFFICallback::finishCreation(VM& vm, JSObject* callable)
+ 
+ void* JSFFICallback::nativeEntrypoint() const
+ {
++#if FFI_CALLBACK_LIBFFI
++    return m_libffiEntrypoint;
++#else
+     return untagCFunctionPtr<void*, JITThunkPtrTag>(m_entryCode.code().taggedPtr());
++#endif
+ }
+ 
+ const char* JSFFICallback::setReturnCString(const UTF8CString& string)
+diff --git a/Source/JavaScriptCore/ffi/JSFFICallback.h b/Source/JavaScriptCore/ffi/JSFFICallback.h
+index 2b4575b..986c816 100644
+--- a/Source/JavaScriptCore/ffi/JSFFICallback.h
++++ b/Source/JavaScriptCore/ffi/JSFFICallback.h
+@@ -27,6 +27,7 @@
+ 
+ #if USE(BUN_JSC_ADDITIONS)
+ 
++#include "FFICallbackThunk.h"
+ #include "FFISignature.h"
+ #include "JSObject.h"
+ #include "MacroAssemblerCodeRef.h"
+@@ -102,6 +103,10 @@ private:
+     Ref<FFI::Signature> m_signature;
+     Vector<char, 64> m_returnCString;
+     MacroAssemblerCodeRef<JITThunkPtrTag> m_entryCode;
++#if FFI_CALLBACK_LIBFFI
++    void* m_libffiCallback { nullptr }; // FFI::createLibffiCallback handle
++    void* m_libffiEntrypoint { nullptr };
++#endif
+     void* m_embedderContext { nullptr }; // opaque, embedder-owned; passed to threadsafe dispatch
+     std::atomic<unsigned> m_threadsafeState { 0 }; // closedBit | pending-invocation count (see above)
+     bool m_threadsafe { false };
+diff --git a/Source/JavaScriptCore/ffi/JSFFIFunction.cpp b/Source/JavaScriptCore/ffi/JSFFIFunction.cpp
+index 7ece49d..db3b66c 100644
+--- a/Source/JavaScriptCore/ffi/JSFFIFunction.cpp
++++ b/Source/JavaScriptCore/ffi/JSFFIFunction.cpp
+@@ -98,12 +98,14 @@ JSFFIFunction* JSFFIFunction::create(VM& vm, JSGlobalObject* globalObject, Struc
+ {
+     auto scope = DECLARE_THROW_SCOPE(vm);
+ 
++#if !CPU(LOONGARCH64)
+     if (!Options::useJIT()) [[unlikely]] {
+         throwTypeError(globalObject, scope, "bun:ffi requires the JIT"_s);
+         return nullptr;
+     }
++#endif
+ 
+-#if ENABLE(JIT_CAGE) || !(CPU(X86_64) || CPU(ARM64))
++#if ENABLE(JIT_CAGE) || !(CPU(X86_64) || CPU(ARM64) || CPU(LOONGARCH64))
+     UNUSED_PARAM(structure);
+     UNUSED_PARAM(signatureRef);
+     UNUSED_PARAM(target);
+diff --git a/Source/JavaScriptCore/runtime/JSModuleLoader.cpp b/Source/JavaScriptCore/runtime/JSModuleLoader.cpp
+index bda17b3..ee65601 100644
 --- a/Source/JavaScriptCore/runtime/JSModuleLoader.cpp
 +++ b/Source/JavaScriptCore/runtime/JSModuleLoader.cpp
 @@ -50,6 +50,7 @@
@@ -27,3 +568,15 @@
  #include <wtf/text/MakeString.h>
  
  namespace JSC {
+diff --git a/Source/JavaScriptCore/runtime/VM.cpp b/Source/JavaScriptCore/runtime/VM.cpp
+index 8713c8f..c6d0159 100644
+--- a/Source/JavaScriptCore/runtime/VM.cpp
++++ b/Source/JavaScriptCore/runtime/VM.cpp
+@@ -163,6 +163,7 @@
+ #include <wtf/CryptographicallyRandomNumber.h>
+ #include <wtf/ProcessID.h>
+ #include <wtf/ReadWriteLock.h>
++#include <wtf/Scope.h>
+ #include <wtf/SimpleStats.h>
+ #include <wtf/StackTrace.h>
+ #include <wtf/StringPrintStream.h>
