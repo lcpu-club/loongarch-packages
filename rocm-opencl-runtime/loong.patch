@@ -1,8 +1,8 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -49,3 +49,13 @@ package() {
-     echo '/opt/rocm/lib/libamdocl64.so' > 'amdocl64.icd'
-     install -Dm644 'amdocl64.icd' "$pkgdir/etc/OpenCL/vendors/amdocl64.icd"
+@@ -52,3 +52,13 @@ package() {
+ 
+     install -Dm644 "$_dir_name/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
 +prepare() {
@@ -12,5 +12,5 @@
 +
 +source+=("0002-support-arm64-loongarch64-riscv64.patch"
 +         "0004-replace-llvm-mc.patch")
-+sha256sums+=('cf57bc26ede388a55f645065f7c15cf8b994f8e9c9d9d0aedb65b7b3760d539f'
-+             '1779ab6d3128135fa3eb1fe8f24836ec019ccaf5f17bb91bf84824a671d83c30')
++sha256sums+=('d43329acf9f632b3aa8749086197552e6ea0789392f54262c8979802a4993ed5'
++             '932c06c6d7630d389149eccbdde84d228c2ab2bccf0ffc7f0f63de2dd3bc0a26')

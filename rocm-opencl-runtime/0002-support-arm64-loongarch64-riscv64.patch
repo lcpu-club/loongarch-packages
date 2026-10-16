@@ -20,26 +20,6 @@ index 8ccab6a53e..f563724f3a 100644
  #define CASE_STRING(X, C)                                                                          \
    case X:                                                                                          \
      case_string = #C;                                                                              \
-diff --git a/rocclr/device/rocm/rocvirtual.cpp b/rocclr/device/rocm/rocvirtual.cpp
-index 5a0392292a..a3298a2c48 100644
---- a/rocclr/device/rocm/rocvirtual.cpp
-+++ b/rocclr/device/rocm/rocvirtual.cpp
-@@ -50,6 +50,15 @@
- #else
- #include <immintrin.h>
- #endif
-+#elif defined(__aarch64__)
-+#define _mm_sfence(ptr) asm volatile("DMB ishst":::"memory")
-+#define _mm_mfence(ptr) asm volatile("DMB ish":::"memory")
-+#elif defined(__loongarch_lp64)
-+#define _mm_sfence(ptr) asm volatile ("dbar 0":::"memory")
-+#define _mm_mfence(ptr) asm volatile ("dbar 0":::"memory")
-+#elif defined(__riscv) && __riscv_xlen == 64
-+#define _mm_sfence(ptr) asm volatile("fence w,w":::"memory")
-+#define _mm_mfence(ptr) asm volatile("fence rw,rw":::"memory")
- #endif
-
- /**
 diff --git a/rocclr/include/top.hpp b/rocclr/include/top.hpp
 index f67d6c72f4..6b3f20acaf 100644
 --- a/rocclr/include/top.hpp
