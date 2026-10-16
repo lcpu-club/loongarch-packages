@@ -1,14 +1,29 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 035ecbe..e3f9060 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -21,6 +21,9 @@ sha256sums=('76bfac6fba31a9c4ec196d9b9b2d5ec51b8b68840b3fba8686aa42323d76a425'
+@@ -19,6 +19,13 @@ sha256sums=('f832a52ead9788c9cc6d40e2fb84818c3e8e82b06079f26623a719cd891efd61')
  _dirname="$(basename "$url")-$(basename "${source[0]}" .tar.gz)"
  
  prepare() {
-+    # clang on loong64 doesn't support `-fstack-clash-protection` and will cause Werror in `check()`
++    # clang on loong64 doesn't support `-fstack-clash-protection` and ignores
++    # `-fno-plt`; clang-tidy reports the latter as an unused argument and turns
++    # it into an error in `check()`
 +    export CXXFLAGS="${CXXFLAGS//-fstack-clash-protection/}"
++    export CXXFLAGS="${CXXFLAGS//-fno-plt/}"
 +    export CFLAGS="${CFLAGS//-fstack-clash-protection/}"
++    export CFLAGS="${CFLAGS//-fno-plt/}"
      cd "$_dirname"
-     # Git version tests fail because we're not working in a local git checkout
-     rm test/pass/{version-norepo.cmake,version-parent.cmake}
+     # Silence warnings that turn into errors with recent cmake versions
+     sed -i 's/-Werror=dev/& -Wno-error=install-absolute-destination/' test/test.cmake
+@@ -28,6 +35,12 @@ prepare() {
+     # https://github.com/RadeonOpenCompute/rocm-docs-core
+     # As we don't package it, disable also this test
+     rm test/pass/doc-sphinxdoxygen.cmake
++    # clang-tidy >= 19 reports the sample functions as internal linkage
++    # candidates unless they are declared externally, so include the sample's
++    # public header again in the analyze test sources
++    sed -i 's/^void simple();$/void simple();\nvoid simple2();/' test/analyze/include/simple.h
++    sed -i 's/^void simple()$/#include <simple.h>\n\nvoid simple()/' test/analyze/simple.cpp
++    sed -i 's/^void simple2()$/#include <simple.h>\n\nvoid simple2()/' test/analyze/simple2.cpp.in
+ }
+ 
+ build() {
