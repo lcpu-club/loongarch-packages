@@ -1,13 +1,21 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -126,3 +126,10 @@ package() {
+@@ -25,6 +25,10 @@ prepare() {
+     # Point the dependency at the intrinsic modules of the installed flang.
+     sed -i "s@\${LLVM_BINARY_DIR}/include/flang@$_prefix/include/flang@" \
+         "$pkgname/openmp/module/CMakeLists.txt"
++
++    # The AMDGPU plugin gate in offload/CMakeLists.txt does not know
++    # loongarch64, which drops the only requested plugin and breaks configure.
++    patch -Np1 -d "$pkgname" -i "$srcdir/0001-offload-support-amdgpu-plugin-on-loongarch64.patch"
+ }
+ 
+ build() {
+@@ -132,3 +136,7 @@ package() {
      install -Dm644 openmp/LICENSE.TXT "$pkgdir/usr/share/licenses/$pkgname/openmp-LICENSE"
      install -Dm644 llvm/LICENSE.TXT "$pkgdir/usr/share/licenses/$pkgname/llvm-LICENSE"
  }
 +
-+prepare() {
-+    patch -Np1 -d "$pkgname" -i "$srcdir/0001-offload-support-amdgpu-plugin-on-loongarch64.patch"
-+}
 +
 +source+=("0001-offload-support-amdgpu-plugin-on-loongarch64.patch")
-+sha256sums+=("8b27fec0f63b9dfa0b92b4b47771566fd6c2ef98f6bd87da1f975d4c14ec0a27")
++sha256sums+=("e1b10c21c997068f431bb340a1717f859eb66d283f6542d0d4ca9d4253ea42cd")
