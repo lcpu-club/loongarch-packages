@@ -1,0 +1,29 @@
+From bd209f39b43f958a1ac338c338a9a9538751b2fe Mon Sep 17 00:00:00 2001
+From: wanglei <wanglei@loongson.cn>
+Date: Thu, 4 Jun 2026 18:01:04 +0800
+Subject: [PATCH] [LoongArch] Fix FP_EXTEND legalization for v2f32 (#201260)
+
+FP_EXTEND may reach ReplaceNodeResults due to a Custom action for
+v2f32 results, but no target-specific lowering is required.
+
+Fixes #198339
+---
+ llvm/lib/Target/LoongArch/LoongArchISelLowering.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/llvm/lib/Target/LoongArch/LoongArchISelLowering.cpp b/llvm/lib/Target/LoongArch/LoongArchISelLowering.cpp
+index 561064b3e109..0a80a88122c2 100644
+--- a/llvm/lib/Target/LoongArch/LoongArchISelLowering.cpp
++++ b/llvm/lib/Target/LoongArch/LoongArchISelLowering.cpp
+@@ -5860,6 +5860,11 @@ void LoongArchTargetLowering::ReplaceNodeResults(
+     Results.push_back(DAG.getNode(ISD::CONCAT_VECTORS, DL, DstVT, Blocks));
+     break;
+   }
++  case ISD::FP_EXTEND:
++    // FP_EXTEND may reach here due to the Custom action for v2f32 results, but
++    // no target-specific lowering is required. Leave it unchanged and rely on
++    // the default type legalization.
++    break;
+   }
+ }
+ 
