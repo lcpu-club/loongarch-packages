@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -61,3 +61,8 @@ package() {
+   install -vDm 644 output/shell_completions/_$pkgname -t "$pkgdir/usr/share/zsh/site-functions/"
+   install -vDm 644 LICENSES/*.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
+ }
++
++# loong64: lld fails with "address assignment did not converge" when linking
++# with debug info enabled (makepkg appends DEBUG_RUSTFLAGS), so disable the
++# LoongArch linker relaxation for all rustc invocations.
++RUSTFLAGS+=" -C link-arg=-Wl,--no-relax"
