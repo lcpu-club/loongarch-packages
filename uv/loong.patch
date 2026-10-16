@@ -1,5 +1,3 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 442b221..1aeb4ca 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -42,6 +42,7 @@ _srcenv() {
@@ -15,6 +13,6 @@ index 442b221..1aeb4ca 100644
  }
  
 +source+=('loongarch64-fiemap.patch')
-+sha256sums+=('a3045ff89b47ff818ab14141d94c0a0af5e12d4649def23665ecb0873e2d81b1')
++sha256sums+=('4222f0eb11650d08133f87936d69ae6688059d2b1564af635fe375b9e242e434')
 +
  # vim: ts=2 sw=2 et:
