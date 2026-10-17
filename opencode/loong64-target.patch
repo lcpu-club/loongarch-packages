@@ -1,7 +1,7 @@
 --- a/packages/cli/script/build.ts
 +++ b/packages/cli/script/build.ts
-@@ -32,10 +32,11 @@
-
+@@ -36,10 +36,11 @@
+ 
  const allTargets: {
    os: string
 -  arch: "arm64" | "x64"
@@ -13,7 +13,7 @@
    { os: "linux", arch: "arm64" },
    { os: "linux", arch: "x64" },
    { os: "linux", arch: "x64", avx2: false },
-@@ -107,7 +108,10 @@
+@@ -139,7 +140,10 @@
        )
      },
    }
@@ -25,6 +25,38 @@
    const parcelWatcherPlugin: BunPlugin = {
      name: "parcel-watcher-binding",
      setup(build) {
+@@ -149,6 +153,23 @@
+       }))
+     },
+   }
++  // loong64 has no librust_pty build: embedding bun-pty's dynamic requires pulls foreign x64 libraries.
++  const ptyStubPlugin: BunPlugin = {
++    name: "opencode-pty-stub",
++    setup(build) {
++      if (item.arch !== "loong64") return
++      build.onLoad({ filter: /pty[/\\]pty\.bun\.ts$/ }, () => ({
++        loader: "ts",
++        contents:
++          `import type { Disp, Exit, Opts, Proc } from "./pty.js"\n` +
++          `export type { Disp, Exit, Opts, Proc } from "./pty.js"\n` +
++          `export function spawnPty(file: string, args: string[], opts: Opts): Proc {\n` +
++          `  throw new Error("PTY spawning is unsupported on loong64: no librust_pty shared library.")\n` +
++          `}\n` +
++          `export { spawnPty as spawn }\n`,
++      }))
++    },
++  }
+   const target = targetName(item)
+   const name = target.replace(binary, "cli")
+   const executablePath = await compileExecutable(item)
+@@ -161,6 +182,7 @@
+       solidPlugin,
+       parcelWatcherPlugin,
+       opencodePtyPlugin,
++      ptyStubPlugin,
+       pluginRuntimePlugin,
+       simulationGraphPlugin,
+     ],
 --- a/packages/core/package.json
 +++ b/packages/core/package.json
 @@ -50,9 +50,9 @@
@@ -39,3 +71,24 @@
      },
      "#photon-wasm": {
        "workerd": "./src/image/photon-wasm.workerd.ts",
+
+--- a/script/native-arch.ts
++++ b/script/native-arch.ts
+@@ -9,7 +9,7 @@
+ }
+ 
+ const PE_MACHINES: Record<number, string> = { 0x8664: "x64", 0xaa64: "arm64", 0x014c: "x86", 0x01c4: "arm" }
+-const ELF_MACHINES: Record<number, string> = { 62: "x64", 183: "arm64", 3: "x86", 40: "arm" }
++const ELF_MACHINES: Record<number, string> = { 62: "x64", 183: "arm64", 3: "x86", 40: "arm", 258: "loong64" }
+ const MACHO_CPUS: Record<number, string> = { 0x01000007: "x64", 0x0100000c: "arm64", 7: "x86", 12: "arm" }
+ 
+ export namespace NativeArch {
+@@ -29,7 +29,7 @@
+    * wrong-architecture library loads only on the machine that needs it, so it ships unnoticed: 2.0.27's ARM64
+    * Windows CLI embedded an x64 rust_pty.dll and could not open a terminal.
+    */
+-  export async function verify(file: string, arch: "x64" | "arm64") {
++  export async function verify(file: string, arch: "x64" | "arm64" | "loong64") {
+     const found = images(await readFile(file))
+     if (found[0]?.offset !== 0) throw new Error(`${file} is not a native executable or library`)
+     const wrong = found.filter((image) => !image.arches.includes(arch))
