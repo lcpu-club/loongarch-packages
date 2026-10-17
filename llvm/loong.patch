@@ -1,0 +1,16 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -237,6 +237,13 @@ build() {
+   CFLAGS=${CFLAGS/-g /-g1 }
+   CXXFLAGS=${CXXFLAGS/-g /-g1 }
+ 
++  # LoongArch clang does not implement -fno-plt.  The resulting
++  # -Wunused-command-line-argument warning makes LLVM's "-Werror <flag>" feature
++  # probes fail in the clang-built runtimes sub-build, so -fPIC is never added
++  # there and openmp's libomptest.so cannot link the embedded GoogleTest objects.
++  CFLAGS=${CFLAGS/-fno-plt/}
++  CXXFLAGS=${CXXFLAGS/-fno-plt/}
++
+   local cmake_args=(
+     -G Ninja
+     -DCMAKE_BUILD_TYPE=Release
