@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a5ffcb6..1e01ea1 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,6 +34,9 @@ prepare() {
+   rm -v "test/fast/Listing versions/Running 'nvm ls' should not show a trailing slash"
+   rm -v "test/fast/Set Colors/nvm_print_versions calls nvm_get_colors"
+   rm -v "test/fast/Unit tests/nvm ls-remote"
++  # loong64: nodejs.org publishes no linux-loong64 binaries
++  rm -v "test/fast/Unit tests/nvm_install_no_progress_bar"
++  rm -v "test/fast/Running 'nvm install' with '--reinstall-packages-from' requires a valid version"
+ }
+ 
+ check() {
