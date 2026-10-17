@@ -1,0 +1,254 @@
+From d54ecc1aecae230cf61d1c0b2d577ee2bd86e2a7 Mon Sep 17 00:00:00 2001
+From: hev <wangrui@loongson.cn>
+Date: Fri, 2 Oct 2026 22:31:51 +0800
+Subject: [PATCH] [lld][LoongArch] Prevent relaxation oscillation for LA.PCRel
+ and CALL (#226713)
+
+Relaxation of pcalau12i+addi (relaxPCHi20Lo12, isInt<22>) and
+call36/call30 (relaxMediumCall, isInt<28>) can oscillate: shrinking one
+section moves a symbol, which flips isInt<N> for other sites and changes
+bytesDropped again.
+
+Follow the same approach as RISCV::relaxCall: after a few passes, do not
+allow remove to increase beyond the previous pass's value (cur - delta).
+Pass that cap as prevRemove into the two helpers; range checks may still
+clear remove (0) when the target goes out of range.
+
+Fixes #226712
+
+(cherry picked from commit 32757891963d7a544dbcf6a52e8f7a7c67e273aa)
+---
+ lld/ELF/Arch/LoongArch.cpp                  | 29 ++++++++---
+ lld/test/ELF/loongarch-relax-call-stress.s  | 58 +++++++++++++++++++++
+ lld/test/ELF/loongarch-relax-pcrel-stress.s | 58 +++++++++++++++++++++
+ 3 files changed, 138 insertions(+), 7 deletions(-)
+ create mode 100644 lld/test/ELF/loongarch-relax-call-stress.s
+ create mode 100644 lld/test/ELF/loongarch-relax-pcrel-stress.s
+
+diff --git a/lld/ELF/Arch/LoongArch.cpp b/lld/ELF/Arch/LoongArch.cpp
+index 224c31d5a2f1d..6c65b74b716f2 100644
+--- a/lld/ELF/Arch/LoongArch.cpp
++++ b/lld/ELF/Arch/LoongArch.cpp
+@@ -1113,7 +1113,7 @@ static bool isPairRelaxable(ArrayRef<Relocation> relocs, size_t i) {
+ //   pcaddi $a0, %got_pc_hi20(sym_got)
+ static void relaxPCHi20Lo12(Ctx &ctx, const InputSection &sec, size_t i,
+                             uint64_t loc, Relocation &rHi20, Relocation &rLo12,
+-                            uint32_t &remove) {
++                            uint32_t &remove, uint32_t prevRemove) {
+   // check if the relocations are relaxable sequences.
+   if (!((rHi20.type == R_LARCH_PCALA_HI20 &&
+          rLo12.type == R_LARCH_PCALA_LO12) ||
+@@ -1179,6 +1179,11 @@ static void relaxPCHi20Lo12(Ctx &ctx, const InputSection &sec, size_t i,
+   if (getD5(currInsn) != getJ5(nextInsn) || getJ5(nextInsn) != getD5(nextInsn))
+     return;
+ 
++  // When the caller specifies the old value of `remove`, disallow its
++  // increment.
++  if (prevRemove < 4)
++    return;
++
+   sec.relaxAux->relocTypes[i] = R_LARCH_RELAX;
+   if (rHi20.type == R_LARCH_TLS_GD_PC_HI20)
+     sec.relaxAux->relocTypes[i + 2] = R_LARCH_TLS_GD_PCREL20_S2;
+@@ -1203,7 +1208,8 @@ static void relaxPCHi20Lo12(Ctx &ctx, const InputSection &sec, size_t i,
+ // To:
+ //   b/bl foo
+ static void relaxMediumCall(Ctx &ctx, const InputSection &sec, size_t i,
+-                            uint64_t loc, Relocation &r, uint32_t &remove) {
++                            uint64_t loc, Relocation &r, uint32_t &remove,
++                            uint32_t prevRemove) {
+   const uint64_t dest =
+       (r.expr == R_PLT_PC ? r.sym->getPltVA(ctx) : r.sym->getVA(ctx)) +
+       r.addend;
+@@ -1213,6 +1219,11 @@ static void relaxMediumCall(Ctx &ctx, const InputSection &sec, size_t i,
+   if ((displace & 0x3) != 0 || !isInt<28>(displace))
+     return;
+ 
++  // When the caller specifies the old value of `remove`, disallow its
++  // increment.
++  if (prevRemove < 4)
++    return;
++
+   const uint32_t nextInsn = read32le(sec.content().data() + r.offset + 4);
+   if (getD5(nextInsn) == R_RA) {
+     // convert jirl to bl
+@@ -1254,7 +1265,7 @@ static void relaxTlsLe(Ctx &ctx, const InputSection &sec, size_t i,
+   }
+ }
+ 
+-static bool relax(Ctx &ctx, InputSection &sec) {
++static bool relax(Ctx &ctx, int pass, InputSection &sec) {
+   const uint64_t secAddr = sec.getVA();
+   const MutableArrayRef<Relocation> relocs = sec.relocs();
+   auto &aux = *sec.relaxAux;
+@@ -1267,6 +1278,10 @@ static bool relax(Ctx &ctx, InputSection &sec) {
+   for (auto [i, r] : llvm::enumerate(relocs)) {
+     const uint64_t loc = secAddr + r.offset - delta;
+     uint32_t &cur = aux.relocDeltas[i], remove = 0;
++    // Prevent oscillation between states by disallowing the increment of
++    // `remove` after a few passes. The previous `remove` value is
++    // `cur-delta`.
++    uint32_t prevRemove = pass < 4 ? UINT32_MAX : cur - delta;
+     switch (r.type) {
+     case R_LARCH_ALIGN: {
+       const uint64_t addend =
+@@ -1298,19 +1313,19 @@ static bool relax(Ctx &ctx, InputSection &sec) {
+     case R_LARCH_TLS_LD_PC_HI20:
+       // The overflow check for i+2 will be carried out in isPairRelaxable.
+       if (isPairRelaxable(relocs, i))
+-        relaxPCHi20Lo12(ctx, sec, i, loc, r, relocs[i + 2], remove);
++        relaxPCHi20Lo12(ctx, sec, i, loc, r, relocs[i + 2], remove, prevRemove);
+       break;
+     case R_LARCH_TLS_DESC_PC_HI20:
+       if (r.expr == RE_LOONGARCH_GOT_PAGE_PC || r.expr == R_TPREL) {
+         if (relaxable(relocs, i))
+           remove = 4;
+       } else if (isPairRelaxable(relocs, i))
+-        relaxPCHi20Lo12(ctx, sec, i, loc, r, relocs[i + 2], remove);
++        relaxPCHi20Lo12(ctx, sec, i, loc, r, relocs[i + 2], remove, prevRemove);
+       break;
+     case R_LARCH_CALL30:
+     case R_LARCH_CALL36:
+       if (relaxable(relocs, i))
+-        relaxMediumCall(ctx, sec, i, loc, r, remove);
++        relaxMediumCall(ctx, sec, i, loc, r, remove, prevRemove);
+       break;
+     case R_LARCH_TLS_LE_HI20_R:
+     case R_LARCH_TLS_LE_ADD_R:
+@@ -1698,7 +1713,7 @@ bool LoongArch::relaxOnce(int pass) const {
+       continue;
+     for (InputSection *sec : getInputSections(*osec, storage))
+       if (sec->relaxAux)
+-        changed |= relax(ctx, *sec);
++        changed |= relax(ctx, pass, *sec);
+   }
+   return changed;
+ }
+diff --git a/lld/test/ELF/loongarch-relax-call-stress.s b/lld/test/ELF/loongarch-relax-call-stress.s
+new file mode 100644
+index 0000000000000..924c79b1232ed
+--- /dev/null
++++ b/lld/test/ELF/loongarch-relax-call-stress.s
+@@ -0,0 +1,58 @@
++# REQUIRES: loongarch
++##
++## call36 -> bl relaxation (relaxMediumCall, isInt<28>) must not
++## oscillate between remove=0 and remove=4. Without the fix, ld.lld reports
++## "address assignment did not converge".
++##
++## Unlike RISC-V calls (8 -> 4 -> 2 bytes), every LoongArch medium call site has
++## only two states (8 or 4 bytes), so oscillation is always a 0 <-> 4 flip.
++## The flip needs a site whose distance sits exactly at the +-128MiB limit while
++## a ".p2align 4" (R_LARCH_ALIGN) absorbs some shrinks but not others, so the
++## target address jitters between passes.
++##
++## The layout is deliberately fragile: the .space size below was found by
++## searching a model of lld's relaxation loop. Do not "round" it. The base
++## address is pinned with -Ttext, and the final addresses are checked below so
++## that a change in the .text.a/.text.b gap (which decides whether the call
++## sites sit on the +-128MiB boundary) makes the test fail instead of silently
++## no longer exercising the bug.
++
++# RUN: llvm-mc -filetype=obj -triple=loongarch64 -mattr=+relax %s -o %t.o
++# RUN: ld.lld -e _start -Ttext=0x10000 %t.o -o %t
++# RUN: llvm-objdump -d --no-show-raw-insn %t | FileCheck %s
++# RUN: llvm-readelf -s %t | FileCheck %s --check-prefix=SYM
++
++## The two short-range sites in .text.a are always relaxed.
++# CHECK-LABEL: <_start>:
++# CHECK-NEXT: bl {{[0-9a-f]+}} <t_d>
++# CHECK-NEXT: bl {{[0-9a-f]+}} <t_e>
++
++## .text.a is 16 bytes and .text.b starts right after it, so t_c - t_d is
++## exactly (128MiB - 4)
++# SYM-DAG: 0000000000010000 {{.*}} _start
++# SYM-DAG: 0000000000010010 {{.*}} t_d
++# SYM-DAG: 000000000801000c {{.*}} t_c
++
++.section .text.a,"ax"
++.globl _start
++_start:
++  call36 t_d
++  call36 t_e
++.globl t_e
++t_e:
++  call36 t_c            # forward, crosses the 128MiB filler
++.globl t_d
++t_d:
++
++.section .text.b,"ax"
++  .space 8
++  call36 t_a
++  call36 t_d            # backward, crosses the 128MiB filler
++  .space 134217696 # 128MiB - 32: puts the sites right at the isInt<28> limit
++  call36 _start         # backward, near the limit
++.globl t_c
++t_c:
++  .p2align 4        # R_LARCH_ALIGN; also makes .text.b 16-byte aligned
++  call36 t_d
++.globl t_a
++t_a:
+diff --git a/lld/test/ELF/loongarch-relax-pcrel-stress.s b/lld/test/ELF/loongarch-relax-pcrel-stress.s
+new file mode 100644
+index 0000000000000..1340d16fecbb4
+--- /dev/null
++++ b/lld/test/ELF/loongarch-relax-pcrel-stress.s
+@@ -0,0 +1,58 @@
++# REQUIRES: loongarch
++##
++## la.pcrel -> pcaddi relaxation (relaxPCHi20Lo12, isInt<22>) must not
++## oscillate between remove=0 and remove=4. Without the fix, ld.lld reports
++## "address assignment did not converge".
++##
++## Unlike RISC-V calls (8 -> 4 -> 2 bytes), every LoongArch la.pcrel site has
++## only two states (8 or 4 bytes), so oscillation is always a 0 <-> 4 flip.
++## The flip needs a site whose distance sits exactly at the +-2MiB limit while
++## a ".p2align 4" (R_LARCH_ALIGN) absorbs some shrinks but not others, so the
++## target address jitters between passes.
++##
++## The layout is deliberately fragile: the .space size below was found by
++## searching a model of lld's relaxation loop. Do not "round" it. The base
++## address is pinned with -Ttext, and the final addresses are checked below so
++## that a change in the .text.a/.text.b gap (which decides whether the call
++## sites sit on the +-2MiB boundary) makes the test fail instead of silently
++## no longer exercising the bug.
++
++# RUN: llvm-mc -filetype=obj -triple=loongarch64 -mattr=+relax %s -o %t.o
++# RUN: ld.lld -e _start -Ttext=0x10000 %t.o -o %t
++# RUN: llvm-objdump -d --no-show-raw-insn %t | FileCheck %s
++# RUN: llvm-readelf -s %t | FileCheck %s --check-prefix=SYM
++
++## The two short-range sites in .text.a are always relaxed.
++# CHECK-LABEL: <_start>:
++# CHECK-NEXT:    pcaddi $t0, 4
++# CHECK-NEXT:    pcaddi $t1, 1
++
++## .text.a is 16 bytes and .text.b starts right after it, so t_c - t_d is
++## exactly (2MiB - 4)
++# SYM-DAG: 0000000000010000 {{.*}} _start
++# SYM-DAG: 0000000000010010 {{.*}} t_d
++# SYM-DAG: 000000000021000c {{.*}} t_c
++
++.section .text.a,"ax"
++.globl _start
++_start:
++  la.pcrel $t0, t_d
++  la.pcrel $t1, t_e
++.globl t_e
++t_e:
++  la.pcrel $t2, t_c            # forward, crosses the 2MiB filler
++.globl t_d
++t_d:
++
++.section .text.b,"ax"
++  .space 8
++  la.pcrel $t3, t_a
++  la.pcrel $t4, t_d            # backward, crosses the 2MiB filler
++  .space 2097120    # 2MiB - 32: puts the sites right at the isInt<22> limit
++  la.pcrel $t5, _start         # backward, near the limit
++.globl t_c
++t_c:
++  .p2align 4        # R_LARCH_ALIGN; also makes .text.b 16-byte aligned
++  la.pcrel $t6, t_d
++.globl t_a
++t_a:
