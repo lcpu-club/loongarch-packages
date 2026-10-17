@@ -1,9 +1,9 @@
 --- a/packages/core/src/shell/parse.ts
 +++ b/packages/core/src/shell/parse.ts
-@@ -167,7 +167,7 @@
-   options?: { portable?: boolean },
+@@ -169,7 +169,7 @@
  ) {
-   if (options?.portable) return yield* scanPortable(command, shell, cwd)
+   if (options?.portable || (options?.wasm ?? shellParserWasm).bash === "")
+     return yield* scanPortable(command, shell, cwd)
 -  return yield* scanLegacy(command, shell, cwd)
 +  return yield* scanLegacy(command, shell, cwd).pipe(Effect.catchCause(() => scanPortable(command, shell, cwd)))
  })

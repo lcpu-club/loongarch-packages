@@ -1,12 +1,12 @@
---- a/chunk-bun-9gqvxy8c.js
-+++ b/chunk-bun-9gqvxy8c.js
+--- a/chunk-bun-6rvkxs1v.js
++++ b/chunk-bun-6rvkxs1v.js
 @@ -1,4 +1,5 @@
  // @bun
 +import koffi from "./koffi.node";
  var __defProp = Object.defineProperty;
  var __returnValue = (v) => v;
  function __exportSetter(name, newValue) {
-@@ -199,7 +200,7 @@
+@@ -198,7 +199,7 @@
  var backend = loadBackend();
  function loadBackend() {
    if (isBun) {
@@ -15,7 +15,7 @@
    }
    try {
      const nodeFfi = requireModule("node:ffi");
-@@ -208,6 +209,75 @@
+@@ -207,6 +208,75 @@
      return createUnsupportedBackend(error);
    }
  }
@@ -91,7 +91,7 @@
  function toPointer(value) {
    if (isBun && typeof value === "bigint") {
      return toSafeNumberPointer(value);
-@@ -8062,7 +8132,7 @@
+@@ -8066,7 +8136,7 @@
    win32: "opentui.dll"
  };
  function getNativeAssetDescriptor(target) {
@@ -100,7 +100,7 @@
      throw new Error(`Unsupported OpenTUI Node asset target: ${String(target.platform)}-${String(target.arch)}`);
    }
    if (target.libc !== undefined && target.libc !== "glibc" && target.libc !== "musl") {
-@@ -8121,6 +8191,10 @@
+@@ -8125,6 +8195,10 @@
      }
    }
    if (process.platform === "linux") {
@@ -111,7 +111,7 @@
      if (process.arch === "x64") {
        if (process.env.OPENTUI_LIBC === "musl") {
          return (await import("@opentui/core-linux-x64-musl")).default;
-@@ -11823,7 +11897,7 @@
+@@ -11950,7 +12024,7 @@
    console.error("FATAL ERROR:", message);
    throw new Error(message);
  }
@@ -120,31 +120,19 @@
  var isBun2 = typeof process !== "undefined" && "bun" in process.versions;
  var typeSizes = {
    u8: 1,
---- a/index.bun.js
-+++ b/index.bun.js
-@@ -12035,8 +12035,7 @@
-     return this.createChunk(text, "default");
-   }
-   createInitialStyledText(token) {
--    if (!this._streaming)
--      return;
-+    // Loong64: no WASM tree-sitter; always keep marked fallback.
-     const chunks = [];
-     if ("tokens" in token && Array.isArray(token.tokens)) {
-       this.renderInlineContent(token.tokens, chunks);
---- a/chunk-bun-bb3k0yt8.js
-+++ b/chunk-bun-bb3k0yt8.js
-@@ -3429,7 +3429,8 @@
-           syntaxStyle: this._syntaxStyle,
-           highlights
+--- a/chunk-bun-h3ggawd9.js
++++ b/chunk-bun-h3ggawd9.js
+@@ -3505,7 +3505,8 @@
+           highlights,
+           sourceRanges
          };
--        let chunks = treeSitterToTextChunks(content, highlights, this._syntaxStyle, {
+-        let chunks = treeSitterToTextChunks2(content, highlights, this._syntaxStyle, {
 +        // Loong64: reuse marked fallback when highlights are empty.
-+        let chunks = highlights.length === 0 && this._initialStyledText ? this._initialStyledText.chunks : treeSitterToTextChunks(content, highlights, this._syntaxStyle, {
++        let chunks = highlights.length === 0 && this._initialStyledText ? this._initialStyledText.chunks : treeSitterToTextChunks2(content, highlights, this._syntaxStyle, {
            enabled: this._conceal,
-           baseHighlight: this._baseHighlight
-         });
-@@ -3461,7 +3464,11 @@
+           baseHighlight: this._baseHighlight,
+           ranges: sourceRanges
+@@ -3538,7 +3539,11 @@
        console.warn("Code highlighting failed, falling back to plain text:", error);
        if (this.isDestroyed)
          return;
@@ -157,3 +145,15 @@
        this.setRenderedLineSources(undefined);
        this._shouldRenderTextBuffer = true;
        this._isHighlighting = false;
+--- a/index.bun.js
++++ b/index.bun.js
+@@ -12170,8 +12170,7 @@
+     return this.createChunk(text, "default", link);
+   }
+   createInitialStyledText(token) {
+-    if (!this._streaming)
+-      return;
++    // Loong64: no WASM tree-sitter; always keep marked fallback.
+     const chunks = [];
+     if ("tokens" in token && Array.isArray(token.tokens)) {
+       this.renderInlineContent(token.tokens, chunks);
