@@ -1,7 +1,6 @@
 --- a/crates/crashes/Cargo.toml
 +++ b/crates/crashes/Cargo.toml
-@@ -9,13 +9,16 @@
- async-process.workspace = true
+@@ -9,14 +9,17 @@
  crash-handler.workspace = true
  log.workspace = true
 -minidumper.workspace = true
@@ -15,6 +14,9 @@
 +[target.'cfg(not(target_arch = "loongarch64"))'.dependencies]
 +minidumper.workspace = true
 +
+ [target.'cfg(not(target_os = "windows"))'.dependencies]
+ async-process.workspace = true
+ 
  [target.'cfg(target_os = "linux")'.dependencies]
  libc.workspace = true
  

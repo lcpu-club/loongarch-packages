@@ -29,4 +29,4 @@
  }
 +
 +source+=('zed-loongarch64-no-crash-reports.patch')
-+sha256sums+=('51f322ee24e8177b81830dc4795d5d5d59a0ade3934c098a727aacd4ad236562')
++sha256sums+=('9a8731d42770bdd9595bddb18bc25ad02c68d63bf0f4f5f963484c39e3ecdc39')
