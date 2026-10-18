@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d520b3f..5d5dac8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,16 @@ b2sums=('a452881c40eb5ebd9a816fcb164ffeeb4c08860f2065d02452aa02c8a86b09c6e395786
+ prepare() {
+   cd $pkgname
+   GOFLAGS="-mod=readonly" go mod vendor -v
++  # loong64 syscall numbers (asm-generic, same as arm64)
++  cat > vendor/github.com/wastore/keyctl/sys_linux_loong64.go <<'EOF'
++package keyctl
++
++const (
++	syscall_keyctl   uintptr = 219
++	syscall_add_key  uintptr = 217
++	syscall_setfsgid uintptr = 152
++)
++EOF
+ }
+ 
+ build() {
