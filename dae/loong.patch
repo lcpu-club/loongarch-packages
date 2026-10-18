@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 65f1431..f878069 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -29,6 +29,8 @@ build() {
+ 	CFLAGS=${CFLAGS/-march=+([^[:space:]])/}
+ 	CFLAGS=${CFLAGS/-mtune=+([^[:space:]])/}
+ 	CFLAGS=${CFLAGS/-mabi=+([^[:space:]])/}
++	CFLAGS=${CFLAGS/-mcmodel=+([^[:space:]])/}
++	CFLAGS=${CFLAGS/-mlsx/}
+ 	CFLAGS=${CFLAGS/-fno-plt/}
+ 	CFLAGS=${CFLAGS/-fstack-clash-protection/}
+ 	CFLAGS=${CFLAGS/-fcf-protection/}
