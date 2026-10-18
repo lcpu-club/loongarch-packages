@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d523c6f..d1c52d3 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,3 +25,11 @@ package() {
+   meson install -C build --destdir "$pkgdir"
+   install -Dm644 ${pkgname}/LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+ }
++
++source+=("libucontext-loong64.patch::https://github.com/kaniini/libucontext/commit/6186a01aabbed7e25ecc1b7fee1b8d2ec0e441a7.diff")
++sha256sums+=('7cbb2b30a010c0097295c1c36f16f3b05ca70c8f55de8e78021012e49fd0231d')
++
++prepare() {
++  cd "${pkgname}"
++  patch -Np1 -i "${srcdir}/libucontext-loong64.patch"
++}
