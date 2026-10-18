@@ -1,0 +1,77 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -5,6 +5,7 @@ pkgname=deno
+ pkgver=2.9.7
+ pkgrel=2
+ _rusty_v8_ver=150.4.0
++_libuv_sys_lite_ver=1.48.4
+ pkgdesc="A secure runtime for JavaScript and TypeScript"
+ arch=('x86_64')
+ url="https://deno.com"
+@@ -34,6 +35,15 @@ prepare() {
+ 
+   cd ../deno
+   echo -e "\n[patch.crates-io]\nv8 = { path = '../rusty_v8' }" >> Cargo.toml
++
++  # libuv-sys-lite only ships prebuilt bindings for x86_64/aarch64 and pins
++  # bindgen 0.70.1, which turns every struct into an opaque blob with clang 20+.
++  mkdir -p ../libuv-sys-lite
++  bsdtar -xf ../libuv-sys-lite-$_libuv_sys_lite_ver.crate \
++    -C ../libuv-sys-lite --strip-components=1
++  sed -i 's/^version = "0.70.1"$/version = "0.72.1"/' ../libuv-sys-lite/Cargo.toml
++  echo "libuv-sys-lite = { path = '../libuv-sys-lite' }" >> Cargo.toml
++
+   # Keep the V8 backend while disabling Deno's self-upgrade and vendored zlib-ng.
+   sed -i \
+     -e '/^v8 = \[/s/"__runtime_defaults", //' \
+@@ -97,3 +107,9 @@ package() {
+ 
+   install -Dm644 LICENSE.md -t "$pkgdir"/usr/share/licenses/$pkgname/
+ }
++
++source+=("libuv-sys-lite-$_libuv_sys_lite_ver.crate::https://static.crates.io/crates/libuv-sys-lite/libuv-sys-lite-$_libuv_sys_lite_ver.crate")
++sha512sums+=('cfc402f4508e14bf20efd9ff47b113f56546d7ed557fcc744f74630339af7d3dfb771e3d7c70779c33bf97a5c75516067f781f9b87da1763b651926ff60671fa')
++
++# compiler-rt-adjust-paths.patch
++sha512sums[2]='80276dba3e09d333915acde30b2f1ec71cbb370a734fafc2415ac5433dd70adcf1086e980b6509d8588d0fae125a4058aa046082bed9f57cd8789cd9c32b52b5'
+diff --git a/compiler-rt-adjust-paths.patch b/compiler-rt-adjust-paths.patch
+index 330fff7..2a3131b 100644
+--- a/compiler-rt-adjust-paths.patch
++++ b/compiler-rt-adjust-paths.patch
+@@ -1,8 +1,6 @@
+-diff --git a/build/config/clang/BUILD.gn b/build/config/clang/BUILD.gn
+-index d4de2e0cca0..57359c32121 100644
+---- a/build/config/clang/BUILD.gn
+-+++ b/build/config/clang/BUILD.gn
+-@@ -187,16 +187,21 @@ template("clang_lib") {
++--- a/build/config/clang/BUILD.gn	2026-10-18 01:00:12.865268280 +0000
+++++ b/build/config/clang/BUILD.gn	2026-10-18 01:00:12.865858300 +0000
++@@ -190,16 +190,20 @@
+        } else if (is_linux || is_chromeos) {
+          if (current_cpu == "x64") {
+            _dir = "x86_64-unknown-linux-gnu"
+@@ -17,19 +15,20 @@ index d4de2e0cca0..57359c32121 100644
+ +          _suffix = "-aarch64"
+          } else if (current_cpu == "loong64") {
+            _dir = "loongarch64-unknown-linux-gnu"
+-+          _suffix = "-loongarch64"
+          } else if (current_cpu == "riscv64") {
+            _dir = "riscv64-unknown-linux-gnu"
+ +          _suffix = "-riscv64"
+          } else if (current_cpu == "ppc64") {
+            _dir = "ppc64le-unknown-linux-gnu"
+          } else if (current_cpu == "s390x") {
+-@@ -231,6 +236,11 @@ template("clang_lib") {
++@@ -234,6 +238,13 @@
+          assert(false)  # Unhandled target platform
+        }
+  
+-+      # Bit of a hack to make this find builtins from compiler-rt >= 16
+-+      if (is_linux || is_chromeos) {
+++      # Bit of a hack to make this find builtins from compiler-rt >= 16.
+++      # Arch Linux's loong64 port keeps compiler-rt under the target triple
+++      # directory without an arch suffix, so leave that layout alone.
+++      if ((is_linux || is_chromeos) && current_cpu != "loong64") {
+ +        _dir = "linux"
+ +      }
+ +
