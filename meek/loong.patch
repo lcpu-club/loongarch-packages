@@ -1,0 +1,30 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e8f8565..e1cc7d8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,16 @@ prepare() {
+ 	     s|\(meek-server\.log\)|/tmp/\1|;
+ 	     s|\(meek-client\.log\)|/tmp/\1|' -i meek-{server,client}/torrc
+ 	go mod download
++	go mod vendor
++	# loong64: upstream cpu_loong64.go conflicts with the generic cpu.go
++	cat > vendor/github.com/refraction-networking/utls/cpu/cpu_loong64.go <<'EOF'
++package cpu
++
++const CacheLinePadSize = 64
++
++func doinit() {
++}
++EOF
+ }
+ 
+ build() {
+@@ -36,7 +46,7 @@ build() {
+ 		cd "$srcdir/meek/$bin"
+ 		go build \
+ 			-buildmode=pie \
+-			-mod=readonly \
++			-mod=vendor \
+ 			-modcacherw \
+ 			-ldflags '-compressdwarf=false -linkmode=external' \
+ 			./...
