@@ -1,0 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 465e630..9b25e37 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -24,12 +24,14 @@ prepare() {
+   cd "$pkgname"
+ 
+   # download dependencies
+-  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
++  cargo fetch --locked --target "`uname -m`-unknown-linux-gnu"
+ }
+ 
+ build() {
+   cd "$pkgname"
+ 
++  # loong64: vendored openssl-src lacks the target, use system openssl
++  export OPENSSL_NO_VENDOR=1
+   cargo build --frozen --release --all-features
+ }
+ 
