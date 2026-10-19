@@ -1,0 +1,13 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,7 +31,9 @@ build() {
+ 
+ check() {
+ 	cd "${pkgname}/"
+-	dart test
++# Flutter does not publish SDKs for loongarch64, so tests tagged 'sdk', which
++# install and run a real Flutter SDK, cannot work on this architecture.
++	dart test --exclude-tags sdk
+ }
+ 
+ package() {
