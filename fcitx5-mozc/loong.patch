@@ -1,0 +1,72 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -64,7 +64,7 @@ depends=(
+   'libstdc++'
+   'glibc'
+ )
+-makedepends=('git' 'bazelisk' 'python')
++makedepends=('git' 'bazel' 'python')
+ replaces=('mozc-fcitx')
+ conflicts=('mozc' 'mozc-server' 'mozc-utils-gui' 'mozc-fcitx' 'fcitx-mozc')
+ source=(git+https://github.com/fcitx/mozc.git#commit=${_mozc_commit}
+@@ -121,7 +121,10 @@ pkgver(){
+   # https://github.com/google/mozc/discussions/1429
+   # REVISION in mozc_version_template.bzl is no longer used by Bazel builds.
+   # REVISION will be probably removed once GYP builds are completely removed.
+-  bazel build --config oss_linux --config stable_channel --config release_build --config no_sframe base:mozc_version_txt >/dev/null 2>&1
++  bazel build --config oss_linux --config stable_channel --config release_build --config no_sframe \
++      --distdir="${srcdir}" \
++      --registry="file://${srcdir}/bazel-central-registry" \
++      base:mozc_version_txt >/dev/null 2>&1
+   source <(grep -E '^(MAJOR|MINOR|BUILD_OSS|REVISION)\s*=' bazel-bin/base/mozc_version.txt)
+    _bzr_ver="$MAJOR.$MINOR.$BUILD_OSS.$REVISION"
+   printf "%s" "${_bzr_ver}"
+@@ -131,6 +134,40 @@ prepare() {
+   # Bazel's distdir lookup uses the original URL basenames.
+   ln -sf abseil-py-2.1.0.tar.gz "$srcdir/v2.1.0.tar.gz"
+   ln -sf bats-core-1.10.0.tar.gz "$srcdir/v1.10.0.tar.gz"
++
++  # loong64: rules_go has no loong64 support and mozc does not use Go at all,
++  # so its Go SDK and Go toolchains are patched out.
++  install -m 644 "$srcdir/rules_go-no-go-toolchains.patch" mozc/src/bazel/
++
++  # loong64: python-build-standalone has no loong64 build, so the system python
++  # is used as the Python toolchain for the build-time python tools.
++  if ! grep -q 'loong64: python-build-standalone' mozc/src/MODULE.bazel; then
++    cat >> mozc/src/MODULE.bazel <<'EOF'
++
++# loong64: rules_go has no loong64 support and mozc does not use Go.
++single_version_override(
++    module_name = "rules_go",
++    patches = ["bazel/rules_go-no-go-toolchains.patch"],
++    version = "0.60.0",
++)
++
++# loong64: python-build-standalone has no loong64 build, use the system python.
++local_runtime_repo = use_repo_rule("@rules_python//python/local_toolchains:repos.bzl", "local_runtime_repo")
++local_runtime_toolchains_repo = use_repo_rule("@rules_python//python/local_toolchains:repos.bzl", "local_runtime_toolchains_repo")
++
++local_runtime_repo(
++    name = "local_python",
++    interpreter_path = "/usr/bin/python3",
++)
++
++local_runtime_toolchains_repo(
++    name = "local_python_toolchains",
++    default_runtimes = ["local_python"],
++)
++
++register_toolchains("@local_python_toolchains//:all")
++EOF
++  fi
+ }
+ 
+ build() {
+@@ -168,3 +205,7 @@ package() {
+   install -d "${pkgdir}/usr/share/licenses/$pkgname/"
+   install -m 644 ../LICENSE data/installer/*.html "${pkgdir}/usr/share/licenses/${pkgname}/"
+ }
++
++# loong64: bazelisk cannot run on loongarch64, build with the system bazel instead.
++source+=('rules_go-no-go-toolchains.patch')
++sha512sums+=('bbf2503d13a6e1d6e61e652523af6a9262eb642b02e87d9b345727e2801b3c921e67ebf71a8a6816ad0ac7eccbfa7595f51734bec96e58f762ca69ded6c843d9')
