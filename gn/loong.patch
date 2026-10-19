@@ -1,11 +1,9 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 795072f..f506bdd 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -21,6 +21,9 @@ pkgver() {
- 
+@@ -22,6 +22,9 @@ pkgver() {
  build() {
    cd $pkgname
+   export CLANG_FORMAT=/usr/bin/clang-format
 +  # clang does not support it
 +  CXXFLAGS=($(printf "%s\n" "${CXXFLAGS[@]}" | grep -Ev '^(-fstack-clash-protection|-fno-plt)$'))
 +  CFLAGS=($(printf "%s\n" "${CFLAGS[@]}" | grep -Ev '^(-fstack-clash-protection|-fno-plt)$'))
