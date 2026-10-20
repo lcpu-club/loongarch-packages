@@ -1,0 +1,12 @@
+--- a/build/main.rs	2006-07-24 09:21:28.000000000 +0800
++++ b/build/main.rs	2026-10-20 15:59:27.058653940 +0800
+@@ -349,6 +349,9 @@
+         }
+ 
+         "linux" => match &*config.target_arch {
++            "loongarch64" => {
++                boringssl_cmake.define("OPENSSL_NO_ASM", "YES");
++            }
+             "x86" => {
+                 boringssl_cmake.define(
+                     "CMAKE_TOOLCHAIN_FILE",

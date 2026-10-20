@@ -1,0 +1,12 @@
+--- a/deps/boringssl/include/openssl/target.h	2006-07-24 09:21:28.000000000 +0800
++++ b/deps/boringssl/include/openssl/target.h	2026-10-20 15:59:27.055756590 +0800
+@@ -40,6 +40,9 @@
+ #elif defined(__MIPSEL__) && defined(__LP64__)
+ #define OPENSSL_64_BIT
+ #define OPENSSL_MIPS64
++#elif defined(__loongarch64) || (defined(__loongarch__) && __loongarch_grlen == 64)
++#define OPENSSL_64_BIT
++#define OPENSSL_LOONGARCH64
+ #elif defined(__riscv) && __SIZEOF_POINTER__ == 8
+ #define OPENSSL_64_BIT
+ #define OPENSSL_RISCV64

@@ -1,0 +1,12 @@
+--- a/src/sys/ioctl/linux.rs	2006-07-24 09:21:28.000000000 +0800
++++ b/src/sys/ioctl/linux.rs	2026-10-20 15:59:27.051649880 +0800
+@@ -42,7 +42,8 @@
+     target_arch = "x86_64",
+     target_arch = "aarch64",
+     target_arch = "riscv32",
+-    target_arch = "riscv64"
++    target_arch = "riscv64",
++    target_arch = "loongarch64"
+ ))]
+ mod consts {
+     #[doc(hidden)]

@@ -1,0 +1,35 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -37,6 +37,19 @@ b2sums=('d5f8c3b34f86b9cf8bb58ff9af5d9301a83ab120385da950b7baaa45b3f464dfe113aa5
+ prepare() {
+   cd ${pkgname}-${pkgver}
+   cargo fetch --locked --target "$(rustc --print host-tuple)"
++
++  local registry="${CARGO_HOME:-$HOME/.cargo}/registry/src"
++
++  # loongarch64: nix 0.26.4 (via cf-mach -> webrtc -> webrtc-util) does not
++  # list loongarch64 among the architectures using the generic ioctl encoding,
++  # so its unconditional `pub use self::consts::*` fails to resolve.
++  patch -Np1 -d "$registry"/*/nix-0.26.4 -i "$srcdir/0001-loongarch64-nix-ioctl.patch"
++
++  # loongarch64: BoringSSL, vendored by boring-sys (via cf-mach), supports
++  # neither LoongArch nor assembly for it. Build it as a generic 64-bit little
++  # endian target without assembly, the same way the Dart SDK does.
++  patch -Np1 -d "$registry"/*/boring-sys-* -i "$srcdir/0002-loongarch64-boringssl-target.patch"
++  patch -Np1 -d "$registry"/*/boring-sys-* -i "$srcdir/0003-loongarch64-boringssl-no-asm.patch"
+ }
+ 
+ 
+@@ -63,3 +76,12 @@ package() {
+     install -Dm644 -t "${pkgdir}"/usr/share/doc/${pkgname}/examples/ ${example}
+   done
+ }
++
++# loongarch64: patches for the Rust dependencies of the speedtest block
++# (cf-mach -> webrtc -> webrtc-util -> nix 0.26.4, cf-mach -> boring-sys).
++source+=('0001-loongarch64-nix-ioctl.patch'
++         '0002-loongarch64-boringssl-target.patch'
++         '0003-loongarch64-boringssl-no-asm.patch')
++b2sums+=('32a65edab6538ae9a4113e87bf9927d7b0bf99dac52cf70fd89734b07f2f7d11b10bdcf2a163ab0ccee873547f046f926c211b21c38cb3b3223038e5fe3b5215'
++         '9d7ce57c72dc5ad7a7760305aaeaf11d0a1d9d0aabef8d232b5ca30c9f87de827bf9ecfacda31bd34148a4c19d51c56cb3547fde5a1af95fe7d104a7f57c5c3a'
++         '1f3e8695b7e462bc49c3e2f4873e49e85a201c91ddab88ed94395aec9679e34abbf162263c43dd3a9222aa0b6ac93607fca061264c453f0806e87f050537f098')
