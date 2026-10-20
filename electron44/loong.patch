@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 447a226..9717ae2 100644
+index e40a9bf..448c375 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -487,6 +487,9 @@ prepare() {
@@ -75,6 +75,15 @@ index 447a226..9717ae2 100644
    popd
  
    echo "Applying local patches..."
+@@ -532,7 +574,7 @@ prepare() {
+   patch -Np1 -i ../chromium-138-nodejs-version-check.patch
+ 
+   # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
+-  patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
+ 
+   # Increase _FORTIFY_SOURCE level to match Arch's default flags
+   patch -Np1 -i ../increase-fortify-level.patch
 @@ -587,11 +629,11 @@ prepare() {
             third_party/gperf/cipd/bin \
             third_party/dawn/tools/golang/linux-amd64/bin
@@ -129,18 +138,20 @@ index 447a226..9717ae2 100644
    export CHROMIUM_BUILDTOOLS_PATH="${PWD}/buildtools"
    gn gen out/Release \
        --args="import(\"//electron/build/args/release.gn\") ${_flags[*]}"
-@@ -747,3 +812,15 @@ package() {
+@@ -747,3 +812,17 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
 +
 +makedepends+=(jq)
-+source+=("chromium-loong64-support.patch"
++source+=("compiler-rt-adjust-paths-loong64.patch"
++         "chromium-loong64-support.patch"
 +         "electron_runtime_api_dalagate-add-loongarch64-support.patch"
 +         "allow-sched_getaffinity-in-seccomp-for-loong64.patch"
 +         "ffmpeg-loong64-add-missing-config-entries.patch"
 +         "dawn-loong64-cipd-platform.patch")
-+sha256sums+=('941b1b63ae4e4432c9b9b6a3fea9a6f5352235c51bf7f980e5e249023fe84866'
++sha256sums+=('4c5bbdd1275379e92120fe89e27ec2779b100e7f56727e139412dc8fbd61a1e3'
++             '941b1b63ae4e4432c9b9b6a3fea9a6f5352235c51bf7f980e5e249023fe84866'
 +             'de2cad8f1c8dced39a2f69e2908b173e7a27321d30d35b25acdc8f9ba3e57b50'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9'
 +             '93ae3b86a9fe780ce732106d5f0cd2d200e864c61e94b38498bb84be84d907dd'
