@@ -1,0 +1,15 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -43,4 +43,12 @@ package() {
+   meson install -C build --destdir "$pkgdir"
+ }
+ 
++prepare() {
++  cd $pkgname
++  patch -Np1 -i "$srcdir/recursive-monitor-polling.patch"
++}
++
++source+=('recursive-monitor-polling.patch')
++b2sums+=('97db9d830c6077c394d3f033e7abc98f821cdb9ca2d421a19c3a53d123525b4a7eac8da93031a5867c07037f8c5345521fe4e40bbcdccd2cf4af4dda045b08f0')
++
+ # vim:set sw=2 sts=-1 et:

@@ -1,0 +1,21 @@
+--- a/tests/test-recursive-monitor.c
++++ b/tests/test-recursive-monitor.c
+@@ -143,13 +143,16 @@
+ 
+   /*
+    * Now start the async test processing. We use a very
+-   * low priority idle to ensure other things process before us.
++   * low priority timeout to ensure other things process before us.
++   * A continually ready idle would keep the main context busy and
++   * delay the delivery of the file monitor events (which are queued
++   * from a worker context) enough to hit the test timeout.
+    */
+ 
+   state->iter = state->dirs.head;
+   state->did_action = FALSE;
+   state->mode = MODE_CREATE;
+-  g_idle_add_full (G_MAXINT, begin_test_basic, state, NULL);
++  g_timeout_add_full (G_PRIORITY_LOW, 1, begin_test_basic, state, NULL);
+ }
+ 
+ static void
