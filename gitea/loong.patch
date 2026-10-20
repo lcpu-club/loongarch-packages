@@ -1,0 +1,39 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -45,6 +45,15 @@ validpgpkeys=(B56E3C7437A49E136862F5DE9D8A57ADAA232E95  # Matti Ranta <matti@mdr
+ prepare() {
+ 	cd "${pkgname}"
+ 	make deps-frontend deps-backend deps-tools
++	# rolldown (used by vite) has no native binding for linux-loong64, so graft
++	# its WASI fallback into the dependency tree installed by pnpm
++	local rolldown_nm rolldown_ver
++	rolldown_nm=$(echo node_modules/.pnpm/rolldown@*/node_modules)
++	rolldown_ver=${rolldown_nm%/node_modules}
++	rolldown_ver=${rolldown_ver##*rolldown@}
++	npm install --prefix "${srcdir}/rolldown-wasi" --no-save --no-audit --no-fund \
++		"@rolldown/binding-wasm32-wasi@${rolldown_ver}"
++	cp -a "${srcdir}/rolldown-wasi/node_modules/." "${rolldown_nm}/"
+ }
+ 
+ build() {
+@@ -65,8 +74,10 @@ check() {
+ 	export GIT_CONFIG_GLOBAL="${PWD}/gitconfig"
+ 	# These tests expect .gitconfig path to be "$HOME/.gitconfig" (which isn't the case due to the above workaround)
+ 	rm -v modules/git/config_test.go modules/git/gpg_test.go
++	# Playwright browsers are not available for linux-loong64, so run the
++	# node-based frontend tests only
++	pnpm exec vitest --project node
+ 	# `-p 1` to prevent race conditions from go tests when trying to lock the gitconfig file
+-	make test-frontend
+ 	make test-backend GOTEST_FLAGS="-p 1"
+ }
+ 
+@@ -79,3 +90,8 @@ package() {
+ 	install -Dm 644 "${srcdir}/${pkgname}.tmpfiles" "${pkgdir}/usr/lib/tmpfiles.d/${pkgname}.conf"
+ 	install -Dm 644 "${srcdir}/${pkgname}.sysusers" "${pkgdir}/usr/lib/sysusers.d/${pkgname}.conf"
+ }
++
++# pnpm 12 pins the version from package.json and refuses to run when that
++# version has no native binary for linux-loong64; skip the version switch and
++# use the pnpm provided by the distribution instead.
++export PNPM_CONFIG_PM_ON_FAIL=ignore
