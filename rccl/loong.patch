@@ -1,19 +1,13 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 2226438..5b00b26 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -29,6 +29,7 @@ prepare() {
-   git config submodule."ext-src/mscclpp".url "${srcdir}/${pkgname}"-mscclpp
- 
-   git -c protocol.file.allow=always submodule update --init --recursive
-+  patch -p1 -d "${srcdir}/${pkgname}" -i "${srcdir}/rccl-loongarch64-support.patch"
- }
- 
- build() {
-@@ -59,3 +60,6 @@ package() {
+@@ -44,3 +44,10 @@ package() {
  
    install -Dm644 "$srcdir/$pkgname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
++prepare() {
++  patch -p1 -d "${srcdir}/${pkgname}" -i "${srcdir}/rccl-loongarch64-support.patch"
++}
++
 +source+=("rccl-loongarch64-support.patch")
-+sha256sums+=('10e3306db067a75a5ade7681212ca2bcf44c20c715a2609a09f2d21cf5978073')
++sha256sums+=('ddeb55c3d19115e04c59fb6fe958168abaa13e8833ebc4cef37f4b59770ca241')
