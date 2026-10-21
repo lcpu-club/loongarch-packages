@@ -1,0 +1,28 @@
+Fix opal_lifo_pop_atomic on weakly ordered architectures when the item_free
+mini-lock implementation is used (no 128-bit compare-and-swap, no LL/SC
+pointer atomics, e.g. loongarch64). The pop path used a release barrier
+where an acquire barrier is needed to pair with the wmb() in push, so a
+stale opal_list_next == NULL could be read and published as the new head.
+Taken from upstream PR #13969.
+
+--- a/opal/class/opal_lifo.h
++++ b/opal/class/opal_lifo.h
+@@ -259,7 +259,8 @@
+             continue;
+         }
+ 
+-        opal_atomic_wmb();
++        /* synchronize with the wmb in push */
++        opal_atomic_rmb();
+ 
+         head = item;
+         /* try to swap out the head pointer */
+@@ -280,8 +281,6 @@
+         return NULL;
+     }
+ 
+-    opal_atomic_wmb();
+-
+     item->opal_list_next = NULL;
+     return item;
+ }

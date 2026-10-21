@@ -1,8 +1,15 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 71ea10a..58cdb6b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -71,12 +71,7 @@ build() {
+@@ -53,6 +53,8 @@ prepare() {
+   sed -i 's|WRAPPER__FCFLAGS|WRAPPER_FCFLAGS|g' configure
+   sed -i 's|WRAPPER_EXTRA_FCFLAGS|WRAPPER_FCFLAGS|g' configure
+   sed -i 's|"-I/usr/include",||' opal/tools/wrappers/opal_wrapper.c
++  # add the missing acquire barrier in the opal_lifo pop path (upstream PR #13969)
++  patch -Np1 -i "$srcdir/fix-opal-lifo-pop-acquire-barrier.patch"
+ }
+ 
+ build() {
+@@ -69,12 +71,7 @@ build() {
      --with-pmix=external
      --with-prrte=external
      --with-valgrind
@@ -15,8 +22,8 @@ index 71ea10a..58cdb6b 100644
      --with-rocm=/opt/rocm
      # all components that link to libraries provided by optdepends must be run-time loadable
      --enable-mca-dso=accelerator_cuda,accelerator_rocm,btl_smcuda,rcache_gpusm,rcache_rgpusm,coll_ucc,scoll_ucc
-@@ -115,11 +110,9 @@ package_openmpi() {
-     zlib
+@@ -111,11 +108,9 @@ package_openmpi() {
+     prrte
    )
    optdepends=(
 -    'cuda: cuda support'
@@ -27,10 +34,14 @@ index 71ea10a..58cdb6b 100644
    )
    provides=(
      libmpi.so
-@@ -146,4 +139,6 @@ package_openmpi-docs() {
+@@ -142,4 +137,10 @@ package_openmpi-docs() {
    install -vDm 644 $pkgbase-$pkgver/LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
  }
  
 +makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|nvidia-utils|openucc)$'))
++
++source+=('fix-opal-lifo-pop-acquire-barrier.patch')
++sha256sums+=('c63bbd25791665130626aaa04a4831ef1882c4dc1d2852fb94b96ed7ad04374c')
++b2sums+=('ab18c7aedd368b3c71508ad656ca07934e4ce2efe904eb8997fcac8c9d78c04313a7cdb690f0308eb54f54317c2d4676756b903322b4ef049b04babc138281a2')
 +
  # vim: ts=2 sw=2 et:
