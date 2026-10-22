@@ -1,0 +1,17 @@
+--- a/alienfile	2026-10-22 17:47:35.942000000 +0800
++++ b/alienfile	2026-10-22 17:47:35.956515060 +0800
+@@ -162,7 +162,13 @@
+     # autoconf compat script.
+     plugin 'Build::Autoconf' => ( with_pic => 0 );
+     build [
+-      '%{configure}',
++      # CMake's configure wrapper only execs bootstrap, which rejects the
++      # --disable-dependency-tracking flag hardcoded in Build::Autoconf.
++      sub {
++        my($build) = @_;
++        my $prefix = $build->install_prop->{prefix};
++        $build->system('./configure', "--prefix=$prefix");
++      },
+       '%{make}',
+       '%{make} install',
+         sub { shift->runtime_prop->{style} = 'source' },

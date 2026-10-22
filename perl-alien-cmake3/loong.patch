@@ -1,0 +1,14 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -28,3 +28,11 @@ package() {
+   cd Alien-cmake3-$pkgver
+   make DESTDIR="$pkgdir" install
+ }
++
++prepare() {
++  cd Alien-cmake3-$pkgver
++  patch -Np1 -i ../alienfile-source-build.patch
++}
++
++source+=("alienfile-source-build.patch")
++sha512sums+=('59b230a5df377872ac40b18b2649b7b211bf3d6cb9b4f2eea9cfdb430db7372b014468cebdd5102e257afea34cd617cb6db39e033c6cff08697527ae4e21bb04')
