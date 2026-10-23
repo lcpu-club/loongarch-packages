@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e565570..c081211 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -23,6 +23,14 @@ sha256sums=('e1feb0788d3871059f252b9efe382a5d0c5b218ca7aa0e2154981e82ee613dc7')
+ prepare() {
+   cd "$pkgname"
+   mkdir -p build
++
++  # loong64: bbolt defines its mmap sizing constants in per-arch
++  # build-tag files, and bolt_loong64.go only landed in v1.3.7 (PR 303),
++  # so influx-cli's pinned v1.3.6 fails on loong64 with "undefined:
++  # maxMapSize". Pin a post-merge state (the 2022-11-14 changelog commit)
++  # rather than the full v1.3.7 release to keep the semantic delta minimal.
++  go mod edit -replace=go.etcd.io/bbolt=go.etcd.io/bbolt@v1.3.7-0.20221114114133-eedea6cb26ef
++  go mod tidy
+ }
+ 
+ build(){
