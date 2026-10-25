@@ -1,11 +1,11 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -15,10 +15,40 @@ source=("$pkgname-$pkgver.tar.gz::$_git/archive/rocm-$pkgver.tar.gz")
- sha256sums=('886dc44e8133285697ab0e6a744ce0aae2c645426298808c2ca42317e243fe14')
- _dirname="$(basename "$_git")-$(basename "${source[0]}" ".tar.gz")"
+@@ -14,16 +14,62 @@ _git='https://github.com/ROCm/rocm-libraries'
+ source=("$pkgname-$pkgver.tar.gz::$_git/releases/download/therock-$pkgver/$pkgname.tar.gz")
+ sha256sums=('40c5938235ea14a1172b9712290b57cf1d9fa830d49dd7495a53e24840a9b553')
  
 +prepare() {
-+  cd "$_dirname"
++  cd "$pkgname"
 +
 +  # loong64: RPP's CPU kernels are written against the x86 SSE/AVX/AVX2/FMA/
 +  # F16C intrinsics; the patch emulates them with SIMDe and makes the x86-only
@@ -22,10 +22,18 @@
    # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
    CXXFLAGS+=" -fcf-protection=none"
 +
-+  # loong64: the third_party/ffts/lib/libffts.a shipped in the tarball is an
-+  # x86_64 binary, so build FFTS from source for the host architecture and use
-+  # that instead.  FFTS has no loongarch SIMD (or JIT) backend, so the portable
-+  # static code path is used.
++  # loong64: LLVM 23's LoongArch backend crashes (bus error in
++  # SelectionDAG::LegalizeTypes) on the SIMDe-emulated AVX2 code of
++  # fisheye.cpp and noise_gaussian.cpp at -O2 and above; disabling the SLP
++  # vectorizer avoids it.  LTO has to be off for this flag to take effect,
++  # see the options below.
++  CXXFLAGS+=" -fno-slp-vectorize"
++
++  # loong64: RPP 10.0 no longer bundles FFTS (third_party/ffts is an empty
++  # submodule), it looks for a system FFTS instead.  FFTS has no loongarch
++  # SIMD (or JIT) backend, so build it from source with the portable static
++  # code path and install it into a private prefix.
++  local ffts_prefix="$srcdir/ffts-prefix"
 +  (
 +    cd "$srcdir/ffts-$_ffts_commit"
 +    ffts_cflags="-O2 -fPIC -DFFTS_BUILD -DDYNAMIC_DISABLED"
@@ -34,25 +42,44 @@
 +    for f in ffts ffts_chirp_z ffts_nd ffts_real ffts_real_nd ffts_transpose ffts_trig ffts_static; do
 +      ${CC:-cc} $ffts_cflags -Iinclude -Isrc -c "src/$f.c" -o "$f.o"
 +    done
-+    ar rcs libffts.a *.o
-+    cp libffts.a "$srcdir/$_dirname/third_party/ffts/lib/libffts.a"
++    install -d "$ffts_prefix/lib" "$ffts_prefix/include/ffts"
++    ar rcs "$ffts_prefix/lib/libffts.a" *.o
++    install -m644 include/ffts.h "$ffts_prefix/include/ffts/"
 +  )
++
++  # loong64: spectrogram.cpp is compiled into the "modules" object library, but
++  # FFTS' include directory only reaches the rpp shared target via FFTS::FFTS,
++  # and the private prefix above is not on the compiler's default search path.
++  CXXFLAGS+=" -I$ffts_prefix/include"
 +
    local cmake_args=(
      -Wno-dev
      -B build
-@@ -34,3 +64,14 @@ package() {
+     -S "$pkgname"
+     -D CMAKE_INSTALL_PREFIX=/opt/rocm
+     -D CMAKE_BUILD_TYPE=None
++    -D FFTS_INCLUDE_DIR="$ffts_prefix/include"
++    -D FFTS_LIBRARY="$ffts_prefix/lib/libffts.a"
+   )
+   cmake "${cmake_args[@]}"
+   cmake --build build
+@@ -33,3 +79,19 @@ package() {
    DESTDIR="$pkgdir" cmake --install build
-   install -Dm644 "$_dirname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+   install -Dm644 "$pkgname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
 +
 +_ffts_commit=b22d839b61c5bd8a993e24ae3e01f39d9b5084fb
 +
++# loong64: -fno-slp-vectorize (see build()) only reaches the per-TU code
++# generator, so LTO, which re-optimizes everything at link time, must be
++# disabled as well.
++options+=('!lto')
++
 +makedepends+=('simde')
 +source+=("rpp-loong64-simde.patch"
 +         "ffts-loong64.patch"
 +         "ffts-$_ffts_commit.tar.gz::https://github.com/anthonix/ffts/archive/$_ffts_commit.tar.gz")
-+sha256sums+=('ea65e566b560c5d0defd8a5c08a20a569ac24ea001c71584197f43eaf6e17167'
++sha256sums+=('04b207ccbff58cbe48c96b08cd314fe423555d4600b8fc97d6a85fe479b2bf5f'
 +             '1f22782a1c21a9e56fb6405c714af4be249eb84b09648e7fe73888a10f5396cb'
 +             'ec623a9e75cf0897370a7988206f16e47ed6e32485522a0a8cc2ae35d846612a')
