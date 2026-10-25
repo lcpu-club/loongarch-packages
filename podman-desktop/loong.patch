@@ -1,0 +1,39 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3a959ec..79b52df 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -40,11 +40,28 @@ prepare(){
+     npm pkg set devDependencies.electron=${_elver}
+     export ELECTRON_SKIP_BINARY_DOWNLOAD=1
+     export ELECTRON_OVERRIDE_DIST_PATH="/usr/lib/${_electron}"
++
++    sed -i '1i pmOnFail: ignore' pnpm-workspace.yaml
++    sed -i '/^overrides:$/a\  lightningcss: "npm:lightningcss-wasm@1.32.0"' pnpm-workspace.yaml
++
++    cat >> pnpm-workspace.yaml <<'YAML'
++
++supportedArchitectures:
++  os:
++    - current
++  cpu:
++    - current
++    - wasm32
++YAML
++
+     pnpm install --ignore-scripts --no-frozen-lockfile
+ }
+ 
+ build(){
+     cd "${srcdir}/podman-desktop-$pkgver"
++    if [[ $CARCH == loong64 ]]; then
++        export NAPI_RS_FORCE_WASI=true
++    fi
+     node_modules/.bin/cross-env MODE=production pnpm run build
+     node_modules/.bin/electron-builder build --linux --x64 --dir -c.electronDist="/usr/lib/${_electron}" -c.electronVersion="${_elver}" --config .electron-builder.config.cjs 
+ 
+@@ -67,3 +84,5 @@ package(){
+     sed "s/@ELECTRON@/${_electron}/" "${srcdir}"/run.sh.in > "${pkgdir}/usr/bin/${pkgname}"
+     chmod 755 "${pkgdir}/usr/bin/${pkgname}"
+ }
++
++makedepends=("${makedepends[@]/nodejs-lts-krypton/nodejs}")
