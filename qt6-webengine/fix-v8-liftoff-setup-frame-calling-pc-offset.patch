@@ -1,0 +1,15 @@
+diff --git a/v8/src/execution/loong64/frame-constants-loong64.h b/v8/src/execution/loong64/frame-constants-loong64.h
+--- a/v8/src/execution/loong64/frame-constants-loong64.h
++++ b/v8/src/execution/loong64/frame-constants-loong64.h
+@@ -41,6 +41,11 @@ class WasmLiftoffSetupFrameConstants : public TypedFrameConstants {
+   // See wasm::kGpParamRegisters and Builtins::Generate_WasmCompileLazy.
+   static constexpr int kInstanceSpillOffset =
+       TYPED_FRAME_PUSHED_VALUE_OFFSET(0);
++
++  // We then spill floating-point param regs and finally ra. Offset computation:
++  // 1 for the instance, and counting each floating-point reg as one slot.
++  static constexpr int kCallingPCOffset = TYPED_FRAME_PUSHED_VALUE_OFFSET(
++      1 + kNumberOfSavedGpParamRegs + kNumberOfSavedFpParamRegs);
+ 
+   static constexpr int kParameterSpillsOffset[] = {
+       TYPED_FRAME_PUSHED_VALUE_OFFSET(6), TYPED_FRAME_PUSHED_VALUE_OFFSET(5),
