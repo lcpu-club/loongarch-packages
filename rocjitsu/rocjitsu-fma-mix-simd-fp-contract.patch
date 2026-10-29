@@ -1,0 +1,21 @@
+--- a/rocm-systems-therock-10.0/emulation/rocjitsu/lib/rocjitsu/src/rocjitsu/isa/arch/amdgpu/shared/simd_glue.h	2026-08-20 03:32:24.000000000 +0800
++++ b/rocm-systems-therock-10.0/emulation/rocjitsu/lib/rocjitsu/src/rocjitsu/isa/arch/amdgpu/shared/simd_glue.h	2026-10-28 17:37:08.777348320 +0800
+@@ -2942,13 +2942,17 @@
+   if (simd_force_scalar() || !sdwa::supports_direct_simd_store(inst) || !inst.src0.simd_capable() ||
+       !inst.src1.simd_capable() || !inst.src2.simd_capable() || !inst.vdst.simd_capable())
+     return false;
+-#if defined(__clang__) && defined(__FMA__)
++#if (defined(__clang__) && defined(__FMA__)) || defined(__loongarch__)
+   if constexpr (DstMode == FmaMixDst::F32) {
+     // Clang contracts native SIMD a*b+c on FMA hosts for this shape while the
+     // generated scalar bodies remain bit-exact with separate multiply/add. The
+     // f16 destination modes round after the mixed-precision add, and the other
+     // FMA-family SIMD helpers intentionally model fused instructions with
+     // stdx::fma, so this guard is only needed for the F32 fma_mix/mad_mix path.
++    //
++    // LoongArch always has FMA in its base FP ISA, so GCC contracts the scalar
++    // bodies there while the stdx::simd shape stays unfused: the same one-ulp
++    // divergence, with the two paths swapped. Keep the fast path off.
+     return false;
+   }
+ #endif
