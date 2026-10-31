@@ -1,5 +1,5 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 364ed7c..4557733 100644
+index a9054ec..b07cd2d 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -452,6 +452,9 @@ prepare() {
@@ -65,7 +65,27 @@ index 364ed7c..4557733 100644
    src/electron/script/apply_all_patches.py \
        src/electron/patches/config.json
  
-@@ -523,6 +564,19 @@ prepare() {
+@@ -479,7 +520,8 @@ prepare() {
+ 
+   pushd src
+   pushd electron
+-  yarn install --frozen-lockfile
++  # Skip build scripts for native test addons only needed for the Electron test suite and fail on loong64.
++  yarn install --frozen-lockfile --mode=skip-build
+   popd
+ 
+   echo "Applying local patches..."
+@@ -501,7 +543,8 @@ prepare() {
+   patch -Np1 -i ../chromium-138-rust-1.86-mismatched_lifetime_syntaxes.patch
+ 
+   # Allow libclang_rt.builtins from compiler-rt >= 16 to be used
+-  patch -Np1 -i ../compiler-rt-adjust-paths.patch
++  # loong64: the plain patch does not match our compiler-rt 23.x layout
++  patch -Np1 -i ../compiler-rt-adjust-paths-loong64.patch
+ 
+   # Increase _FORTIFY_SOURCE level to match Arch's default flags
+   patch -Np1 -i ../increase-fortify-level.patch
+@@ -523,6 +566,19 @@ prepare() {
    patch -Np1 -i "${srcdir}/jinja-python-3.10.patch" -d "third_party/electron_node/tools/inspector_protocol/jinja2"
    patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
  
@@ -85,7 +105,7 @@ index 364ed7c..4557733 100644
    # Allow building against system libraries in official builds
    echo "Patching Chromium for using system libraries..."
    sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' \
-@@ -638,6 +692,13 @@ build() {
+@@ -638,6 +694,13 @@ build() {
      CXXFLAGS="${CXXFLAGS/-march=*([^ ]) }"
    fi
  
@@ -99,7 +119,7 @@ index 364ed7c..4557733 100644
    export CHROMIUM_BUILDTOOLS_PATH="${PWD}/buildtools"
    gn gen out/Release \
        --args="import(\"//electron/build/args/release.gn\") ${_flags[*]}"
-@@ -662,3 +723,11 @@ package() {
+@@ -662,3 +725,13 @@ package() {
    install -Dm644 src/electron/default_app/icon.png \
            "${pkgdir}/usr/share/pixmaps/${pkgname}.png"  # hicolor has no 1024x1024
  }
@@ -111,3 +131,5 @@ index 364ed7c..4557733 100644
 +sha256sums+=('65da85f63d4554958fd6166a4b0cb7fbeea91ab6253c4f016249efec0ddda4cd'
 +             'de2cad8f1c8dced39a2f69e2908b173e7a27321d30d35b25acdc8f9ba3e57b50'
 +             'b48d40e93f020b5e8861f1f320437984d8f7d62c568ad1995af78e49e88de7a9')
++source+=("compiler-rt-adjust-paths-loong64.patch")
++sha256sums+=('4c5bbdd1275379e92120fe89e27ec2779b100e7f56727e139412dc8fbd61a1e3')
