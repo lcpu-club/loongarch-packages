@@ -1,0 +1,14 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -41,7 +41,10 @@ check() {
+   # headers exist. The first useable tree we find is good enough, as these
+   # modules will never be loaded by tests.
+ 
+-  meson test -C 'build'
++  # The running kernel release may not match the installed linux-headers, so
++  # point the test suite at the installed headers tree instead of uname -r.
++  KDIR="$(find /usr/lib/modules -mindepth 2 -maxdepth 2 -type d -name build | sort -V | tail -n 1)" \
++    meson test -C 'build'
+ }
+ 
+ package() {
