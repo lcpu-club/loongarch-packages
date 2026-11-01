@@ -1,0 +1,36 @@
+diff --git a/build/config/clang/BUILD.gn b/build/config/clang/BUILD.gn
+--- a/build/config/clang/BUILD.gn
++++ b/build/config/clang/BUILD.gn
+@@ -189,21 +189,25 @@ template("clang_lib") {
+         _dir = "darwin"
+       } else if (is_linux || is_chromeos) {
+         if (current_cpu == "x64") {
+-          _dir = "x86_64-unknown-linux-gnu"
++          _dir = "linux"
++          _suffix = "-x86_64"
+         } else if (current_cpu == "x86") {
+-          _dir = "i386-unknown-linux-gnu"
++          _dir = "linux"
++          _suffix = "-i386"
+         } else if (current_cpu == "arm") {
+-          _dir = "armv7-unknown-linux-gnueabihf"
++          _dir = "linux"
+         } else if (current_cpu == "arm64") {
+-          _dir = "aarch64-unknown-linux-gnu"
++          _dir = "linux"
++          _suffix = "-aarch64"
+         } else if (current_cpu == "loong64") {
+           _dir = "loongarch64-unknown-linux-gnu"
+         } else if (current_cpu == "riscv64") {
+-          _dir = "riscv64-unknown-linux-gnu"
++          _dir = "linux"
++          _suffix = "-riscv64"
+         } else if (current_cpu == "ppc64") {
+-          _dir = "ppc64le-unknown-linux-gnu"
++          _dir = "linux"
+         } else if (current_cpu == "s390x") {
+-          _dir = "s390x-unknown-linux-gnu"
++          _dir = "linux"
+         } else {
+           assert(false)  # Unhandled cpu type
+         }
