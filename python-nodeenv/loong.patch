@@ -1,0 +1,13 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -28,7 +28,9 @@ build() {
+ 
+ check() {
+   cd nodeenv
+-  pytest
++  # Integration tests download prebuilt Node.js from nodejs.org, which has no
++  # loongarch64 builds; upstream tox.ini also runs the suite without them.
++  pytest -m "not integration"
+ }
+ 
+ package() {
