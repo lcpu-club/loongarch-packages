@@ -1,0 +1,24 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -63,6 +63,21 @@ prepare() {
+     --expression '/group :maintenance/,/end/d' \
+     --expression '/rubocop/d' \
+     gems.rb
++
++  # Drop the tests which reach out to www.google.com: they hang forever when the
++  # network is unavailable, because a failed upstream CONNECT deadlocks the test.
++  sed --in-place \
++    --expression '/^describe Async::HTTP::Internet do$/,$d' \
++    test/async/http/internet.rb
++
++  sed --in-place \
++    --expression '/it "can fetch remote resource" do/,/^\tend$/d' \
++    --expression '/it "can request remote resource with compression" do/,/^\tend$/d' \
++    test/async/http/client/google.rb
++
++  sed --in-place \
++    --expression '/^\twith "proxied client" do$/,/^\tend$/d' \
++    test/async/http/proxy.rb
+ }
+ 
+ build() {
