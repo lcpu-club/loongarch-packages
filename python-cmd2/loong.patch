@@ -1,0 +1,15 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -30,4 +30,12 @@ package() {
+   install -Dm 644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+ }
+ 
++prepare() {
++  cd cmd2
++  patch -Np1 -i ../pipe-capacity.patch
++}
++
++source+=("pipe-capacity.patch")
++sha512sums+=("83322e2e44ad678f6e7da5e229bb86023d167a197547b89dbb46f5fa5bd0a0eccb2b0f5c18a8d4724e0f3271f83aed285cf18b533dd2f9d7c6c5837a632cac54")
++
+ # vim:set ts=2 sw=2 et:

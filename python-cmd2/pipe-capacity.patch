@@ -1,0 +1,24 @@
+--- a/tests/test_utils.py
++++ b/tests/test_utils.py
+@@ -478,14 +478,17 @@
+     waiting, command code gets the terminal back, whether or not the consumer has read all
+     its output yet. That is as between cmd2's own writes.
+     """
++    import fcntl
+     import subprocess
+     import threading
+ 
+-    # More than the relay and both pipes hold, so the child blocks until the consumer reads. What remains after the consumer's
+-    # first read fits, so the child can then finish.
+-    payload = b"x" * 280000
+-    first_read = 200000 if pauses else len(payload)
+     read_fd, write_fd = os.pipe()
++    # A pipe holds a fixed number of pages, so its capacity depends on the page size. Size the payload from the consumer's pipe:
++    # more than it and the relay's pipe hold together with the relay's 64 KiB read, so the child blocks until the consumer
++    # reads. What remains after the consumer's first read fits, so the child can then finish.
++    capacity = fcntl.fcntl(write_fd, fcntl.F_GETPIPE_SZ)
++    payload = b"x" * (2 * capacity + 2 * 65536)
++    first_read = len(payload) - capacity if pauses else len(payload)
+     received = bytearray()
+     lent = threading.Event()
+     resume = threading.Event()
