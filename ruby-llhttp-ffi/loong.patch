@@ -1,0 +1,20 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -90,6 +90,17 @@ package() {
+ 
+   cp --archive --verbose tmp_install/* "${pkgdir}"
+ 
++  # makepkg's tidy stage deletes *.so files below gems/, but ffi-compiler
++  # installs the library to gems/<gem>/ext/<platform>/ instead of the
++  # extension directory. Copy it to the extension directory, which is
++  # searched first by FFI::Compiler::Loader.find.
++  local _gemdir="$(gem env gemdir)"
++  local _platspec
++  _platspec="$(ruby -e 'print "#{Gem::Platform.local}/#{Gem::extension_api_version}"')"
++  install --verbose -D --mode=0755 \
++    "tmp_install${_gemdir}/gems/${_gemname}-${pkgver}/ext/${_platspec%%/*}/libllhttp-ext.so" \
++    "${pkgdir}${_gemdir}/extensions/${_platspec}/${_gemname}-${pkgver}/libllhttp-ext.so"
++
+   install --verbose -D --mode=0644 LICENSE* --target-directory "${pkgdir}/usr/share/licenses/${pkgname}"
+   install --verbose -D --mode=0644 *.md --target-directory "${pkgdir}/usr/share/doc/${pkgname}"
+ }
