@@ -1,6 +1,6 @@
 --- a/packages/cli/script/build.ts
 +++ b/packages/cli/script/build.ts
-@@ -36,10 +36,11 @@
+@@ -39,10 +39,11 @@
  
  const allTargets: {
    os: string
@@ -13,7 +13,7 @@
    { os: "linux", arch: "arm64" },
    { os: "linux", arch: "x64" },
    { os: "linux", arch: "x64", avx2: false },
-@@ -139,7 +140,10 @@
+@@ -143,7 +144,10 @@
        )
      },
    }
@@ -25,7 +25,7 @@
    const parcelWatcherPlugin: BunPlugin = {
      name: "parcel-watcher-binding",
      setup(build) {
-@@ -149,6 +153,23 @@
+@@ -153,6 +157,23 @@
        }))
      },
    }
@@ -49,17 +49,17 @@
    const target = targetName(item)
    const name = target.replace(binary, "cli")
    const executablePath = await compileExecutable(item)
-@@ -161,6 +182,7 @@
+@@ -165,6 +186,7 @@
        solidPlugin,
        parcelWatcherPlugin,
        opencodePtyPlugin,
 +      ptyStubPlugin,
        pluginRuntimePlugin,
        simulationGraphPlugin,
-     ],
+       modelsSnapshot,
 --- a/packages/core/package.json
 +++ b/packages/core/package.json
-@@ -50,9 +50,9 @@
+@@ -56,9 +56,9 @@
      },
      "#fff": {
        "workerd": "./src/filesystem/fff.workerd.ts",
@@ -71,7 +71,6 @@
      },
      "#photon-wasm": {
        "workerd": "./src/image/photon-wasm.workerd.ts",
-
 --- a/script/native-arch.ts
 +++ b/script/native-arch.ts
 @@ -9,7 +9,7 @@
@@ -92,3 +91,60 @@
      const found = images(await readFile(file))
      if (found[0]?.offset !== 0) throw new Error(`${file} is not a native executable or library`)
      const wrong = found.filter((image) => !image.arches.includes(arch))
+--- a/packages/script/src/index.ts
++++ b/packages/script/src/index.ts
+@@ -11,7 +11,8 @@
+ }
+ 
+ // relax version requirement
+-const expectedBunVersionRange = `^${expectedBunVersion}`
++// loong64: the repository still ships an older bun than the pinned packageManager version.
++const expectedBunVersionRange = `>=1.4.3`
+ 
+ if (!semver.satisfies(process.versions.bun, expectedBunVersionRange)) {
+   throw new Error(`This script requires bun@${expectedBunVersionRange}, but you are using bun@${process.versions.bun}`)
+--- a/packages/desktop/script/utils.ts
++++ b/packages/desktop/script/utils.ts
+@@ -56,6 +56,12 @@
+     os: "linux",
+     cpu: "arm64",
+   },
++  {
++    target: "linux-loong64",
++    package: "@opencode/cli-linux-loong64",
++    os: "linux",
++    cpu: "loong64",
++  },
+ ]
+ 
+ function nativeTarget() {
+@@ -65,7 +71,7 @@
+ 
+   if (platform === "win32") return arch === "arm64" ? "windows-arm64" : "windows-x64"
+ 
+-  if (platform === "linux") return arch === "arm64" ? "linux-arm64" : "linux-x64"
++  if (platform === "linux") return arch === "arm64" ? "linux-arm64" : arch === "loong64" ? "linux-loong64" : "linux-x64"
+   throw new Error(`Unsupported platform: ${platform}/${arch}`)
+ }
+ 
+--- a/packages/desktop/electron-builder.config.ts
++++ b/packages/desktop/electron-builder.config.ts
+@@ -112,7 +112,8 @@
+       const arch = Arch[context.arch]
+ 
+       // The --arm64 flag picks Electron while OPENCODE_TARGET picks the CLI and node-pty, so they can disagree.
+-      if (arch !== "x64" && arch !== "arm64") throw new Error(`Unsupported desktop architecture: ${arch}`)
++      if (arch !== "x64" && arch !== "arm64" && arch !== "loong64")
++        throw new Error(`Unsupported desktop architecture: ${arch}`)
+ 
+       if (arch !== target.cpu) throw new Error(`Packaging ${arch} Electron with the ${target.target} CLI`)
+       const resources = context.packager.getResourcesDir(context.appOutDir)
+@@ -121,7 +122,7 @@
+       const file = await stat(cli)
+ 
+       if (!file.isFile() || file.size === 0) throw new Error(`Bundled CLI must be a non-empty file: ${cli}`)
+-      await NativeArch.verify(cli, arch)
++      await NativeArch.verify(cli, arch as "x64" | "arm64" | "loong64")
+       const version = path.join(path.dirname(cli), "opencode-cli.version")
+ 
+       if ((await stat(version)).size === 0) throw new Error(`Bundled CLI version must be a non-empty file: ${version}`)

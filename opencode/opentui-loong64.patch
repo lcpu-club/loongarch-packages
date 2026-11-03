@@ -1,12 +1,12 @@
---- a/chunk-bun-6rvkxs1v.js
-+++ b/chunk-bun-6rvkxs1v.js
+--- a/chunk-bun-x6cz4jyg.js
++++ b/chunk-bun-x6cz4jyg.js
 @@ -1,4 +1,5 @@
  // @bun
 +import koffi from "./koffi.node";
  var __defProp = Object.defineProperty;
  var __returnValue = (v) => v;
  function __exportSetter(name, newValue) {
-@@ -198,7 +199,7 @@
+@@ -2402,7 +2403,7 @@
  var backend = loadBackend();
  function loadBackend() {
    if (isBun) {
@@ -15,43 +15,56 @@
    }
    try {
      const nodeFfi = requireModule("node:ffi");
-@@ -207,6 +208,75 @@
+@@ -2411,6 +2412,113 @@
      return createUnsupportedBackend(error);
    }
  }
 +function createKoffiBackend(bun) {
 +  // Bun's engine FFI requires JIT; Koffi uses static LoongArch call trampolines.
 +  const types = {
-+    i8: "int8_t", u8: "uint8_t", i16: "int16_t", u16: "uint16_t",
-+    i32: "int32_t", u32: "uint32_t", i64: "int64_t", u64: "uint64_t",
-+    f32: "float", f64: "double", usize: "size_t", cstring: "str",
-+    ptr: "void *", pointer: "void *", buffer: "void *",
-+    function: "void *", callback: "void *"
++    char: "char",
++    i8: "int8_t",
++    u8: "uint8_t",
++    i16: "int16_t",
++    u16: "uint16_t",
++    i32: "int32_t",
++    u32: "uint32_t",
++    i64: "int64_t",
++    u64: "uint64_t",
++    f32: "float",
++    f64: "double",
++    usize: "size_t",
++    bool: "bool",
++    ptr: "void *",
++    pointer: "void *",
++    buffer: "void *",
++    function: "void *",
++    callback: "void *",
++    cstring: "str",
++    void: "void"
 +  };
 +  const ffiType = (type = "void") => types[type] ?? type;
-+  const isPointer = (type) => types[type] === "void *";
++  const isPointer = (type) => ffiType(type) === "void *";
 +  // Preserve non-null empty buffers, which Koffi otherwise passes as NULL.
 +  const emptyBuffer = new Uint8Array(1);
++  // Keep pointer-sized integers in the safe range so callers can use them as numbers.
++  const toSafeInteger = (value) => typeof value === "bigint" && value <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(value) : value;
 +  function toNative(type, value) {
-+    if (type === "bool") return Boolean(value);
-+    if (!isPointer(type)) return value;
-+    if (typeof value === "number") return toSafeBigIntPointer(value);
-+    if (value != null && value.byteLength === 0) return emptyBuffer;
++    if (isPointer(type))
++      return value !== null && value !== undefined && value.byteLength === 0 ? emptyBuffer : value;
 +    return value;
 +  }
 +  function toJS(type, value) {
-+    if (isPointer(type)) return value == null ? null : toSafeNumberPointer(value);
-+    if (["i64", "u64", "int64_t", "uint64_t"].includes(type)) return BigInt(value);
-+    return value;
++    if (isPointer(type))
++      return value === null || value === undefined ? null : Number(value);
++    return toSafeInteger(value);
 +  }
-+  return createBunBackend({
-+    // Raw memory access does not use Bun's JIT-dependent call trampolines.
-+    ptr: bun.ptr,
-+    toArrayBuffer: bun.toArrayBuffer,
-+    suffix: bun.suffix,
++  return {
 +    dlopen(path, definitions) {
 +      const lib = koffi.load(path instanceof URL ? fileURLToPath(path) : path);
 +      const symbols = {};
++      const callbacks = new Set;
++      let closed = false;
 +      try {
 +        for (const [name, definition] of Object.entries(definitions)) {
 +          if (definition.ptr != null) {
@@ -66,32 +79,66 @@
 +        lib.unload();
 +        throw error;
 +      }
-+      return { symbols, close: () => lib.unload() };
-+    },
-+    JSCallback: class {
-+      constructor(callback, definition) {
-+        if (definition.threadsafe) {
-+          throw new Error("OpenTUI Koffi callbacks must be same-thread");
++      return {
++        symbols,
++        createCallback(callback, definition) {
++          if (closed) {
++            throw new Error(LIBRARY_CLOSED);
++          }
++          if (definition.threadsafe) {
++            throw new Error("OpenTUI Koffi callbacks must be same-thread");
++          }
++          const args = definition.args ?? [];
++          const proto = koffi.proto(ffiType(definition.returns), args.map(ffiType));
++          const registered = koffi.register((...values) => toNative(definition.returns,
++            callback(...values.map((value, index) => toJS(args[index], value)))), koffi.pointer(proto));
++          const instance = {
++            ptr: Number(registered),
++            threadsafe: false,
++            close() {
++              if (this.ptr === null) {
++                return;
++              }
++              koffi.unregister(registered);
++              this.ptr = null;
++            }
++          };
++          callbacks.add(instance);
++          return instance;
++        },
++        close() {
++          if (closed) {
++            return;
++          }
++          closed = true;
++          for (const callback of [...callbacks]) {
++            callback.close();
++          }
++          lib.unload();
 +        }
-+        const args = definition.args ?? [];
-+        const proto = koffi.proto(ffiType(definition.returns), args.map(ffiType));
-+        this.callback = koffi.register((...values) => toNative(definition.returns,
-+          callback(...values.map((value, index) => toJS(args[index], value)))), koffi.pointer(proto));
-+        this.ptr = toSafeNumberPointer(this.callback);
-+        this.threadsafe = false;
-+      }
-+      close() {
-+        if (this.ptr === null) return;
-+        koffi.unregister(this.callback);
-+        this.ptr = null;
-+      }
++      };
++    },
++    // Raw memory access does not use Bun's JIT-dependent call trampolines.
++    ptr: bun.ptr,
++    suffix: bun.suffix,
++    toArrayBuffer(pointer, offset, length) {
++      return bun.toArrayBuffer(typeof pointer === "bigint" ? Number(pointer) : pointer, offset, length);
 +    }
-+  });
++  };
 +}
  function toPointer(value) {
    if (isBun && typeof value === "bigint") {
      return toSafeNumberPointer(value);
-@@ -8066,7 +8136,7 @@
+@@ -4215,7 +4323,7 @@
+   console.error("FATAL ERROR:", message);
+   throw new Error(message);
+ }
+-var pointerSize = process.arch === "x64" || process.arch === "arm64" ? 8 : 4;
++var pointerSize = process.arch === "x64" || process.arch === "arm64" || process.arch === "loong64" ? 8 : 4;
+ var isBun2 = typeof process !== "undefined" && "bun" in process.versions;
+ var typeSizes = {
+   u8: 1,
+@@ -5632,7 +5740,7 @@
    win32: "opentui.dll"
  };
  function getNativeAssetDescriptor(target) {
@@ -100,7 +147,7 @@
      throw new Error(`Unsupported OpenTUI Node asset target: ${String(target.platform)}-${String(target.arch)}`);
    }
    if (target.libc !== undefined && target.libc !== "glibc" && target.libc !== "musl") {
-@@ -8125,6 +8195,10 @@
+@@ -5691,6 +5799,10 @@
      }
    }
    if (process.platform === "linux") {
@@ -111,28 +158,28 @@
      if (process.arch === "x64") {
        if (process.env.OPENTUI_LIBC === "musl") {
          return (await import("@opentui/core-linux-x64-musl")).default;
-@@ -11950,7 +12024,7 @@
-   console.error("FATAL ERROR:", message);
-   throw new Error(message);
- }
--var pointerSize = process.arch === "x64" || process.arch === "arm64" ? 8 : 4;
-+var pointerSize = process.arch === "x64" || process.arch === "arm64" || process.arch === "loong64" ? 8 : 4;
- var isBun2 = typeof process !== "undefined" && "bun" in process.versions;
- var typeSizes = {
-   u8: 1,
---- a/chunk-bun-h3ggawd9.js
-+++ b/chunk-bun-h3ggawd9.js
-@@ -3505,7 +3505,8 @@
+--- a/chunk-bun-6kxdhkdc.js
++++ b/chunk-bun-6kxdhkdc.js
+@@ -14971,7 +14971,7 @@
+       }
+       if (this.isDestroyed)
+         return;
+-      if (highlights.length > 0 || this._onChunks || this._baseHighlight) {
++      if (highlights.length > 0 || this._onChunks || this._baseHighlight || this._initialStyledText) {
+         const sourceRanges = this._onChunks ? [] : undefined;
+         const context = {
+           content,
+@@ -14980,7 +14980,8 @@
            highlights,
            sourceRanges
          };
 -        let chunks = treeSitterToTextChunks2(content, highlights, this._syntaxStyle, {
-+        // Loong64: reuse marked fallback when highlights are empty.
++        // Loong64: reuse the marked fallback when highlights are unavailable.
 +        let chunks = highlights.length === 0 && this._initialStyledText ? this._initialStyledText.chunks : treeSitterToTextChunks2(content, highlights, this._syntaxStyle, {
            enabled: this._conceal,
            baseHighlight: this._baseHighlight,
            ranges: sourceRanges
-@@ -3538,7 +3539,11 @@
+@@ -15013,7 +15014,11 @@
        console.warn("Code highlighting failed, falling back to plain text:", error);
        if (this.isDestroyed)
          return;
@@ -143,17 +190,17 @@
 +        this.textBuffer.setText(content);
 +      }
        this.setRenderedLineSources(undefined);
-       this._shouldRenderTextBuffer = true;
+       this.setShouldRenderTextBuffer(true);
        this._isHighlighting = false;
 --- a/index.bun.js
 +++ b/index.bun.js
-@@ -12170,8 +12170,7 @@
+@@ -11761,8 +11761,7 @@
      return this.createChunk(text, "default", link);
    }
    createInitialStyledText(token) {
 -    if (!this._streaming)
 -      return;
-+    // Loong64: no WASM tree-sitter; always keep marked fallback.
++    // Loong64: no WASM tree-sitter, always keep the marked fallback.
      const chunks = [];
      if ("tokens" in token && Array.isArray(token.tokens)) {
        this.renderInlineContent(token.tokens, chunks);

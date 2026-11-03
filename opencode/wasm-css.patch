@@ -1,14 +1,14 @@
 --- a/package.json
 +++ b/package.json
-@@ -120,6 +120,7 @@
+@@ -115,6 +115,7 @@
      "@ast-grep/cli": "0.44.0",
      "@opencode/client": "workspace:*",
      "@oxlint/plugins": "1.60.0",
 +    "@rolldown/binding-wasm32-wasi": "1.2.5",
      "@tsconfig/bun": "catalog:",
+     "@types/bun": "catalog:",
      "@types/mime-types": "3.0.1",
-     "@types/react": "19.2.17",
-@@ -157,6 +158,8 @@
+@@ -149,6 +150,8 @@
      "electron"
    ],
    "overrides": {
@@ -17,16 +17,16 @@
      "@opentui/core": "catalog:",
      "@opentui/keymap": "catalog:",
      "@opentui/solid": "catalog:",
-@@ -169,6 +172,8 @@
+@@ -163,6 +166,9 @@
      "solid-js": "catalog:"
    },
    "patchedDependencies": {
-+    "@opentui/core@0.5.17": "patches/opentui-loong64.patch",
++    "@opentui/core@0.8.0": "patches/opentui-loong64.patch",
++    "builder-util@26.15.3": "patches/builder-util-loong64.patch",
 +    "@tailwindcss/oxide-wasm32-wasi@4.3.3": "patches/fix-oxide-worker-exit.patch",
      "@ai-sdk/openai-compatible@2.0.41": "patches/@ai-sdk%2Fopenai-compatible@2.0.41.patch",
      "@dnd-kit/dom@0.5.0": "patches/@dnd-kit%2Fdom@0.5.0.patch",
      "@npmcli/agent@4.0.2": "patches/@npmcli%2Fagent@4.0.2.patch",
-
 --- a/packages/cli/script/app-assets.ts
 +++ b/packages/cli/script/app-assets.ts
 @@ -8,7 +8,7 @@

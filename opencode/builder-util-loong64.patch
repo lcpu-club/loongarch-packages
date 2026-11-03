@@ -1,0 +1,35 @@
+--- a/out/arch.js
++++ b/out/arch.js
+@@ -14,6 +14,7 @@
+     Arch[Arch["armv7l"] = 2] = "armv7l";
+     Arch[Arch["arm64"] = 3] = "arm64";
+     Arch[Arch["universal"] = 4] = "universal";
++    Arch[Arch["loong64"] = 5] = "loong64";
+ })(Arch || (exports.Arch = Arch = {}));
+ function toLinuxArchString(arch, targetName) {
+     switch (arch) {
+@@ -25,12 +26,14 @@
+             return targetName === "snap" || targetName === "deb" ? "armhf" : targetName === "flatpak" ? "arm" : "armv7l";
+         case Arch.arm64:
+             return targetName === "pacman" || targetName === "rpm" || targetName === "flatpak" ? "aarch64" : "arm64";
++        case Arch.loong64:
++            return "loong64";
+         default:
+             throw new Error(`Unsupported arch ${arch}`);
+     }
+ }
+ function getArchCliNames() {
+-    return [Arch[Arch.ia32], Arch[Arch.x64], Arch[Arch.armv7l], Arch[Arch.arm64]];
++    return [Arch[Arch.ia32], Arch[Arch.x64], Arch[Arch.armv7l], Arch[Arch.arm64], Arch[Arch.loong64]];
+ }
+ function getArchSuffix(arch, defaultArch) {
+     return arch === defaultArchFromString(defaultArch) ? "" : `-${Arch[arch]}`;
+@@ -46,6 +49,8 @@
+         case "arm":
+         case "armv7l":
+             return Arch.armv7l;
++        case "loong64":
++            return Arch.loong64;
+         case "universal":
+             return Arch.universal;
+         default:
