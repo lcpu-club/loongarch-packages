@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7b30643..5cf8b2c 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -29,6 +29,7 @@ prepare() {
+     cd "$pkgname-$pkgver"
+     # fix version string, don't use the build date
+     sed -i 's|PROJECT_VERSION "%Y%m%d"|PROJECT_VERSION "'$pkgver'"|' CMakeLists.txt
++    patch -p1 -i "$srcdir/profiler-loongarch64.patch"
+ }
+ 
+ build() {
+@@ -55,3 +56,6 @@ package() {
+ }
+ 
+ # vim: ts=2 sw=2 et:
++
++source+=('profiler-loongarch64.patch')
++sha256sums+=('5c239de5de634ededdf75c3ea5b3d70ab4bb7ea98767daab323b2c4d2328e128')
