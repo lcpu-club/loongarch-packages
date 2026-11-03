@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7554281..098705b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -62,6 +62,11 @@ b2sums=('bfe918d22d0ae535f81e72f23bf66dab037ebe193b6afbae094114f39c7b2b51dc50137
+ build() {
+   cd $_name-$pkgver
+   # NOTE: jupyterlab requires 'httpx~=0.28.0' in its pyproject.toml, but Arch still has only 0.27.0 so we must use --skip-dependency-check
++  # loong64: lerna 7 builds its project graph through nx, which has no loong64 build; berry's own workspaces foreach runs the same scripts in topological order
++  node -e "const f='package.json',j=require('./'+f);j.scripts['build:prod']='jlpm workspaces foreach -pt run build:prod';require('fs').writeFileSync(f,JSON.stringify(j,null,2))"
++  # loong64: yarn berry rejects the chroot's legacy npm_config_registry/YARN_REGISTRY env vars; translate to yarn's own config
++  export YARN_NPM_REGISTRY_SERVER="${npm_config_registry:-https://registry.npmmirror.com}"
++  unset npm_config_registry YARN_REGISTRY
+   python -m build --wheel --no-isolation --skip-dependency-check
+ }
+ 
