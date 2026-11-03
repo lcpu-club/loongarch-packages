@@ -1,0 +1,49 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index fe32e93..a3cc174 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,7 +22,9 @@ b2sums=('922af6a0ea5bf4be5265c0584a681a1f45c55eb6de9ca707e97b1b4d9706f708bf56c47
+ 
+ prepare() {
+   cd $pkgname
+-  pnpm install --frozen-lockfile
++  # loong64: the pinned pnpm build ships no linux-loong64 binary; use the system pnpm (which also must refresh the pnpm-11 lockfile)
++  export npm_config_manage_package_manager_versions=false
++  pnpm install
+ }
+ 
+ build() {
+@@ -32,6 +34,33 @@ build() {
+ 
+ check() {
+   cd $pkgname
++  # loong64: vitest's rolldown ships no loong64 binding; stage the version-matched wasm32-wasi fallback, built against the @emnapi 2.0.0-beta.2 its init requires
++  local rolldown_ver stage
++  rolldown_ver=$(jq -r .version "$(find node_modules/.pnpm -maxdepth 4 -path '*/node_modules/rolldown/package.json' | head -n1)")
++  stage="$srcdir/rolldown-wasm-stage"
++  rm -rf "$stage"
++  mkdir -p "$stage"
++  cat > "$stage/package.json" << 'JSON'
++{
++  "overrides": {
++    "@emnapi/core": "2.0.0-beta.2",
++    "@emnapi/runtime": "2.0.0-beta.2"
++  }
++}
++JSON
++  # --force: the wasm binding declares cpu: ["wasm32"], npm 12 refuses the install on loong64 otherwise
++  npm install --prefix "$stage" --no-save --ignore-scripts --no-audit --no-fund \
++      --force \
++      "@rolldown/binding-wasm32-wasi@${rolldown_ver}"
++  # nest the fallback's deps under its own node_modules so it resolves the versions it was built against, not pnpm's top-level ones
++  rm -rf node_modules/@rolldown/binding-wasm32-wasi
++  mkdir -p node_modules/@rolldown
++  cp -r "$stage/node_modules/@rolldown/binding-wasm32-wasi" node_modules/@rolldown/
++  mkdir -p node_modules/@rolldown/binding-wasm32-wasi/node_modules
++  cp -rn "$stage/node_modules/." node_modules/@rolldown/binding-wasm32-wasi/node_modules/
++  rm -rf node_modules/@rolldown/binding-wasm32-wasi/node_modules/@rolldown
++  rm -rf "$stage"
++
+   pnpm test:commit
+ }
+ 
