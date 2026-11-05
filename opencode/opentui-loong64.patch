@@ -15,7 +15,7 @@
    }
    try {
      const nodeFfi = requireModule("node:ffi");
-@@ -2411,6 +2412,113 @@
+@@ -2411,6 +2412,119 @@
      return createUnsupportedBackend(error);
    }
  }
@@ -45,19 +45,25 @@
 +  };
 +  const ffiType = (type = "void") => types[type] ?? type;
 +  const isPointer = (type) => ffiType(type) === "void *";
++  // Bun's FFI hands 64-bit integers to JS as BigInt; Koffi may hand back a Number
++  // when the value fits, so normalize 64-bit values to BigInt to keep identity
++  // comparisons (e.g. contextId) sound across the boundary.
++  const is64 = (type) => { const t = ffiType(type); return t === "int64_t" || t === "uint64_t"; };
 +  // Preserve non-null empty buffers, which Koffi otherwise passes as NULL.
 +  const emptyBuffer = new Uint8Array(1);
-+  // Keep pointer-sized integers in the safe range so callers can use them as numbers.
-+  const toSafeInteger = (value) => typeof value === "bigint" && value <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(value) : value;
 +  function toNative(type, value) {
 +    if (isPointer(type))
 +      return value !== null && value !== undefined && value.byteLength === 0 ? emptyBuffer : value;
++    if (is64(type) && typeof value === "number")
++      return BigInt(value);
 +    return value;
 +  }
 +  function toJS(type, value) {
 +    if (isPointer(type))
 +      return value === null || value === undefined ? null : Number(value);
-+    return toSafeInteger(value);
++    if (is64(type) && value !== null && value !== undefined)
++      return BigInt(value);
++    return value;
 +  }
 +  return {
 +    dlopen(path, definitions) {
@@ -93,7 +99,7 @@
 +          const registered = koffi.register((...values) => toNative(definition.returns,
 +            callback(...values.map((value, index) => toJS(args[index], value)))), koffi.pointer(proto));
 +          const instance = {
-+            ptr: Number(registered),
++            ptr: registered,
 +            threadsafe: false,
 +            close() {
 +              if (this.ptr === null) {
@@ -129,7 +135,7 @@
  function toPointer(value) {
    if (isBun && typeof value === "bigint") {
      return toSafeNumberPointer(value);
-@@ -4215,7 +4323,7 @@
+@@ -4215,7 +4329,7 @@
    console.error("FATAL ERROR:", message);
    throw new Error(message);
  }
@@ -138,7 +144,7 @@
  var isBun2 = typeof process !== "undefined" && "bun" in process.versions;
  var typeSizes = {
    u8: 1,
-@@ -5632,7 +5740,7 @@
+@@ -5632,7 +5746,7 @@
    win32: "opentui.dll"
  };
  function getNativeAssetDescriptor(target) {
@@ -147,7 +153,7 @@
      throw new Error(`Unsupported OpenTUI Node asset target: ${String(target.platform)}-${String(target.arch)}`);
    }
    if (target.libc !== undefined && target.libc !== "glibc" && target.libc !== "musl") {
-@@ -5691,6 +5799,10 @@
+@@ -5691,6 +5805,10 @@
      }
    }
    if (process.platform === "linux") {

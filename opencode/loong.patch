@@ -1,3 +1,5 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 45023e6..b267296 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -36,18 +36,42 @@ b2sums=('7cea1cbf241901c6ad4b5a3880d1df3533cb526f783af5060b3d54fbe39ba947d0c68ae
@@ -84,17 +86,17 @@
 +  'loong64-target.patch'
 +  'fix-oxide-worker-exit.patch'
 +  'opentui-loong64.patch'
-+  'opentui-0.8.0.tar.gz'
-+  'koffi-linux-loong64-3.2.1.tgz'
-+  # OpenTUI 0.8.0 rejects the zig in [extra]; use the version it supports.
-+  'zig-loongarch64-linux-0.16.0.tar.xz'
++  'opentui-0.8.0.tar.gz::https://github.com/anomalyco/opentui/archive/refs/tags/v0.8.0.tar.gz'
++  'koffi-linux-loong64-3.2.1.tgz::https://registry.npmjs.org/@koromix/koffi-linux-loong64/-/koffi-linux-loong64-3.2.1.tgz'
++  # OpenTUI 0.8.0 does not build with the zig in [extra] (0.17 removed ReleaseFast); use 0.16.0.
++  'zig-loongarch64-linux-0.16.0.tar.xz::https://ziglang.org/download/0.16.0/zig-loongarch64-linux-0.16.0.tar.xz'
 +  'builder-util-loong64.patch'
 +)
 +b2sums+=(
 +  '946ffac4da3527905d63d8cdd6650534fdbc12ca9c4cf2f8a362b7a2e1dc4ebf6141de14f25bd24e8408febc05b045921086a8adc18e297567e9fd397f04d6e3'
 +  '1461d420a90cba5ec1756e1d1b3219d620b13478094b7ae61f7a64bec9aaeb201b68573f9a5fdec0219e64821a83191296e951a2a5ed08242ec9a620c5634e47'
 +  '8ccefc948e86b53c43f77cc3f3ef3de557cd4c104a444fb0eb8b2626cfc607ae20825370ffa29eab66604514c5c76eeaa0c86d45a3b65776ac15edae374278b1'
-+  'b2196414c3590c6a39eb4da6cc45728702c6214e19f8c4ec82c747003234c317c64671a213db2522917e6fc9827ee1903875e4b63428b7c02410ce2561764731'
++  '35c2e48ea93462bef63efb5dfefaa30d4259c446a8916ca6b130baa9d0cbda3983a3c33f6b9b805f854a4c70e4347094ff3b9fcde5e2f983e752d7f91b48fa08'
 +  '8a1baeceb0c08b0194c0fb2ca8d8403b6cb7c3f33b3e4225175f9af0ba5a482dd0a619d804de2331d79b5e9a8412cebdf6647d2623465f199b414796a508466f'
 +  '2b993122ef63c1cea33ca57861c3b5b1087473622dee2c4654468ffbf51ce6594885b9ea18d34215351f544e9444439841ff3b7ab3f1792ecd2de25da274fb88'
 +  'b3335c5907dbb3528fb35b16117c47e3e77f898c752fe1cd69805b8d6e5bd14cbe3ac1a05bac0ec7090561e90686f496a3e39652c82238c1cd26bee53d4c4cfd'
