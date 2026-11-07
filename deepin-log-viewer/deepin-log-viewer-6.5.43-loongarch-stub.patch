@@ -1,0 +1,36 @@
+--- a/tests/src/stub.h
++++ b/tests/src/stub.h
+@@ -13,6 +13,7 @@
+ #endif
+ //c
+ #include <cstddef>
++#include <cstdint>
+ #include <cstring>
+ //c++
+ #include <map>
+@@ -54,6 +55,25 @@
+     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+ #elif defined(__thumb__) || defined(_M_THUMB)
+     #error "Thumb is not supported"
++#elif defined(__loongarch_lp64) || defined(__loongarch64)
++    #define CODESIZE 20U
++    #define CODESIZE_MIN 20U
++    #define CODESIZE_MAX CODESIZE
++    // 20 byte absolute jump, needed because the stubbed function and the
++    // replacement may live in different shared objects:
++    // lu12i.w $t0, bits[51:12]
++    // ori     $t0, $t0, bits[11:0]
++    // lu32i.d $t0, bits[51:32]
++    // lu52i.d $t0, $t0, bits[63:52]
++    // jirl    $zero, $t0, 0
++    #define REPLACE_FAR(t, fn, fn_stub)\
++        ((uint32_t*)fn)[0] = 0x1400000cU | (uint32_t)(((((unsigned long long)fn_stub) >> 12) & 0xfffffU) << 5);\
++        ((uint32_t*)fn)[1] = 0x0380000cU | (12U << 5) | (uint32_t)((((unsigned long long)fn_stub) & 0xfffU) << 10);\
++        ((uint32_t*)fn)[2] = 0x1600000cU | (uint32_t)(((((unsigned long long)fn_stub) >> 32) & 0xfffffU) << 5);\
++        ((uint32_t*)fn)[3] = 0x0300000cU | (12U << 5) | (uint32_t)(((((unsigned long long)fn_stub) >> 52) & 0xfffU) << 10);\
++        ((uint32_t*)fn)[4] = 0x4c000180U;\
++        CACHEFLUSH((char *)fn, CODESIZE);
++    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+ #else //__i386__ _x86_64__
+     #define CODESIZE 13U
+     #define CODESIZE_MIN 5U
