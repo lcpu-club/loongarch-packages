@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -35,6 +35,8 @@ prepare() {
+   # Fix Qt6 targets, partition selection and GUI tests; adapt hotplug detection for Arch.
+   # D-Bus authorization fix: https://github.com/linuxdeepin/deepin-diskmanager/pull/235
+   git apply ../$pkgname-6.0.28-arch.patch
++  # Add a LoongArch64 jump sequence to the test stub helper (tests/stub.h).
++  git apply ../loongarch-stub.patch
+ 
+   # Install hotplug helpers under /usr/lib and keep udev rules in sync.
+   sed -i 's|libexec/deepin-diskmanager|lib/deepin-diskmanager|g' \
+@@ -59,3 +61,5 @@ check() {
+ package() {
+   DESTDIR="$pkgdir" cmake --install build
+ }
++source+=("loongarch-stub.patch")
++sha512sums+=('7216a7c5088386416a793cdbcfeeef63ffdfaff32c3f4fc13249568f2325dc3520ca330d29fbe44a80c48d46027fe9ff3e0d0c7b12366b769f4174e3f2ed9d3b')
