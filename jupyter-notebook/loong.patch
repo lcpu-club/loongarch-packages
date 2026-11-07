@@ -1,21 +1,27 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 22a6898..34be26a 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -31,6 +31,49 @@ replaces=(jupyter-retrolab)
+@@ -31,6 +31,63 @@ replaces=(jupyter-retrolab)
  source=(git+https://github.com/jupyter/notebook#tag=v$pkgver)
- sha256sums=('af2f020cfe32f65047d0064ecafd6fc6651377c8a7f47f8cfccfc17dad23c35e')
+ sha256sums=('83051e358c87fc67280b675b9e3ea40c0dcf295a974a0b1243992fa5f3c366af')
  
 +prepare() {
 +# rspack has no loong64 native binding; build the frontend with webpack instead
 +  cd notebook
 +  sed -i 's|@jupyter/builder|@jupyterlab/builder|' app/rspack*.config.js
 +  sed -i "s|const rspack = require('@rspack/core');|const webpack = require('webpack');|; s|rspack\.container|webpack.container|" app/rspack.config.js
-+# workaround for khroma's tsconfig.json extending its missing devDependency tsex
++# webpack >= 5.112 minimises all asset types by default, which chokes on the Jinja
++# templates emitted by HtmlWebpackPlugin; restrict it to everything but HTML
 +  cat >> app/rspack.config.js <<'EOF'
 +
++const MinimizerPlugin = require('minimizer-webpack-plugin');
++
 +module.exports.forEach(config => {
++// workaround for khroma's tsconfig.json extending its missing devDependency tsex
 +  config.experiments = { ...config.experiments, typescript: false };
++  config.optimization = {
++    ...config.optimization,
++    minimizer: [new MinimizerPlugin({ exclude: /\.html$/ })],
++  };
 +});
 +EOF
 +  python - <<'EOF'
@@ -34,6 +40,8 @@ index 22a6898..34be26a 100644
 +dev['webpack'] = '^5.94.0'
 +dev['webpack-cli'] = '^5.1.4'
 +
++lab_version = data['resolutions']['@jupyterlab/application']
++
 +with open('app/package.json', 'w') as f:
 +    json.dump(data, f, indent=2)
 +
@@ -43,6 +51,10 @@ index 22a6898..34be26a 100644
 +dev = data['devDependencies']
 +dev.pop('@jupyter/builder', None)
 +dev['@jupyterlab/builder'] = '^4.5.10'
++# the legacy webpack builder needs the JupyterLab core metadata: provide it in
++# node_modules, otherwise it is resolved over the network at build time
++# (core-meta 4.5.x is not published and the GitHub fallback is rate limited)
++dev['@jupyterlab/core-meta'] = lab_version
 +
 +with open('packages/lab-extension/package.json', 'w') as f:
 +    json.dump(data, f, indent=2)
