@@ -1,0 +1,13 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -29,7 +29,9 @@ build() {
+ 
+ check() {
+     cd "$_archive"
+-    go test ./...
++    # Upstream release assets do not include linux/loong64, so the self-update
++    # tests that look up the asset name for the host platform cannot pass.
++    go test -skip 'TestNativeComplementaryUpdates|TestPermissionFailureEscalatesOnlyOnce' ./...
+ }
+ 
+ package() {
