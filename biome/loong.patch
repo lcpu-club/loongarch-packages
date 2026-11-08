@@ -25,3 +25,13 @@
  }
  
  build() {
+@@ -48,6 +66,9 @@ check() {
+ 		commands::lint::lint_help
+ 		commands::lsp_proxy::lsp_proxy_help
+ 	)
++	# loong64: upstream release_target_for_platform() has no linux/loongarch64
++	# entry, so this self-update test panics with UnsupportedPlatformError.
++	skipped+=(commands::upgrade::tests::installs_latest_release_from_github)
+ 	cargo test -p "${pkgname}_cli" --frozen --all-features -- \
+ 		${skipped[@]/#/--skip }
+ }
