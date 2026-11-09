@@ -1,0 +1,27 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 99ab260..ea58fee 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -33,3 +33,22 @@ package() {
+   install -Dm755 plumber-bin "${pkgdir}/usr/bin/${pkgname}"
+ }
+ 
++# loong64: batchcorp/plz implements gls.getg() with per-arch assembly but
++# ships no loongarch64 variant; inject it (the goroutine pointer is exposed
++# as "g" in the Go assembler). The module cache is read-only, so chmod first.
++prepare() {
++  cd "${pkgname}-${pkgver}"
++  go mod download github.com/v2pro/plz
++  local gls_dir
++  gls_dir="$(go env GOMODCACHE)/github.com/batchcorp/plz@v0.9.2/gls"
++  chmod u+w "$gls_dir"
++  rm -f "$gls_dir/goid_loongarch64.s"
++  cat > "$gls_dir/goid_loongarch64.s" <<'EOF'
++#include "textflag.h"
++
++// func getg() uintptr
++TEXT ·getg(SB), NOSPLIT, $0-8
++	MOVV	g, ret+0(FP)
++	RET
++EOF
++}
