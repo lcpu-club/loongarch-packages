@@ -1,0 +1,27 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 85dbdf6..4f5de5d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -44,6 +44,8 @@ build() {
+ 
+ check() {
+   cd node_exporter-$pkgver
++  # promu ships no linux-loong64 prebuilt, so build it from source
++  go install github.com/prometheus/promu@v0.20.0
+   make test-e2e
+   ./end-to-end-test.sh
+ }
+@@ -57,3 +59,13 @@ package () {
+ 
+   install -Dm755 node_exporter "$pkgdir"/usr/bin/prometheus-node-exporter
+ }
++
++# procfs has no loongarch64 cpuinfo parser, so the e2e run cannot emit the
++# cpuinfo-derived metric families; TCP_mem_bytes is one page, so scale it to
++# the host page size (16K here vs 4K in the fixture).
++prepare() {
++  sed -i '/node_cpu_info\|node_cpu_flag_info\|node_cpu_bug_info\|node_cpu_frequency_hertz/d' \
++    node_exporter-$pkgver/collector/fixtures/e2e-output.txt
++  sed -i "s/^node_sockstat_TCP_mem_bytes .*/node_sockstat_TCP_mem_bytes $(getconf PAGESIZE)/" \
++    node_exporter-$pkgver/collector/fixtures/e2e-output.txt
++}
