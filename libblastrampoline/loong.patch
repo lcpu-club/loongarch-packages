@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 09c1c39..e7c835b 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,7 +18,7 @@ build() {
+   make\
+     COMPLEX_RETSTYLE_AUTODETECTION=0 \
+     F2C_AUTODETECTION=0 \
+-    LBT_CFLAGS="$CFLAGS -fPIC -D_GNU_SOURCE -DARCH_$CARCH" \
++    LBT_CFLAGS="$CFLAGS -fPIC -D_GNU_SOURCE -DARCH_$(uname -m)" \
+     LBT_LDFLAGS="-shared $LDFLAGS"
+ }
+ 
