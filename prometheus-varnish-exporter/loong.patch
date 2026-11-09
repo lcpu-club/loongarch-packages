@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 6fdc681..a84f745 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,7 +34,10 @@ prepare() {
+   rm -Rf build
+   mkdir build
+ 
++  # client_golang pins a 2021 golang.org/x/sys without loongarch64 support
++  go mod edit -replace=golang.org/x/sys=golang.org/x/sys@v0.26.0
+   go mod download
++  go mod tidy
+ }
+ 
+ build() {
