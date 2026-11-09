@@ -1,0 +1,33 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 02fae23..a5254bd 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -71,17 +71,19 @@ _build_bios() {
+   local output_name=$2
+   local binary_name=$3
+   local build_target=$4
++  # SeaBIOS builds x86 firmware, so use the cross toolchain
++  local cross=CROSS_PREFIX=x86_64-linux-gnu-
+ 
+   echo "Building target with config $config, output_name $output_name, binary_name $binary_name and build_target $build_target..."
+ 
+-  make clean distclean -C $pkgbase-rel-$pkgver
++  make clean distclean $cross -C $pkgbase-rel-$pkgver
+ 
+   cp -v $config $pkgbase-rel-$pkgver/.config
+   # NOTE: refer to $pkgbase-rel-$pkgver/src/config.h for explanation of debug levels
+   echo "CONFIG_DEBUG_LEVEL=$_debug_level" >> $pkgbase-rel-$pkgver/.config
+-  make oldnoconfig V=1 -C $pkgbase-rel-$pkgver
++  make oldnoconfig V=1 $cross -C $pkgbase-rel-$pkgver
+ 
+-  make -C $pkgbase-rel-$pkgver V=1 EXTRAVERSION=-$pkgrel PYTHON=python3 $build_target
++  make -C $pkgbase-rel-$pkgver V=1 EXTRAVERSION=-$pkgrel PYTHON=python3 $cross $build_target
+ 
+   cp $pkgbase-rel-$pkgver/out/$output_name output/$binary_name
+ }
+@@ -130,3 +132,5 @@ package_seabios-docs() {
+ 
+   install -vDm 644 $pkgbase-rel-$pkgver/docs/*.md -t "$pkgdir/usr/share/doc/$pkgbase/"
+ }
++
++makedepends+=(x86_64-linux-gnu-gcc)
