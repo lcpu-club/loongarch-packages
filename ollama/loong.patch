@@ -1,9 +1,7 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 2c9b8c2..b20e975 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -37,6 +37,9 @@ b2sums=('b9cc2165f8e7cd51f346b1beb24d220a1f820ab9979f3db3359b0869b10950a9b1e3012
-         'e8f2b19e2474f30a4f984b45787950012668bf0acb5ad1ebb25cd9776925ab4a6aa927f8131ed53e35b1c71b32c504c700fe5b5145ecd25c7a8284373bb951ed')
+@@ -47,6 +47,9 @@ prepare() {
+ }
  
  build() {
 +  # Enable LASX to workaround the compile error with LSX
@@ -12,13 +10,14 @@ index 2c9b8c2..b20e975 100644
    export CGO_CPPFLAGS="${CPPFLAGS}"
    export CGO_CFLAGS="${CFLAGS}"
    export CGO_CXXFLAGS="${CXXFLAGS}"
-@@ -55,15 +58,22 @@ build() {
+@@ -61,16 +64,23 @@ build() {
      -W no-dev
      -D CMAKE_BUILD_TYPE=Release
      -D CMAKE_INSTALL_PREFIX=/usr
 -    -D OLLAMA_LLAMA_BACKENDS="cuda_v13;rocm_v7_2;vulkan"
 +    -D OLLAMA_LLAMA_BACKENDS="rocm_v7_2;vulkan"
-     -D AMDGPU_TARGETS="$(rocm-supported-gfx)"
+     # llama.cpp uses gfx12 WMMA builtins that gfx1250 lacks
+     -D AMDGPU_TARGETS="$(rocm-supported-gfx -e gfx1250)"
      # Sync GPU targets from CMakePresets.json
      # For CUDA 12
      # -D CMAKE_CUDA_ARCHITECTURES="50;52;53;60;61;62;70;72;75;80;86;87;89;90;90a"
@@ -37,7 +36,7 @@ index 2c9b8c2..b20e975 100644
    cmake "${cmake_options[@]}"
    cmake --build build
    go build .
-@@ -79,9 +89,9 @@ check() {
+@@ -86,9 +96,9 @@ check() {
  
  package_ollama() {
    cp -r ollama/staging-install/* "$pkgdir"
@@ -50,7 +49,7 @@ index 2c9b8c2..b20e975 100644
  
    install -Dm755 $pkgname/ollama "$pkgdir/usr/bin/ollama"
    install -dm755 "$pkgdir/var/lib/ollama"
-@@ -125,3 +135,13 @@ package_ollama-docs() {
+@@ -132,3 +142,13 @@ package_ollama-docs() {
    cp -r ollama/docs "$pkgdir/usr/share/doc/ollama"
    install -Dm644 ollama/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
