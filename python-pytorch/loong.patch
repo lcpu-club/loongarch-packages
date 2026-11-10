@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -228,6 +228,11 @@ prepare() {
+@@ -229,6 +229,11 @@ prepare() {
  
    git -c protocol.file.allow=always submodule update --init --recursive
  
@@ -12,9 +12,9 @@
    # Fix cmake prefix path (FS#78665)
    patch -Np1 -i "${srcdir}"/fix_cmake_prefix_path.patch
  
-@@ -253,19 +258,25 @@ prepare() {
-   # nvcc fatal   : The same GPU code (`sm_103f`) generated for non family-specific and family-specific GPU arch
-   patch -p1 -i "${srcdir}/$pkgname-187006.patch"
+@@ -259,19 +264,25 @@ prepare() {
+   sed -i 's/find_package_and_print_version(hipfile REQUIRED)/find_package_and_print_version(hipfile)/' \
+     cmake/public/LoadHIP.cmake
  
 +  # fmt >= 12 auto-enables a C++20 module target (fmt-module) which conflicts with
 +  # the ROCm CXXFLAGS workaround (-include chrono/-include stacktrace) appended in
@@ -43,7 +43,7 @@
      sed -i '1s/^/#ifndef GLOG_USE_GLOG_EXPORT\n#define GLOG_USE_GLOG_EXPORT\n#endif\n\n/' ${_pkgname}-${_suffix}/c10/util/logging_is_google_glog.h
    done
  }
-@@ -279,7 +290,7 @@ _prepare() {
+@@ -285,7 +296,7 @@ _prepare() {
    # Check tools/setup_helpers/cmake.py, setup.py and CMakeLists.txt for a list of flags that can be set via env vars.
    export BUILD_TEST=OFF  # do not build tests
    export ATEN_NO_TEST=ON  # do not build ATen tests
@@ -52,7 +52,7 @@
    export BUILD_CUSTOM_PROTOBUF=OFF
    export USE_GFLAGS=ON
    export USE_GLOG=ON
-@@ -287,11 +298,12 @@ _prepare() {
+@@ -293,11 +304,12 @@ _prepare() {
    export USE_OBSERVERS=ON
    # export USE_SYSTEM_LIBS=ON  # experimental, not all libs present in repos
    # USE_SYSTEM_ONNX=ON does not work and onnx itself should be removed from pytorch: https://github.com/pytorch/pytorch/issues/166546#issuecomment-3463370459
@@ -67,7 +67,7 @@
    export USE_GOLD_LINKER=ON
    export NCCL_VERSION=$(pkg-config nccl --modversion)
    export NCCL_VER_CODE=$(sed -n 's/^#define NCCL_VERSION_CODE\s*\(.*\).*/\1/p' /usr/include/nccl.h)
-@@ -312,7 +324,7 @@ _prepare() {
+@@ -318,7 +330,7 @@ _prepare() {
    # https://github.com/pytorch/pytorch/blob/f9074c7332c3dfd43fe39e8733ec98f7f29b3e61/torch/utils/cpp_extension.py#L2417-L2420
    # (note that 8.8 is not supported)
    export TORCH_CUDA_ARCH_LIST="7.5 8.0 8.6 8.7 8.9 9.0 10.0 10.3 11.0 12.0 12.1"
@@ -76,7 +76,7 @@
    export ROCM_PATH=/opt/rocm
    export HIP_ROOT_DIR=/opt/rocm
    # gfx950 lacks support for 128 bit atomics
-@@ -324,7 +336,8 @@ _prepare() {
+@@ -330,7 +342,8 @@ _prepare() {
    export USE_FBGEMM_GENAI=OFF
  
    # Compile source code for supported GPU archs in parallel (but using too many jobs is not helpful)
@@ -86,7 +86,7 @@
    export HIPCC_LINK_FLAGS_APPEND="-parallel-jobs=4"
  
    export AOTRITON_INSTALLED_PREFIX=/usr
-@@ -340,25 +353,26 @@ _prepare() {
+@@ -346,25 +359,26 @@ _prepare() {
  
  build() {
    cd "${srcdir}/${_pkgname}"
@@ -117,7 +117,7 @@
    cd "${srcdir}/${_pkgname}-cuda"
    echo "Building with cuda and without non-x86-64 optimizations"
    _prepare
-@@ -379,34 +393,42 @@ build() {
+@@ -385,47 +399,44 @@ build() {
    export USE_XPU=0
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
@@ -126,13 +126,23 @@
    cd "${srcdir}/${_pkgname}-rocm"
 -  echo "Building with rocm and without non-x86-64 optimizations"
 +  echo "Building with rocm and without loong64 optimizations"
+ 
    # -fcf-protection is not supported by HIP, see
    # https://rocm.docs.amd.com/projects/llvm-project/en/latest/reference/rocmcc.html#support-status-of-other-clang-options
    CXXFLAGS+=" -fcf-protection=none"
+-
+-  # The HIP headers (hip/amd_detail/host_defines.h) define __noinline__ as an
+-  # empty macro when compiled with GCC. This breaks GCC 16's libshdc++ <format>,
+-  # which uses [[__gnu__::__noinline__]] and then fails with
+-  # "error: expected an identifier for the attribute name".
+-  # Force-including <format> before any HIP header fixes this.
+-  # Now that's some bs.
+-  CXXFLAGS+=" -include ${srcdir}/fix_noinline_macro.h"
 +  # ROCm's hip/amd_detail/host_defines.h defines __noinline__ as a macro, which
 +  # breaks GCC 16's <format> and <stacktrace> headers when ROCm headers get
 +  # included first. Force-include the affected std headers up front.
 +  CXXFLAGS+=" -include chrono -include stacktrace"
+ 
    _prepare
    export USE_CUDA=0
    export USE_CUDNN=0
@@ -160,11 +170,14 @@
    python tools/amd_build/build_amd.py
    python -m build --wheel --no-isolation
  
+-  # Remove the -include fix_noinline_macro.h thing again so it's not part of the XPU build below.
+-  export CXXFLAGS="${CXXFLAGS// -include ${srcdir}\/fix_noinline_macro.h/}"
+-
 +  : <<COMMENT_SEPARATOR
    # Strip the problematic format-security flag that breaks SYCL CMake scripts
    export CFLAGS="${CFLAGS/-Werror=format-security/}"
    export CXXFLAGS="${CXXFLAGS/-Werror=format-security/}"
-@@ -432,6 +454,7 @@ build() {
+@@ -451,6 +462,7 @@ build() {
    export USE_XPU=1
    echo "add_definitions(-march=x86-64-v3)" >> cmake/MiscCheck.cmake
    python -m build --wheel --no-isolation
@@ -172,7 +185,7 @@
  }
  
  _package() {
-@@ -468,7 +491,7 @@ package_python-pytorch() {
+@@ -487,7 +499,7 @@ package_python-pytorch() {
  }
  
  package_python-pytorch-opt() {
@@ -181,25 +194,25 @@
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -498,7 +521,7 @@ package_python-pytorch-opt-cuda() {
+@@ -517,7 +529,7 @@ package_python-pytorch-opt-cuda() {
  
  package_python-pytorch-rocm() {
    pkgdesc+=" (with ROCm)"
--  depends+=(amdsmi rocm-hip-sdk hipblaslt rocprofiler roctracer miopen-hip onednn python-triton python-aotriton)
-+  depends+=(amdsmi rocm-hip-sdk hipblaslt rocprofiler roctracer miopen-hip onednn)
+-  depends+=(amdsmi rocm-hip-sdk hipblaslt hipsparselt rocprofiler-sdk roctracer miopen-hip onednn python-triton python-aotriton)
++  depends+=(amdsmi rocm-hip-sdk hipblaslt hipsparselt rocprofiler-sdk roctracer miopen-hip onednn)
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver})
  
-@@ -508,7 +531,7 @@ package_python-pytorch-rocm() {
+@@ -527,7 +539,7 @@ package_python-pytorch-rocm() {
  
  package_python-pytorch-opt-rocm() {
    pkgdesc+=" (with ROCm and AVX2 CPU optimizations)"
--  depends+=(amdsmi rocm-hip-sdk hipblaslt rocprofiler roctracer miopen-hip onednn python-triton python-aotriton)
-+  depends+=(amdsmi rocm-hip-sdk hipblaslt rocprofiler roctracer miopen-hip onednn)
+-  depends+=(amdsmi rocm-hip-sdk hipblaslt hipsparselt rocprofiler-sdk roctracer miopen-hip onednn python-triton python-aotriton)
++  depends+=(amdsmi rocm-hip-sdk hipblaslt hipsparselt rocprofiler-sdk roctracer miopen-hip onednn)
    conflicts=(python-pytorch)
    provides=(python-pytorch=${pkgver} python-pytorch-rocm=${pkgver})
  
-@@ -551,4 +574,31 @@ package_python-pytorch-opt-xpu() {
+@@ -570,4 +582,32 @@ package_python-pytorch-opt-xpu() {
    _package
  }
  
@@ -217,6 +230,7 @@
 +makedepends=(${makedepends[@]/intel-oneapi-common})
 +makedepends=(${makedepends[@]/python-triton})
 +makedepends=(${makedepends[@]/python-aotriton})
++makedepends=(${makedepends[@]/rocshmem})
 +pkgname=(${pkgname[@]/"${pkgbase}-cuda"})
 +pkgname=(${pkgname[@]/"${pkgbase}-opt-cuda"})
 +pkgname=(${pkgname[@]/"${pkgbase}-xpu"})
@@ -225,7 +239,7 @@
 +         "sleef_loong64.patch"
 +         "cpuinfo_loong64.patch::https://raw.githubusercontent.com/loong64/pytorch/refs/heads/main/cpuinfo/cpuinfo_loong64.patch"
 +         "fmt_disable_module.patch")
-+b2sums+=('007a8ffef259856b57d6714e2535c579c2c00932e324eb51c505a33ae1cbe46c6223aacf89823f0e4faf0ea6a4dd595cd21f6a57ab6eccb219f6e690a1500c32'
++b2sums+=('b3c9c87ff6f4f959bd0ec7790acd06f5c6aa3cf218d894a0e4f34a513845f1db5cb6e7997e5553499f70b16eef856afcae065f8727668d61f0b9904b46b7e1a2'
 +         '5a06663c88476341c169dadf8a2adda13fd264fda9468bcd1e3c3d120c8ba3949e9eb6396faf824afae4b2557665f5dd4f09ccd162f08dc022cf2076fe0620fe'
 +         'b56ac09123c229431d82ef47415ef97600ceedd34576058efe3feb511fecd8ee65944f3556995d7b21c20df9d41cc1bd8768f5208831a2817a0569f0d9346824'
 +         '9048d7e4a90a2f5447222ce824f5a2cc886e48c7829337ab8c046fdad25090ed6bec7e9ecf3775c954e1aedd09991c1ea98e94858b48fd873283e48229f50921')
