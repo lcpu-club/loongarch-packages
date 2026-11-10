@@ -1,17 +1,6 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 8718e3a..0df0fe3 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -28,8 +28,6 @@ makedepends=(
-   graphviz
-   texlive-bin
-   texlive-latexextra
--  # -cuda
--  cuda
-   # -hip
-   hip-runtime-amd
-   hipblas
-@@ -66,7 +64,7 @@ build() {
+@@ -105,7 +105,7 @@ build() {
      -DGINKGO_BUILD_BENCHMARKS=ON
      -DGINKGO_BUILD_EXAMPLES=ON
      -DGINKGO_BUILD_DOC=ON
@@ -20,15 +9,15 @@ index 8718e3a..0df0fe3 100644
    )
    # In general, we want to list all real archs (sm_XX) and the latest virtual arch (compute_XX) for future PTX compatibility.
    # Valid values can be discovered from nvcc --help
-@@ -81,6 +79,7 @@ build() {
+@@ -123,6 +123,7 @@ build() {
      -DGINKGO_BUILD_SYCL=OFF
    cmake --build build
  
 +  : <<COMMENT_SEPARATOR
    # -cuda package
    # Compile source code for supported GPU archs in parallel
-   export CUDAFLAGS="--threads $(nproc)"
-@@ -90,6 +89,7 @@ build() {
+   export CUDAFLAGS="--threads 8"
+@@ -132,6 +133,7 @@ build() {
      -DGINKGO_BUILD_HIP=OFF \
      -DGINKGO_BUILD_SYCL=OFF
    cmake --build build-cuda
@@ -36,10 +25,28 @@ index 8718e3a..0df0fe3 100644
  
    # -hip package
    # LTO does not work with HIP
-@@ -192,4 +192,6 @@ package_ginkgo-hpc-hip() {
-   _package -hip
+@@ -151,6 +153,8 @@ build() {
+     -DGINKGO_BUILD_SYCL=OFF
+   cmake --build build-hip
+ 
++  # oneAPI/icpx is not available on loongarch64
++  : <<COMMENT_SEPARATOR
+   # -sycl package
+   # With debug symbols, memory consumption of icpx blows up
+   export CXXFLAGS="${CXXFLAGS/-g/}"
+@@ -169,6 +173,7 @@ build() {
+     -DGINKGO_BUILD_BENCHMARKS=OFF \
+     -DGINKGO_BUILD_EXAMPLES=OFF
+   cmake --build build-sycl
++COMMENT_SEPARATOR
+ }
+ 
+ check() {
+@@ -270,4 +275,7 @@ package_ginkgo-hpc-sycl() {
+   _package -sycl
  }
  
 +pkgname=(${pkgname[@]/ginkgo-hpc-cuda})
-+
++pkgname=(${pkgname[@]/ginkgo-hpc-sycl})
++makedepends=($(printf "%s\n" "${makedepends[@]}" | grep -Ev '^(cuda|intel|onedpl)'))
  # vim:set ts=2 sw=2 et:
