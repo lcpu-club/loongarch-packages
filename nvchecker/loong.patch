@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8cf1b7e..101c161 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -65,7 +65,13 @@ build() {
+ 
+ check() {
+   cd nvchecker
+-  pytest
++  # these tests query live external services and time out in the build chroot
++  pytest \
++    --deselect tests/test_cran.py::test_cran \
++    --deselect tests/test_pagure.py::test_pagure \
++    --deselect tests/test_pagure.py::test_pagure_with_ignored \
++    --deselect tests/test_rpmrepo.py::test_rpmrepo_fedora \
++    --deselect tests/test_rpmrepo.py::test_rpmrepo_alma
+ }
+ 
+ package() {
