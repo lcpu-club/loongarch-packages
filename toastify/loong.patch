@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 65f1104..b619ec0 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -15,6 +15,12 @@ b2sums=('ad477d660217139f3a9e83a38247326ed2dc1f807a9128cb0f83a47e935e96b1d60b35b
+ prepare() {
+   cd $pkgname
+   cargo fetch --locked --target "$(rustc --print host-tuple)"
++
++  # nix 0.23 (pinned via notify-rust) lacks loongarch64 in the ioctl protocol list
++  local nix_dir
++  nix_dir=$(find "${CARGO_HOME:-$HOME/.cargo}/registry/src" -maxdepth 2 -type d -name 'nix-0.23.*' | head -n1)
++  sed -i 's/^\( *\)target_arch = "riscv64"))\]$/\1target_arch = "riscv64",\n\1target_arch = "loongarch64"))]/' \
++    "$nix_dir/src/sys/ioctl/linux.rs"
+ }
+ 
+ build() {
