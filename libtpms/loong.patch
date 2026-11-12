@@ -1,12 +1,10 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index fd24ea7..6b0a18e 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -28,6 +28,7 @@ validpgpkeys=('B818B9CADF9089C2D5CEC66B75AD65802A0B4211') # Stefan Berger <stefa
+@@ -22,6 +22,7 @@ prepare() {
  
- prepare() {
- 	cd "$pkgname"
+ 	# Fix build failure with GCC 15 and later
+ 	git cherry-pick -n a405c830fb2d696c57cbc11695ad297fc18c1207
 +	git cherry-pick -n 048e207b8e526d5dad072d54bb1fd8218047e3dc
+ 
  	autoreconf --install --force
  }
- 
