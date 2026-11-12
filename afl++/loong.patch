@@ -1,15 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -3,7 +3,7 @@
- 
- pkgname=afl++
- pkgver=5.00c
--pkgrel=1
-+pkgrel=1.1
- pkgdesc='instrumentation-driven fuzzer for binary format'
- url='https://aflplus.plus/'
- arch=(x86_64)
-@@ -92,4 +92,16 @@ package() {
+@@ -95,4 +95,16 @@ package() {
    install -Dm 644 README.md -t "${pkgdir}/usr/share/doc/${pkgname}"
  }
  
