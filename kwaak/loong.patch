@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -35,7 +35,8 @@ build() {
+ 
+ check() {
+   cd "$pkgname-$pkgver"
+-  cargo test --frozen --lib -- --skip "config::defaults"
++  # duckdb vss extension has no loongarch64 build, indexing tests cannot load it
++  cargo test --frozen --lib -- --skip "config::defaults" --skip "indexing::garbage_collection"
+ }
+ 
+ package() {
