@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -38,4 +38,8 @@ package() {
+   install -Dm 644 default-config/*.{css,toml} -t "$pkgdir/usr/share/doc/$pkgname/default-config"
+ }
+ 
++# Bundled oniguruma is built from C sources with makepkg LTO flags, and ld.lld
++# cannot link the resulting GCC LTO objects.
++options+=('!lto')
++
+ # vim: ts=2 sw=2 et:
