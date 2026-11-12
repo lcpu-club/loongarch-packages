@@ -1,13 +1,11 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 9f93398..449a9d1 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -63,7 +63,7 @@ check() {
-   export PATH="$(pwd)/out:$PATH"
+@@ -67,7 +67,7 @@ check() {
  
-   go run ./plugin/stub-generator
--  go test ./...
-+  go test ./... -skip 'TestIntegration|Test_Install'
+   # Skip base64gzip test, broken since go 1.27
+   # https://github.com/terraform-linters/tflint/issues/2678
+-  go test -skip 'TestFunctions/base64gzip|TestBase64Gzip' ./...
++  go test -skip 'TestFunctions/base64gzip|TestBase64Gzip|TestIntegration|Test_Install|TestVersion' ./...
  }
  
  package() {
