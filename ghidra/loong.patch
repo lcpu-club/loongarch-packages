@@ -1,6 +1,6 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -7,6 +7,7 @@ pkgrel=1
+@@ -8,6 +8,7 @@ _jdkver=25
  _yajsw=13.18
  _jsarif=2.1
  _protobuf=6.31.0
@@ -8,7 +8,7 @@
  _psutil=5.9.8
  _setuptools=80.9.0
  _wheel=0.45.1
-@@ -39,6 +40,8 @@ makedepends=(
+@@ -40,6 +41,8 @@ makedepends=(
    python-setuptools
    z3
    z3-java
@@ -17,18 +17,18 @@
  )
  optdepends=(
    'pam: GhidraServer support'
-@@ -105,8 +108,9 @@ prepare() {
+@@ -111,8 +114,9 @@ prepare() {
    # Ignore lack of licensing for YAJSW zip, packed FID datasets, and the native binaries
    sed -i '/FileTree tree/a\\t\texclude "yajsw-stable-**.zip"\n\t\texclude "src/main/fidb/**.fidb"\n\t\texclude "os/linux64/**"' gradle/support/ip.gradle
  
-+  patch -Np1 -i ../add-loongarch64-build.patch
++  patch -Np1 --no-backup-if-mismatch -i ../add-loongarch64-build.patch
    # z3 dependencies
 -  install -Dm 644 /usr/lib/libz3* -t dependencies/SymbolicSummaryZ3/os/linux_x86_64
 +  install -Dm 644 /usr/lib/libz3* -t dependencies/SymbolicSummaryZ3/os/linux_loongarch_64
    install -Dm 644 /usr/share/java/com.microsoft.z3.jar -t dependencies/flatRepo
  }
  
-@@ -119,6 +123,17 @@ _check_dep() {
+@@ -125,6 +129,17 @@ _check_dep() {
  }
  
  build() {
@@ -46,7 +46,7 @@
    cd ghidra-Ghidra_${pkgver}_build
  
    export GRADLE_HOME="$(pwd)/usr/share/java/gradle/"
-@@ -133,8 +148,9 @@ build() {
+@@ -141,8 +156,9 @@ build() {
    _build_python_dependency jpype1-${_jpype1} PyGhidra
  
    # Ghidra build
@@ -57,17 +57,8 @@
    gradle sleighCompile
    gradle buildGhidra
  }
-@@ -161,7 +177,7 @@ package() {
-   install -d "${pkgdir}"/{opt,usr/bin}
-   _appver=$(grep -oP '(?<=^application.version=).*$' Ghidra/application.properties)
-   _relname=$(grep -oP '(?<=^application.release.name=).*$' Ghidra/application.properties)
--  bsdtar xf "build/dist/ghidra_${_appver}_${_relname}"_*_linux_x86_64.zip -C "${pkgdir}"/opt
-+  bsdtar xf "build/dist/ghidra_${_appver}_${_relname}"_*_linux_loongarch_64.zip -C "${pkgdir}"/opt
- 
-   # Simplify some directory and binary names
-   mv "${pkgdir}"/opt/ghidra{_*,}
-@@ -170,4 +186,8 @@ package() {
-   ln -s /opt/ghidra/support/analyzeHeadless "${pkgdir}"/usr/bin/ghidra-analyzeHeadless
+@@ -191,4 +207,8 @@ package() {
+   done
  }
  
 +source+=(add-loongarch64-build.patch
