@@ -1,19 +1,22 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index d8e48d8..667973b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -73,6 +73,10 @@ prepare() {
-   cp -r $pkgbase{,-src}
+@@ -74,6 +74,15 @@ prepare() {
    # Fix ssl_certificate_compression test: loop only checked first algorithm
    sed '/\$has_zlib = 1 if \$algo == 1;/{n;/^\t\t\t\tlast;/d}' -i nginx-tests/ssl_certificate_compression.t
+ 
++  # Fix ssl_stapling.t: read the response so that nginx has written it before the client closes
++  # the connection, otherwise a harmless "SSL_write() failed" crit is logged and fails the test
++  sed -i 's/^\treturn \$s unless \$s;$/\treturn $s unless $s;\n\tmy $buf;\n\t1 while $s->sysread($buf, 4096);/' nginx-tests/ssl_stapling.t
++  grep -q 'while \$s->sysread' nginx-tests/ssl_stapling.t
 +
 +  # loongarch64: use 64-byte cache line (fixes server_names_hash_bucket_size
 +  # default of 32, which breaks ssl_store_keys.t and real-world long server names)
 +  patch -d $pkgbase -Np1 -i "$srcdir"/nginx-loongarch-cacheline.patch
- }
- 
- build() {
-@@ -309,3 +313,6 @@ package_nginx-mod-xslt() {
++
+   # OpenSSL 4.1 no longer falls back to the subject CN for hostname checks; give the CN-only test
+   # certificates a matching DNS SAN.
+   cd nginx-tests
+@@ -324,3 +333,6 @@ package_nginx-mod-xslt() {
    backup=(etc/nginx/modules.d/20-xslt.conf)
    _package_module xslt
  }
