@@ -1,0 +1,11 @@
+--- a/Make.rules
++++ b/Make.rules
+@@ -8,6 +8,8 @@
+ ARCH3264 =
+ else ifeq ($(ARCH),aarch64)
+ ARCH3264 =
++else ifeq ($(ARCH),loongarch64)
++ARCH3264 =
+ else ifeq ($(ARCH),arm)
+ ARCH3264 =
+ else

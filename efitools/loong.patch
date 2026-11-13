@@ -1,0 +1,19 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -62,6 +62,8 @@ prepare() {
+   patch -Np1 -i ../$pkgname-1.9.2-fix-ftbfs.patch
+   # drop (broken) openssl engine support
+   patch -Np1 -i ../$pkgname-1.9.2-drop-engine-options.patch
++  # add loongarch64 support to the architecture dispatch
++  patch -Np1 -i ../$pkgname-1.9.2-loongarch64.patch
+ }
+ 
+ build() {
+@@ -76,3 +78,7 @@ package() {
+   make DESTDIR="$pkgdir" install -C $pkgname
+   install -vDm 644 $pkgname/README -t "$pkgdir/usr/share/doc/$pkgname/"
+ }
++
++source+=('efitools-1.9.2-loongarch64.patch')
++sha512sums+=('54407bb65a5e6bdbefe23410227327ff263500e5cd1aa746c95a7b69c66da0ae85ca3d8e7abd66acc2736453543bcd7e365fe6c9d893b932c395d321a1a587ea')
++b2sums+=('b5159f32ef5a1090826e9d12ba465c6d12ffc935d3d6a6eb067345843791459a8e47cc9474f3c352ce8a6ec312ed7649cbf6dea22f52bd39886cd65dff4de603')
