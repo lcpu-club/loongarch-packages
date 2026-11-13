@@ -1,0 +1,38 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -44,4 +44,35 @@ package() {
+     target/release/legba
+ }
+ 
++# loong64: rust-crypto 0.2.36 implements
++# rust_crypto_util_fixed_time_eq_asm only for x86/arm, so linking the
++# non-LTO (debug profile) test binaries fails. Provide a portable
++# fallback with the same semantics for the test build.
++check() {
++  cd "${pkgname}-${pkgver}"
++
++  cat > "${srcdir}/fixed_time_eq.c" <<-'EOF'
++	#include <stddef.h>
++	#include <stdint.h>
++
++	uint32_t rust_crypto_util_fixed_time_eq_asm(
++	    const uint8_t *lhs, const uint8_t *rhs, size_t count) {
++	  uint8_t result = 0;
++
++	  if (count == 0) {
++	    return 1;
++	  }
++
++	  for (size_t i = 0; i < count; i++) {
++	    result |= lhs[i] ^ rhs[i];
++	  }
++
++	  return result;
++	}
++	EOF
++
++  cc -O2 -c "${srcdir}/fixed_time_eq.c" -o "${srcdir}/fixed_time_eq.o"
++  RUSTFLAGS="${RUSTFLAGS} -C link-arg=${srcdir}/fixed_time_eq.o" cargo test --frozen
++}
++
+ # vim: ts=2 sw=2 et:
