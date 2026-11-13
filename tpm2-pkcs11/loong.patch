@@ -1,0 +1,15 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -68,6 +68,12 @@ prepare() {
+   # Disable tests failing with openssl>=4: https://github.com/tpm2-software/tpm2-pkcs11/issues/938
+   sed '/nss-tests.sh/d' -i Makefile-integration.am
+ 
++  # The pkcs11-dbup test builds tpm2-pkcs11 1.0.3 in a temporary directory, whose
++  # bundled config.guess (2018-02-24) cannot detect loongarch64: tell configure
++  # the build triplet detected by the config.guess of the current source tree
++  sed -i 's|^\./configure --enable-debug --disable-hardening$|& --build="$("$T"/config.guess)"|' \
++    test/integration/pkcs11-dbup.sh.nosetup
++
+   # NOTE: Set the VERSION file manually, so that configure.ac uses a release version and does not add `-Werror`
+   sed '/VERSION/d' -i bootstrap
+   printf '%s\n' "$pkgver" > VERSION
