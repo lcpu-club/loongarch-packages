@@ -1,0 +1,31 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index bd30ee2..566ac61 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,7 +19,26 @@ b2sums=('d81bd48fdcfa1b01f6c9d941350cf933b2a25d416276c7b1978189a9cab7a63a3aa9808
+ 
+ prepare() {
+   cd $pkgname
++  # The repo pins pnpm 11 via packageManager, but @pnpm/exe has no loong64 binary
++  export npm_config_manage_package_manager_versions=false
++  # @vscode/vsce-sign's postinstall has no linux-loong64 build; drop its
++  # allowBuilds entry so pnpm skips it (only needed for VSIX signing)
++  sed -i "/@vscode\/vsce-sign/d" pnpm-workspace.yaml
+   pnpm install
++
++  # @rspack/binding has no loong64 native build; stage the wasm fallback next to it
++  local stage="$srcdir/rspack-wasm-stage"
++  local -a binding_dirs
++  mapfile -t binding_dirs < <(find . -type d -path '*/node_modules/@rspack/binding')
++  local binding_ver
++  binding_ver=$(node -p "require('./${binding_dirs[0]}/package.json').version")
++  npm install --prefix "$stage" --force --ignore-scripts --no-audit --no-fund \
++    @rspack/binding-wasm32-wasi@$binding_ver
++  local binding_dir
++  for binding_dir in "${binding_dirs[@]}"; do
++    cp -r "$stage/node_modules/@rspack/binding-wasm32-wasi" "$binding_dir/../"
++    cp -rn "$stage/node_modules/@emnapi" "$stage/node_modules/@napi-rs" "$binding_dir/../.."/
++  done
+ }
+ 
+ build() {
