@@ -6,7 +6,7 @@
  }
 +
 +prepare() {
-+  cd HIPIFY-rocm-${pkgver}
++  cd HIPIFY-therock-${pkgver}
 +  patch -Np1 < ../0000-fix-undefined-symbol.patch
 +}
 +
