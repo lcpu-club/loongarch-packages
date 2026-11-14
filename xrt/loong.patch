@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -69,6 +69,7 @@ prepare() {
+   git -c protocol.file.allow=always submodule update --init --recursive
+ 
+   patch -Np1 -i ../install-to-bin.patch
++  patch -Np1 -i ../loongarch64-machine-node.patch
+ }
+ 
+ build() {
+@@ -94,3 +95,6 @@ package() {
+   install -Dm644 "$pkgname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+   rm -f "$pkgdir/usr/include/CL/cl_ext.h"
+ }
++
++source+=("loongarch64-machine-node.patch")
++sha256sums+=("c9b7d51f16559b122f1278f660a4389489b382575374dadfa9c3d01588ca9a7e")
