@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -24,6 +24,9 @@ build() {
+ 	"riscv64")
+ 		_platform="linux64-$CARCH"
+ 		;;
++	"loong64")
++		_platform="linux64-loongarch64"
++		;;
+ 	esac
+ 
+ 
