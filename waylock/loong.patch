@@ -1,12 +1,10 @@
-diff --git a/PKGBUILD b/PKGBUILD
-index 015c354..9e12f7b 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -63,6 +63,7 @@ build() {
+@@ -54,6 +54,7 @@ build() {
    local zig_options=(
      -Dcpu=baseline
      -Dpie
 +    -Dllvm=true # loong64: no self-hosted codegen backend; use LLVM+lld
-     -Dtarget=native-linux.6.6-gnu.2.40 \
-     --build-id=sha1 \
+     -Dtarget=native-linux.6.12-gnu.2.42
+     --build-id=sha1
      --prefix /usr
