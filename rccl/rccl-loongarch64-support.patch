@@ -9,3 +9,28 @@
  #ifdef __cplusplus
  #include <atomic>
  static inline void wc_store_fence(void) { std::atomic_thread_fence(std::memory_order_release); }
+--- a/src/init.cc
++++ b/src/init.cc
+@@ -78,7 +78,9 @@
+ #include "dda_all_reduce.h"
+ #include "ipc_init.h"
+ #include "fabric_init.h"
++#if defined(__x86_64__)
+ #include <cpuid.h>
++#endif
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include "kernel_config.h"
+@@ -296,8 +298,12 @@
+   }
+   INFO(NCCL_INIT, "Kernel version: %s", verStr);
+   if (strstr(verStr, "cray") == NULL) {
++#if defined(__x86_64__)
+     unsigned int eax, ebx, ecx, edx;
+     if (!__get_cpuid(1, &eax, &ebx, &ecx, &edx)) ecx = 0; // cpuid not supported
++#else
++    unsigned int ecx = 0;
++#endif
+     NCCLCHECK(ncclTopoGetStrFromSys("/sys/devices/virtual/dmi/id", "bios_version", strValue));
+       // Check BIOS string and hypervisor presence on ecx bit 31
+     if (strncmp("Hyper-V UEFI Release", strValue, 20) != 0 && (ecx & (1u << 31)) == 0) {
