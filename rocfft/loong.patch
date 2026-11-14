@@ -1,0 +1,11 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -40,3 +40,8 @@ package() {
+   DESTDIR="$pkgdir" cmake --install build
+   install -Dm644 "$pkgname/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++# hip/amd_detail/host_defines.h defines __noinline__ as a macro, which breaks
++# libstdc++ 16's [[__gnu__::__noinline__]] in <format> when ROCm headers are
++# included before <chrono>. Force-include the affected std header first.
++CXXFLAGS+=" -include chrono"
