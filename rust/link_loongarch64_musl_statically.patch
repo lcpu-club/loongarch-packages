@@ -7,6 +7,6 @@ diff -urN a/compiler/rustc_target/src/spec/targets/loongarch64_unknown_linux_mus
              mcount: "_mcount".into(),
 -            crt_static_default: false,
 +            crt_static_default: true,
-             supported_sanitizers: SanitizerSet::ADDRESS
-                 | SanitizerSet::CFI
-                 | SanitizerSet::LEAK
+             pre_link_args: TargetOptions::link_args(
+                 LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+                 &["-Wl,--no-rosegment"],
