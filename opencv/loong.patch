@@ -1,14 +1,14 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -94,6 +94,7 @@ prepare() {
-   git cherry-pick -n a18356853d99a67e432e818cf0328b4690d68833 # https://github.com/opencv/opencv/issues/29292
- #  git cherry-pick -n 142801f769ed4946a161f62738bac5a5fe56a60f # https://github.com/opencv/opencv/issues/29291
- #  git cherry-pick -n 883f8d83ae1463a5f486ace784762e8c42e7ea7d # https://github.com/opencv/opencv/issues/29471
+@@ -88,6 +88,7 @@ sha256sums=('510e5199cd9ce4a80a08b5d5a9684f9fd64352fe43264e81ab22a2b67366c482'
+ 
+ prepare() {
+   pushd opencv
 +  git cherry-pick -n ee9c019556d7c3133aca55fa02ef2d6e20893f49 # https://github.com/opencv/opencv/issues/29422
-   patch -p1 < ../fix-dnn-umat-dimensions.patch # Fix face recognition in digikam
-   patch -p1 < ../ffmpeg-9.patch # Fix build with FFmpeg 9
-   popd
-@@ -145,7 +146,8 @@ build() {
+   patch -p1 < ../vtk9.patch # Don't require all vtk optdepends
+   # OpenCV passes all CXXFLAGS to nvcc through -Xcompiler, which does not work for '-Wp,something' flags
+   # We remove the -Xcompiler and pass our CXXFLAGS through cmake's CUDAFLAGS
+@@ -141,7 +142,8 @@ build() {
    cmake -B build -S $pkgname "${cmake_options[@]}" \
      -DBUILD_WITH_DEBUG_INFO=ON
    cmake --build build
@@ -18,7 +18,7 @@
    # In general, we want to list all real archs (sm_XX) and the latest virtual arch (compute_XX) for future PTX compatibility.
    # Valid values can be discovered from nvcc --help
    local cuda_archs="75;80;86;87;88;89;90;100;103;110;120;121;121-virtual"
-@@ -160,6 +162,7 @@ build() {
+@@ -156,6 +158,7 @@ build() {
      -DENABLE_CUDA_FIRST_CLASS_LANGUAGE=ON \
      -DCMAKE_CUDA_ARCHITECTURES="$cuda_archs"
    cmake --build build-cuda --verbose
@@ -26,7 +26,7 @@
  }
  
  package_opencv() {
-@@ -243,3 +246,11 @@ package_python-opencv-cuda() {
+@@ -255,3 +258,11 @@ package_python-opencv-cuda() {
  
    DESTDIR="$pkgdir" cmake --install build-cuda/modules/python3
  }
