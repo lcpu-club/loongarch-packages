@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
 @@ -95,6 +95,20 @@ prepare() {
+   # Bump chromium to head of stable branch
+   cd src/3rdparty
    [[ -n $_chromium ]] && git checkout $_chromium || true
- # Block compromised certificates
-   git cherry-pick -n b7849cb032f0c5f760454da257f405cef85ffa7e dfe972d1d0a64f68e06954d7b4023700fff8c4b5
 +  pushd "${srcdir}/${_pkgfn}"
 +  # Fix build for loong64
 +  patch -Np2 -i "$srcdir/add-loong64-support.patch"
@@ -31,7 +31,7 @@
 +         "libyuv-loongarch-fix-row_lsx.cc-and-row_lasx.cc.patch"
 +         "fix-v8-assembler-kMaximalBufferSize.patch"
 +         "fix-v8-liftoff-setup-frame-calling-pc-offset.patch")
-+sha256sums+=('8592cef263fee7a8d806b2b16fb07e7296593b6a0b3c35174fd3a5f53f29bc94'
++sha256sums+=('22235f364f9ab2425f203660e1f93bdd7215c5f7a94e1a85941425b34058a0e7'
 +             '9dddd42413ce4a7b877f5778402e360cab3310a316f5209b0bcefa0d1d2d27fe'
 +             '63f6dff26b20c178ef86f9220c9f72c4da39059b9bad8c4f551c605515626300'
 +             'a9cbf5a1dfffbbccdb5b7527b976e3c735253d1bf497da9786ba056f2495e287'

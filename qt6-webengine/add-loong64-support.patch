@@ -19010,15 +19010,15 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni
 --- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni	2026-03-26 21:44:21.869138879 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/ffmpeg_generated.gni	2026-03-27 12:49:54.043569165 +0800
-@@ -259,6 +259,7 @@ if (((current_cpu == "arm64" || current_
+@@ -394,6 +394,7 @@
  if (((current_cpu == "arm64" || current_cpu == "arm64e") &&
       ffmpeg_branding == "Chrome") ||
      (current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
 +    (current_cpu == "loong64" && ffmpeg_branding == "Chrome") ||
-     (is_android && current_cpu == "arm" && arm_use_neon &&
-      ffmpeg_branding == "Chrome") ||
+     (is_android && current_cpu == "arm" && ffmpeg_branding == "Chrome") ||
      (is_android && current_cpu == "x86" && ffmpeg_branding == "Chrome") ||
-@@ -440,6 +441,19 @@ if ((current_cpu == "arm64" || current_c
+     (is_apple && ffmpeg_branding == "Chrome") ||
+@@ -552,6 +553,19 @@
    ]
  }
  
@@ -19035,9 +19035,9 @@ diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r
 +  ]
 +}
 +
- if ((is_android && current_cpu == "arm" && arm_use_neon) ||
-     (use_linux_config && current_cpu == "arm" && arm_use_neon) ||
+ if ((is_android && current_cpu == "arm") ||
      (use_linux_config && current_cpu == "arm")) {
+   ffmpeg_c_sources += [
 diff '--color=auto' -p -X ../chromium-loongarch64/qt6-webengine/exclude -N -u -r a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/libavcodec/bsf_list.c b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/libavcodec/bsf_list.c
 --- a/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/libavcodec/bsf_list.c	1970-01-01 08:00:00.000000000 +0800
 +++ b/qtwebengine/src/3rdparty/chromium/third_party/ffmpeg/libavcodec/bsf_list.c	2026-03-27 12:49:54.043885342 +0800
