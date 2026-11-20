@@ -1,0 +1,12 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -34,7 +34,8 @@ source=("git+https://github.com/linuxmint/cinnamon-desktop.git#tag=$pkgver")
+ b2sums=(964b13a993bb1a42e4a9a1b4221374598b94bbe4772de8dd9f6a92c90d53512296098c293a9853a3f9795effa2cfcdcab59d1e06582a620708f405d31e97a302)
+ 
+ build() {
+-  arch-meson $pkgname build
++  # bubblewrap+seccomp sandbox only supports x86_64/aarch64 upstream
++  arch-meson $pkgname build -Dbubblewrap=disabled
+   meson compile -C build
+ }
+ 
