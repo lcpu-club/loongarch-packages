@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a68efbe..c212a05 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -27,6 +27,9 @@ build() {
+   # prevent mangling of static library, disable GCC 14 warning
+   CFLAGS+=" -ffat-lto-objects -Wno-calloc-transposed-args"
+ 
++  # drop -Werror, breaks the build with GCC 16
++  sed -i 's/ -Werror//' ../config.sh
++
+   ../configure --prefix=/usr
+ 
+   make PREFIX=/usr
