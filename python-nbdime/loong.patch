@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index e3063a3..08eafdd 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -40,6 +40,9 @@ sha256sums=('9ff1963446d06748a0e9419f6137cbe7d4134af9fea54b8659a355d6c48046c4')
+ prepare() {
+   cd nbdime-$pkgver
+ 
++  # loong64: lerna 7 loads nx's native hasher (no loong64 build) even with useNx:false; build workspaces directly
++  sed -i 's#"build": "lerna run build"#"build": "npm run build -w nbdime \&\& npm run build -w nbdime-jupyterlab \&\& npm run build -w nbdime-webapp"#' package.json
++
+   # Many tests need a valid git config
+   cat > gitconfig <<EOF
+ [user]
