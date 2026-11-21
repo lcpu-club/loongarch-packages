@@ -1,0 +1,28 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3c5f1b6..dff8015 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -45,9 +45,14 @@ prepare() {
+   export HOME="$srcdir"
+   opam init -a --disable-sandboxing --compiler=ocaml-system
+   eval $(opam env)
++  # loong64: system ocaml-seq/ocaml-stdlib-shims/ptmap predate ocaml 5.5.0 (stale cmxa magic); prefer opam switch libs
++  export OCAMLPATH="$OPAM_SWITCH_PREFIX/lib"
++  # loong64: repo camlp5 is built for an older OCaml; prefer the opam-built one
++  export PATH="$OPAM_SWITCH_PREFIX/bin:$PATH"
+ 
+   # TODO: Package all required OCaml packages in [extra]
+-  opam install -y extlib luv ocamlfind sedlex xml-light
++  # loong64: system ocaml-camlp-streams predates ocaml 5.5.0; pull a fresh one into the opam switch
++  opam install -y camlp-streams camlp5 extlib luv ocamlfind ptmap sedlex xml-light
+ 
+   # Create the script that will be placed in /etc/profile.d
+   echo 'export HAXE_STD_PATH=/usr/share/haxe/std' > haxe.sh
+@@ -58,6 +63,7 @@ build() {
+ 
+   # Prepare opam and ocamlfind before building
+   eval $(opam env --switch=ocaml-system)
++  export OCAMLPATH="$OPAM_SWITCH_PREFIX/lib"
+ 
+   export CFLAGS+=" -I/usr/include/mbedtls3"
+   export OCAMLPARAM="_,w=-a"
