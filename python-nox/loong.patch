@@ -1,6 +1,20 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 9c51b98..a445764 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -61,4 +61,5 @@ package() {
+@@ -48,6 +48,11 @@ check() {
+     -vv
+     # subprocess.CalledProcessError: Command '['uv', 'pip', 'install', 'nox @ git+https://github.com/wntrblm/nox.git@2024.10.09']' returned non-zero exit status 1.
+     --deselect tests/test_main.py::test_noxfile_script_mode_url_req
++    # uv has no managed python builds to install on loongarch64
++    --deselect "tests/test_virtualenv.py::test_uv_install[3.11-True]"
++    --deselect "tests/test_virtualenv.py::test_uv_install[pypy3.8-True]"
++    --deselect "tests/test_virtualenv.py::test_uv_install[cpython3.9-True]"
++    --deselect "tests/test_virtualenv.py::test_uv_install[python3.12-True]"
+   )
+ 
+   python -m venv --system-site-packages test-env
+@@ -61,4 +66,5 @@ package() {
    install -vDm 644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
  }
  
