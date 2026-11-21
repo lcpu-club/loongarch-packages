@@ -1,15 +1,15 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -37,6 +37,8 @@ prepare() {
-   git apply ../$pkgname-6.5.43-build.patch
+@@ -35,6 +35,8 @@ prepare() {
+   git apply ../$pkgname-6.5.44-build.patch
    # Use pacman for diagnostics and make service paths work on Arch.
-   git apply ../$pkgname-6.5.43-arch.patch
+   git apply ../$pkgname-6.5.44-arch.patch
 +  # Add a LoongArch64 jump sequence to the test stub helper (tests/src/stub.h).
 +  git apply ../$pkgname-6.5.43-loongarch-stub.patch
  }
  
  build() {
-@@ -60,3 +62,6 @@ package() {
+@@ -58,3 +60,6 @@ package() {
    install -Dm644 deepin-log-viewer/LICENSES/*.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
    install -Dm644 deepin-log-viewer/debian/copyright "$pkgdir/usr/share/licenses/$pkgname/copyright"
  }
