@@ -1,0 +1,12 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 496fa57..e3bef8c 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -57,6 +57,7 @@ check() {
+     -vv
+     -o addopts=''  # we are not interested in coverage
+     -W ignore::ResourceWarning  # ignore tests failing due to a warning
++    -W ignore::pytest.PytestDeprecationWarning  # pytest-asyncio deprecation warning is fatal with filterwarnings=error
+     --ignore tests/integration  # we are not interested in integration tests using the internet
+     --deselect tests/http/proxy/test_http2.py::TestHttp2WithProxy::test_http2_via_proxy
+     --deselect tests/http/exceptions/test_http_proxy_auth_failed.py::TestHttpProxyAuthFailed::test_proxy_auth_fails_without_cred
