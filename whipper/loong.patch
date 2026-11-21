@@ -1,0 +1,11 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index c0c891b..23f8c7d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -108,3 +108,6 @@ package() {
+   # install man pages
+   install -Dm644 -t "${pkgdir}/usr/share/man/man1" man/*.1
+ }
++
++# sox is linked against these but does not declare them; sox/soxi fail to start (exit 127) otherwise
++checkdepends+=(libebur128 sndio)
