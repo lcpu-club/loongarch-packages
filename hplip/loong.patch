@@ -1,21 +1,20 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index e65cb1a..b0df796 100644
+index cdcbca1..ea2f712 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -97,6 +97,9 @@ prepare() {
-  patch -Np1 -i ../hplip-hpaio-gcc14.patch 
+@@ -105,6 +105,9 @@ prepare() {
   patch -Np1 -i ../hplip-pserror-gcc14.patch
- 
+  # fix build with gcc15
+  patch -Np1 -i ../hplip-gcc15-stdc23.patch
++
 + # don't link unused ImageProcessor library because --disable-imageProcessor-build
 + patch -Np1 -i ../Prevent-linking-ImageProcessor.patch
-+
-  export AUTOMAKE='automake --foreign'
-  autoreconf --force --install
- }
-@@ -137,3 +140,6 @@ package() {
+  # Python 3.14 removed urlopener
+  # https://bugs.launchpad.net/hplip/+bug/2115046
+  patch -Np1 -i ../hplip-no-urlopener.patch
+@@ -153,3 +156,5 @@ package() {
   python -m compileall -d /usr/share "$pkgdir/usr/share"
   python -O -m compileall -d /usr/share "$pkgdir/usr/share"
  }
-+
 +source+=("Prevent-linking-ImageProcessor.patch")
-+sha512sums+=('f361fbf6ca84a99e17411716c0bfc9d283ea5ecc13517c70b89c2931cb2b0f54a423983383d0f3f25d8bb83813078c9d3aeb78178be77e80c7329046918c5c32')
++sha512sums+=('a73d28fa3038fec5e27c86a98f9fe3205254fa9e02967fec24590c7b994a7abf53a148fe758a45d9cc1f6cfe6255c9801e4d80da18dbd6b83616b50af82e4896')
