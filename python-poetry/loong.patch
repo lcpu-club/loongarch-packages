@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index afb2822..4d1f1e7 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -82,6 +82,10 @@ check() {
+ 		tests/console/test_application_command_not_found.py
+ 		# expects Darwin sysconfig stuff
+ 		tests/console/test_application.py::test_no_slow_imports_when_importing_the_cli_entrypoint
++		# Python 3.14 tarfile data filter no longer raises OutsideDestinationError here
++		tests/utils/test_helpers.py::test_extractall_sdist_no_symlink_path_traversal_via_directory_symlink
++		# LFS object download fails without a reachable git-lfs server
++		tests/vcs/git/test_backend.py::test_clone_with_lfs_files
+ 	)
+ 	pytest -vv tests ${deselected[@]/#/--deselect }
+ }
