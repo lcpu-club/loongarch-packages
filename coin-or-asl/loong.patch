@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index dee8d41..ae52b5a 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -22,6 +22,8 @@ prepare() {
+ 
+ build() {
+   cd ThirdParty-ASL
++  # loongarch64 glibc lacks fedisableexcept; FPU default is already IEEE
++  CFLAGS+=' -DASL_NO_FP_INIT'
+   ./configure --prefix=/usr --srcdir="$PWD"
+   make
+ }
