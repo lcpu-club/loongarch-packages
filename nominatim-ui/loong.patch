@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index baf8bcc..884a140 100755
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -24,6 +24,12 @@ prepare() {
+   jq 'del(.packageManager)' package.json > temp.json && mv temp.json package.json
+ 
+   yarn install
++
++  # rolldown has no loong64 native binding, install its wasm fallback
++  yarn add --dev --ignore-platform "@rolldown/binding-wasm32-wasi@$(node -p "require('rolldown/package.json').version")"
++
++  # lightningcss (vite 8's default css minifier) has no loong64 native build
++  sed -i '/sourcemap: true,/i\    cssMinify: false,' vite.config.js
+ }
+ 
+ build() {
