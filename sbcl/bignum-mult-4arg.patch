@@ -1,0 +1,12 @@
+--- a/src/compiler/loongarch64/arith.lisp
++++ b/src/compiler/loongarch64/arith.lisp
+@@ -680,8 +680,8 @@
+             (lo :scs (unsigned-reg) :from (:eval 3)))
+   (:result-types unsigned-num unsigned-num)
+   (:generator 8
+-    (inst mulh.du hi x y)
+     (inst mul.d t1 x y)
++    (inst mulh.du hi x y)
+     (inst add.d lo prev carry-in)
+     (inst sltu t2 lo carry-in)
+     (inst add.d hi hi t2)
