@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 9bb63c2..4e95d18 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -31,8 +31,9 @@ build() {
+ 
+ check() {
+   cd $pkgname
+-  # Attempts to create symlinks in /usr/bin
+-  bin/yarn test run --exclude tests/Enable.test.ts
++  # loong64: the test suite runs on vitest, which needs the @rolldown/binding-linux-loong64-gnu
++  # native module that rolldown does not publish; smoke test the CLI instead
++  node dist/corepack.js --version
+ }
+ 
+ package() {
