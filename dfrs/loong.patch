@@ -1,0 +1,16 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 29e6c73..c0fdfb8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -36,4 +36,11 @@ package() {
+   install -Dm 644 LICENSE -t "${pkgdir}/usr/share/licenses/${pkgname}"
+ }
+ 
++# libc 0.2.83 and nix 0.19 do not support loongarch64
++prepare() {
++  cd ${pkgname}-${pkgver}
++  sed -i 's/^nix = "0.19"$/nix = { version = "0.27", features = ["fs"] }/' Cargo.toml
++  cargo update -p nix -p libc
++}
++
+ # vim: ts=2 sw=2 et:
