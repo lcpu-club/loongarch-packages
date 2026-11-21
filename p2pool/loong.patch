@@ -1,10 +1,32 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7a9662a..896630c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -117,6 +117,7 @@ prepare() {
+@@ -95,6 +95,11 @@ prepare() {
+   git config submodule."external/src/robin-hood-hashing".url "${srcdir}/${pkgname}"-robin-hood-hashing
+   git config submodule."tests/googletest".url "${srcdir}/${pkgname}"-googletest
+ 
++  # loong64: the miniupnp fork was rebased upstream and p2pool's pinned commit vanished; recreate it
++  git -C "${srcdir}/${pkgname}"-miniupnp checkout -q -B loong64-p2pool 91eeeaecc70d3f312871fe5d0f9e9f5ece8d0f56
++  git -c user.name=loong64 -c user.email=loong64@localhost -C "${srcdir}/${pkgname}"-miniupnp am "${srcdir}/miniupnp-p2pool-changes.patch"
++  git update-index --cacheinfo 160000,"$(git -C "${srcdir}/${pkgname}"-miniupnp rev-parse HEAD)",external/src/miniupnp
++
+   git -c protocol.file.allow=always submodule update
+ 
+   cd external/src/grpc
+@@ -117,6 +122,8 @@ prepare() {
    git config submodule."third_party/zlib".url "${srcdir}/${pkgname}"-zlib
  
    git -c protocol.file.allow=always submodule update
-+  sed -i 's/#error "Unknown target CPU"/#define OPENSSL_64_BIT/' third_party/boringssl-with-bazel/src/include/openssl/target.h
++  # loong64: boringssl does not recognize loongarch64; the pinned tree uses the flattened include/ layout
++  sed -i 's/#error "Unknown target CPU"/#define OPENSSL_64_BIT/' third_party/boringssl-with-bazel/include/openssl/target.h
  }
  
  build() {
+@@ -137,3 +144,6 @@ package() {
+ }
+ 
+ # vim: ts=2 sw=2 et:
++
++source+=('miniupnp-p2pool-changes.patch')
++b2sums+=('88faf59d1aca33cb4ebd3e49b5ce1497f6e2b2a631fcf7068f8f19fe07b18987221a39da153f8f8715092fa70854ab527be7d0906dd290ef044f8b6365c6c527')
