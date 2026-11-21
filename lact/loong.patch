@@ -1,0 +1,21 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d851ba5..7338106 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -41,6 +41,8 @@ _reverts=(
+ 
+ prepare() {
+   cd "LACT"
++  # loong64: NVIDIA headers don't detect loongarch64 as 64-bit, making bindgen emit u64 for NvP64 pointers
++  patch -p1 -i "$srcdir/loongarch-nv64.patch"
+   local _c
+   for _c in "${_backports[@]}"; do
+     if [[ $_c == *..* ]]; then
+@@ -80,3 +82,7 @@ package_lact() {
+ 
+   install -Dvm644 LICENSE -t "$pkgdir/usr/share/licenses/$pkgbase/"
+ }
++
++source+=('loongarch-nv64.patch')
++sha256sums+=('db0f4dd17b7a5d0507642593eae47bfbc6024d6455dbe5698fb8b1a9e04ae0af')
++b2sums+=('4d77d3c30360ed087ed7b5383bd64cb070e627f492a7b59dca5f3b10f723ee5a2b5d7c0ad71d34858cbdc264875505b662984f1978e80db0f80b2daa385d704d')
