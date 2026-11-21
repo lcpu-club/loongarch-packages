@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7480fc0..715d742 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -60,6 +60,8 @@ check() {
+   )
+ 
+   cd "$_name"
++  # pyo3 extension-module suppresses linking libpython, which the test binary needs
++  export RUSTFLAGS="${RUSTFLAGS:-} -L native=/usr/lib -l dylib=python$(python -c 'import sys;print(f"{sys.version_info[0]}.{sys.version_info[1]}")')"
+   cargo test --frozen --all-features
+   pytest "${pytest_options[@]}" tests
+ }
