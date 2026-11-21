@@ -1,15 +1,16 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index b019283..472dd50 100644
+index 57f3888..85715c9 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -36,3 +36,10 @@ package() {
+@@ -36,3 +36,11 @@ package() {
  
    install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
  }
 +
++# loongson arch support ported from upstream commit bf26f18 to 3.11.3
 +prepare() {
 +  patch -d "oneDNN-$pkgver" -p1 -i "${srcdir}/add-loong64-support.patch"
 +}
 +
-+source+=("add-loong64-support.patch::https://github.com/oneapi-src/oneDNN/commit/bf26f18df89099e491188d5382b990e190dfe450.patch")
-+sha256sums+=('e415e5edb514767276979a4e6117124e629625faea4840b23b95dd2441111b83')
++source+=("add-loong64-support.patch")
++sha256sums+=('39dc9861aaa66ddd84652ca2f1b40596cdb0ea7ee7489cc05af33ad51961a098')

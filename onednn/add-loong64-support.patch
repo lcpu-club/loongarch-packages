@@ -1,0 +1,120 @@
+From bf26f18df89099e491188d5382b990e190dfe450 Mon Sep 17 00:00:00 2001
+From: Huang Yang <huangyang@loongson.cn>
+Date: Mon, 20 May 2024 11:21:18 +0800
+Subject: [PATCH] cpu: add loongson architecture support
+
+Ported to oneDNN 3.11.3: hunks re-based onto current line numbers and
+cmake/platform.cmake (restructured into per-compiler chains) gained the
+LOONGARCH64 branch in both the Clang and the GNU flag chain.
+---
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e81995e..9ee0cca 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -70,6 +70,8 @@ if(NOT DNNL_TARGET_ARCH)
+         set(DNNL_TARGET_ARCH "S390X")
+     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(rv.*|RV.*|riscv.*|RISCV.*)")
+         set(DNNL_TARGET_ARCH "RV64")
++    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(loongarch64.*|LOONGARCH64.*)")
++        set(DNNL_TARGET_ARCH "LOONGARCH64")
+     else()
+         set(DNNL_TARGET_ARCH "X64")
+     endif()
+diff --git a/README.md b/README.md
+index 0846f98..ec048b7 100644
+--- a/README.md
++++ b/README.md
+@@ -70,10 +70,11 @@ oneDNN supports platforms based on the following architectures:
+ - [OpenPOWER](https://openpowerfoundation.org/) / [IBM Power ISA](https://en.wikipedia.org/wiki/Power_ISA).
+ - [IBMz z/Architecture (s390x)](https://en.wikipedia.org/wiki/Z/Architecture).
+ - [RISC-V 64-bit (RV64)](https://en.wikipedia.org/wiki/RISC-V).
++- [LOONGARCH 64 bit](https://docs.kernel.org/arch/loongarch/introduction.html).
+ 
+ > **WARNING**
+ >
+-> Power ISA (PPC64), IBMz (s390x), and RISC-V (RV64) support is
++> Power ISA (PPC64), IBMz (s390x), RISC-V (RV64) and Loongson (LOONGARCH64) support is
+ > **experimental** with limited testing validation.
+ 
+ The library is optimized for the following CPUs:
+diff --git a/cmake/platform.cmake b/cmake/platform.cmake
+index 84b69bf..6c219bd 100644
+--- a/cmake/platform.cmake
++++ b/cmake/platform.cmake
+@@ -370,6 +370,8 @@ elseif(UNIX OR MINGW)
+              endif()
+         elseif(DNNL_TARGET_ARCH STREQUAL "RV64")
+              append(DEF_ARCH_OPT_FLAGS "${RV64_MARCH_FLAG}")
++        elseif(DNNL_TARGET_ARCH STREQUAL "LOONGARCH64")
++             append(DEF_ARCH_OPT_FLAGS "-march=loongarch64")
+         elseif(DNNL_TARGET_ARCH STREQUAL "X64")
+              platform_clang_x64_arch_ccxx_flags(DEF_ARCH_OPT_FLAGS)
+         endif()
+@@ -481,6 +483,8 @@ elseif(UNIX OR MINGW)
+             endif()
+         elseif(DNNL_TARGET_ARCH STREQUAL "RV64")
+             append(DEF_ARCH_OPT_FLAGS "${RV64_MARCH_FLAG}")
++        elseif(DNNL_TARGET_ARCH STREQUAL "LOONGARCH64")
++            append(DEF_ARCH_OPT_FLAGS "-march=loongarch64")
+         elseif(DNNL_TARGET_ARCH STREQUAL "X64")
+             platform_gnu_x64_arch_ccxx_flags(DEF_ARCH_OPT_FLAGS)
+         endif()
+diff --git a/src/cpu/README.md b/src/cpu/README.md
+index 75668c1..55f1fb0 100644
+--- a/src/cpu/README.md
++++ b/src/cpu/README.md
+@@ -48,6 +48,7 @@ enable or disable parts of code. There the following macros defined:
+ - `DNNL_PPC64` is 1 on OpenPOWER / IBM Power architecture;
+ - `DNNL_S390X` is 1 on IBMz / s390x architecture;
+ - `DNNL_RV64` is 1 on RISC-V architecture;
++- `DNNL_LOONGARCH64` is 1 on Loongson LOONGARCH64 architecture;
+ - `DNNL_ARCH_GENERIC` is 1 on other platforms.
+ Only one of the macros above is defined to 1. All others are defined to 0.
+ 
+diff --git a/src/cpu/platform.hpp b/src/cpu/platform.hpp
+index 9e0635d..c8ec1fc 100644
+--- a/src/cpu/platform.hpp
++++ b/src/cpu/platform.hpp
+@@ -30,12 +30,13 @@
+ // - DNNL_PPC64
+ // - DNNL_S390X
+ // - DNNL_RV64
++// - DNNL_LOONGARCH64
+ // - DNNL_ARCH_GENERIC
+ // Target architecture macro is set to 1, others to 0. All macros are defined.
+ 
+ #if defined(DNNL_X64) + defined(DNNL_AARCH64) + defined(DNNL_PPC64) \
+                 + defined(DNNL_S390X) + defined(DNNL_RV64) \
+-                + defined(DNNL_ARCH_GENERIC) \
++                + defined(DNNL_LOONGARCH64) + defined(DNNL_ARCH_GENERIC) \
+         == 0
+ #if defined(__x86_64__) || defined(_M_X64)
+ #define DNNL_X64 1
+@@ -47,6 +48,8 @@
+ #define DNNL_S390X 1
+ #elif defined(__riscv)
+ #define DNNL_RV64 1
++#elif defined(__loongarch64)
++#define DNNL_LOONGARCH64 1
+ #else
+ #define DNNL_ARCH_GENERIC 1
+ #endif
+@@ -54,7 +57,7 @@
+ 
+ #if defined(DNNL_X64) + defined(DNNL_AARCH64) + defined(DNNL_PPC64) \
+                 + defined(DNNL_S390X) + defined(DNNL_RV64) \
+-                + defined(DNNL_ARCH_GENERIC) \
++                + defined(DNNL_LOONGARCH64) + defined(DNNL_ARCH_GENERIC) \
+         != 1
+ #error One and only one architecture should be defined at a time
+ #endif
+@@ -74,6 +77,9 @@
+ #if !defined(DNNL_RV64)
+ #define DNNL_RV64 0
+ #endif
++#if !defined(DNNL_LOONGARCH64)
++#define DNNL_LOONGARCH64 0
++#endif
+ #if !defined(DNNL_ARCH_GENERIC)
+ #define DNNL_ARCH_GENERIC 0
+ #endif
