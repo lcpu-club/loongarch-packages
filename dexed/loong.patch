@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f269379..4438753 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -132,6 +132,8 @@ build() {
+     -D CMAKE_BUILD_TYPE=Release
+     -D BUILD_ID="$pkgver"
+     -D JUCE_COPY_PLUGIN_AFTER_BUILD=FALSE
++    # loong64: JUCE arch detection has no loongarch case, set it explicitly
++    -D JUCE_TARGET_ARCHITECTURE=loongarch64
+   )
+ 
+   cmake "${cmake_options[@]}"
