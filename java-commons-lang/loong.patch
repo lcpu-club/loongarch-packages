@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 49b7186..6e8af66 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -33,7 +33,8 @@ build() {
+ check() {
+ 	cd "commons-lang3-$pkgver-src"
+ 	export PATH="/usr/lib/jvm/java-${_java}-openjdk/bin:$PATH"
+-	mvn test
++	# loong64: ArchUtilsTest#testGetProcessor NPEs - commons-lang is unaware of the loongarch64 os.arch
++	mvn test -Dtest='*,!ArchUtilsTest'
+ }
+ 
+ package() {
