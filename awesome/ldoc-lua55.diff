@@ -1,0 +1,92 @@
+diff --git a/ldoc/doc.lua b/ldoc/doc.lua
+index 21732fb0..3b3bd117 100644
+--- a/ldoc/doc.lua
++++ b/ldoc/doc.lua
+@@ -6,7 +6,7 @@ local class = require 'pl.class'
+ local utils = require 'pl.utils'
+ local List = require 'pl.List'
+ local Map = require 'pl.Map'
+-local text = require 'pl.text'
++local text = require 'pl.stringx'
+ 
+ local doc = {}
+ local global = require 'ldoc.builtin.globals'
+diff --git a/ldoc/html.lua b/ldoc/html.lua
+index 07e1d721..6071c6c2 100644
+--- a/ldoc/html.lua
++++ b/ldoc/html.lua
+@@ -41,12 +41,12 @@ end
+ 
+ local function get_module_info(m)
+    local info = OrderedMap()
+-   for tag in doc.module_info_tags() do
+-      local val = m.tags[tag]
++   for t in doc.module_info_tags() do
++      local val = m.tags[t]
+       if type(val)=='table' then
+          val = table.concat(val,',')
+       end
+-      tag = stringx.title(tag)
++      local tag = stringx.title(t)
+       info:set(tag,val)
+    end
+    if #info:keys() > 0 then
+@@ -232,7 +232,8 @@ function ldoc.source_ref (fun)
+       end
+ 
+       local types = {}
+-      for name in tp:gmatch("[^|]+") do
++      for n in tp:gmatch("[^|]+") do
++	 local name = n
+          local sym = name:match '([%w%.%:]+)'
+          local ref,_ = markup.process_reference(sym,true)
+          if ref then
+diff --git a/ldoc/html/ldoc_ltp.lua b/ldoc/html/ldoc_ltp.lua
+index ba5f495c..73f29b59 100644
+--- a/ldoc/html/ldoc_ltp.lua
++++ b/ldoc/html/ldoc_ltp.lua
+@@ -65,7 +65,8 @@ return [==[
+ 
+ 
+ # if ldoc.no_summary and module and not ldoc.one then -- bang out the functions on the side
+-# for kind, items in module.kinds() do
++# for k, items in module.kinds() do
++# local kind = k
+ <h2>$(kind)</h2>
+ <ul class="nowrap">
+ # for item in items() do
+@@ -76,7 +77,8 @@ return [==[
+ # end
+ # -------- contents of project ----------
+ # local this_mod = module and module.name
+-# for kind, mods, type in ldoc.kinds() do
++# for k, mods, t in ldoc.kinds() do
++#  local kind, type = k, t
+ #  if ldoc.allowed_in_contents(type,module) then
+ <h2>$(kind)</h2>
+ <ul class="$(kind=='Topics' and '' or 'nowrap')">
+@@ -300,7 +302,8 @@ return [==[
+   <p>$(M(ldoc.full_description,nil))</p>
+ # end
+ 
+-# for kind, mods in ldoc.kinds() do
++# for k, mods in ldoc.kinds() do
++# local kind = k
+ <h2>$(kind)</h2>
+ # kind = kind:lower()
+ <table class="module_list">
+diff --git a/ldoc/markdown.lua b/ldoc/markdown.lua
+index 86d5c86a..4d846954 100644
+--- a/ldoc/markdown.lua
++++ b/ldoc/markdown.lua
+@@ -824,8 +824,8 @@ end
+ local function unescape_special_chars(t)
+ 	local tin = t
+ 	for k,v in pairs(escape_table) do
+-		k = k:gsub("%%", "%%%%")
+-		t = t:gsub(v,k)
++		local pattern = k:gsub("%%", "%%%%")
++		t = t:gsub(v,pattern)
+ 	end
+ 	if t ~= tin then t = unescape_special_chars(t) end
+ 	return t

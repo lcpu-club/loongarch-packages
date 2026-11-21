@@ -1,0 +1,46 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index eb5cca4..a650230 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -64,18 +64,33 @@ prepare() {
+ 	    -e 's/Gio\.UnixInputStream/GioUnix\.InputStream/g' \
+ 	    -e 's/Gio\.UnixOutputStream/GioUnix\.OutputStream/g' \
+ 	    -i lib/awful/spawn.lua tests/_client.lua tests/test-spawn.lua
++
++	# loong64: lua 5.5 makes for-variables const; stop reassigning the loop variable in the ldoc template
++	sed -i 's|^# kind = kind:lower()$|# local kind = kind:lower()|' docs/ldoc.ltp
+ }
+ 
+ build() {
+ 	cd "$_archive"
+ 	CFLAGS+=' -fcommon' # https://wiki.gentoo.org/wiki/Gcc_10_porting_notes/fno_common
++	# loong64: ldoc 1.5.0 breaks on lua 5.5 const for-vars; backport upstream fix (lunarmodules/ldoc@28d75b4)
++	# loong64: /usr/bin/ldoc force-prepends the system lua path, so patch a private copy and run it via a wrapper
++	mkdir -p "$srcdir/ldoc-patched"
++	cp -r /usr/share/lua/5.5/ldoc "$srcdir/ldoc-patched/"
++	patch -p1 -d "$srcdir/ldoc-patched" -i "${srcdir}/ldoc-lua55.diff"
++	# loong64: the wrapper path also carries lua-penlight 5.4, which ldoc (running on lua 5.5) requires
++	cat > "$srcdir/ldoc-patched/ldoc-run" <<EOF
++#!/bin/sh
++exec /usr/bin/lua5.5 -e 'package.path="${srcdir}/ldoc-patched/?.lua;${srcdir}/ldoc-patched/?/init.lua;/usr/share/lua/5.4/?.lua;/usr/share/lua/5.4/?/init.lua;;";package.cpath="/usr/lib/lua/5.5/?.so;;"' /usr/lib/luarocks/rocks-5.5/ldoc/1.5.0-1/bin/ldoc "\$@"
++EOF
++	chmod +x "$srcdir/ldoc-patched/ldoc-run"
+ 	cmake -B build \
+ 		-DCMAKE_BUILD_TYPE=RELEASE \
+ 		-DCMAKE_INSTALL_PREFIX=/usr \
+ 		-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+ 		-DSYSCONFDIR=/etc \
+ 		-DLUA_LIBRARY=/usr/lib/liblua5.3.so \
+-		-DLUA_INCLUDE_DIR=/usr/include/lua5.3
++		-DLUA_INCLUDE_DIR=/usr/include/lua5.3 \
++		-DLDOC_EXECUTABLE="${srcdir}/ldoc-patched/ldoc-run"
+ 	make -C build
+ }
+ 
+@@ -84,3 +99,6 @@ package() {
+ 	make -C build DESTDIR="$pkgdir" install
+ 	install -Dm0644 -t "$pkgdir/usr/share/xsessions/" awesome.desktop
+ }
++
++source+=('ldoc-lua55.diff')
++sha512sums+=('35d0dc7af01526bbf071ff87ca062158fce740782472b61e87c98ef9a0bda9c78b1d5271646a92eac610c34aed238132fc15840bf7f7e320504b3f7b23fdad2f')
