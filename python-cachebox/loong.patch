@@ -1,0 +1,10 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -24,6 +24,7 @@ prepare() {
+ 
+ build() {
+   cd cachebox
++  export RUSTFLAGS="${RUSTFLAGS:-} -C target-feature=-lsx"
+   CARGO_NET_OFFLINE=true python -m build --wheel --no-isolation
+ }
+ 
