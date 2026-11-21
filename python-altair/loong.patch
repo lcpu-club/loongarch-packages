@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b6feb14..bb7f504 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -62,6 +62,9 @@ check() {
+     --deselect tests/test_examples.py
+     # ValueError: Unexpected character found when decoding object value
+     --deselect tests/utils/test_schemapi.py::test_chart_validation_errors
++    # loong64: these import tools/ at collection time, which imports vl_convert (not in loong64 repos)
++    --ignore tests/test_toplevel.py
++    --ignore tests/test_vega_expr.py
+   )
+ 
+   cd $_name-$pkgver
+@@ -77,3 +80,7 @@ package() {
+   install -vDm 644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
+   install -vDm 644 README.md -t "$pkgdir"/usr/share/doc/$pkgname/
+ }
++
++# loong64: python-vl-convert is not in the loong64 repos yet; tests that need it
++# are decorated with skip_requires_vl_convert and will be skipped
++checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^python-vl-convert$'))
