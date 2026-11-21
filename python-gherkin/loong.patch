@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index f144b9a..172218f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,6 +21,12 @@ checkdepends=('python-pytest')
+ source=("$url/archive/v$pkgver/$pkgname-$pkgver.tar.gz")
+ b2sums=('69c399cf3873946eb7bb432a2f8689bcf74adfdcff3cfccb2f7d235b003c7279b4751b5fb75dba8bcdd78c372b897ef96b288dd8c731d33a963d3867ec1134a3')
+ 
++prepare() {
++  cd "${pkgname#python-}-$pkgver"
++  # uv_build 0.13.x is backwards-compatible; the pinned range excludes the version in the repos
++  sed -i 's/uv_build>=0.12.0,<0.13.0/uv_build>=0.12.0/' python/pyproject.toml
++}
++
+ build() {
+   cd "${pkgname#python-}-$pkgver/python"
+   python -m build --wheel --no-isolation
