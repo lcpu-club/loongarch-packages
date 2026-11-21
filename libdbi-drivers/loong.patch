@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index a44f22d..98ac1e8 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -41,6 +41,12 @@ prepare() {
+   patch -Np1 < ../$pkgname-fix-bundled-cgreen-build.patch
+   patch -Np1 < ../$pkgname-fix-test-datetime-types.patch
+   patch -Np1 < ../$pkgname-fix-vla-buffer-overflow-in-getTables.patch
++  # update config.guess/config.sub for loongarch64
++  cp -f "$(automake --print-libdir)/config.guess" .
++  cp -f "$(automake --print-libdir)/config.sub" .
++  # loong64 float->int64 conversion saturates to LLONG_MAX instead of x86's INT64_MIN
++  sed -i -e 's/\("the_float", 2, 2, 0, 7, \.expect_val\.double_val = 3\.402823466E+38, \)-9223372036854775808/\19223372036854775807/' \
++      -e 's/\("the_double", 2, 4, 0, 7, \.expect_val\.double_val = 1\.797693e+307, \)-9223372036854775808/\19223372036854775807/' tests/test_dbi.c
+ }
+ 
+ build() {
