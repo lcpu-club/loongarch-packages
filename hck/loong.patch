@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 656dfb5..4f0d525 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,6 +18,9 @@ b2sums=('fe4deb6d7358d2427a9b1ee956d9ffe374e929aec29652793956000dd68a65ec60671cf
+ prepare() {
+   cd "$pkgname"
+ 
++  # libz-sys/libz-ng-sys 1.1.28 crates lack the zlib-ng loongarch sources
++  cargo update -p libz-sys -p libz-ng-sys
++
+   # download dependencies
+   cargo fetch --locked --target $(rustc --print host-tuple)
+ }
