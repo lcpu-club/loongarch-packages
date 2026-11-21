@@ -1,0 +1,19 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3d56e73..84a8a1c 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -51,6 +51,8 @@ check() {
+     env LUA_PATH="${PWD}/lua/?/init.lua;${PWD}/lua/?.lua;;" \
+       "lua${_version}" run.lua
+     # https://github.com/lunarmodules/Penlight/issues/411
++    # lua54-busted is uninstallable during bootstrap: it depends on lua54-penlight built here
++    [ "$_version" = 5.4 ] && continue
+     env LUA_PATH="${PWD}/lua/?/init.lua;${PWD}/lua/?.lua;;" \
+       busted --lua "lua${_version}" --exclude-pattern app_spec
+   done
+@@ -95,3 +97,5 @@ package_lua51-penlight() {
+ }
+ 
+ # vim: ts=2 sw=2 et:
++
++checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^(lua54-busted)$'))
