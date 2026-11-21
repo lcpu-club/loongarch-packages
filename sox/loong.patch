@@ -1,0 +1,11 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 34a6062..9ede3d5 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -103,3 +103,6 @@ package() {
+     -t "$pkgdir/usr/share/doc/$pkgname" \
+     AUTHORS ChangeLog README
+ }
++
++# autodetected on loong64 builds; binaries link them unconditionally
++depends+=(libebur128 sndio)
