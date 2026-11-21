@@ -1,0 +1,11 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 5aba7a3..4665050 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -81,3 +81,6 @@ check() {
+ package() {
+     DESTDIR="$pkgdir" cmake --install build-SPIRV-Cross
+ }
++
++# loong64: GCC 16 LTO ICE (ipa-cp) linking the test executables
++options+=('!lto')
