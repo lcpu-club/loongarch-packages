@@ -1,8 +1,8 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index e83d114..323f8fd 100644
+index 8064f51..db71517 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -16,6 +16,9 @@ sha256sums=('74d92c017e8beb41730a8be07c2c6e4ff6547660c84bf91f832d8f325dd0cf82')
+@@ -17,6 +17,9 @@ sha256sums=('05662a657c86ece56e21d7804f2c217c82f4dc535c5ad1d61c03b1fe43b0c188')
  
  build() {
      cd "${pkgname}-${pkgver}"
@@ -12,3 +12,10 @@ index e83d114..323f8fd 100644
      ./configure \
          --prefix='/usr' \
          --enable-static='no' \
+@@ -33,3 +36,6 @@ check() {
+ package() {
+     make -C "${pkgname}-${pkgver}" DESTDIR="$pkgdir" install
+ }
++
++# autoreconf needs AX_CXX_COMPILE_STDCXX, not shipped in the tarball
++makedepends+=('autoconf-archive')
