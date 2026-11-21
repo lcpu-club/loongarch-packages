@@ -1,0 +1,11 @@
+--- a/lact-daemon/include/nvidia/src/common/sdk/nvidia/inc/cpuopsys.h
++++ b/lact-daemon/include/nvidia/src/common/sdk/nvidia/inc/cpuopsys.h
+@@ -232,6 +232,7 @@
+ #if defined(NVCPU_IA64) || defined(NVCPU_X86_64) || \
+     defined(NV_MACINTOSH_64) || defined(NVCPU_AARCH64) || \
+-    defined(NVCPU_PPC64LE) || defined(NVCPU_RISCV64)
++    defined(NVCPU_PPC64LE) || defined(NVCPU_RISCV64) || \
++    (defined(__loongarch__) && __loongarch_grlen == 64)
+ #   define NV_64_BITS          /* all architectures where pointers are 64 bits */
+ #else
+ /* we assume 32 bits. I don't see a need for NV_16_BITS. */
