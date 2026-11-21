@@ -1,0 +1,23 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -203,6 +203,8 @@
+     # Processor-specific optimizations (x86 vs ARM)
+     if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm|aarch64")
+         add_compile_definitions(HAVE_NEON=1)
++    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "loongarch")
++        # LoongArch has no x86 SIMD; use the generic FFTW code paths
+     else()
+         # Keep distributable builds compatible with AVX-capable x86_64 CPUs.
+         # Local builds may explicitly target the build machine for extra optimization.
+@@ -314,7 +316,10 @@
+         file(GLOB_RECURSE FFTW_SOURCES "vendors/fftw3/*.c")
+         
+         # Exclude files depending on architecture
+-        if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm|aarch64")
++        if(CMAKE_SYSTEM_PROCESSOR MATCHES "loongarch")
++            # loong64: exclude both the x86 and ARM SIMD codelets
++            list(FILTER FFTW_SOURCES EXCLUDE REGEX ".*(avx|/sse|neon).*")
++        elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm|aarch64")
+             list(FILTER FFTW_SOURCES EXCLUDE REGEX ".*(avx|/sse).*")
+         else()
+             list(FILTER FFTW_SOURCES EXCLUDE REGEX ".*neon.*")
