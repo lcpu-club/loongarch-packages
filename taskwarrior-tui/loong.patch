@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 8e6b68f..40bcf26 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -28,7 +28,8 @@ check() {
+   cd "$pkgname-$pkgver"
+   export TASKRC="../taskwarrior-testdata/.taskrc"
+   export TASKDATA="../taskwarrior-testdata/.task"
+-  cargo test --frozen --all-features
++  # https://github.com/kdheepak/taskwarrior-tui/issues/442
++  cargo test --frozen --all-features -- --skip "test_taskwarrior_tui"
+ }
+ 
+ package() {
