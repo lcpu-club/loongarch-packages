@@ -1,0 +1,18 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -21,6 +21,7 @@ b2sums=('3e4db0370c3fbe0dba7795f09a58dcccd2975e8c154fd85712804f39095df98aa61f1fd
+ 
+ prepare() {
+   cd $pkgname-$pkgver
++  patch -Np1 < ../0001-loongarch-do-not-copy-return-value-for-void-calls.patch
+   autoreconf -fiv
+ }
+ 
+@@ -52,3 +53,7 @@ package() {
+ }
+ 
+ # vim:set ts=2 sw=2 et:
++
++source+=("0001-loongarch-do-not-copy-return-value-for-void-calls.patch")
++b2sums+=('3de304379268d6c808295194c9cd00d960e4f186bd14b8e9165640b1370d9753264848b4b2b665195dcc3905a31f43f8e94e866eb32c639d7133429f3a7bc811')
++sha256sums+=('b1ae5734cb7029338e933dd470f69f1bead075ba11325568b26cfd9e25eed1bd')
