@@ -1,6 +1,8 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index dadeab7..79f7f0c 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -43,6 +43,7 @@ b2sums=('9d46d4c296e1d52ffb1abbd2e3ac48b3329618706fad4e76928e733b15d61e3d352b50d
+@@ -47,6 +47,7 @@ b2sums=('eef449e66148a338f54e2192f5e87bb4ee7eb174e3bcf737a62a4321cda28c2dc8937ed
  
  prepare() {
    cd Aegisub
@@ -8,10 +10,9 @@
    meson subprojects download luajit
    meson subprojects packagefiles --apply luajit
    sed "/subdir('tests')/d" -i meson.build
-@@ -68,3 +69,6 @@ package() {
+@@ -72,3 +73,5 @@ package() {
    cp -dr --no-preserve=ownership Aegisub/automation/include/{aegisub,*.lua} "${pkgdir}"/usr/share/aegisub/automation/include/
    install -Dm 644 Aegisub/LICENCE -t "${pkgdir}"/usr/share/licenses/aegisub/
  }
-+
 +source+=("use-supported-luajit-fork.patch")
-+b2sums+=('9b1fafe33c9cb5df824fb6a18c5565603fe73e0821075ec06b796e00e8c0f7e42a86067d8f3765c69cad6e5c3aa0f22602dd3f0bf3f7201505813c806f48ccba')
++b2sums+=('f55d498897ce3fcf9f97a30d3a9156eb482d118a101d2402386a6e74d7ad399c263a0c48abdbf59a667c5ce9bb0262f4a3a9020d7f61d0bdd5e6a2fb9de073e4')
