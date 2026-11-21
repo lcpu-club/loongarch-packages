@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index b5d738d..0c8ac7f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -45,6 +45,8 @@ prepare() {
+ 
+ build() {
+ 	_srcenv
++	# loong64: utmp-raw lacks loongarch64; it shares the LP64 utmp layout with aarch64
++	sed -i 's/target_arch = "aarch64",/target_arch = "aarch64",\n        target_arch = "loongarch64",/' "$CARGO_HOME"/registry/src/*/utmp-raw-0.4.0/lib.rs
+ 	cargo build --frozen --release --all-features
+ 	scdoc < contrib/man/$_pkgname-1.scd > contrib/man/$_pkgname.1
+ }
