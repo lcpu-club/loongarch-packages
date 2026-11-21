@@ -1,0 +1,44 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index d9fb513..d174a06 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -52,6 +52,31 @@ prepare() {
+   sed -i 's|/etc/openbao/openbao.env|/etc/default/openbao|g' .release/linux/package/usr/lib/systemd/system/openbao.service
+ 
+   pushd ui
++  # loong64: no @pnpm/exe for loong64; pnpm 12 only honors pmOnFail from env, not .npmrc
++  export PNPM_CONFIG_PM_ON_FAIL=ignore
++  # loong64: pnpm 12 ignores package.json "pnpm.overrides"; mirror them into pnpm-workspace.yaml so the frozen lockfile matches
++  # the upstream file ends without a newline, so start a fresh line before appending
++  printf '\n' >> pnpm-workspace.yaml
++  cat >> pnpm-workspace.yaml <<'EOF'
++overrides:
++  '@embroider/macros': ^1.19.7
++  cryptiles: ^4.1.2
++  eslint-utils: ^1.4.1
++  ember-basic-dropdown: 6.0.1
++  growl: ^1.10.0
++  https-proxy-agent: ^2.2.3
++  ini: ^1.3.6
++  kind-of: ^6.0.3
++  minimatch: ^3.0.2
++  prismjs: ^1.21.0
++  qs: ^6.14.1
++  serialize-javascript: ^3.1.0
++  underscore: ^1.12.1
++  trim: ^0.0.3
++  xmlhttprequest-ssl: ^1.6.2
++  cheerio: 1.0.0-rc.12
++  get-intrinsic: 1.2.7
++EOF
+   pnpm install
+   popd
+ 
+@@ -63,6 +88,7 @@ build() {
+   cd "${pkgname}"
+ 
+   pushd ui
++  export PNPM_CONFIG_PM_ON_FAIL=ignore
+   pnpm build
+   popd
+ 
