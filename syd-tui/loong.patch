@@ -1,0 +1,11 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 62ffc9e..896d882 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -29,3 +29,6 @@ package() {
+ 	install -Dm 755 "target/release/${pkgname}" "${pkgdir}/usr/bin/${pkgname}"
+ 	install -Dm 644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+ }
++
++# syd (sydbox) is not ported to loong64 yet
++depends=($(printf "%s\n" "${depends[@]}" | grep -Ev '^(syd)$'))
