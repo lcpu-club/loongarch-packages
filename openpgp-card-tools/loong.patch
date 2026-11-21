@@ -1,0 +1,11 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 0ad1ea5..98f0b4d 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -46,3 +46,6 @@ package() {
+   install -vDm 644 ../completion/_oct -t "$pkgdir/usr/share/zsh/site-functions/"
+   install -vDm 644 ../completion/oct.fish -t "$pkgdir/usr/share/fish/vendor_completions.d/"
+ }
++
++# slim LTO objects from cc-built C code (pikchr) cannot be linked by ld.lld
++options+=('!lto')
