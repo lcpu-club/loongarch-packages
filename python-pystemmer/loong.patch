@@ -1,0 +1,17 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 374ac1f..6a2a86f 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -14,6 +14,12 @@ sha512sums=('7e36cb0aae5b2367530a7561a015da7e8dab29e0e278e6bfce1834d2d7faea501f8
+ 
+ export PYSTEMMER_SYSTEM_LIBSTEMMER=1
+ 
++prepare() {
++  cd pystemmer
++  # backport doctest fix: hardcoded algorithm list breaks with newer system libstemmer
++  git cherry-pick --no-commit 301c074791708ab2c479808b410480c34183cd9a 77ee7b34fdcd61c78146ae4c6e536a63755db0e6
++}
++
+ build() {
+   cd pystemmer
+   python -m build --wheel --no-isolation
