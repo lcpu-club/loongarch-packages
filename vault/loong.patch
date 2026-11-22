@@ -1,11 +1,12 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index fad5846..52e0b05 100644
+index 3565550..91aa7e5 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -33,6 +33,10 @@ prepare() {
+@@ -33,11 +33,46 @@ prepare() {
    cd vault
    sed -i 's|/etc/vault.d/vault.hcl|/etc/vault.hcl|g' .release/linux/package/usr/lib/systemd/system/vault.service
    sed -i 's|/etc/vault.d/vault.env|/etc/default/vault|g' .release/linux/package/usr/lib/systemd/system/vault.service
++  # loong64: old bbolt/gopsutil lack loongarch64 support
 +  go mod edit -replace go.etcd.io/bbolt=github.com/etcd-io/bbolt@v1.3.7
 +  go mod edit -replace github.com/boltdb/bolt=go.etcd.io/bbolt@v1.3.7
 +  go mod edit -replace github.com/shirou/gopsutil/v3=github.com/shirou/gopsutil/v3@v3.24.5
@@ -13,3 +14,38 @@ index fad5846..52e0b05 100644
  }
  
  build() {
+   mkdir -p "${srcdir}/vault/http/web_ui"
+   cd "${srcdir}/vault/ui"
++  # loong64: pnpm 12 ignores package.json "pnpm.overrides"; mirror them into pnpm-workspace.yaml so the frozen lockfile matches
++  # the upstream file ends without a newline, so start a fresh line before appending
++  printf '\n' >> pnpm-workspace.yaml
++  cat >> pnpm-workspace.yaml <<'WORKSPACE_EOF'
++overrides:
++  '@babel/runtime': 7.27.0
++  ansi-html: 0.0.8
++  braces: 3.0.3
++  clean-css: 5.3.3
++  kind-of: 6.0.3
++  markdown-it: 14.1.1
++  micromatch: 4.0.8
++  rollup: 2.80.0
++  tmp: 0.2.7
++  ws: 8.21.0
++allowBuilds:
++  '@hashicorp/vault-client-typescript@https://codeload.github.com/hashicorp/vault-client-typescript/tar.gz/88a1cc1ba34a40ab694fc52f8ea5243e5ff6930d': true
++  '@carbon/charts@1.27.11': true
++  '@carbon/colors@11.52.0': true
++  '@carbon/utils-position@1.3.0': true
++  '@parcel/watcher@2.5.6': true
++  '@scarf/scarf@1.4.0': true
++  core-js@2.6.12: true
++  core-js@3.49.0: true
++WORKSPACE_EOF
++  # loong64: no @pnpm/exe for loong64; pnpm 12 only honors pmOnFail from env, not .npmrc
++  export PNPM_CONFIG_PM_ON_FAIL=ignore
++  export PNPM_CONFIG_RUNTIME_ON_FAIL=ignore
++  export PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
++  pnpm install
+   pnpm build
+ 
+   cd "${srcdir}/vault"
