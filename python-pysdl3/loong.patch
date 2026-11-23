@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 3fdaf3e..c64e00e 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -49,3 +49,10 @@ package() {
+ 	cp -r sdl3/__doc__.py "${pkgdir}/usr/lib/python${_PYTHON_VERSION}/site-packages/sdl3/"
+ 	install -Dm644 "${srcdir}/${pkgname}-${pkgver}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+ }
++
++prepare() {
++  cd "$pkgname-$pkgver"
++  patch -Np1 -i "$srcdir/Add-riscv64-and-loongarch64-architecture-support.patch"
++}
++source+=("Add-riscv64-and-loongarch64-architecture-support.patch")
++sha256sums+=('f0a30fa168e467a3eb11b60b1a3e4ab6b7aa27f19536ecd22ff15c82ed52dd18')

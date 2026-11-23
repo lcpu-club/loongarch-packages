@@ -1,0 +1,13 @@
+diff --git a/sdl3/__init__.py b/sdl3/__init__.py
+index 758c32c..b31dd46 100644
+--- a/sdl3/__init__.py
++++ b/sdl3/__init__.py
+@@ -12,6 +12,8 @@ def SDL_FORMAT_ARCH(arch: str) -> str:
+     """Format the architecture string."""
+     if arch.lower() in ["x64", "x86_64", "amd64"]: return "AMD64"
+     if arch.lower() in ["aarch64", "arm64"]: return "ARM64"
++    if arch.lower() in ["riscv64"]: return "RISCV64"
++    if arch.lower() in ["loongarch64"]: return "LOONGARCH64"
+     assert False, "Unknown architecture."
+ 
+ SDL_SYSTEM, SDL_ARCH = platform.system(), SDL_FORMAT_ARCH(platform.machine())
