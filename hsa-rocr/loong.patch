@@ -1,21 +1,18 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -24,6 +24,10 @@ sha256sums=('a700912d102b35c9336b7352d09d56b9d19e4957daf53779983c3d00ce744c9d')
- _dirname="$(basename "$url")-rocm-$pkgver"/projects/rocr-runtime/
- options=(!lto)
+@@ -39,6 +39,7 @@ options=(!lto)
+ prepare() {
+   patch -d "$(basename "$url")-therock-$pkgver" -Np1 --no-backup-if-mismatch \
+     -i "$srcdir/$pkgname-stripped-symtab.patch"
++  patch -d "${_dirname}" -Np1 < "${srcdir}/0001-support-arm64-loongarch64-riscv64.patch"
+ }
  
-+prepare() {
-+    patch -d "${_dirname}" -Np1 < "${srcdir}/0001-support-arm64-loongarch64-riscv64.patch"
-+}
-+
  build() {
-   # Silence warnings on optional libraries with -DNDEBUG,
-   # https://github.com/RadeonOpenCompute/ROCR-Runtime/issues/89#issuecomment-613788944
-@@ -44,3 +48,7 @@ package() {
+@@ -63,3 +64,7 @@ package() {
    DESTDIR="$pkgdir" cmake --install build
    install -Dm644 "$_dirname/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
 +# Patch borrowed from AOSC
 +source+=("0001-support-arm64-loongarch64-riscv64.patch")
-+sha256sums+=('a8a596818541f6c3ef1cbfec14998504efbab0705b4f8ae70baaeda625ef7957')
++sha256sums+=('e18aeb3948930c884119b05a480f3efd55bfdb5d886f7248859561cf3c732914')
