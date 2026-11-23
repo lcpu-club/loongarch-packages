@@ -1,0 +1,15 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 802bff6..124f916 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -128,6 +128,10 @@ check() {
+     --deselect distributed/deploy/tests/test_local.py::test_local_tls[True]
+     # TypeError: list.extend() takes exactly one argument (2 given)
+     --deselect distributed/deploy/tests/test_local.py::test_local_tls[False]
++    # loong64: dashboard port 8787 already in use under parallel xdist in chroot
++    --deselect distributed/cli/tests/test_dask_scheduler.py::test_defaults
++    # loong64: unreachable external address errors before match, no "connect" in message
++    --deselect distributed/tests/test_client.py::test_bad_address
+   )
+ 
+   cd $_name-$pkgver
