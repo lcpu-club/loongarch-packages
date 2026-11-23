@@ -1,0 +1,30 @@
+ipa-cp: Fix ICE when propagated size cost of a clone candidate is zero
+
+decide_about_value() passes val->prop_size_cost to
+good_cloning_opportunity_p() as SIZE_COST, which must be positive.
+It can however be zero when the value was accumulated only through
+an SCC of values that were not locally estimated, e.g. a polymorphic
+call context value on mutually recursive functions.  The clone then
+does not grow code, so accept it when there is any propagated time
+benefit, like the "Code not going to grow." case below.
+
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=127365
+diff --git a/gcc/ipa-cp.cc b/gcc/ipa-cp.cc
+--- a/gcc/ipa-cp.cc
++++ b/gcc/ipa-cp.cc
+@@ -6026,10 +6026,11 @@ decide_about_value (struct cgraph_node *node, int index, HOST_WIDE_INT offset,
+   find_contexts_for_caller_subset (avals.m_known_contexts, info, callers);
+   find_aggregate_values_for_callers_subset (avals.m_known_aggs, node, callers);
+ 
+-
+-  if (good_cloning_opportunity_p (node, val->prop_time_benefit,
+-				  freq_sum, count_sum, val->prop_size_cost,
+-				  called_without_ipa_profile, cur_sweep))
++  if (val->prop_size_cost <= 0
++      ? val->prop_time_benefit > 0
++      : good_cloning_opportunity_p (node, val->prop_time_benefit,
++				    freq_sum, count_sum, val->prop_size_cost,
++				    called_without_ipa_profile, cur_sweep))
+     ;
+   else
+     {
