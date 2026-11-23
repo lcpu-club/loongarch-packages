@@ -1,11 +1,27 @@
 diff --git a/PKGBUILD b/PKGBUILD
-index 2d8583c..1dcea04 100644
+index 67c967b..04e67a2 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -37,4 +37,6 @@ package() {
+@@ -21,11 +21,15 @@ prepare() {
+ 
+ build() {
+   cd "$pkgname-$pkgver"
++  # loong64: rustup's rustc links build scripts with -Wl,--icf=safe, which bfd ld rejects
++  RUSTFLAGS+=" -C link-arg=-fuse-ld=lld"
+   cargo build --release --frozen
+ }
+ 
+ check() {
+   cd "$pkgname-$pkgver"
++  # loong64: rustup's rustc links build scripts with -Wl,--icf=safe, which bfd ld rejects
++  RUSTFLAGS+=" -C link-arg=-fuse-ld=lld"
+   cargo test --frozen --all --lib -- --test-threads=1
+ }
+ 
+@@ -37,4 +41,6 @@ package() {
    depends+=('rustup')
  }
  
-+makedepends+=(cmake clang)
++makedepends+=(cmake clang lld)
 +
  # vim:set ts=2 sw=2 et:
