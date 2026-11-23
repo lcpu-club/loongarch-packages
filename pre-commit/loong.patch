@@ -1,0 +1,42 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 1b0d4d0..1630c82 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -78,10 +78,13 @@ check() {
+   # Deselect coursier because we don't have it!
+   # Deselect dart because it doesn't support 3.x.x!
+   # Deselect swift because we don't have it!
++  # Deselect julia because we don't have it! (loong64)
++  # loong64: these download upstream toolchains that have no loongarch64 builds (go/node/perl/rust)
+   # test_install_ruby_with_version,test_run_a_ruby_hook: https://github.com/pre-commit/pre-commit/issues/1368
+   python -m pytest --deselect tests/languages/conda_test.py \
+                    --deselect tests/languages/coursier_test.py \
+                    --deselect tests/languages/dart_test.py \
++                   --deselect tests/languages/julia_test.py \
+                    --deselect tests/languages/docker_image_test.py \
+                    --deselect tests/languages/docker_test.py \
+                    --deselect tests/languages/dotnet_test.py \
+@@ -92,7 +95,15 @@ check() {
+                    --deselect tests/languages/ruby_test.py::test_ruby_hook_language_version \
+                    --deselect tests/languages/ruby_test.py::test_ruby_with_bundle_disable_shared_gems \
+                    --deselect tests/languages/rust_test.py::test_language_version_with_rustup \
+-                   --deselect tests/languages/lua_test.py::test_lua_additional_dependencies
++                   --deselect tests/languages/lua_test.py::test_lua_additional_dependencies \
++                   --deselect tests/languages/golang_test.py::test_golang_default_version \
++                   --deselect tests/languages/golang_test.py::test_golang_versioned \
++                   --deselect tests/languages/golang_test.py::test_automatic_toolchain_switching \
++                   --deselect tests/languages/golang_test.py::test_automatic_toolchain_switching_go_fmt \
++                   --deselect tests/languages/node_test.py::test_node_hook_versions \
++                   --deselect tests/languages/node_test.py::test_npm_install_succeeds_with_build \
++                   --deselect tests/languages/perl_test.py::test_perl_additional_dependencies \
++                   --deselect tests/languages/rust_test.py::test_installs_rust_missing_rustup
+   deactivate
+ }
+ 
+@@ -102,3 +113,6 @@ package() {
+ 
+   install -Dm644 LICENSE -t "$pkgdir"/usr/share/licenses/$pkgname/
+ }
++
++# loong64: julia is not available in the loong64 repos
++checkdepends=($(printf "%s\n" "${checkdepends[@]}" | grep -Ev '^julia$'))
