@@ -1,0 +1,15 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -65,3 +65,12 @@ package() {
+ 
+   install -Dm644 "$pkgname/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+ }
++
++prepare() {
++  cd "$pkgname"
++
++  patch -Np1 -i "$srcdir/rocshmem-loong64.patch"
++}
++
++source+=('rocshmem-loong64.patch')
++sha256sums+=('af6d4b1bd2376fdb02e8fd6fbda826a3c764044543a62fb665a5d8a4ac5fec56')
