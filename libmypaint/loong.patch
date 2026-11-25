@@ -1,0 +1,14 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 4c2a904..06bac76 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -20,7 +20,8 @@ b2sums=('08e88b83391a237f89f8eb601421f822f74e2e02607ebe7e28c52b5bc6060b39102ded4
+ prepare() {
+   cd ${pkgname}-${pkgver}
+   patch -Np1 < ../libmypaint-autoconf-2.7.patch
+-  ./autogen.sh
++  # autogen.sh only probes versioned automake-1.13..1.16 names, none of which exist on Arch
++  AUTOMAKE=automake ACLOCAL=aclocal ./autogen.sh
+   autoreconf -fiv
+ }
+ 
