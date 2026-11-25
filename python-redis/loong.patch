@@ -1,9 +1,9 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -196,6 +196,21 @@ check() {
-     # New test failures in 8.1.0
-     --deselect tests/test_asyncio/test_sentinel.py::test_himport_prepare_set_survives_reconnect
-     --deselect tests/test_sentinel.py::test_himport_prepare_set_survives_reconnect
+@@ -207,6 +207,21 @@ check() {
+     --deselect tests/test_asyncio/test_command_metadata.py::TestAsyncStaticMetadataAgainstServer::test_static_first_falls_back_to_the_server[pool]
+     --deselect tests/test_command_metadata.py::TestCommandsParserMetadata::test_get_command_policies_matches_the_metadata_view
+     --deselect tests/test_command_metadata.py::TestStaticMetadataAgainstServer::test_static_first_falls_back_to_the_server
 +
 +    # To build on loong64 (floating point precision issues)
 +    --deselect=tests/test_asyncio/test_commands.py::TestRedisCommands::test_geopos
