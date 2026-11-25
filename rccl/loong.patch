@@ -10,4 +10,4 @@
 +}
 +
 +source+=("rccl-loongarch64-support.patch")
-+sha256sums+=('ddeb55c3d19115e04c59fb6fe958168abaa13e8833ebc4cef37f4b59770ca241')
++sha256sums+=('be7ed824ecf1dda6ace7466f8e0b9d182d59bc8fe5f3d55e9bdc16a8e8dcd667')
