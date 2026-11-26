@@ -1,0 +1,22 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -19,6 +19,11 @@ source=("$pkgname::git+$url#tag=v$pkgver")
+ sha512sums=('26e368bfa12bdfb6497ac72c6e9f6abdf2b7d84909ee8cc091e129f94b689a3f6be444801225d7b9c16e9f0681161f07eda9f51a66fa585ce05d98486b801798')
+ b2sums=('1c439590c9ed6eadf59a25d0d7697b95a6cc2b6edd057278fe2c513af86be1f7e498e8643e3cfa4e20369d19ac85d98d3f87a883cb6ac49c0f50c8610cf725a2')
+ 
++prepare() {
++  cd "$pkgname"
++  patch -Np1 -i ../qmk-loongarch-support.patch
++}
++
+ build() {
+   cd "$pkgname"
+ 
+@@ -30,3 +35,7 @@ package() {
+ 
+   make PREFIX=/usr DESTDIR="$pkgdir" install
+ }
++
++source+=('qmk-loongarch-support.patch')
++sha512sums+=('bc28eecbbe353c39a348d5effebf242c77e39b3696b0a2361f09c6e21b1fe9a50e37f48664b84b142b7257a99cad83c0547415266b71a7b96dfc0fe600460cfa')
++b2sums+=('168bfe19156f2046b7132eece46cb3793275100f20427acae5ca25cd5a1d34ceb71a303272fe9d9b140826587fb47c53d695f1efb3e357c535a94e699f6d23de')
