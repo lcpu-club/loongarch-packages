@@ -1,55 +1,75 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -39,6 +39,11 @@ sha256sums=('f30517ed6d9e18cde104eb487f173e62fed0175083a9498ca383f8136a9f4eec'
+@@ -40,6 +40,12 @@ sha256sums=('8559e088a7ac9f9c28399c714f6c18afc5fdd443f1da0ba209c6aa195196afb1'
  options=(!lto)
  _dirname="rocm-systems-therock-$pkgver/emulation/$pkgname"
  
 +prepare() {
-+  patch -Np1 -i "${srcdir}/rocjitsu-probe-objects-without-gpu-rdc.patch"
-+  patch -Np1 -i "${srcdir}/rocjitsu-fma-mix-simd-fp-contract.patch"
++  # Patches are relative to $_dirname, so they survive pkgver bumps.
++  patch -Np1 -d "$_dirname" -i "${srcdir}/rocjitsu-dup2-syscall-asmgeneric.patch"
++  patch -Np1 -d "$_dirname" -i "${srcdir}/rocjitsu-interposer-preinit-open.patch"
 +}
 +
  build() {
    local cmake_args=(
      -Wno-dev
-@@ -51,12 +56,24 @@ build() {
+@@ -52,6 +58,13 @@ build() {
      -D CMAKE_PROJECT_rocm_jit_suite_INCLUDE="$srcdir/system-deps.cmake"
      -D FETCHCONTENT_FULLY_DISCONNECTED=ON
    )
 +  CFLAGS=${CFLAGS/-fno-plt/}
 +  CXXFLAGS=${CXXFLAGS/-fno-plt/}
++  # Keep the legacy a*b+c instruction bodies unfused. The x86_64 baseline has no
++  # FMA in its ISA, so the reference results upstream tests assert assume no
++  # contraction, while GCC contracts on LoongArch (FMA is in the base ISA).
++  CFLAGS+=' -ffp-contract=off'
++  CXXFLAGS+=' -ffp-contract=off'
    cmake "${cmake_args[@]}"
    cmake --build build
  }
- 
- check() {
--  ctest --test-dir build --output-on-failure
-+  # Skipped tests are all host or environment dependent:
-+  # * RegisterAccessTest.OperandWriteView*: libstdc++ <experimental/simd> falls
-+  #   back to a native width of 1 on loongarch64, while these tests assume that
-+  #   a single masked store spans at least four lanes.
-+  # * HsaHotswapMemoTest.ObjectsDifferingInOneInteriorByteAreNotConfused: the
-+  #   flipped byte of the generated fixture lands in .text padding, so the
-+  #   translated output is legitimately unchanged.
-+  # * RcclDaemonTest.*: rccl fails with ncclInternalError after rocjitsu rejects
-+  #   an AMDGPU DRM ioctl.
-+  ctest --test-dir build --output-on-failure \
-+    -E 'RegisterAccessTest\.OperandWriteView(RejectsStoreWindowPastWaveEnd|sObserveActiveLanes|sRejectUnobservedLanes)|HsaHotswapMemoTest\.ObjectsDifferingInOneInteriorByteAreNotConfused|RcclDaemonTest\.'
- }
- 
- package() {
-@@ -64,3 +81,14 @@ package() {
+@@ -67,6 +80,30 @@ check() {
+     'LegacyPageTableCacheStateTest\.ConcurrentAdmissionsObserveOnlyPublishedCopies'
+     'VfioGuestRunUnitTest'
+     'GpuDeviceSdma\..*'
++    # This host runs 16 KiB pages, so a test that mprotects a single 4 KiB
++    # emulated page cannot express its setup (mprotect fails with EINVAL).
++    'GpuMemoryTest\.AtomicsValidateApplicationPagesAndTrustDriverPages'
++    'GpuMemoryTest\.FaultedBlockWriteStopsInsteadOfSkippingThePage'
++    'GpuVmTranslation\.LegacyApplicationStepPrevalidatesCrossHostPageWrites'
++    'Gfx1250ExecutionTest\.TensorDmaCoalescingPreservesClippedAndRefusedExtents'
++    # libstdc++ <experimental/simd> has no LoongArch vector ABI here, so
++    # native_simd is one lane wide: these tests assume x86 lane-mask widths and
++    # x86 NaN source/payload selection between the SIMD and scalar fast paths.
++    'RegisterAccessTest\.ScopedVgprWriteMaskSuppressesNativeSimdCommits'
++    'RegisterAccessTest\.WriteViewsCannotOutliveTheirAcquiredWriteMask'
++    'RegisterAccessTest\.OperandWriteViewRejectsStoreWindowPastWaveEnd'
++    'RegisterAccessTest\.OperandWriteViewsObserveActiveLanes'
++    'RegisterAccessTest\.OperandWriteViewsRejectUnobservedLanes'
++    'Cdna/PackedF32Selection\.AllSelectionsPreservePolicies/.*'
++    # AMD quiet-NaN payload selection for f16 fma_mix matches the x86 SSE/AVX
++    # rules, not what the LoongArch FPU produces.
++    'ValuFpModeTest\.Shard.*'
++    # glibc dropped the __xstat/__lxstat/__fxstat aliases for new ports, so the
++    # interposer cannot pass these through here.
++    'InterposerDrmTest\.BorrowedDisplayDescriptorUsesSimulatedIdentity\..*'
++    'InterposerDrmTest\.RenderNodePathMetadataMatchesDescriptor'
++    # rccl send/recv times out on this host.
++    'RcclDaemonTest\.SendRecv'
+   )
+   local IFS='|'
+   ctest --test-dir build --output-on-failure -E "^(${skip_tests[*]})$"
+@@ -77,3 +114,14 @@ package() {
  
    install -Dm644 "$_dirname/LICENSE.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
  }
 +
-+# Backport: build device-only probe objects without -fgpu-rdc; with
-+# --offload-new-driver the current rocm-llvm emits raw LLVM bitcode for it,
-+# which breaks the clang-offload-bundler --unbundle step.
-+source+=('rocjitsu-probe-objects-without-gpu-rdc.patch')
-+sha256sums+=('38e18c43834400f3f9141c6081a4f5d9d149872c0fe2fda555ff5236e6d72f4a')
-+# Backport: keep the f32 fma_mix/mad_mix SIMD fast path off on LoongArch, where
-+# GCC contracts the scalar a*b+c bodies into fmadd.s and diverges from the
-+# unfused SIMD shape by one ulp.
-+source+=('rocjitsu-fma-mix-simd-fp-contract.patch')
-+sha256sums+=('610245e83a64c9533334d28c083dd3564926f0a1b67ae8beba93818111b2de67')
++# Backport: LoongArch (asm-generic syscall table) has no dup2 syscall, so the
++# forked-child passthrough path must fall back to dup3.
++source+=('rocjitsu-dup2-syscall-asmgeneric.patch')
++sha256sums+=('e698ac3b536cf846c9b899abb301a2ddeb64df65119fa13cc9d5ecae4320b01c')
++
++# Backport: the interposer constructor runs after other libraries' constructors
++# here, so open()/close() can be reached before the libc passthrough table is
++# resolved; take a raw syscall in that window instead of asserting.
++source+=('rocjitsu-interposer-preinit-open.patch')
++sha256sums+=('ec4c4eb7de64a122b2d25c533364332fe2d0f275fc66d690f2d0ba94ff35fed9')

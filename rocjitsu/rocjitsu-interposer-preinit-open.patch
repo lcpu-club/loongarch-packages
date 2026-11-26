@@ -1,0 +1,37 @@
+--- a/lib/rocjitsu/src/rocjitsu/kmd/linux/interposer.cpp
++++ b/lib/rocjitsu/src/rocjitsu/kmd/linux/interposer.cpp
+@@ -3993,7 +3993,14 @@
+     va_end(ap);
+   }
+ 
+-  assert(InterposerContext::real().ready());
++  if (!InterposerContext::real().ready()) {
++    // The passthrough table is unresolved until our constructor runs, and a
++    // library constructor can reach open() first: libpython reads
++    // /proc/sys/vm/overcommit_memory from its own init, which ld.so runs ahead
++    // of LD_PRELOAD constructors on this target. No interposer state exists
++    // yet, so take the raw syscall instead of touching it.
++    return static_cast<int>(syscall(SYS_openat, AT_FDCWD, path, flags, mode));
++  }
+   // ready() first, as openat() and every other entry point does. owner_pid_ is zero
+   // until init() runs, so before the constructor rj_owns_interposer_state() is false
+   // for the OWNER too -- taking the child branch there would fail closed on an
+@@ -4082,6 +4089,8 @@
+     va_end(ap);
+   }
+ 
++  if (!InterposerContext::real().ready())
++    return static_cast<int>(syscall(SYS_openat, dirfd, path, flags, mode));
+   if (InterposerContext::real().ready() && !rj_owns_interposer_state()) {
+     int refuse_errno = 0;
+     if (rj_child_must_refuse_open(dirfd, path, &refuse_errno)) {
+@@ -4138,7 +4147,8 @@
+ }
+ 
+ RJ_INTERPOSER_EXPORT int close(int fd) {
+-  assert(InterposerContext::real().ready());
++  if (!InterposerContext::real().ready())
++    return static_cast<int>(syscall(SYS_close, fd));
+   // A vfork child shares the parent's address space until exec/_exit but has a
+   // separate descriptor table. Descriptor cleanup in that window must close the
+   // child's fd without clearing the parent's KFD/DRM bookkeeping.

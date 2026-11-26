@@ -1,0 +1,19 @@
+--- a/lib/rocjitsu/src/rocjitsu/kmd/linux/interposer.cpp
++++ b/lib/rocjitsu/src/rocjitsu/kmd/linux/interposer.cpp
+@@ -4878,7 +4878,16 @@
+   if (!rj_owns_interposer_state()) {
+     if (rj_child_refuses_fd(oldfd))
+       return -1;
++#ifdef SYS_dup2
+     return static_cast<int>(syscall(SYS_dup2, oldfd, newfd));
++#else
++    // asm-generic architectures (e.g. LoongArch) provide no dup2 syscall, only
++    // dup3. dup3 rejects oldfd == newfd with EINVAL whereas dup2 returns newfd,
++    // so keep that case separate and validate the descriptor with fcntl.
++    if (oldfd == newfd)
++      return static_cast<int>(syscall(SYS_fcntl, oldfd, F_GETFD)) < 0 ? -1 : newfd;
++    return static_cast<int>(syscall(SYS_dup3, oldfd, newfd, 0));
++#endif
+   }
+   // dup2(fd, fd) is a POSIX no-op that leaves the descriptor live; mutating
+   // tracking would drop a still-open ref. Forward without touching tracking.
