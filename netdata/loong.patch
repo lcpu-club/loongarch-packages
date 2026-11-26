@@ -1,10 +1,10 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -35,6 +35,7 @@ prepare() {
-   # fix libbpf build
-   patch -Np1 -i "$srcdir/0001-Fix-libbpf-build-workaround-for-netdata-libbpf-4.patch"
+@@ -30,6 +30,7 @@ sha512sums=('dddf026efc2fb0c7eb883ec1a8970e79c977ed7b0e0aec8c76d59c46a54fa00d918
+ prepare() {
+   cd $pkgname-v$pkgver
  
 +  sed -i "s|OBJDIR=build/|OBJDIR=build/ LIBSUBDIR=lib|g" packaging/cmake/Modules/NetdataLibBPF.cmake
-   sed -i "s/CMAKE_CXX_STANDARD 14/CMAKE_CXX_STANDARD 17/" CMakeLists.txt
+   sed -i "s|usr/libexec|usr/lib|g" packaging/cmake/Modules/NetdataInstallLayout.cmake
    sed -i "s|usr/sbin|usr/bin|g" CMakeLists.txt
-   sed -i "s|usr/libexec|usr/lib|g" CMakeLists.txt
+ }
