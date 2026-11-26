@@ -1,17 +1,28 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 69196d3..96e81a0 100644
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -26,6 +26,10 @@ sha256sums=('e37902dd39ca9cbee37095ccce841e3e9f744f8b86f5935fa68f833dcd37d0ed')
+@@ -26,6 +26,10 @@ sha256sums=('a032d3e663b966ec2e80f66c8454dee883a02d60140e898a9fb96f6661e87f19')
  
  prepare() {
      cd "${srcdir}"/local-agent-rs/python-proton-vpn-local-agent
 +    cargo update -p bindgen
-+    export CFLAGS="${CFLAGS/-Wp,-D_FORTIFY_SOURCE=3/} -Wno-unterminated-string-initialization"
-+    export CXXFLAGS="${CXXFLAGS/-Wp,-D_FORTIFY_SOURCE=3/} -Wno-unterminated-string-initialization"
++    export CFLAGS="${CFLAGS/-Wp,-D_FORTIFY_SOURCE=3/} -Wno-unterminated-string-initialization -Wno-error=discarded-qualifiers"
++    export CXXFLAGS="${CXXFLAGS/-Wp,-D_FORTIFY_SOURCE=3/} -Wno-unterminated-string-initialization -Wno-error=discarded-qualifiers"
 +    export CMAKE_POLICY_VERSION_MINIMUM=3.5
      cargo fetch --locked --target "$(rustc --print host-tuple)"
  }
  
-@@ -43,3 +47,4 @@ package() {
+@@ -36,6 +40,8 @@ build() {
+ 
+ check() {
+     cd "${srcdir}"/local-agent-rs/python-proton-vpn-local-agent
++    # pyo3 extension-module suppresses linking libpython, which the test binary needs
++    export RUSTFLAGS="${RUSTFLAGS:-} -L native=/usr/lib -l dylib=python${_pyver}"
+     cargo test --frozen --all-features
+ }
+ 
+@@ -43,3 +49,4 @@ package() {
      mkdir -p "${pkgdir}"/usr/lib/python"${_pyver}"/site-packages/proton/vpn
      install -Dm755 "${srcdir}"/local-agent-rs/python-proton-vpn-local-agent/target/release/libpython_proton_vpn_local_agent.so "${pkgdir}"/usr/lib/python"${_pyver}"/site-packages/proton/vpn/local_agent.abi3.so
  }
