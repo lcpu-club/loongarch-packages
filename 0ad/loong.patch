@@ -1,0 +1,36 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -18,6 +18,13 @@ source=("https://releases.wildfiregames.com/$pkgname-$pkgver-unix-build.tar.xz")
+ validpgpkeys=('A035C8C19219BA821ECEA86B64E628F8D684696D')  # Pablo Galindo Salgado <pablogsal@gmail.com>
+ sha512sums=('6b5d7893d27d5fa71ce4cad1b424a7d4b36e8bc438c590cbd86d9872148d5051cd3215f8f8f4b817e48d4fe386d8902ecc0dcd612ca779306ef35dfa2898a878')
+ 
++prepare() {
++  cd "$pkgname-$pkgver"
++  patch -Np1 -i ../0001-Enable-building-on-arbitrary-architectures.patch
++  patch -Np1 -i ../0002-nvtt-Add-LoongArch64-support-to-poshlib.patch
++  patch -Np1 -i ../0003-spidermonkey-Fix-RUSTFLAGS-handling.patch
++}
++
+ build() {
+   cd "$pkgname-$pkgver"
+ 
+@@ -34,6 +41,7 @@ build() {
+     --with-system-premake5 \
+     --with-lto \
+     --without-pch \
++    --without-tests \
+     --bindir=/usr/bin \
+     --libdir=/usr/lib/0ad \
+     --datadir=/usr/share/0ad/data
+@@ -55,3 +63,11 @@ package() {
+   install -Dm644 build/resources/${pkgname}.appdata.xml "${pkgdir}/usr/share/metainfo/${pkgname}.appdata.xml"
+   install -Dm644 build/resources/${pkgname}.png "${pkgdir}/usr/share/pixmaps/${pkgname}.png"
+ }
++
++# LoongArch64 support
++source+=('0001-Enable-building-on-arbitrary-architectures.patch'
++         '0002-nvtt-Add-LoongArch64-support-to-poshlib.patch'
++         '0003-spidermonkey-Fix-RUSTFLAGS-handling.patch')
++sha512sums+=('ac27071b59267557124a723e2b11dda4bb83e73baacfb61511d3be47f8fb6da05f74fb393e4b46579a4afba8884633c2dfff40a79cd2a8d98ced7593a834ca43'
++             '7d2727eeac487091c2138dec8f6833a31e2d69952d2f1a3b100fcdfc9e7154be9329713822d53ca6f2eae2da204669d92e5fa1fe9a65a5b1c7a2cac12f55704f'
++             '454490ef5b069d10b2934d59220df78b325f227845527a97fbe99fac889a0c041c715a36ef9bb652b3502180ee6598e55635cd71ded130db6c91a30165c23943')

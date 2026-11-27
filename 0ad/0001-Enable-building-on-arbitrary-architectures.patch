@@ -1,0 +1,54 @@
+--- a/build/premake/premake5.lua
++++ b/build/premake/premake5.lua
+@@ -131,7 +131,7 @@
+ 	elseif string.find(machine, "ppc64") == 1 or string.find(machine, "powerpc64") == 1 then
+ 		arch = "ppc64"
+ 	else
+-		print("WARNING: Cannot determine architecture from GCC, assuming x86")
++		arch = "generic"
+ 	end
+ end
+ 
+@@ -1001,6 +1001,8 @@
+ 		table.insert(source_dirs, "lib/sysdep/arch/e2k");
+ 	elseif arch == "ppc64" then
+ 		table.insert(source_dirs, "lib/sysdep/arch/ppc64");
++	else
++		table.insert(source_dirs, "lib/sysdep/arch/generic");
+ 	end
+ 
+ 	-- OS-specific
+@@ -1218,6 +1220,8 @@
+ 			links {
+ 				-- Dynamic libraries (needed for linking for gold)
+ 				"dl",
++				-- boost lockfree algorithms reference libatomic symbols
++				"atomic",
+ 			}
+ 		end
+ 
+--- a/source/lib/sysdep/arch.h
++++ b/source/lib/sysdep/arch.h
+@@ -83,11 +83,6 @@
+ # define ARCH_E2K 0
+ #endif
+ 
+-// ensure exactly one architecture has been detected
+-#if (ARCH_IA32+ARCH_IA64+ARCH_AMD64+ARCH_ALPHA+ARCH_ARM+ARCH_AARCH64+ARCH_MIPS+ARCH_E2K+ARCH_PPC64) != 1
+-# error "architecture not correctly detected (either none or multiple ARCH_* defined)"
+-#endif
+-
+ // "X86_X64"-specific code requires either IA-32 or AMD64
+ #define ARCH_X86_X64 (ARCH_IA32|ARCH_AMD64)
+ 
+--- /dev/null
++++ b/source/lib/sysdep/arch/generic/generic.cpp
+@@ -0,0 +1,8 @@
++#include "precompiled.h"
++
++#include "lib/sysdep/cpu.h"
++
++const char* cpu_IdentifierString()
++{
++	return "generic";
++}

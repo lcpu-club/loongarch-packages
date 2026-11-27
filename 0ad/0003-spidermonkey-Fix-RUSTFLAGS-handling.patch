@@ -1,0 +1,27 @@
+--- a/libraries/source/spidermonkey/patches/patch.sh
++++ b/libraries/source/spidermonkey/patches/patch.sh
+@@ -47,3 +47,8 @@
+ 
+ # Fix building with python 3.14
+ patch -p1 <"${PATCHES}"/FixPython3_14.diff
++
++# Accept RUSTFLAGS values containing commas (e.g. the distro default
++# "-C link-arg=-Wl,--icf=safe"): mozbuild splits environment-sourced options
++# on commas and then rejects the result.
++patch -p1 <"${PATCHES}"/FixRustFlags.diff
+--- /dev/null
++++ b/libraries/source/spidermonkey/patches/FixRustFlags.diff
+@@ -0,0 +1,13 @@
++--- a/build/moz.configure/rust.configure
+++++ b/build/moz.configure/rust.configure
++@@ -599,8 +599,8 @@
++ 
++ # ==============================================================
++ 
++-option(env="RUSTFLAGS", nargs=1, help="Rust compiler flags")
++-set_config("RUSTFLAGS", depends("RUSTFLAGS")(lambda flags: flags))
+++option(env="RUSTFLAGS", nargs="*", help="Rust compiler flags")
+++set_config("RUSTFLAGS", depends("RUSTFLAGS")(lambda flags: ",".join(flags) or None))
++ 
++ 
++ # Rust compiler flags
