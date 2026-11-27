@@ -1,0 +1,17 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -48,3 +48,14 @@ package() {
+   # license
+   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname" LICENSE
+ }
++
++source+=('0001-loongarch64-stat-layout.patch')
++sha512sums+=('832eb78ad4ab38e4dc3bd26a68c5c12e8c816f1ee386187a1dd623cbe5a72511719f2caa6ffddbebba35753cf5658414e8773b907f1f8ea8f0c14dd47d56b0a3')
++b2sums+=('f6acabaec66b031a7f07c4948007ae0f2fc5f98c6c8baaff50545b78b9937c420c23402f7c303a1f717f427a1b972759e712f5cd5e845a1d3ded27fd6e83d1d6')
++
++prepare() {
++  cd "$pkgname"
++
++  # loongarch64 uses asm-generic/stat.h, which shares the aarch64/riscv64 layout
++  patch -Np1 -i "$srcdir/0001-loongarch64-stat-layout.patch"
++}

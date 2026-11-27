@@ -1,0 +1,11 @@
+--- a/mfusepy.py
++++ b/mfusepy.py
+@@ -595,7 +595,7 @@
+                     ('__glibc_reserved5', ctypes.c_ulong),
+                     ('__glibc_reserved6', ctypes.c_ulong),
+                 ]
+-            elif _machine in ('aarch64', 'riscv64'):
++            elif _machine in ('aarch64', 'riscv64', 'loongarch64'):
+                 _c_stat__fields_ = [
+                     ('st_dev', c_dev_t),
+                     ('st_ino', ctypes.c_ulong),
