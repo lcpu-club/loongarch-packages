@@ -1,0 +1,22 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 62f4a35..1a2e1f9 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -60,6 +60,9 @@ prepare() {
+   # use anonymous git
+   patch -p1 -i "$srcdir/use-anonymous-git.patch"
+ 
++  # loong64: skip x86-only -mavx/HAVE_AVX flags on loongarch64
++  patch -p1 -i "$srcdir/loongarch-simd.patch"
++
+   # setup git submodules
+   git submodule init
+   git config submodule.JUCE.url "$srcdir/github.com-juce-framework-JUCE"
+@@ -85,3 +88,7 @@ package() {
+ 
+   python -m installer --destdir="$pkgdir" dist/*.whl
+ }
++
++source+=('loongarch-simd.patch')
++sha512sums+=('b69f95bb074fefd5ff5dc648fc63bb748d4696991137bf1ef4476d002fb00079835eba3e4bd27c76d2a246041084290af8c65b62126ab51bebce25a7f349761c')
++b2sums+=('dee520aff91b038b76f0040dfc4ad84b8f69be0712f459d66361615bde7afcbdfe8f5edb374d87e424fd34aff4bf489666c524c75a4c0d20cec512e41d61c40a')
