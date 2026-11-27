@@ -1,0 +1,22 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -57,6 +57,11 @@ source=(
+ sha512sums=('294825194fc564cf0ab339dd8429be9d169412b20b133203511025b8ce5cb2dde1e06caf2547223cbb95dd5c1f98628b22beccced68913e667c7dba65138aa08')
+ b2sums=('68e4f2d99ff9286cd13e9357c72b74bd4ae1d4d4dbd998337556a6f7a8fe999b0d7d00ff0970a097d628b46c4a89d656aeba1f3fc714abc418da79c84137c6ae')
+ 
++prepare() {
++  cd ${pkgname}-v${pkgver}
++  patch -Np1 -i "${srcdir}/rz_types-add-loongarch64-support.patch"
++}
++
+ build() {
+   cd ${pkgname}-v${pkgver}
+   arch-meson build \
+@@ -99,3 +104,7 @@ package() {
+ }
+ 
+ # vim: ts=2 sw=2 et:
++
++source+=("rz_types-add-loongarch64-support.patch")
++sha512sums+=('74b1ffdf870b80f583c5a818a0312b32af650e97c7b2b18d326f913b6ae11c504547b5e44baf3f5744b84d51186d923fb1e82f381678793a7254fc881a9cce6b')
++b2sums+=('7f8a2c0e8f6f4a085e8af178961abd9d3a08e11f73c9490654161ec1f045d32a4b961d96f441e16a50a303186d4233c6adfcb3694817c4c932db5ae4e94ceb65')
