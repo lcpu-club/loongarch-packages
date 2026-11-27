@@ -1,6 +1,18 @@
 --- a/PKGBUILD
 +++ b/PKGBUILD
-@@ -91,6 +91,9 @@ check() {
+@@ -80,6 +80,11 @@ check() {
+     # Fails or times out, not sure why.
+     H5_H5DUMP-f90_h5ex_t_regrefatt_F03
+     H5_H5DUMP-f90_h5ex_t_vlen_F03
++    # Their -clean tests depend on the skipped h5dump tests above. ctest ignores
++    # dependencies on excluded tests, so those -clean tests would run in parallel
++    # with the example and remove its .h5 file while it is still running.
++    H5_f90_h5ex_t_regrefatt_F03-clean
++    H5_f90_h5ex_t_vlen_F03-clean
+     MPI_TEST_H5DIFF-h5diff
+     MPI_TEST_H5_f90_ph5_f90_filtered_writes_no_sel
+     MPI_TEST_PERFORM_h5perf
+@@ -90,6 +95,9 @@ check() {
    )
    skipped_tests_pattern="${skipped_tests[0]}$(printf '|%s' "${skipped_tests[@]:1}")"
    ctest --test-dir build --output-on-failure --parallel -E "$skipped_tests_pattern"
