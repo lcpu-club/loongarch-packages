@@ -1,0 +1,19 @@
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -44,6 +44,7 @@ prepare() {
+ 
+   # Make tests pass
+   git apply -3 ../0001-tests-Allow-debuginfod.patch
++  git apply -3 ../0002-tests-Skip-valgrind-tests-on-loong64.patch
+ 
+   NOCONFIGURE=1 ./autogen.sh
+ }
+@@ -84,4 +85,8 @@ package_libgsf-docs() {
+   mv doc/* "$pkgdir"
+ }
+ 
++# valgrind is broken on loong64, skip its tests
++source+=(0002-tests-Skip-valgrind-tests-on-loong64.patch)
++b2sums+=('74651b2fa67e8b2289642547165834f8a90f18a827740099e9ec26351c178ea1423e85ef1fe23053f607ce573512710978b149437c6cb1090cad3b8ecc534405')
++
+ # vim:set sw=2 sts=-1 et:

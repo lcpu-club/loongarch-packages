@@ -1,0 +1,29 @@
+From 1bc7cd5b52063f2b2b36373a4e529fe410b5e2db Mon Sep 17 00:00:00 2001
+From: loong64 <loong64@localhost>
+Date: Sat, 28 Nov 2026 12:10:48 +0800
+Subject: [PATCH] tests: Skip valgrind tests on loong64
+
+---
+ tests/LibGsfTest.pm | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/tests/LibGsfTest.pm b/tests/LibGsfTest.pm
+index cf69617..77559e8 100644
+--- a/tests/LibGsfTest.pm
++++ b/tests/LibGsfTest.pm
+@@ -470,6 +470,12 @@ sub report_skip {
+ # -----------------------------------------------------------------------------
+ # Setup a consistent environment
+ 
++# The 8xxx tests run the code under valgrind.  Valgrind does not work on
++# loong64: its LoongArch backend cannot translate LSX instructions, and the
++# mandatory ld.so redirections are missing on that architecture.
++&report_skip ("Valgrind does not work on loong64")
++    if $Config{'archname'} =~ /^loong/ && $0 =~ /t8\d+-/;
++
+ &report_skip ("all tests skipped") if exists $ENV{'LIBGSF_SKIP_TESTS'};
+ 
+ delete $ENV{'G_SLICE'};
+-- 
+2.56.1
+
